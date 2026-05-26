@@ -29,13 +29,13 @@ import { parseYoutubeUrl, buildDeepLink } from '../utils';
 import { motion } from 'motion/react';
 
 // YouTube SVG Logo preset - Clean red play button
-const PRESET_YT_CLASSIC = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FF0000"><path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.108C19.52 3.5 12 3.5 12 3.5s-7.52 0-9.388.555a3.003 3.003 0 0 0-2.11 2.108C0 8.03 0 12 0 12s0 3.97.502 5.837a3.003 3.003 0 0 0 2.11 2.108C4.48 20.5 12 20.5 12 20.5s7.52 0 9.388-.555a3.003 3.003 0 0 0 2.11-2.108C24 15.97 24 12 24 12s0-3.97-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`;
+const PRESET_YT_CLASSIC = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI0ZGMDAwMCI+PHBhdGggZD0iTTIzLjQ5OCA2LjE2M2EzLjAwMyAzLjAwMyAwIDAgMC0yLjExLTIuMTA4QzE5LjUyIDMuNSAxMiAzLjUgMTIgMy41cy03LjUyIDAtOS4zODguNTU1YTMuMDAzIDMuMDAzIDAgMCAwLTIuMTEgMi4xMDhDMCA4LjAzIDAgMTIgMCAxMnMwIDMuOTcuNTAyIDUuODM3YTMuMDAzIDMuMDAzIDAgMCAwIDIuMTEgMi4xMDhDNC40OCAyMC41IDEyIDIwLjUgMTIgMjAuNXM3LjUyIDAgOS4zODgtLjU1NWEzLjAwMyAzLjAwMyAwIDAgMCAyLjExLTIuMTA4QzE0IDE1Ljk3IDI0IDEyIDI0IDEyczAtMy45Ny0uNTAyLTUuODM3ek05LjU0NSAxNS41NjhWOC40MzJMMTUuODE4IDEybC02LjI3MyAzLjU2OHoiLz48L3N2Zz4=`;
 
-// YouTube SVG outline black
-const PRESET_YT_WHITE = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FFFFFF"><path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.108C19.52 3.5 12 3.5 12 3.5s-7.52 0-9.388.555a3.003 3.003 0 0 0-2.11 2.108C0 8.03 0 12 0 12s0 3.97.502 5.837a3.003 3.003 0 0 0 2.11 2.108C4.48 20.5 12 20.5 12 20.5s7.52 0 9.388-.555a3.003 3.003 0 0 0 2.11-2.108C24 15.97 24 12 24 12s0-3.97-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`;
+// YouTube SVG outline white
+const PRESET_YT_WHITE = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI0ZGRkZGRiI+PHBhdGggZD0iTTIzLjQ5OCA2LjE2M2EzLjAwMyAzLjAwMyAwIDAgMC0yLjExLTIuMTA4QzE5LjUyIDMuNSAxMiAzLjUgMTIgMy41cy03LjUyIDAtOS4zODguNTU1YTMuMDAzIDMuMDAzIDAgMCAwLTIuMTEgMi4xMDhDMCA4LjAzIDAgMTIgMCAxMnMwIDMuOTcuNTAyIDUuODM3YTMuMDAzIDMuMDAzIDAgMCAwIDIuMTEgMi4xMDhDNC40OCAyMC41IDEyIDIwLjUgMTIgMjAuNXM3LjUyIDAgOS4zODgtLjU1NWEzLjAwMyAzLjAwMyAwIDAgMCAyLjExLTIuMTA4QzI0IDE1Ljk3IDI0IDEyIDI0IDEyczAtMy45Ny0uNTAyLTUuODM3ek05LjU0NSAxNS41NjhWOC40MzJMMTUuODE4IDEybC02LjI3MyAzLjU2OHoiLz48L3N2Zz4=`;
 
 // YouTube Shorts preset
-const PRESET_YT_SHORTS = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FF0000"><path d="M17.71 7.15a3.3 3.3 0 0 0-3.34-3A3.37 3.37 0 0 0 13 4.67L9.61 6.57a3.31 3.31 0 0 0-1.57 2.82V12.1a3.31 3.31 0 0 0 3.34 3 3.37 3.37 0 0 0 1.34-0.52l3.39-1.9a3.31 3.31 0 0 0 1.57-2.82v-2.7a3.29 3.29 0 0 0-0.03-.01z" opacity=".1"/><path d="M19.12 7.74a3 3 0 0 0-2.71-1.63L15.1 6l1-2.43a3 3 0 0 0-2.82-4.13c-0.54 0-1.07 0.15-1.53 0.44L4.85 4.09H4.84a3.11 3.11 0 0 0-1.39 2.59 3 3 0 0 0 1.3 2.51l1.32 0.81-1 2.45a3 3 0 0 0 2.82 4.14c0.54 0 1.07-0.15 1.53-0.44l6.84-4.14a3.11 3.11 0 0 0 1.39-2.59 3 3 0 0 0-1.53-2.63L19.12 7.74zM9.52 14.22V9.8L13.78 12l-4.26 2.22z" fill="%23FF0000"/></svg>`;
+const PRESET_YT_SHORTS = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI0ZGMDAwMCI+PHBhdGggZD0iTTE3LjcxIDcuMTVhMy4zIDMuMyAwIDAgMC0zLjM0LTNBMy4zNyAzLjM3IDAgMCAwIDEzIDQuNjdMOS42MSA2LjU3YTMuMzEgMy4zMSAwIDAgMC0xLjU3IDIuODJWMTIuMWEzLjMxIDMuMzEgMCAwIDAgMy4zNCAzQTMuMzcgMy4zNyAwIDAgMCAxMy4zNCAxNC41OGwzLjM5LTEuOWEzLjMxIDMuMzEgMCAwIDAgMS41Ny0yLjgydm0tMi43YTMuMjkgMy4yOSAwIDAgMC0wLjAzLS4wMXoiIG9wYWNpdHk9Ii4xIi8+PHBhdGggZD0iTTE5LjEyIDcuNzRhMyAwIDAgMC0yLjcxLTEuNjNMMTUuMSA2bDEtMi40M2EzIDAgMCAwLTIuODItNC4xM2MtLjU0IDAtMS4wNy4xNS0xLjUzLjQ0TDQuODUgNC4wOUg0Ljg0YTMuMTEgMy4xMSAwIDAgMC0xLjM5IDIuNTlhMyAwIDAgMCAxLjMgMi41bDEuMzIuODEtMSAyLjQ1YTMgMCAwIDAgMi44MiA0LjE0Yy41NCAwIDEuMDctLjE1IDEuNTMtLjQ0bDYuODQtNC4xNGEzLjExIDMuMTEgMCAwIDAgMS4zOS0yLjU5YTMgMCAwIDAtMS41My0yLjYzTDE5LjEyIDcuNzR6TTkuNTIgMTQuMjJWOS44TDEzLyc4IDEybC00LjI2IDIuMjJ6IiBmaWxsPSIjRkYwMDAwIi8+PC9zdmc+`;
 
 const PRESETS = [
   { id: 'yt-classic', name: 'يوتيوب أحمر', url: PRESET_YT_CLASSIC, isYT: true },
@@ -57,6 +57,7 @@ const COLOR_TEMPLATES = [
 export default function QRGenerator() {
   const [urlInput, setUrlInput] = useState('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
   const [deepLinkType, setDeepLinkType] = useState<'vnd' | 'ios' | 'android' | 'standard'>('vnd');
+  const [useSmartLink, setUseSmartLink] = useState<boolean>(true);
   const [foregroundColor, setForegroundColor] = useState('#FF0000');
   const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
   const [eyeColor, setEyeColor] = useState('#FF0000');
@@ -78,6 +79,41 @@ export default function QRGenerator() {
   const urlInfo = parseYoutubeUrl(urlInput);
   const formattedDeepLink = buildDeepLink(urlInput, deepLinkType);
 
+  // Active payload to embed inside the QR
+  const getActivePayload = () => {
+    if (useSmartLink) {
+      return `${window.location.origin}/?r=${encodeURIComponent(urlInput.trim())}&type=${deepLinkType}`;
+    }
+    return formattedDeepLink.trim() || 'https://www.youtube.com';
+  };
+
+  // Check if QR colors are dangerously inverted for standard mobile lenses
+  const isColorWayInverted = () => {
+    try {
+      const getBrightness = (hex: string) => {
+        const c = hex.replace('#', '');
+        if (c.length === 3) {
+          // expand short hex
+          const r = parseInt(c[0] + c[0], 16);
+          const g = parseInt(c[1] + c[1], 16);
+          const b = parseInt(c[2] + c[2], 16);
+          return (r * 299 + g * 587 + b * 114) / 1000;
+        }
+        const r = parseInt(c.substring(0, 2), 16);
+        const g = parseInt(c.substring(2, 4), 16);
+        const b = parseInt(c.substring(4, 6), 16);
+        return (r * 299 + g * 587 + b * 114) / 1000;
+      };
+      
+      const fgBrightness = getBrightness(foregroundColor);
+      const bgBrightness = getBrightness(backgroundColor);
+      // If foreground is lighter than background, QR is inverted
+      return fgBrightness > bgBrightness;
+    } catch (_) {
+      return false;
+    }
+  };
+
   // Load selected logo (either custom or preset)
   const getSelectedLogoUrl = () => {
     if (logoPreset === 'custom') {
@@ -92,7 +128,7 @@ export default function QRGenerator() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const payload = formattedDeepLink.trim() || 'https://www.youtube.com';
+    const payload = getActivePayload();
     setRenderedPayload(payload);
 
     try {
@@ -199,6 +235,7 @@ export default function QRGenerator() {
   }, [
     urlInput, 
     deepLinkType, 
+    useSmartLink,
     foregroundColor, 
     backgroundColor, 
     logoPreset, 
@@ -251,7 +288,7 @@ export default function QRGenerator() {
 
   // Download High-Resolution version of the QR Code
   const handleDownload = async () => {
-    const payload = formattedDeepLink.trim();
+    const payload = getActivePayload();
     if (!payload) {
       alert('الرجاء إدخال رابط يوتيوب صحيح أولاً لتتمكن من تحميل رمز الـ QR!');
       return;
@@ -331,6 +368,10 @@ export default function QRGenerator() {
             }
             resolve(true);
           };
+          logoImg.onerror = () => {
+            console.error("Failed to load preset/custom logo image into download canvas");
+            resolve(true);
+          };
         });
       }
 
@@ -369,7 +410,7 @@ export default function QRGenerator() {
           console.error("Failed to copy image to clipboard: ", err);
           // Fallback context link
           try {
-            await navigator.clipboard.writeText(formattedDeepLink);
+            await navigator.clipboard.writeText(getActivePayload());
             alert('تم نسخ رابط الـ Deep Link كبديل لعدم دعم متصفحك نسخ الصور!');
           } catch (_) {}
         }
@@ -460,6 +501,60 @@ export default function QRGenerator() {
           <p className="text-sm text-gray-500 font-arabic mb-4 leading-relaxed">
             الروابط العميقة تجبر الهاتف على تشغيل تطبيق YouTube الرسمي مباشرة بدلاً من فتحه داخل المتصفح الداخلي لـ (Instagram/Facebook) الذي لا يتيح الاشتراك أو التفاعل إلا بعد تسجيل الدخول المعقد.
           </p>
+
+          {/* Interactive QR Link Mode selector block */}
+          <div className="mb-6 p-5 rounded-2xl bg-slate-50 border border-gray-200/60 space-y-3.5">
+            <div className="flex items-center gap-2">
+              <span className="p-1.5 bg-red-500 text-white rounded-lg flex items-center justify-center animate-pulse">
+                <Sparkles size={14} />
+              </span>
+              <span className="font-bold text-sm text-gray-800 font-arabic">وضع ترميز كود الـ QR لليوتيوب:</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" id="smart_link_mode_selector">
+              {/* Option 1: Smart Link (Recommended) */}
+              <button
+                onClick={() => setUseSmartLink(true)}
+                className={`p-4 rounded-xl border text-right transition-all cursor-pointer flex flex-col gap-1.5 ${
+                  useSmartLink 
+                    ? 'border-red-500 bg-red-50/40 ring-2 ring-red-100'
+                    : 'border-gray-200 bg-white hover:bg-gray-50'
+                }`}
+                type="button"
+              >
+                <div className="flex items-center justify-between w-full">
+                  <span className="font-black text-xs text-red-600 font-arabic flex items-center gap-1">
+                    🌟 وضع الرابط الذكي (مستحسن ومعتمد)
+                  </span>
+                  {useSmartLink && <span className="w-2 h-2 bg-red-600 rounded-full" />}
+                </div>
+                <p className="text-[11px] text-gray-500 font-arabic leading-relaxed">
+                  يولّد رابط ويب آمن (<span className="font-sans">https://</span>) تقرأه كاميرا الهاتف بكل سهولة ويفتح تطبيق اليوتيوب تلقائياً بدون أي تجميد.
+                </p>
+              </button>
+
+              {/* Option 2: Direct Protocol Scheme */}
+              <button
+                onClick={() => setUseSmartLink(false)}
+                className={`p-4 rounded-xl border text-right transition-all cursor-pointer flex flex-col gap-1.5 ${
+                  !useSmartLink 
+                    ? 'border-slate-500 bg-slate-50 ring-2 ring-slate-100'
+                    : 'border-gray-200 bg-white hover:bg-gray-50'
+                }`}
+                type="button"
+              >
+                <div className="flex items-center justify-between w-full">
+                  <span className="font-bold text-xs text-slate-700 font-arabic">
+                    البروتوكول المباشر (لشعارات مخصصة)
+                  </span>
+                  {!useSmartLink && <span className="w-2 h-2 bg-slate-600 rounded-full" />}
+                </div>
+                <p className="text-[11px] text-gray-500 font-arabic leading-relaxed">
+                  يكتب الكود بالبروتوكول الداخلي للجهاز مباشرة. قد لا تقبله بعض أنواع كاميرات الهواتف الافتراضية.
+                </p>
+              </button>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3" id="deeplink_presets_grid">
             
@@ -555,7 +650,7 @@ export default function QRGenerator() {
               الرابط المُشفر الفعلي داخل الـ QR Code:
             </div>
             <div className="font-mono text-xs text-slate-600 break-all bg-white px-2.5 py-1.5 rounded-lg border border-gray-200" dir="ltr">
-              {formattedDeepLink}
+              {getActivePayload()}
             </div>
           </div>
         </div>
@@ -674,6 +769,21 @@ export default function QRGenerator() {
               </div>
             </div>
           </div>
+
+          {/* Dynamic Inverted colors warning banner */}
+          {isColorWayInverted() && (
+            <div className="mt-5 p-4 bg-amber-50 rounded-2xl border border-amber-200 flex items-start gap-3 text-right animate-fadeIn" id="inverted_color_banner">
+              <span className="p-2 bg-amber-100 text-amber-700 rounded-xl mt-0.5 shrink-0">
+                <AlertCircle size={18} />
+              </span>
+              <div className="space-y-1">
+                <h4 className="font-extrabold text-xs text-amber-950 font-arabic">⚠️ تنبيه الألوان المعكوسة (الوضع الداكن):</h4>
+                <p className="text-[11px] text-amber-800 font-arabic leading-relaxed">
+                  لقد حددت لون مربعات فاتحة مع خلفية داكنة! على الرغم من شكلها الليلي الجذاب، إلا أن <strong>العديد من كاميرات الهواتف الافتراضية والقديمة</strong> تعجز تماماً عن التعرف على رموز الـ QR المعكوسة. ننصح بشدة بتبديل دمج الألوان (مربعات داكنة وخلفية فاتحة) لضمان مسح فوري وناجح لجميع هواتف الزوار بنسبة 100%!
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Module 4: Central Logo Picker & Uploader */}

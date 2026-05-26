@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import QRGenerator from './components/QRGenerator';
+import { buildDeepLink } from './utils';
 import { 
   Youtube, 
   Sparkles, 
@@ -23,6 +24,99 @@ import { motion } from 'motion/react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'generator' | 'faq' | 'tips'>('generator');
+
+  // Detect and handle deep-link redirected scans
+  const queryParams = new URL(window.location.href).searchParams;
+  const redirectUrl = queryParams.get('r') || queryParams.get('url');
+  const redirectType = queryParams.get('type') || 'vnd';
+
+  useEffect(() => {
+    if (redirectUrl) {
+      try {
+        const decodedUrl = decodeURIComponent(redirectUrl);
+        const deepLink = buildDeepLink(decodedUrl, redirectType as any);
+        
+        // Immediate redirection attempt
+        window.location.href = deepLink;
+        
+        // Also do a backup retry
+        const retryTimer = setTimeout(() => {
+          window.location.href = deepLink;
+        }, 1200);
+
+        return () => clearTimeout(retryTimer);
+      } catch (err) {
+        console.error("Redirection failure", err);
+      }
+    }
+  }, [redirectUrl, redirectType]);
+
+  // If redirect parameter is active, render a loading screen instead of the full landing page
+  if (redirectUrl) {
+    let decodedUrl = '';
+    let deepLink = '';
+    try {
+      decodedUrl = decodeURIComponent(redirectUrl);
+      deepLink = buildDeepLink(decodedUrl, redirectType as any);
+    } catch (_) {}
+
+    return (
+      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 text-center" id="redirect_fallback_screen">
+        <div className="max-w-md w-full space-y-8">
+          
+          {/* Animated pulsing massive YouTube logo */}
+          <div className="flex justify-center">
+            <span className="p-6 bg-red-600 text-white rounded-3xl animate-pulse shadow-2xl shadow-red-500/40">
+              <Youtube size={48} />
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            <h2 className="text-2xl font-black font-arabic text-white leading-normal">
+              جاري توجيهك لتطبيق يوتيوب...
+            </h2>
+            <p className="text-xs text-slate-400 font-arabic leading-relaxed">
+              نقوم بفتح الرابط بشكل مباشر في تطبيق YouTube الرسمي بخصائص الـ Deep Link لتجربة تفاعل فورية فائقة السرعة.
+            </p>
+          </div>
+
+          {/* Quick spinner fallback button card */}
+          <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4" id="fallback_actions_card">
+            <span className="text-xs text-slate-300 font-arabic block font-semibold leading-relaxed">
+              إذا لم يفتح الهاتف تطبيق يوتيوب تلقائياً خلال لحظة، يرجى الضغط على أحد الأزرار بالأسفل:
+            </span>
+
+            <div className="flex flex-col gap-2.5">
+              {/* Force App link */}
+              <button
+                onClick={() => { if (deepLink) window.location.href = deepLink; }}
+                className="w-full py-3.5 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold font-arabic text-sm transition-all shadow-md active:scale-98 cursor-pointer"
+                type="button"
+                id="force_open_app_btn"
+              >
+                اضغط هنا لتفعيل فتح التطبيق فوراً
+              </button>
+
+              {/* standard web fallback */}
+              <button
+                onClick={() => { if (decodedUrl) window.location.href = decodedUrl; }}
+                className="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl font-medium font-arabic text-xs transition-all cursor-pointer"
+                type="button"
+                id="open_via_browser_btn"
+              >
+                المواصلة عبر متصفح الويب العادي لقناتنا
+              </button>
+            </div>
+          </div>
+
+          <div className="text-[10px] text-slate-600 font-arabic">
+            توليد وإدارة وتوجيه آمن بالكامل بواسطة QR Deep Linker 🚀
+          </div>
+
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 selection:bg-red-100 selection:text-red-700" id="main_app_wrapper">
