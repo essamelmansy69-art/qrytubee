@@ -24,24 +24,26 @@ export default {
 
     // 1. Explicitly serve static sitemap.xml with correct headers
     if (pathname === '/sitemap.xml') {
-      return new Response(SITEMAP_XML, {
+      return new Response(SITEMAP_XML.trim(), {
         status: 200,
         headers: {
           'Content-Type': 'application/xml; charset=utf-8',
           'Cache-Control': 'public, max-age=86400',
           'Access-Control-Allow-Origin': '*',
+          'X-Content-Type-Options': 'nosniff',
         },
       });
     }
 
     // 2. Explicitly serve robots.txt
     if (pathname === '/robots.txt') {
-      return new Response(ROBOTS_TXT, {
+      return new Response(ROBOTS_TXT.trim(), {
         status: 200,
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
           'Cache-Control': 'public, max-age=86400',
           'Access-Control-Allow-Origin': '*',
+          'X-Content-Type-Options': 'nosniff',
         },
       });
     }
