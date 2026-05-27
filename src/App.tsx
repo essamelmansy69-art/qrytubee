@@ -19,15 +19,31 @@ import {
   Share2, 
   ShieldCheck, 
   Layers,
-  Languages
+  Languages,
+  BookOpen,
+  FileText,
+  ShieldAlert
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { translations } from './translations';
+import ArticlesView from './components/ArticlesView';
+import LegalView from './components/LegalView';
 
 export default function App() {
   const [lang, setLang] = useState<'ar' | 'en'>(() => {
     const saved = localStorage.getItem('qr_language');
-    return (saved === 'en' || saved === 'ar') ? saved : 'ar';
+    if (saved === 'en' || saved === 'ar') return saved;
+
+    // Detect visitor's language
+    try {
+      const browserLang = navigator.language || (navigator as any).userLanguage || '';
+      if (browserLang.toLowerCase().startsWith('en')) {
+        return 'en';
+      }
+    } catch (e) {
+      // safe fallback
+    }
+    return 'ar';
   });
 
   useEffect(() => {
@@ -36,7 +52,7 @@ export default function App() {
 
   const t = translations[lang];
 
-  const [activeTab, setActiveTab] = useState<'generator' | 'faq' | 'tips'>('generator');
+  const [activeTab, setActiveTab] = useState<'generator' | 'faq' | 'tips' | 'articles' | 'terms' | 'privacy'>('generator');
 
   // Detect and handle deep-link redirected scans
   const queryParams = new URL(window.location.href).searchParams;
@@ -173,6 +189,15 @@ export default function App() {
               {t.navTips}
             </button>
             <button
+              onClick={() => setActiveTab('articles')}
+              className={`px-4 py-2 rounded-lg font-medium transition-all cursor-pointer ${
+                activeTab === 'articles' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'
+              }`}
+              type="button"
+            >
+              {t.navArticles}
+            </button>
+            <button
               onClick={() => setActiveTab('faq')}
               className={`px-4 py-2 rounded-lg font-medium transition-all cursor-pointer ${
                 activeTab === 'faq' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'
@@ -199,9 +224,6 @@ export default function App() {
             <span className="hidden sm:inline-flex items-center gap-1 py-1 px-3 bg-red-50 text-red-600 text-xs font-semibold rounded-full font-arabic">
               <Flame size={12} />
               {t.navFreeBadge}
-            </span>
-            <span className="text-xs bg-slate-900 text-white font-semibold py-1.5 px-3 rounded-xl shadow-xs font-arabic">
-              {t.navBetaBadge}
             </span>
           </div>
 
@@ -343,6 +365,24 @@ export default function App() {
           </div>
         )}
 
+        {activeTab === 'articles' && (
+          <div className="transition-opacity duration-300">
+            <ArticlesView lang={lang} />
+          </div>
+        )}
+
+        {activeTab === 'terms' && (
+          <div className="transition-opacity duration-300">
+            <LegalView lang={lang} docType="terms" />
+          </div>
+        )}
+
+        {activeTab === 'privacy' && (
+          <div className="transition-opacity duration-300">
+            <LegalView lang={lang} docType="privacy" />
+          </div>
+        )}
+
       </main>
 
       {/* 4. PROFESSIONAL BEAUTIFUL FOOTER */}
@@ -366,10 +406,13 @@ export default function App() {
             {/* Column 2: Navigation Links */}
             <div className="md:col-span-4 space-y-3 font-arabic">
               <span className="text-xs font-bold text-white uppercase block">{t.quickLinks}</span>
-              <div className="flex flex-col gap-2 text-xs">
-                <button onClick={() => setActiveTab('generator')} className={`hover:text-white ${lang === 'ar' ? 'text-right' : 'text-left'} cursor-pointer`}>{t.navGenerator}</button>
-                <button onClick={() => setActiveTab('tips')} className={`hover:text-white ${lang === 'ar' ? 'text-right' : 'text-left'} cursor-pointer`}>{t.optGuidanceLabel}</button>
-                <button onClick={() => setActiveTab('faq')} className={`hover:text-white ${lang === 'ar' ? 'text-right' : 'text-left'} cursor-pointer`}>{t.faqDetailsLabel}</button>
+              <div className="flex flex-col gap-2 text-xs items-start">
+                <button onClick={() => { setActiveTab('generator'); window.scrollTo({top:0, behavior:'smooth'}); }} className={`hover:text-white ${lang === 'ar' ? 'text-right' : 'text-left'} cursor-pointer transition-colors`}>{t.navGenerator}</button>
+                <button onClick={() => { setActiveTab('tips'); window.scrollTo({top:0, behavior:'smooth'}); }} className={`hover:text-white ${lang === 'ar' ? 'text-right' : 'text-left'} cursor-pointer transition-colors`}>{t.optGuidanceLabel}</button>
+                <button onClick={() => { setActiveTab('articles'); window.scrollTo({top:0, behavior:'smooth'}); }} className={`hover:text-white ${lang === 'ar' ? 'text-right' : 'text-left'} cursor-pointer transition-colors`}>{t.navArticles}</button>
+                <button onClick={() => { setActiveTab('faq'); window.scrollTo({top:0, behavior:'smooth'}); }} className={`hover:text-white ${lang === 'ar' ? 'text-right' : 'text-left'} cursor-pointer transition-colors`}>{t.faqDetailsLabel}</button>
+                <button onClick={() => { setActiveTab('terms'); window.scrollTo({top:0, behavior:'smooth'}); }} className={`hover:text-white ${lang === 'ar' ? 'text-right' : 'text-left'} cursor-pointer transition-colors`}>{t.navTerms}</button>
+                <button onClick={() => { setActiveTab('privacy'); window.scrollTo({top:0, behavior:'smooth'}); }} className={`hover:text-white ${lang === 'ar' ? 'text-right' : 'text-left'} cursor-pointer transition-colors`}>{t.navPrivacy}</button>
               </div>
             </div>
 

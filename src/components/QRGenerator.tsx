@@ -92,7 +92,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
   const [logoScale, setLogoScale] = useState<number>(0.22);
   const [logoMargin, setLogoMargin] = useState<boolean>(true);
   const [errorCorrectionLevel, setErrorCorrectionLevel] = useState<'L' | 'M' | 'Q' | 'H'>('H');
-  const [downloadSize, setDownloadSize] = useState<number>(1024);
+  const [downloadSize, setDownloadSize] = useState<number>(2048);
   const [downloadFormat, setDownloadFormat] = useState<'png' | 'jpg'>('png');
   const [copied, setCopied] = useState<boolean>(false);
   const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -416,6 +416,74 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
     }
   };
 
+  // Download high-quality custom vector SVG version of the QR Code
+  const handleDownloadSvg = async () => {
+    const payload = getActivePayload();
+    if (!payload || !urlInput.trim()) {
+      alert(t.alertInputFirst);
+      return;
+    }
+    try {
+      const qrOptions = {
+        margin: 2,
+        errorCorrectionLevel: errorCorrectionLevel,
+        color: {
+          dark: foregroundColor,
+          light: backgroundColor
+        }
+      };
+
+      // Get pure vector SVG string from qrcode library
+      const svgString = await QRCode.toString(payload, {
+        type: 'svg',
+        ...qrOptions
+      });
+
+      let finalSvg = svgString;
+      const logoUrl = getSelectedLogoUrl();
+      if (logoUrl) {
+        // Compute standard central position inside SVG viewBox coordinate grid
+        const viewBoxMatch = svgString.match(/viewBox="0 0 (\d+) (\d+)"/);
+        if (viewBoxMatch) {
+          const w = parseInt(viewBoxMatch[1]);
+          const h = parseInt(viewBoxMatch[2]);
+          const logoSize = w * logoScale;
+          const cx = w / 2;
+          const cy = h / 2;
+          const lx = cx - logoSize / 2;
+          const ly = cy - logoSize / 2;
+          
+          let logoElements = '';
+          if (logoMargin) {
+            const badgeSize = logoSize * 1.25;
+            const bx = cx - badgeSize / 2;
+            const by = cy - badgeSize / 2;
+            const radius = badgeSize * 0.2;
+            logoElements += `<rect x="${bx}" y="${by}" width="${badgeSize}" height="${badgeSize}" fill="${backgroundColor}" rx="${radius}" ry="${radius}" />`;
+          }
+          
+          // Embed the base64 or custom logo image inside the SVG vector
+          logoElements += `<image href="${logoUrl}" x="${lx}" y="${ly}" width="${logoSize}" height="${logoSize}" />`;
+          
+          // Insert inside SVG root before closing tag
+          finalSvg = svgString.replace('</svg>', `${logoElements}</svg>`);
+        }
+      }
+
+      const blob = new Blob([finalSvg], { type: 'image/svg+xml;charset=utf-8' });
+      const blobUrl = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.download = `YouTube-DeepLink-QR.svg`;
+      link.href = blobUrl;
+      link.click();
+      
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error("error during vector SVG download generation", err);
+    }
+  };
+
   // Copy QR Image directly to Clipboard
   const handleCopyToClipboard = async () => {
     try {
@@ -449,8 +517,8 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full max-w-7xl mx-auto" id="qr_main_layout">
       
-      {/* LEFT PANEL: INPUTS & CUSTOMIZATION (8 COLS) */}
-      <div className="lg:col-span-7 space-y-6" id="qr_left_panel">
+      {/* LEFT PANEL: INPUTS & PREVIEW (8 COLS) */}
+      <div className="lg:col-span-8 space-y-6" id="qr_left_panel">
         
         {/* Module 1: The Link Input */}
         <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-100 flex flex-col justify-start" id="module_link_input">
@@ -510,6 +578,87 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
               )}
             </div>
           )}
+
+          {/* Aesthetic Divider */}
+          <div className="w-full h-px bg-gray-100 my-6" />
+
+          {/* Moved Live Preview & Actions Section */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center" id="direct_preview_area">
+            
+            {/* Left: Copy & High-Res download (7 cols on md) located directly under the link input field */}
+            <div className="md:col-span-7 space-y-4 w-full order-1 md:order-1" id="direct_actions_container">
+              
+              {/* Copy to clipboard button */}
+              <button
+                onClick={handleCopyToClipboard}
+                className={`w-full py-3 px-4 rounded-xl font-arabic font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer text-xs ${
+                  copied 
+                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-inner'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                }`}
+                type="button"
+                id="copy_qr_btn"
+              >
+                {copied ? (
+                  <>
+                    <Check size={16} />
+                    <span>{t.copiedToast}</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy size={16} />
+                    <span>{t.btnCopyImage}</span>
+                  </>
+                )}
+              </button>
+
+              {/* Pro Print Export - PNG & SVG Download buttons */}
+              <div className="grid grid-cols-2 gap-3" id="pro_export_action_buttons">
+                {/* PNG Download Button */}
+                <button
+                  onClick={handleDownload}
+                  className="py-3 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold font-arabic flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs hover:shadow-md text-xs"
+                  type="button"
+                  id="direct_download_png_btn"
+                >
+                  <Download size={15} />
+                  <span>{t.btnDownloadPng}</span>
+                </button>
+
+                {/* SVG Download Button */}
+                <button
+                  onClick={handleDownloadSvg}
+                  className="py-3 px-4 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-semibold font-arabic flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs hover:shadow-md text-xs"
+                  type="button"
+                  id="direct_download_svg_btn"
+                >
+                  <Sparkles size={15} />
+                  <span>{t.btnDownloadSvg}</span>
+                </button>
+              </div>
+
+            </div>
+
+            {/* Right: The QR Code canvas (5 cols on md) rendered next or below */}
+            <div className="md:col-span-5 flex flex-col items-center justify-center text-center p-4 sm:p-5 bg-slate-50/40 rounded-2xl border border-gray-100 group relative w-full shadow-xs order-2 md:order-2" id="direct_canvas_container">
+              <span className="text-[10px] font-bold text-gray-400 font-arabic tracking-wider uppercase mb-0.5 block">{t.previewHeading}</span>
+              <h3 className="text-xs font-bold font-arabic text-gray-700 mb-2">{t.finalQrLabel}</h3>
+
+              {/* Square canvas wrapper box ensuring crisp 1:1 rendering on all screens */}
+              <div className="w-36 h-36 min-w-[9rem] min-h-[9rem] max-w-full aspect-square bg-white rounded-xl shadow-xs border border-gray-100 p-1.5 flex items-center justify-center transition-all duration-300 group-hover:shadow-md group-hover:scale-102 overflow-hidden" id="canvas_square_box">
+                <canvas
+                  ref={canvasRef}
+                  className="!w-full !h-full !max-w-full !max-h-full object-contain rounded-md"
+                  id="final_qr_canvas"
+                />
+              </div>
+
+              <p className="mt-2 text-[9px] font-arabic text-gray-400 max-w-[200px] leading-relaxed">
+                {t.previewSyncMsg}
+              </p>
+            </div>
+
+          </div>
         </div>
 
         {/* Module 2: The Deep Link Strategy Selector */}
@@ -680,6 +829,10 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* RIGHT PANEL: BRANDING, LOGOS, & EDUCATION (4 COLS) */}
+      <div className="lg:col-span-4 space-y-6" id="qr_right_panel">
 
         {/* Module 3: Branding & Custom Colors */}
         <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-100" id="module_colors_branding">
@@ -966,110 +1119,6 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
               </div>
             </div>
           )}
-        </div>
-      </div>
-
-      {/* RIGHT PANEL: LIVE PREVIEW & DOWNLOAD ACTIONS (5 COLS) */}
-      <div className="lg:col-span-5 space-y-6" id="qr_right_panel">
-        
-        {/* Preview and basic action Card */}
-        <div className="bg-white rounded-3xl p-6 shadow-md border border-gray-100 flex flex-col items-center justify-center text-center sticky top-6" id="preview_sticky_container">
-          <span className="text-xs font-bold text-gray-400 font-arabic tracking-wider uppercase mb-1 block">{t.previewHeading}</span>
-          <h3 className="text-lg font-bold font-arabic text-gray-800 mb-6">{t.finalQrLabel}</h3>
-
-          {/* QR Code Canvas container */}
-          <div className="p-6 bg-slate-50/60 rounded-3xl border border-dashed border-gray-200 relative group flex items-center justify-center glow-youtube">
-            
-            {/* The canvas */}
-            <canvas
-              ref={canvasRef}
-              className="w-60 h-60 max-w-full rounded-2xl bg-white shadow-xs p-2 transition-transform duration-300 group-hover:scale-102"
-              id="final_qr_canvas"
-            />
-          </div>
-
-          {/* Sub description of encoded data */}
-          <p className="mt-4 text-xs font-arabic text-gray-400 max-w-xs leading-relaxed">
-            {t.previewSyncMsg}
-          </p>
-
-          <div className="w-full h-px bg-gray-100 my-6" />
-
-          {/* Quick operational actions - Copy & Download */}
-          <div className="w-full space-y-3.5" id="preview_actions">
-            
-            {/* Copy to clipboard button */}
-            <button
-              onClick={handleCopyToClipboard}
-              className={`w-full py-3 px-4 rounded-xl font-arabic font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                copied 
-                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-inner'
-                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-              }`}
-              type="button"
-              id="copy_qr_btn"
-            >
-              {copied ? (
-                <>
-                  <Check size={18} />
-                  <span>{t.copiedToast}</span>
-                </>
-              ) : (
-                <>
-                  <Copy size={18} />
-                  <span>{t.btnCopyImage}</span>
-                </>
-              )}
-            </button>
-
-            {/* High-Resolution Professional Download form */}
-            <div className={`bg-slate-50 p-4 rounded-2xl border border-gray-100 ${lang === 'ar' ? 'text-right' : 'text-left'} space-y-3`} id="high_res_download_form">
-              <span className="text-xs font-bold text-gray-700 font-arabic block">{t.exportConfigHeading}</span>
-              
-              <div className="grid grid-cols-2 gap-2">
-                {/* Resolution selector */}
-                <div>
-                  <label className="text-[10px] font-semibold text-gray-500 font-arabic block mb-1">{t.exportLvlLabel}</label>
-                  <select
-                    value={downloadSize}
-                    onChange={(e) => setDownloadSize(parseInt(e.target.value))}
-                    className="w-full bg-white border border-gray-200 rounded-lg p-1.5 text-xs focus:outline-none"
-                    id="download_size_select"
-                  >
-                    <option value="512">{t.exportLvl512}</option>
-                    <option value="1024">{t.exportLvl1024}</option>
-                    <option value="2048">{t.exportLvl2048}</option>
-                    <option value="4096">{t.exportLvl4096}</option>
-                  </select>
-                </div>
-
-                {/* Format selection */}
-                <div>
-                  <label className="text-[10px] font-semibold text-gray-500 font-arabic block mb-1">{t.exportFormatLabel}</label>
-                  <select
-                    value={downloadFormat}
-                    onChange={(e) => setDownloadFormat(e.target.value as 'png' | 'jpg')}
-                    className="w-full bg-white border border-gray-200 rounded-lg p-1.5 text-xs focus:outline-none"
-                    id="download_format_select"
-                  >
-                    <option value="png">PNG ({t.exportFormatPng})</option>
-                    <option value="jpg">JPEG ({t.exportFormatJpg})</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Mega download button */}
-              <button
-                onClick={handleDownload}
-                className="w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold font-arabic flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md hover:shadow-lg shadow-red-500/10"
-                type="button"
-                id="mega_download_btn"
-              >
-                <Download size={18} />
-                <span>{t.btnDownloadQr}</span>
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* Guidance and education panel on Deep Links */}

@@ -126,6 +126,8 @@ export const translations = {
     previewSyncMsg: "تمت المزامنة والتحديث حياً! يدعم هذا الرمز فتح تطبيق يوتيوب من الكاميرا الافتراضية للـ iPhone والـ Android مباشرة بمجرد المسح.",
     copiedToast: "تم نسخ الـ QR كصورة للحافظة!",
     btnCopyImage: "نسخ صورة الـ QR لنسخها في التصاميم",
+    btnDownloadPng: "تحميل بصيغة PNG (دقة فائقة)",
+    btnDownloadSvg: "تحميل بصيغة SVG (متجه مرن)",
     exportConfigHeading: "خيارات تصدير الملفات عالية الجودة للطباعة:",
     exportLvlLabel: "دقة الصورة المستخرجة:",
     exportLvl512: "512 × 512 بكسل (شبكات التواصل)",
@@ -155,7 +157,17 @@ export const translations = {
     // Validation alerts
     alertUploadType: "الرجاء تحميل ملف صورة صالح.",
     alertInputFirst: "الرجاء إدخال رابط يوتيوب صحيح أولاً لتتمكن من تحميل رمز الـ QR!",
-    clipboardFallbackMsg: "تم نسخ رابط الـ Deep Link كبديل لعدم دعم متصفحك نسخ الصور!"
+    clipboardFallbackMsg: "تم نسخ رابط الـ Deep Link كبديل لعدم دعم متصفحك نسخ الصور!",
+
+    // Custom sections
+    navArticles: "مقالات النمو والـ SEO",
+    navTerms: "شروط الخدمة",
+    navPrivacy: "سياسة الخصوصية",
+    readMore: "اقرأ المقال كاملاً ←",
+    lastUpdated: "آخر تحديث:",
+    seoArticlesHeading: "مقالات النمو وسيو اليوتيوب والمواقع",
+    seoArticlesDesc: "دليلك المتكامل لتصدر محركات البحث، تنشيط خوارزميات يوتيوب، واستعمال تقنيات التوجيه المتقدمة لمضاعفة المشتركين مجاناً.",
+    backToArticles: "العودة لجميع المقالات"
   },
   en: {
     // General
@@ -279,6 +291,8 @@ export const translations = {
     previewSyncMsg: "Live Synchronized! Scan this code with standard Apple iOS or Android cameras to launch YouTube app organically.",
     copiedToast: "QR design graphic copied to clipboard as binary image!",
     btnCopyImage: "Copy Image to Clipboard",
+    btnDownloadPng: "Download PNG (Ultra High-Res)",
+    btnDownloadSvg: "Download SVG (Flexible Vector)",
     exportConfigHeading: "Pro Print Export Resolutions & Files:",
     exportLvlLabel: "Target File Image Dimensions:",
     exportLvl512: "512 × 512 px (Low-res preview)",
@@ -308,6 +322,16 @@ export const translations = {
     // Validation alerts
     alertUploadType: "Please select a valid image file formatting.",
     alertInputFirst: "Please specify a valid YouTube URL address first before trying to download!",
-    clipboardFallbackMsg: "Deep Link URL copied successfully to clipboard!"
+    clipboardFallbackMsg: "Deep Link URL copied successfully to clipboard!",
+
+    // Custom sections
+    navArticles: "Growth & SEO Articles",
+    navTerms: "Terms of Service",
+    navPrivacy: "Privacy Policy",
+    readMore: "Read full article ←",
+    lastUpdated: "Last updated:",
+    seoArticlesHeading: "YouTube Growth & Web SEO Insights",
+    seoArticlesDesc: "Your ultimate playbook to top search engines, trigger YouTube's recommendation flywheels, and leverage advanced deep links to multiply subscribers.",
+    backToArticles: "Back to all articles"
   }
 };
