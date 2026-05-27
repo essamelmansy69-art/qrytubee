@@ -1,6 +1,6 @@
 {
-  "name": "YouTube QR Deep Linker",
-  "description": "أداة احترافية لتوليد رموز الاستجابة السريعة (QR Code) لروابط اليوتيوب تدعم ميزة الروابط العميقة (Deep Linking) لفتح التطبيق مباشرة مع إمكانية إضافة شعار مخصص وتعديل الألوان.",
+  "name": "Qrytube",
+  "description": "اصنع رموز QR ذكية (Deep Links) لـقناتك على اليوتيوب مجاناً. تتيح للمتابعين فتح قناتك أو فيديوهاتك داخل تطبيق اليوتيوب مباشرة لزيادة المشاهدات والاشتراكات.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

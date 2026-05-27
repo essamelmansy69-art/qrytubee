@@ -887,34 +887,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
               </div>
             </div>
 
-            {/* Advanced configurations */}
-            <div className="space-y-4 rounded-2xl bg-gray-50 p-4 border border-gray-100">
-              <span className="text-xs font-bold text-gray-700 font-arabic block mb-1">{t.advConfigTitle}</span>
-              
-              {/* Error correction level info & selector */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-medium text-gray-600 font-arabic" htmlFor="error_correction_level">
-                    {t.labelErrorCorrection}
-                  </label>
-                  <span className="text-[10px] text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded font-arabic">{t.logoOptimized}</span>
-                </div>
-                <select
-                  id="error_correction_level"
-                  value={errorCorrectionLevel}
-                  onChange={(e) => setErrorCorrectionLevel(e.target.value as 'L' | 'M' | 'Q' | 'H')}
-                  className="w-full px-3 py-2 bg-white rounded-xl border border-gray-200 text-xs font-arabic focus:outline-none focus:ring-1 focus:ring-red-500 cursor-pointer"
-                >
-                  <option value="H">{t.errLvlH}</option>
-                  <option value="Q">{t.errLvlQ}</option>
-                  <option value="M">{t.errLvlM}</option>
-                  <option value="L">{t.errLvlL}</option>
-                </select>
-                <span className="text-[10px] text-gray-500 mt-1 block font-arabic leading-normal">
-                  {t.errCorrectionDesc}
-                </span>
-              </div>
-            </div>
+
           </div>
 
           {/* Dynamic Inverted colors warning banner */}
