@@ -407,6 +407,123 @@ export default {
       });
     }
 
+    // 2.7 Fetch YouTube avatar proxy to bypass CORS
+    if (pathname === '/api/youtube-avatar') {
+      try {
+        const targetUrl = url.searchParams.get('url');
+        if (!targetUrl) {
+          return new Response(JSON.stringify({ error: 'Missing channel URL' }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'X-Content-Type-Options': 'nosniff' }
+          });
+        }
+
+        const ytResponse = await fetch(targetUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept-Language': 'en-US,en;q=0.9',
+          }
+        });
+
+        if (!ytResponse.ok) {
+          return new Response(JSON.stringify({ error: `YouTube page fetch failed: ${ytResponse.status}` }), {
+            status: 502,
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'X-Content-Type-Options': 'nosniff' }
+          });
+        }
+
+        const html = await ytResponse.text();
+        const isVideo = targetUrl.includes('/watch') || targetUrl.includes('/shorts') || targetUrl.includes('youtu.be');
+
+        let avatarUrl = '';
+
+        // Extract og:image if not a video URL
+        if (!isVideo) {
+          const ogImageMatch = html.match(/<meta property="og:image" content="([^"]+)"/i);
+          if (ogImageMatch && ogImageMatch[1]) {
+            avatarUrl = ogImageMatch[1];
+          }
+        }
+
+        // Search for YT3 profile avatar
+        if (!avatarUrl) {
+          const yt3Matches = html.match(/https:\/\/yt3\.(?:ggpht|googleusercontent)\.com\/[a-zA-Z0-9_.-]+(?:=s\d+[^'"\s]*|)/g);
+          if (yt3Matches && yt3Matches.length > 0) {
+            const goodAvatar = yt3Matches.find(url => url.includes('=s') || url.includes('/channels4_profile'));
+            avatarUrl = goodAvatar || yt3Matches[0];
+          }
+        }
+
+        // If video fallback
+        if (!avatarUrl && isVideo) {
+          const channelMatch = html.match(/"channelId":"(UC[a-zA-Z0-9_-]{22})"/);
+          if (channelMatch && channelMatch[1]) {
+            const subYtRes = await fetch(`https://www.youtube.com/channel/${channelMatch[1]}`, {
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+              }
+            });
+            if (subYtRes.ok) {
+              const subHtml = await subYtRes.text();
+              const ogImageMatch = subHtml.match(/<meta property="og:image" content="([^"]+)"/i);
+              if (ogImageMatch && ogImageMatch[1]) {
+                avatarUrl = ogImageMatch[1];
+              } else {
+                const subYt3 = subHtml.match(/https:\/\/yt3\.(?:ggpht|googleusercontent)\.com\/[a-zA-Z0-9_.-]+(?:=s\d+[^'"\s]*|)/g);
+                if (subYt3 && subYt3.length > 0) {
+                  const goodAvatar = subYt3.find(url => url.includes('=s') || url.includes('/channels4_profile'));
+                  avatarUrl = goodAvatar || subYt3[0];
+                }
+              }
+            }
+          }
+        }
+
+        if (!avatarUrl) {
+          return new Response(JSON.stringify({ error: 'Could not resolve channel avatar' }), {
+            status: 404,
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'X-Content-Type-Options': 'nosniff' }
+          });
+        }
+
+        const imgResponse = await fetch(avatarUrl);
+        if (!imgResponse.ok) {
+          return new Response(JSON.stringify({ error: 'Failed to fetch the avatar image' }), {
+            status: 502,
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'X-Content-Type-Options': 'nosniff' }
+          });
+        }
+
+        const contentType = imgResponse.headers.get('content-type') || 'image/jpeg';
+        const buffer = await imgResponse.arrayBuffer();
+        
+        // Convert to base64
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        const b64 = btoa(binary);
+        const dataUrl = `data:${contentType};base64,${b64}`;
+
+        return new Response(JSON.stringify({ avatar: dataUrl }), {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Cache-Control': 'public, max-age=3600',
+            'X-Content-Type-Options': 'nosniff'
+          }
+        });
+      } catch (err) {
+        return new Response(JSON.stringify({ error: err.message }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'X-Content-Type-Options': 'nosniff' }
+        });
+      }
+    }
+
     // 3. Optional edge redirection acceleration for smart QR codes (?r=...)
     // This allows native redirection directly from the edge, speeding up the open process!
     const redirectUrl = url.searchParams.get('r') || url.searchParams.get('url');

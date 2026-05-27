@@ -24,8 +24,10 @@ import {
   Instagram,
   Music,
   UploadCloud,
-  Trash2
+  Trash2,
+  FileText
 } from 'lucide-react';
+import { jsPDF } from 'jspdf';
 import { QRConfig, QRStyle } from '../types';
 import { parseYoutubeUrl, buildDeepLink } from '../utils';
 import { translations } from '../translations';
@@ -71,6 +73,11 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
   const [downloadFormat, setDownloadFormat] = useState<'png' | 'jpg'>('png');
   const [copied, setCopied] = useState<boolean>(false);
   const [renderedPayload, setRenderedPayload] = useState<string>('');
+
+  // Automatic YouTube Avatar fetching states
+  const [isFetchingAvatar, setIsFetchingAvatar] = useState<boolean>(false);
+  const [avatarFetchError, setAvatarFetchError] = useState<string | null>(null);
+  const [lastFetchedYoutubeUrl, setLastFetchedYoutubeUrl] = useState<string>('');
 
   // Custom Logo upload & styling states
   const [customLogo, setCustomLogo] = useState<string | null>(null);
@@ -118,6 +125,47 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
   // Parse URL to show useful UI statistics
   const urlInfo = parseYoutubeUrl(urlInput);
   const formattedDeepLink = buildDeepLink(urlInput, deepLinkType);
+
+  // Automatically fetch YouTube channel avatar when a valid YouTube link is inputted
+  useEffect(() => {
+    const trimmedUrl = urlInput.trim();
+    if (!trimmedUrl) return;
+
+    // Check if it's a YouTube URL and is valid
+    const isYoutube = trimmedUrl.includes('youtube.com') || trimmedUrl.includes('youtu.be');
+    
+    // We only want to trigger fetching if it's a YouTube URL and we haven't already fetched for this precise URL
+    if (isYoutube && trimmedUrl !== lastFetchedYoutubeUrl) {
+      // Debounce the fetch slightly (800ms) to allow the user to finish typing
+      const debounceTimer = setTimeout(async () => {
+        setIsFetchingAvatar(true);
+        setAvatarFetchError(null);
+        try {
+          const response = await fetch(`/api/youtube-avatar?url=${encodeURIComponent(trimmedUrl)}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.avatar) {
+              setCustomLogo(data.avatar);
+              setErrorCorrectionLevel('H'); // Promote to highest density for flawless QR design with centered logo
+              setLastFetchedYoutubeUrl(trimmedUrl);
+            } else {
+              setAvatarFetchError('No avatar found');
+            }
+          } else {
+            const errData = await response.json().catch(() => ({}));
+            setAvatarFetchError(errData.error || `HTTP error ${response.status}`);
+          }
+        } catch (err: any) {
+          console.error("Error auto-fetching YouTube avatar:", err);
+          setAvatarFetchError(err.message || 'Error loading avatar');
+        } finally {
+          setIsFetchingAvatar(false);
+        }
+      }, 800);
+
+      return () => clearTimeout(debounceTimer);
+    }
+  }, [urlInput, lastFetchedYoutubeUrl]);
 
   // Auto-switch colors when platform changes
   useEffect(() => {
@@ -425,6 +473,227 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
     }
   };
 
+  // Download custom high-res poster-perfect PDF version of the QR Code
+  const handleDownloadPdf = async () => {
+    const payload = getActivePayload();
+    if (!payload || !urlInput.trim()) {
+      alert(t.alertInputFirst);
+      return;
+    }
+    try {
+      const scale = 2; // For higher density rendering
+      const canvasWidth = 595 * scale; // A4 standard point width is 595
+      const canvasHeight = 842 * scale; // A4 standard point height is 842
+      const pdfCanvas = document.createElement('canvas');
+      pdfCanvas.width = canvasWidth;
+      pdfCanvas.height = canvasHeight;
+      const ctx = pdfCanvas.getContext('2d');
+      if (!ctx) return;
+
+      // 1. Draw elegant background card
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+      // Dynamic subtle frame border
+      ctx.strokeStyle = '#F1F5F9';
+      ctx.lineWidth = 15 * scale;
+      ctx.strokeRect(20 * scale, 20 * scale, canvasWidth - 40 * scale, canvasHeight - 40 * scale);
+
+      // Red Accent bar at the top
+      ctx.fillStyle = '#DC2626';
+      ctx.fillRect(20 * scale, 20 * scale, canvasWidth - 40 * scale, 8 * scale);
+
+      // 2. Main titles
+      ctx.fillStyle = '#0F172A';
+      ctx.font = `bold ${24 * scale}px system-ui, -apple-system, sans-serif`;
+      ctx.textAlign = 'center';
+
+      const headerTitle = lang === 'ar' ? 'رمز الاستجابة السريعة الذكي لقناتك' : 'Your Smart YouTube QR Code';
+      ctx.fillText(headerTitle, canvasWidth / 2, 80 * scale);
+
+      ctx.fillStyle = '#64748B';
+      ctx.font = `${11 * scale}px system-ui, sans-serif`;
+      const subTitle = lang === 'ar' 
+        ? 'تقنية الروابط العميقة (Deep Links) لتوجيه فوري ومباشر للتطبيق' 
+        : 'Smart Deep Link technology for direct official app redirection';
+      ctx.fillText(subTitle, canvasWidth / 2, 105 * scale);
+
+      // Decorative divider
+      ctx.strokeStyle = '#E2E8F0';
+      ctx.lineWidth = 1 * scale;
+      ctx.beginPath();
+      ctx.moveTo(80 * scale, 130 * scale);
+      ctx.lineTo(canvasWidth - 80 * scale, 130 * scale);
+      ctx.stroke();
+
+      // 3. Middle Main Poster Container
+      ctx.fillStyle = '#F8FAFC';
+      const cardX = 60 * scale;
+      const cardY = 150 * scale;
+      const cardW = canvasWidth - 120 * scale;
+      const cardH = 430 * scale;
+      const cardRadius = 16 * scale;
+
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(cardX, cardY, cardW, cardH, cardRadius);
+      } else {
+        ctx.rect(cardX, cardY, cardW, cardH);
+      }
+      ctx.fill();
+      ctx.strokeStyle = '#E2E8F0';
+      ctx.stroke();
+
+      ctx.fillStyle = '#0F172A';
+      ctx.font = `bold ${15 * scale}px system-ui, sans-serif`;
+      ctx.fillText(lang === 'ar' ? 'امسح الرمز ضوئياً للبدء' : 'SCAN TO START PLAYBACK', canvasWidth / 2, 195 * scale);
+
+      // 4. Generate the QR Code image & overlay logo onto it
+      const qrTempCanvas = document.createElement('canvas');
+      qrTempCanvas.width = 600;
+      qrTempCanvas.height = 600;
+
+      await QRCode.toCanvas(qrTempCanvas, payload, {
+        width: 600,
+        margin: 2,
+        errorCorrectionLevel: errorCorrectionLevel,
+        color: {
+          dark: foregroundColor,
+          light: backgroundColor
+        }
+      });
+
+      if (customLogo) {
+        const logoImg = new Image();
+        logoImg.src = customLogo;
+        await new Promise((resolve) => {
+          logoImg.onload = () => {
+            const lCtx = qrTempCanvas.getContext('2d');
+            if (lCtx) {
+              const cx = qrTempCanvas.width / 2;
+              const cy = qrTempCanvas.height / 2;
+              const logoSize = qrTempCanvas.width * logoScale;
+
+              if (logoMargin) {
+                lCtx.fillStyle = backgroundColor;
+                const badgeSize = logoSize * 1.25;
+                const badgeX = cx - badgeSize / 2;
+                const badgeY = cy - badgeSize / 2;
+                const radius = badgeSize * 0.2;
+
+                lCtx.beginPath();
+                if (lCtx.roundRect) {
+                  lCtx.roundRect(badgeX, badgeY, badgeSize, badgeSize, radius);
+                } else {
+                  lCtx.rect(badgeX, badgeY, badgeSize, badgeSize);
+                }
+                lCtx.fill();
+              }
+              lCtx.drawImage(logoImg, cx - logoSize / 2, cy - logoSize / 2, logoSize, logoSize);
+            }
+            resolve(true);
+          };
+          logoImg.onerror = () => resolve(true);
+        });
+      }
+
+      const qrDisplaySize = 250 * scale;
+      const qrX = (canvasWidth - qrDisplaySize) / 2;
+      const qrY = 225 * scale;
+
+      // Fill a white background plate behind QR
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(qrX - 10 * scale, qrY - 10 * scale, qrDisplaySize + 20 * scale, qrDisplaySize + 20 * scale, 12 * scale);
+      } else {
+        ctx.rect(qrX - 10 * scale, qrY - 10 * scale, qrDisplaySize + 20 * scale, qrDisplaySize + 20 * scale);
+      }
+      ctx.fill();
+      ctx.strokeStyle = '#E2E8F0';
+      ctx.stroke();
+
+      // Draw high-res QR Code
+      ctx.drawImage(qrTempCanvas, qrX, qrY, qrDisplaySize, qrDisplaySize);
+
+      // Embedded target meta labels
+      ctx.fillStyle = '#64748B';
+      ctx.font = `${10.5 * scale}px system-ui, sans-serif`;
+      const codeIsSmart = useSmartLink ? 'Deep Link' : 'Direct Link';
+      ctx.fillText(`${lang === 'ar' ? 'نوع التوجيه:' : 'Routing Engine:'} ${codeIsSmart}`, canvasWidth / 2, 520 * scale);
+
+      ctx.fillStyle = '#94A3B8';
+      ctx.font = `italic ${9.5 * scale}px Courier, monospace`;
+      let truncatedUrl = urlInput.trim();
+      if (truncatedUrl.length > 55) {
+        truncatedUrl = truncatedUrl.slice(0, 52) + '...';
+      }
+      ctx.fillText(truncatedUrl, canvasWidth / 2, 542 * scale);
+
+      // 5. Instruction Bullet points
+      ctx.fillStyle = '#0F172A';
+      ctx.font = `bold ${14 * scale}px system-ui, sans-serif`;
+      ctx.fillText(lang === 'ar' ? 'كيفية المسح والاستخدام:' : 'How to Scan & Access:', canvasWidth / 2, 615 * scale);
+
+      ctx.fillStyle = '#475569';
+      ctx.font = `${11 * scale}px system-ui, sans-serif`;
+      ctx.textAlign = 'center';
+
+      const inst1 = lang === 'ar' ? '١. وجّه الكاميرا العادية لهاتفك (آيفون أو أندرويد) مباشرة نحو الـ QR.' : '1. Open the camera app on your mobile device and frame the code.';
+      const inst2 = lang === 'ar' ? '٢. انقر فوق نافذة الرابط الإرشادية المنبثقة فوراً.' : '2. Click on the notification banner that instantly pops up.';
+      const inst3 = lang === 'ar' ? '٣. سيتم تشغيل تطبيق يوتيوب الرسمي مباشرة للاشتراك والتفاعل في ثوانٍ.' : '3. Official YouTube App launches directly with one-click engagement.';
+
+      ctx.fillText(inst1, canvasWidth / 2, 645 * scale);
+      ctx.fillText(inst2, canvasWidth / 2, 672 * scale);
+      ctx.fillText(inst3, canvasWidth / 2, 699 * scale);
+
+      // 6. Marketing High conversion badge
+      const badgeX = 60 * scale;
+      const badgeY = 732 * scale;
+      const badgeW = canvasWidth - 120 * scale;
+      const badgeH = 45 * scale;
+      ctx.fillStyle = '#FEF2F2';
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 8 * scale);
+      } else {
+        ctx.rect(badgeX, badgeY, badgeW, badgeH);
+      }
+      ctx.fill();
+
+      ctx.fillStyle = '#EF4444';
+      ctx.font = `bold ${10.5 * scale}px system-ui, sans-serif`;
+      const badgeText = lang === 'ar' 
+        ? '🔥 ميزة الروابط الذكية العميقة تمنع خسارة الزوار وتزيد المشتركين بنسبة ٤٠٠٪!' 
+        : '🔥 Smart deep links bypass the in-app browser login roadblocks, boosting signups by 400%+!';
+      ctx.fillText(badgeText, canvasWidth / 2, 759 * scale);
+
+      // 7. Slate separator and Footer branding
+      ctx.strokeStyle = '#F1F5F9';
+      ctx.beginPath();
+      ctx.moveTo(80 * scale, 802 * scale);
+      ctx.lineTo(canvasWidth - 80 * scale, 802 * scale);
+      ctx.stroke();
+
+      ctx.fillStyle = '#A1A1AA';
+      ctx.font = `500 ${9.5 * scale}px system-ui, sans-serif`;
+      ctx.fillText(lang === 'ar' ? 'توليد ونشر ذكي وآمن بنسبة ١٠٠٪ بواسطة QR Deep Linker 🚀' : '100% Secure offline & deep routing powered by QR Deep Linker 🚀', canvasWidth / 2, 822 * scale);
+
+      // 8. Convert to PDF Page
+      const imgData = pdfCanvas.toDataURL('image/png', 1.0);
+      const pdf = new jsPDF({
+        orientation: 'p',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      pdf.addImage(imgData, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
+      pdf.save(`YouTube-Smart-QR.pdf`);
+    } catch (err) {
+      console.error("error during high-res PDF flyer generation:", err);
+    }
+  };
+
   // Copy QR Image directly to Clipboard
   const handleCopyToClipboard = async () => {
     try {
@@ -602,6 +871,30 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                     {pStyle.icon}
                   </div>
                 </div>
+
+                {/* Auto YouTube Avatar Fetch Status Indicator */}
+                {(isFetchingAvatar || avatarFetchError || (lastFetchedYoutubeUrl === urlInput.trim() && customLogo && (urlInput.trim().includes('youtube.com') || urlInput.trim().includes('youtu.be')))) && (
+                  <div className="mt-2.5 flex items-center gap-2 text-xs font-arabic select-none transition-all duration-300">
+                    {isFetchingAvatar && (
+                      <div className="flex items-center gap-1.5 text-red-650 animate-pulse">
+                        <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping animate-duration-1000" />
+                        <span>{lang === 'ar' ? 'جاري جلب شعار القناة تلقائياً...' : 'Auto-fetching channel logo...'}</span>
+                      </div>
+                    )}
+                    {avatarFetchError && (
+                      <div className="flex items-center gap-1.5 text-amber-600">
+                        <AlertCircle size={13} />
+                        <span>{lang === 'ar' ? 'لم نتمكن من جلب الشعار تلقائياً.' : 'Could not fetch channel logo automatically.'}</span>
+                      </div>
+                    )}
+                    {!isFetchingAvatar && !avatarFetchError && lastFetchedYoutubeUrl === urlInput.trim() && customLogo && (
+                      <div className="flex items-center gap-1.5 text-emerald-600 font-medium">
+                        <CheckCircle2 size={13} />
+                        <span>{lang === 'ar' ? 'تم دمج صورة بروفايل القناة بنجاح ✨' : 'Channel profile photo merged successfully ✨'}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </>
             );
           })()}
@@ -641,28 +934,39 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                 )}
               </button>
 
-              {/* Pro Print Export - PNG & SVG Download buttons */}
-              <div className="grid grid-cols-2 gap-3" id="pro_export_action_buttons">
+              {/* Pro Print Export - PNG, SVG & PDF Download buttons */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5" id="pro_export_action_buttons">
                 {/* PNG Download Button */}
                 <button
                   onClick={handleDownload}
-                  className="py-3 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold font-arabic flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs hover:shadow-md text-xs"
+                  className="py-3 px-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold font-arabic flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs hover:shadow-md text-[11px]"
                   type="button"
                   id="direct_download_png_btn"
                 >
-                  <Download size={15} />
+                  <Download size={14} />
                   <span>{t.btnDownloadPng}</span>
                 </button>
 
                 {/* SVG Download Button */}
                 <button
                   onClick={handleDownloadSvg}
-                  className="py-3 px-4 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-semibold font-arabic flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs hover:shadow-md text-xs"
+                  className="py-3 px-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-semibold font-arabic flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs hover:shadow-md text-[11px]"
                   type="button"
                   id="direct_download_svg_btn"
                 >
-                  <Sparkles size={15} />
+                  <Sparkles size={14} />
                   <span>{t.btnDownloadSvg}</span>
+                </button>
+
+                {/* PDF Download Button */}
+                <button
+                  onClick={handleDownloadPdf}
+                  className="py-3 px-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold font-arabic flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs hover:shadow-md text-[11px]"
+                  type="button"
+                  id="direct_download_pdf_btn"
+                >
+                  <FileText size={14} />
+                  <span>{t.btnDownloadPdf}</span>
                 </button>
               </div>
 
