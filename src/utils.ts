@@ -269,6 +269,8 @@ export function buildDeepLink(url: string, type: 'vnd' | 'ios' | 'android' | 'st
     return info.cleanUrl;
   }
 
+  const fallbackUrl = encodeURIComponent(info.cleanUrl);
+
   // ROUTING BY PLATFORM
   if (info.platform === 'facebook') {
     if (type === 'vnd' || type === 'ios') {
@@ -278,9 +280,9 @@ export function buildDeepLink(url: string, type: 'vnd' | 'ios' | 'android' | 'st
       return `fb://facewebmodal/f?href=${encodeURIComponent(info.cleanUrl)}`;
     } else if (type === 'android') {
       if (/^\d+$/.test(info.id)) {
-        return `intent://facebook.com/profile.php?id=${info.id}#Intent;package=com.facebook.katana;scheme=https;end`;
+        return `intent://facebook.com/profile.php?id=${info.id}#Intent;package=com.facebook.katana;scheme=https;S.browser_fallback_url=${fallbackUrl};end`;
       }
-      return `intent://facebook.com/${info.id}#Intent;package=com.facebook.katana;scheme=https;end`;
+      return `intent://facebook.com/${info.id}#Intent;package=com.facebook.katana;scheme=https;S.browser_fallback_url=${fallbackUrl};end`;
     }
   }
 
@@ -292,9 +294,9 @@ export function buildDeepLink(url: string, type: 'vnd' | 'ios' | 'android' | 'st
       return `instagram://media?id=${info.id}`;
     } else if (type === 'android') {
       if (info.type === 'profile') {
-        return `intent://instagram.com/_u/${info.id}#Intent;package=com.instagram.android;scheme=https;end`;
+        return `intent://instagram.com/_u/${info.id}#Intent;package=com.instagram.android;scheme=https;S.browser_fallback_url=${fallbackUrl};end`;
       }
-      return `intent://instagram.com/p/${info.id}#Intent;package=com.instagram.android;scheme=https;end`;
+      return `intent://instagram.com/p/${info.id}#Intent;package=com.instagram.android;scheme=https;S.browser_fallback_url=${fallbackUrl};end`;
     }
   }
 
@@ -306,9 +308,9 @@ export function buildDeepLink(url: string, type: 'vnd' | 'ios' | 'android' | 'st
       return `tiktok://video/${info.id}`;
     } else if (type === 'android') {
       if (info.type === 'profile') {
-        return `intent://tiktok.com/@${info.id}#Intent;package=com.zhiliaoapp.musically;scheme=https;end`;
+        return `intent://tiktok.com/@${info.id}#Intent;package=com.zhiliaoapp.musically;scheme=https;S.browser_fallback_url=${fallbackUrl};end`;
       }
-      return `intent://tiktok.com/video/${info.id}#Intent;package=com.zhiliaoapp.musically;scheme=https;end`;
+      return `intent://tiktok.com/video/${info.id}#Intent;package=com.zhiliaoapp.musically;scheme=https;S.browser_fallback_url=${fallbackUrl};end`;
     }
   }
 
@@ -320,7 +322,7 @@ export function buildDeepLink(url: string, type: 'vnd' | 'ios' | 'android' | 'st
       } else if (type === 'ios') {
         return `youtube://www.youtube.com/watch?v=${info.id}`;
       } else if (type === 'android') {
-        return `intent://www.youtube.com/watch?v=${info.id}#Intent;package=com.google.android.youtube;scheme=https;end`;
+        return `intent://www.youtube.com/watch?v=${info.id}#Intent;package=com.google.android.youtube;scheme=https;S.browser_fallback_url=${fallbackUrl};end`;
       }
       break;
 
@@ -330,7 +332,7 @@ export function buildDeepLink(url: string, type: 'vnd' | 'ios' | 'android' | 'st
       } else if (type === 'ios') {
         return `youtube://www.youtube.com/shorts/${info.id}`;
       } else if (type === 'android') {
-        return `intent://www.youtube.com/shorts/${info.id}#Intent;package=com.google.android.youtube;scheme=https;end`;
+        return `intent://www.youtube.com/shorts/${info.id}#Intent;package=com.google.android.youtube;scheme=https;S.browser_fallback_url=${fallbackUrl};end`;
       }
       break;
 
@@ -340,7 +342,7 @@ export function buildDeepLink(url: string, type: 'vnd' | 'ios' | 'android' | 'st
       } else if (type === 'ios') {
         return `youtube://www.youtube.com/playlist?list=${info.id}`;
       } else if (type === 'android') {
-        return `intent://www.youtube.com/playlist?list=${info.id}#Intent;package=com.google.android.youtube;scheme=https;end`;
+        return `intent://www.youtube.com/playlist?list=${info.id}#Intent;package=com.google.android.youtube;scheme=https;S.browser_fallback_url=${fallbackUrl};end`;
       }
       break;
 
@@ -358,9 +360,9 @@ export function buildDeepLink(url: string, type: 'vnd' | 'ios' | 'android' | 'st
         return `youtube://www.youtube.com/channel/${info.id}`;
       } else if (type === 'android') {
         if (isHandle) {
-          return `intent://www.youtube.com/${info.id}#Intent;package=com.google.android.youtube;scheme=https;end`;
+          return `intent://www.youtube.com/${info.id}#Intent;package=com.google.android.youtube;scheme=https;S.browser_fallback_url=${fallbackUrl};end`;
         }
-        return `intent://www.youtube.com/channel/${info.id}#Intent;package=com.google.android.youtube;scheme=https;end`;
+        return `intent://www.youtube.com/channel/${info.id}#Intent;package=com.google.android.youtube;scheme=https;S.browser_fallback_url=${fallbackUrl};end`;
       }
       break;
 
@@ -371,7 +373,7 @@ export function buildDeepLink(url: string, type: 'vnd' | 'ios' | 'android' | 'st
         return info.cleanUrl.replace(/^https?:\/\//i, 'youtube://');
       } else if (type === 'android') {
         const payload = info.cleanUrl.replace(/^https?:\/\//i, '');
-        return `intent://${payload}#Intent;package=com.google.android.youtube;scheme=https;end`;
+        return `intent://${payload}#Intent;package=com.google.android.youtube;scheme=https;S.browser_fallback_url=${fallbackUrl};end`;
       }
   }
 

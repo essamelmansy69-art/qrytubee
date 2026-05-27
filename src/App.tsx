@@ -136,13 +136,27 @@ export default function App() {
         const resolvedType = redirectType === 'vnd' ? getRedirectionTypeForDevice() : redirectType;
         const deepLink = buildDeepLink(decodedUrl, resolvedType as any);
         
-        // Immediate redirection attempt
-        window.location.href = deepLink;
-        
-        // Also do a backup retry
-        const retryTimer = setTimeout(() => {
+        // If standard redirection is determined, open immediately
+        if (resolvedType === 'standard') {
           window.location.href = deepLink;
-        }, 1200);
+          return;
+        }
+
+        // Record time to monitor transition status
+        const startTime = Date.now();
+        
+        // Try launching native mobile app
+        window.location.href = deepLink;
+
+        // Failsafe fallback: if app isn't installed, the browser stays here.
+        // After 1.5 seconds, we redirect them to standard Web browser URL to avoid error pages.
+        const retryTimer = setTimeout(() => {
+          const elapsed = Date.now() - startTime;
+          // If browser is active (it didn't go to background)
+          if (elapsed < 2200) {
+            window.location.href = decodedUrl;
+          }
+        }, 1500);
 
         return () => clearTimeout(retryTimer);
       } catch (err) {
