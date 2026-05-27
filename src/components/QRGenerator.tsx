@@ -551,33 +551,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
             </div>
           </div>
 
-          {/* Dynamic Parsing Status Badge */}
-          {urlInput.trim() && (
-            <div className="mt-3.5 flex flex-wrap gap-2 items-center text-xs font-arabic">
-              {urlInfo.isValid ? (
-                <>
-                  <span className="inline-flex items-center gap-1 py-1 px-2.5 rounded-lg bg-emerald-50 text-emerald-700 font-medium border border-emerald-100">
-                    <CheckCircle2 size={13} />
-                    {t.validLink}
-                  </span>
-                  
-                  <span className="inline-flex items-center gap-1 py-1 px-2.5 rounded-lg bg-red-50 text-red-700 font-medium capitalize border border-red-100 font-sans">
-                    Type: {urlInfo.type}
-                  </span>
-                  {urlInfo.id && (
-                    <span className="inline-flex items-center gap-1 py-1 px-2.5 rounded-lg bg-slate-100 text-slate-700 font-mono">
-                      ID: {urlInfo.id}
-                    </span>
-                  )}
-                </>
-              ) : (
-                <span className="inline-flex items-center gap-1 py-1 px-2.5 rounded-lg bg-amber-50 text-amber-700 font-medium border border-amber-100">
-                  <AlertCircle size={13} />
-                  {t.fallbackLinkMsg}
-                </span>
-              )}
-            </div>
-          )}
+          {/* Dynamic Parsing Status Badge removed as per request */}
 
           {/* Aesthetic Divider */}
           <div className="w-full h-px bg-gray-100 my-6" />
