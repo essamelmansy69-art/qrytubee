@@ -41,9 +41,10 @@ export default function ArticlesView({ lang }: ArticlesViewProps) {
         // Parse bold references in lists
         const listText = trimmed.replace('- ', '');
         return (
-          <li key={idx} className="mr-5 ml-5 list-disc text-slate-600 font-arabic text-sm leading-relaxed mb-2">
-            {parseBoldText(listText)}
-          </li>
+          <p key={idx} className="mr-5 ml-5 text-slate-600 font-arabic text-sm leading-relaxed mb-2 flex items-start gap-1.5">
+            <span className="text-red-500 shrink-0">•</span>
+            <span>{parseBoldText(listText)}</span>
+          </p>
         );
       }
 

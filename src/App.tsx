@@ -29,8 +29,8 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { translations } from './translations';
-import ArticlesView from './components/ArticlesView';
-import LegalView from './components/LegalView';
+const ArticlesView = React.lazy(() => import('./components/ArticlesView'));
+const LegalView = React.lazy(() => import('./components/LegalView'));
 
 export default function App() {
   const [lang, setLang] = useState<'ar' | 'en'>(() => {
@@ -444,31 +444,41 @@ export default function App() {
 
         {activeTab === 'articles' && (
           <div className="transition-opacity duration-300">
-            <ArticlesView lang={lang} />
+            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
+              <ArticlesView lang={lang} />
+            </React.Suspense>
           </div>
         )}
 
         {activeTab === 'terms' && (
           <div className="transition-opacity duration-300">
-            <LegalView lang={lang} docType="terms" />
+            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
+              <LegalView lang={lang} docType="terms" />
+            </React.Suspense>
           </div>
         )}
 
         {activeTab === 'privacy' && (
           <div className="transition-opacity duration-300">
-            <LegalView lang={lang} docType="privacy" />
+            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
+              <LegalView lang={lang} docType="privacy" />
+            </React.Suspense>
           </div>
         )}
 
         {activeTab === 'about' && (
           <div className="transition-opacity duration-300">
-            <LegalView lang={lang} docType="about" />
+            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
+              <LegalView lang={lang} docType="about" />
+            </React.Suspense>
           </div>
         )}
 
         {activeTab === 'contact' && (
           <div className="transition-opacity duration-300">
-            <LegalView lang={lang} docType="contact" />
+            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
+              <LegalView lang={lang} docType="contact" />
+            </React.Suspense>
           </div>
         )}
 

@@ -899,6 +899,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                   <span className="text-red-600 font-mono font-bold">{(logoScale * 100).toFixed(0)}%</span>
                 </div>
                 <input
+                  id="logo_scale_slider"
                   type="range"
                   min="0.15"
                   max="0.30"
@@ -906,6 +907,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                   value={logoScale}
                   onChange={(e) => setLogoScale(parseFloat(e.target.value))}
                   className="w-full min-h-[1.5rem] accent-red-600 hover:accent-red-700 cursor-pointer"
+                  aria-label={t.logoScaleLabel}
                 />
                 <div className="flex justify-between text-[9px] text-gray-400 font-arabic">
                   <span>{t.balancedSmall}</span>
@@ -914,12 +916,14 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
               </div>
 
               {/* Protective white boundary mask toggle */}
-              <label className="flex items-center gap-2.5 cursor-pointer bg-slate-50/50 hover:bg-slate-50 border border-slate-100 p-3 rounded-2xl select-none transition-all">
+              <label className="flex items-center gap-2.5 cursor-pointer bg-slate-50/50 hover:bg-slate-50 border border-slate-100 p-3 rounded-2xl select-none transition-all" htmlFor="logo_margin_checkbox">
                 <input
+                  id="logo_margin_checkbox"
                   type="checkbox"
                   checked={logoMargin}
                   onChange={(e) => setLogoMargin(e.target.checked)}
                   className="w-4 h-4 rounded text-red-600 focus:ring-red-500 border-gray-300 accent-red-600 cursor-pointer"
+                  aria-label={t.maskCheckboxLabel}
                 />
                 <span className="text-xs text-gray-700 font-arabic leading-relaxed font-semibold">
                   {t.maskCheckboxLabel}
