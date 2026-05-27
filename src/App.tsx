@@ -497,7 +497,7 @@ export default function App() {
       </main>
 
       {/* 4. PROFESSIONAL BEAUTIFUL FOOTER */}
-      <footer className={`bg-slate-900 text-slate-400 py-12 border-t border-slate-800 ${lang === 'ar' ? 'text-right' : 'text-left'} mt-16`} id="app_footer">
+      <footer className={`bg-slate-900 text-slate-300 py-12 border-t border-slate-800 ${lang === 'ar' ? 'text-right' : 'text-left'} mt-16`} id="app_footer">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
             
@@ -509,7 +509,7 @@ export default function App() {
                 </span>
                 <span className="text-lg font-bold font-arabic text-white">QR Deep Linker for Creators</span>
               </div>
-              <p className="text-xs text-slate-400 max-w-sm leading-relaxed font-arabic">
+              <p className="text-xs text-slate-300 max-w-sm leading-relaxed font-arabic">
                 {t.footerDesc}
               </p>
             </div>
@@ -518,28 +518,28 @@ export default function App() {
             <div className="md:col-span-4 space-y-3 font-arabic">
               <span className="text-xs font-bold text-white uppercase block">{t.quickLinks}</span>
               <div className="flex flex-col gap-2 text-xs items-start">
-                <a href="/" onClick={(e) => handleNavClick('generator', e)} className="hover:text-white cursor-pointer transition-colors block">{t.navGenerator}</a>
-                <a href="/tips" onClick={(e) => handleNavClick('tips', e)} className="hover:text-white cursor-pointer transition-colors block">{t.optGuidanceLabel}</a>
-                <a href="/articles" onClick={(e) => handleNavClick('articles', e)} className="hover:text-white cursor-pointer transition-colors block">{t.navArticles}</a>
-                <a href="/faq" onClick={(e) => handleNavClick('faq', e)} className="hover:text-white cursor-pointer transition-colors block">{t.faqDetailsLabel}</a>
-                <a href="/about" onClick={(e) => handleNavClick('about', e)} className="hover:text-white cursor-pointer transition-colors block">{t.navAbout}</a>
-                <a href="/contact" onClick={(e) => handleNavClick('contact', e)} className="hover:text-white cursor-pointer transition-colors block">{t.navContact}</a>
-                <a href="/privacy" onClick={(e) => handleNavClick('privacy', e)} className="hover:text-white cursor-pointer transition-colors block">{t.navPrivacy}</a>
-                <a href="/terms" onClick={(e) => handleNavClick('terms', e)} className="hover:text-white cursor-pointer transition-colors block">{t.navTerms}</a>
+                <a href="/" onClick={(e) => handleNavClick('generator', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.navGenerator}</a>
+                <a href="/tips" onClick={(e) => handleNavClick('tips', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.optGuidanceLabel}</a>
+                <a href="/articles" onClick={(e) => handleNavClick('articles', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.navArticles}</a>
+                <a href="/faq" onClick={(e) => handleNavClick('faq', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.faqDetailsLabel}</a>
+                <a href="/about" onClick={(e) => handleNavClick('about', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.navAbout}</a>
+                <a href="/contact" onClick={(e) => handleNavClick('contact', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.navContact}</a>
+                <a href="/privacy" onClick={(e) => handleNavClick('privacy', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.navPrivacy}</a>
+                <a href="/terms" onClick={(e) => handleNavClick('terms', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.navTerms}</a>
               </div>
             </div>
 
             {/* Column 3: Quality declarations */}
             <div className="md:col-span-3 space-y-3 font-arabic">
               <span className="text-xs font-bold text-white uppercase block">{t.trustLabel}</span>
-              <p className="text-[11px] leading-relaxed text-slate-500">
+              <p className="text-[11px] leading-relaxed text-slate-400">
                 {t.trustDesc}
               </p>
             </div>
 
           </div>
 
-          <div className={`border-t border-slate-800 mt-10 pt-6 flex flex-col ${lang === 'ar' ? 'sm:flex-row' : 'sm:flex-row-reverse'} items-center justify-between text-xs text-slate-500 font-arabic gap-4`}>
+          <div className={`border-t border-slate-800 mt-10 pt-6 flex flex-col ${lang === 'ar' ? 'sm:flex-row' : 'sm:flex-row-reverse'} items-center justify-between text-xs text-slate-400 font-arabic gap-4`}>
             <span dir="ltr">{t.copyrightText}</span>
             <span>{t.loveText}</span>
           </div>

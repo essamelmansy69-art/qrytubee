@@ -494,7 +494,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                   return {
                     focusClass: 'focus:border-red-500 focus:ring-red-100',
                     bgClass: 'bg-red-50 text-red-600',
-                    icon: <Youtube size={20} className={urlInfo.isValid && urlInfo.type !== 'unknown' ? 'text-red-500' : 'text-slate-500'} />,
+                    icon: <Youtube size={20} className={urlInfo.isValid && urlInfo.type !== 'unknown' ? 'text-red-500' : 'text-slate-600'} />,
                     badgeIcon: <Youtube size={20} />
                   };
               }
@@ -510,7 +510,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                     </span>
                     {t.mod1Title}
                   </h2>
-                  <div className="text-xs text-gray-500 font-mono">STEP 1</div>
+                  <div className="text-xs text-slate-600 font-mono">STEP 1</div>
                 </div>
 
                 {/* Horizontal Quick Swappers */}
@@ -524,11 +524,11 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                     className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer ${
                       urlInfo.platform === 'youtube'
                         ? 'border-red-500 bg-red-50/40 text-red-600 shadow-xs'
-                        : 'border-gray-50 hover:border-gray-150 text-slate-400 bg-gray-50/20'
+                        : 'border-gray-50 hover:border-gray-150 text-slate-600 bg-gray-50/20 font-medium'
                     }`}
                     type="button"
                   >
-                    <Youtube size={20} className="mb-1" />
+                    <Youtube size={20} className="mb-1 text-slate-600" />
                     <span className="text-[10px] font-bold font-arabic">يوتيوب</span>
                   </button>
 
@@ -541,11 +541,11 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                     className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer ${
                       urlInfo.platform === 'facebook'
                         ? 'border-blue-500 bg-blue-50/40 text-blue-600 shadow-xs'
-                        : 'border-gray-50 hover:border-gray-150 text-slate-400 bg-gray-50/20'
+                        : 'border-gray-50 hover:border-gray-150 text-slate-600 bg-gray-50/20 font-medium'
                     }`}
                     type="button"
                   >
-                    <Facebook size={20} className="mb-1" />
+                    <Facebook size={20} className="mb-1 text-slate-600" />
                     <span className="text-[10px] font-bold font-arabic">فيسبوك</span>
                   </button>
 
@@ -558,11 +558,11 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                     className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer ${
                       urlInfo.platform === 'instagram'
                         ? 'border-rose-500 bg-rose-50/40 text-rose-600 shadow-xs'
-                        : 'border-gray-50 hover:border-gray-150 text-slate-400 bg-gray-50/20'
+                        : 'border-gray-50 hover:border-gray-150 text-slate-600 bg-gray-50/20 font-medium'
                     }`}
                     type="button"
                   >
-                    <Instagram size={20} className="mb-1" />
+                    <Instagram size={20} className="mb-1 text-slate-600" />
                     <span className="text-[10px] font-bold font-arabic">إنستغرام</span>
                   </button>
 
@@ -575,11 +575,11 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                     className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer ${
                       urlInfo.platform === 'tiktok'
                         ? 'border-slate-800 bg-slate-100 text-slate-800 shadow-xs'
-                        : 'border-gray-50 hover:border-gray-150 text-slate-400 bg-gray-50/20'
+                        : 'border-gray-50 hover:border-gray-150 text-slate-600 bg-gray-50/20 font-medium'
                     }`}
                     type="button"
                   >
-                    <Music size={20} className="mb-1" />
+                    <Music size={20} className="mb-1 text-slate-600" />
                     <span className="text-[10px] font-bold font-arabic">تيك توك</span>
                   </button>
                 </div>
@@ -670,7 +670,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
 
             {/* Right: The QR Code canvas (5 cols on md) rendered next or below */}
             <div className="md:col-span-5 flex flex-col items-center justify-center text-center p-4 sm:p-5 bg-slate-50/40 rounded-2xl border border-gray-100 group relative w-full shadow-xs order-2 md:order-2" id="direct_canvas_container">
-              <span className="text-[10px] font-bold text-slate-500 font-arabic tracking-wider uppercase mb-0.5 block">{t.previewHeading}</span>
+              <span className="text-[10px] font-bold text-slate-600 font-arabic tracking-wider uppercase mb-0.5 block">{t.previewHeading}</span>
               <h3 className="text-xs font-bold font-arabic text-gray-700 mb-2">{t.finalQrLabel}</h3>
 
               {/* Square canvas wrapper box ensuring crisp 1:1 rendering on all screens */}
@@ -682,7 +682,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                 />
               </div>
 
-              <p className="mt-2 text-[10px] font-arabic text-slate-500 max-w-[200px] leading-relaxed">
+              <p className="mt-2 text-[10px] font-arabic text-slate-600 max-w-[200px] leading-relaxed">
                 {t.previewSyncMsg}
               </p>
             </div>
@@ -705,12 +705,12 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
               </span>
               {t.mod3Title}
             </h2>
-            <div className="text-xs text-gray-500 font-mono">STEP 3</div>
+            <div className="text-xs text-slate-600 font-mono">STEP 3</div>
           </div>
 
           {/* Color Presets Templates */}
           <div className="mb-6">
-            <span className="text-xs font-semibold text-gray-500 font-arabic block mb-2.5">{t.colorPresetsLabel}</span>
+            <span className="text-xs font-semibold text-slate-600 font-arabic block mb-2.5">{t.colorPresetsLabel}</span>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2" id="color_presets_grid">
               {COLOR_TEMPLATES.map((tpl, idx) => (
                 <button
@@ -811,10 +811,10 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
               </span>
               {t.mod4Title}
             </h2>
-            <div className="text-xs text-gray-500 font-mono">STEP 4</div>
+            <div className="text-xs text-slate-600 font-mono">STEP 4</div>
           </div>
 
-          <p className="text-xs font-arabic text-gray-500 mb-4 leading-relaxed">
+          <p className="text-xs font-arabic text-slate-600 mb-4 leading-relaxed">
             {t.mod4Desc}
           </p>
 
@@ -838,6 +838,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
               type="file"
               accept="image/*"
               className="hidden"
+              aria-label={t.uploadCustomLabel || "Upload Custom Logo"}
               onChange={(e) => {
                 if (e.target.files && e.target.files[0]) {
                   handleLogoUpload(e.target.files[0]);
@@ -851,6 +852,8 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                   <img
                     src={customLogo}
                     alt="Channel Logo Preview"
+                    width={64}
+                    height={64}
                     className="w-full h-full object-contain rounded-md animate-scaleIn"
                     referrerPolicy="no-referrer"
                   />
@@ -860,7 +863,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                     <CheckCircle2 size={14} className="text-emerald-500" />
                     {t.successUploadMsg}
                   </p>
-                  <p className="text-[10px] text-gray-400 font-arabic mt-0.5">
+                  <p className="text-[10px] text-slate-600 font-arabic mt-0.5">
                     {t.changeImgTip}
                   </p>
                 </div>
@@ -873,7 +876,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                 <p className="text-xs font-bold text-gray-700 font-arabic">
                   {t.dragDropText}
                 </p>
-                <p className="text-[10px] text-gray-400 font-arabic">
+                <p className="text-[10px] text-slate-600 font-arabic">
                   {t.uploadFormatTip}
                 </p>
               </div>
@@ -895,7 +898,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
               {/* Slider for scaling */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs font-arabic">
-                  <span className="text-gray-600 font-semibold">{t.logoScaleLabel}</span>
+                  <span className="text-gray-650 font-semibold">{t.logoScaleLabel}</span>
                   <span className="text-red-600 font-mono font-bold">{(logoScale * 100).toFixed(0)}%</span>
                 </div>
                 <input
@@ -909,7 +912,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                   className="w-full min-h-[1.5rem] accent-red-600 hover:accent-red-700 cursor-pointer"
                   aria-label={t.logoScaleLabel}
                 />
-                <div className="flex justify-between text-[9px] text-gray-400 font-arabic">
+                <div className="flex justify-between text-[10px] text-slate-600 font-arabic font-medium">
                   <span>{t.balancedSmall}</span>
                   <span>{t.largeOverlay}</span>
                 </div>

@@ -91,7 +91,7 @@ export default function ArticlesView({ lang }: ArticlesViewProps) {
         {/* Navigation bar to return */}
         <button
           onClick={() => setSelectedId(null)}
-          className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-500 hover:text-red-600 transition-colors mb-6 cursor-pointer"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-600 hover:text-red-600 transition-colors mb-6 cursor-pointer"
           type="button"
           id="back_to_blog_btn"
         >
@@ -108,7 +108,7 @@ export default function ArticlesView({ lang }: ArticlesViewProps) {
             {selectedArticle.title}
           </h1>
 
-          <div className={`flex flex-wrap items-center gap-4 text-xs text-slate-500 font-arabic ${lang === 'ar' ? 'justify-start' : 'justify-start'}`}>
+          <div className={`flex flex-wrap items-center gap-4 text-xs text-slate-600 font-arabic ${lang === 'ar' ? 'justify-start' : 'justify-start'}`}>
             <span className="flex items-center gap-1">
               <Calendar size={13} />
               <span>{selectedArticle.date}</span>
@@ -117,7 +117,7 @@ export default function ArticlesView({ lang }: ArticlesViewProps) {
               <Clock size={13} />
               <span>{selectedArticle.readTime}</span>
             </span>
-            <span className="flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded text-slate-500">
+            <span className="flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded text-slate-600">
               <BookOpen size={13} />
               <span>SEO Optimized</span>
             </span>
@@ -138,7 +138,7 @@ export default function ArticlesView({ lang }: ArticlesViewProps) {
             <h4 className="font-bold text-sm text-slate-800 font-arabic">
               {lang === 'ar' ? 'هل تود تجربة أداة الروابط العميقة الآن؟' : 'Ready to create your own deep-link QR?'}
             </h4>
-            <p className="text-xs text-slate-500 font-arabic">
+            <p className="text-xs text-slate-600 font-arabic">
               {lang === 'ar' ? 'صمّم كود كيو آر ذكي يدير المتابعين لتطبيق اليوتيوب الرسمي بضغطة واحدة.' : 'Build responsive deep linked QRs in seconds locally and print with absolute zero pixel loss.'}
             </p>
           </div>
@@ -167,7 +167,7 @@ export default function ArticlesView({ lang }: ArticlesViewProps) {
         <h2 className="text-2xl sm:text-3xl font-black font-arabic text-slate-900">
           {t.seoArticlesHeading}
         </h2>
-        <p className="text-xs sm:text-sm text-slate-500 font-arabic leading-relaxed">
+        <p className="text-xs sm:text-sm text-slate-600 font-arabic leading-relaxed">
           {t.seoArticlesDesc}
         </p>
       </div>
@@ -194,7 +194,7 @@ export default function ArticlesView({ lang }: ArticlesViewProps) {
                   }`}>
                     {article.category}
                   </span>
-                  <span className="text-[10px] text-slate-500 font-mono">{article.date}</span>
+                  <span className="text-[10px] text-slate-600 font-mono">{article.date}</span>
                 </div>
 
                 <h3 className={`font-bold font-arabic text-base group-hover:text-red-600 transition-colors leading-snug ${
@@ -203,7 +203,7 @@ export default function ArticlesView({ lang }: ArticlesViewProps) {
                   {article.title}
                 </h3>
 
-                <p className={`text-xs text-slate-500 font-arabic leading-relaxed ${
+                <p className={`text-xs text-slate-600 font-arabic leading-relaxed ${
                   lang === 'ar' ? 'text-right' : 'text-left'
                 }`}>
                   {article.excerpt}
@@ -212,7 +212,7 @@ export default function ArticlesView({ lang }: ArticlesViewProps) {
 
               {/* Action footer */}
               <div className="flex items-center justify-between pt-5 border-t border-slate-50 mt-5 text-[11px] font-bold text-slate-600 group-hover:text-red-600 font-arabic transition-colors">
-                <span className="flex items-center gap-1 text-slate-500 font-mono font-normal">
+                <span className="flex items-center gap-1 text-slate-600 font-mono font-normal">
                   <Clock size={11} />
                   <span>{article.readTime}</span>
                 </span>
