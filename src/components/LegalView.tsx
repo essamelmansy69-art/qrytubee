@@ -25,7 +25,7 @@ export default function LegalView({ lang, docType }: LegalViewProps) {
           </h1>
         </div>
 
-        <div className="flex items-center gap-1.5 text-xs text-slate-400 font-arabic">
+        <div className="flex items-center gap-1.5 text-xs text-slate-500 font-arabic">
           <Clock size={13} />
           <span>{t.lastUpdated} {data.lastUpdated}</span>
         </div>
@@ -47,7 +47,7 @@ export default function LegalView({ lang, docType }: LegalViewProps) {
 
       {/* Legal Footer Info */}
       <div className="text-center pt-4">
-        <span className="text-[10px] text-gray-400 font-arabic block leading-relaxed max-w-md mx-auto">
+        <span className="text-[10px] text-slate-500 font-arabic block leading-relaxed max-w-md mx-auto">
           {lang === 'ar' 
             ? 'تمت صياغة هذه البنود لحفظ كمال الخصوصية البرمجية للمستخدم وضمان تقديم أعلى مستويات الأمان والجودة.' 
             : 'These elements are formulated to preserve developer security parameters and enforce clean local digital conversions.'}

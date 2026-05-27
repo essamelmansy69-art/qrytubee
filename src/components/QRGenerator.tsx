@@ -546,8 +546,8 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
               className="w-full pl-4 pr-12 py-3.5 bg-gray-50/50 hover:bg-gray-50 focus:bg-white rounded-2xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-100 font-mono text-sm transition-all focus:outline-none"
               dir="ltr"
             />
-            <div className={`absolute ${lang === 'ar' ? 'right-3.5' : 'left-3.5'} top-1/2 -translate-y-1/2 text-gray-400`}>
-              <Youtube size={20} className={urlInfo.isValid && urlInfo.type !== 'unknown' ? 'text-red-500' : 'text-gray-400'} />
+            <div className={`absolute ${lang === 'ar' ? 'right-3.5' : 'left-3.5'} top-1/2 -translate-y-1/2 text-slate-500`}>
+              <Youtube size={20} className={urlInfo.isValid && urlInfo.type !== 'unknown' ? 'text-red-500' : 'text-slate-500'} />
             </div>
           </div>
 
@@ -641,7 +641,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
 
             {/* Right: The QR Code canvas (5 cols on md) rendered next or below */}
             <div className="md:col-span-5 flex flex-col items-center justify-center text-center p-4 sm:p-5 bg-slate-50/40 rounded-2xl border border-gray-100 group relative w-full shadow-xs order-2 md:order-2" id="direct_canvas_container">
-              <span className="text-[10px] font-bold text-gray-400 font-arabic tracking-wider uppercase mb-0.5 block">{t.previewHeading}</span>
+              <span className="text-[10px] font-bold text-slate-500 font-arabic tracking-wider uppercase mb-0.5 block">{t.previewHeading}</span>
               <h3 className="text-xs font-bold font-arabic text-gray-700 mb-2">{t.finalQrLabel}</h3>
 
               {/* Square canvas wrapper box ensuring crisp 1:1 rendering on all screens */}
@@ -1059,7 +1059,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                     <div className="text-xs font-arabic font-semibold text-emerald-700">
                       {t.successUploadMsg}
                     </div>
-                    <span className="text-[10px] text-gray-400 font-arabic underline">{t.changeImgTip}</span>
+                    <span className="text-[10px] text-slate-500 font-arabic underline">{t.changeImgTip}</span>
                   </div>
                 ) : (
                   <div className="space-y-1.5 flex flex-col items-center">
@@ -1069,7 +1069,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                     <div className="text-xs font-arabic text-gray-700 font-medium">
                       {t.dragDropText}
                     </div>
-                    <div className="text-[10px] text-gray-400 font-arabic">
+                    <div className="text-[10px] text-slate-500 font-arabic">
                       {t.uploadFormatTip}
                     </div>
                   </div>

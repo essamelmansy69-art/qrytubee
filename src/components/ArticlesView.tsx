@@ -107,7 +107,7 @@ export default function ArticlesView({ lang }: ArticlesViewProps) {
             {selectedArticle.title}
           </h1>
 
-          <div className={`flex flex-wrap items-center gap-4 text-xs text-slate-400 font-arabic ${lang === 'ar' ? 'justify-start' : 'justify-start'}`}>
+          <div className={`flex flex-wrap items-center gap-4 text-xs text-slate-500 font-arabic ${lang === 'ar' ? 'justify-start' : 'justify-start'}`}>
             <span className="flex items-center gap-1">
               <Calendar size={13} />
               <span>{selectedArticle.date}</span>
@@ -193,7 +193,7 @@ export default function ArticlesView({ lang }: ArticlesViewProps) {
                   }`}>
                     {article.category}
                   </span>
-                  <span className="text-[10px] text-slate-400 font-mono">{article.date}</span>
+                  <span className="text-[10px] text-slate-500 font-mono">{article.date}</span>
                 </div>
 
                 <h3 className={`font-bold font-arabic text-base group-hover:text-red-600 transition-colors leading-snug ${
@@ -211,7 +211,7 @@ export default function ArticlesView({ lang }: ArticlesViewProps) {
 
               {/* Action footer */}
               <div className="flex items-center justify-between pt-5 border-t border-slate-50 mt-5 text-[11px] font-bold text-slate-600 group-hover:text-red-600 font-arabic transition-colors">
-                <span className="flex items-center gap-1 text-slate-400 font-mono font-normal">
+                <span className="flex items-center gap-1 text-slate-500 font-mono font-normal">
                   <Clock size={11} />
                   <span>{article.readTime}</span>
                 </span>
