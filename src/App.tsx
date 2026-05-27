@@ -103,6 +103,28 @@ export default function App() {
   };
 
   // Detect and handle deep-link redirected scans
+  const getRedirectionTypeForDevice = (): 'ios' | 'android' | 'standard' => {
+    if (typeof window === 'undefined') return 'standard';
+    const userAgent = window.navigator.userAgent || window.navigator.vendor || (window as any).opera || '';
+    
+    // Android detection
+    if (/android/i.test(userAgent)) {
+      return 'android';
+    }
+    
+    // iOS detection (iPhone, iPad, iPod)
+    if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
+      return 'ios';
+    }
+    
+    // iPadOS on newer Safari
+    if (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) {
+      return 'ios';
+    }
+    
+    return 'standard';
+  };
+
   const queryParams = new URL(window.location.href).searchParams;
   const redirectUrl = queryParams.get('r') || queryParams.get('url');
   const redirectType = queryParams.get('type') || 'vnd';
@@ -111,7 +133,8 @@ export default function App() {
     if (redirectUrl) {
       try {
         const decodedUrl = decodeURIComponent(redirectUrl);
-        const deepLink = buildDeepLink(decodedUrl, redirectType as any);
+        const resolvedType = redirectType === 'vnd' ? getRedirectionTypeForDevice() : redirectType;
+        const deepLink = buildDeepLink(decodedUrl, resolvedType as any);
         
         // Immediate redirection attempt
         window.location.href = deepLink;
@@ -135,7 +158,8 @@ export default function App() {
     let platform = 'youtube';
     try {
       decodedUrl = decodeURIComponent(redirectUrl);
-      deepLink = buildDeepLink(decodedUrl, redirectType as any);
+      const resolvedType = redirectType === 'vnd' ? getRedirectionTypeForDevice() : redirectType;
+      deepLink = buildDeepLink(decodedUrl, resolvedType as any);
       platform = parseYoutubeUrl(decodedUrl).platform;
     } catch (_) {}
 

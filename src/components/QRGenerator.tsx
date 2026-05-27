@@ -74,10 +74,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
   const [copied, setCopied] = useState<boolean>(false);
   const [renderedPayload, setRenderedPayload] = useState<string>('');
 
-  // Automatic YouTube Avatar fetching states
-  const [isFetchingAvatar, setIsFetchingAvatar] = useState<boolean>(false);
-  const [avatarFetchError, setAvatarFetchError] = useState<string | null>(null);
-  const [lastFetchedYoutubeUrl, setLastFetchedYoutubeUrl] = useState<string>('');
+
 
   // Custom Logo upload & styling states
   const [customLogo, setCustomLogo] = useState<string | null>(null);
@@ -126,46 +123,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
   const urlInfo = parseYoutubeUrl(urlInput);
   const formattedDeepLink = buildDeepLink(urlInput, deepLinkType);
 
-  // Automatically fetch YouTube channel avatar when a valid YouTube link is inputted
-  useEffect(() => {
-    const trimmedUrl = urlInput.trim();
-    if (!trimmedUrl) return;
 
-    // Check if it's a YouTube URL and is valid
-    const isYoutube = trimmedUrl.includes('youtube.com') || trimmedUrl.includes('youtu.be');
-    
-    // We only want to trigger fetching if it's a YouTube URL and we haven't already fetched for this precise URL
-    if (isYoutube && trimmedUrl !== lastFetchedYoutubeUrl) {
-      // Debounce the fetch slightly (800ms) to allow the user to finish typing
-      const debounceTimer = setTimeout(async () => {
-        setIsFetchingAvatar(true);
-        setAvatarFetchError(null);
-        try {
-          const response = await fetch(`/api/youtube-avatar?url=${encodeURIComponent(trimmedUrl)}`);
-          if (response.ok) {
-            const data = await response.json();
-            if (data.avatar) {
-              setCustomLogo(data.avatar);
-              setErrorCorrectionLevel('H'); // Promote to highest density for flawless QR design with centered logo
-              setLastFetchedYoutubeUrl(trimmedUrl);
-            } else {
-              setAvatarFetchError('No avatar found');
-            }
-          } else {
-            const errData = await response.json().catch(() => ({}));
-            setAvatarFetchError(errData.error || `HTTP error ${response.status}`);
-          }
-        } catch (err: any) {
-          console.error("Error auto-fetching YouTube avatar:", err);
-          setAvatarFetchError(err.message || 'Error loading avatar');
-        } finally {
-          setIsFetchingAvatar(false);
-        }
-      }, 800);
-
-      return () => clearTimeout(debounceTimer);
-    }
-  }, [urlInput, lastFetchedYoutubeUrl]);
 
   // Auto-switch colors when platform changes
   useEffect(() => {
@@ -872,29 +830,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                   </div>
                 </div>
 
-                {/* Auto YouTube Avatar Fetch Status Indicator */}
-                {(isFetchingAvatar || avatarFetchError || (lastFetchedYoutubeUrl === urlInput.trim() && customLogo && (urlInput.trim().includes('youtube.com') || urlInput.trim().includes('youtu.be')))) && (
-                  <div className="mt-2.5 flex items-center gap-2 text-xs font-arabic select-none transition-all duration-300">
-                    {isFetchingAvatar && (
-                      <div className="flex items-center gap-1.5 text-red-650 animate-pulse">
-                        <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping animate-duration-1000" />
-                        <span>{lang === 'ar' ? 'جاري جلب شعار القناة تلقائياً...' : 'Auto-fetching channel logo...'}</span>
-                      </div>
-                    )}
-                    {avatarFetchError && (
-                      <div className="flex items-center gap-1.5 text-amber-600">
-                        <AlertCircle size={13} />
-                        <span>{lang === 'ar' ? 'لم نتمكن من جلب الشعار تلقائياً.' : 'Could not fetch channel logo automatically.'}</span>
-                      </div>
-                    )}
-                    {!isFetchingAvatar && !avatarFetchError && lastFetchedYoutubeUrl === urlInput.trim() && customLogo && (
-                      <div className="flex items-center gap-1.5 text-emerald-600 font-medium">
-                        <CheckCircle2 size={13} />
-                        <span>{lang === 'ar' ? 'تم دمج صورة بروفايل القناة بنجاح ✨' : 'Channel profile photo merged successfully ✨'}</span>
-                      </div>
-                    )}
-                  </div>
-                )}
+
               </>
             );
           })()}
