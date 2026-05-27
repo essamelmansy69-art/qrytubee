@@ -47,6 +47,8 @@ export default function App() {
   });
 
   useEffect(() => {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     localStorage.setItem('qr_language', lang);
   }, [lang]);
 
@@ -162,7 +164,7 @@ export default function App() {
               <h1 className="text-md sm:text-lg font-extrabold font-arabic text-gray-900 tracking-tight leading-none">
                 {t.appTitle}
               </h1>
-              <span className="text-[10px] font-medium font-arabic text-gray-400 mt-0.5">
+              <span className="text-[10px] font-medium font-arabic text-slate-500 mt-0.5">
                 {t.appSubTitle}
               </span>
             </div>

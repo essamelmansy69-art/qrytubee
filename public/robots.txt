@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://qrytubee.essamelmansy69.workers.dev/sitemap.xml

@@ -529,7 +529,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
               </span>
               {t.mod1Title}
             </h2>
-            <div className="text-xs text-gray-400 font-mono">STEP 1</div>
+            <div className="text-xs text-gray-500 font-mono">STEP 1</div>
           </div>
 
           <label className="text-sm font-medium font-arabic text-gray-600 mb-2 block" htmlFor="yt_url">
@@ -653,7 +653,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                 />
               </div>
 
-              <p className="mt-2 text-[9px] font-arabic text-gray-400 max-w-[200px] leading-relaxed">
+              <p className="mt-2 text-[10px] font-arabic text-slate-500 max-w-[200px] leading-relaxed">
                 {t.previewSyncMsg}
               </p>
             </div>
@@ -670,7 +670,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
               </span>
               {t.mod2Title}
             </h2>
-            <div className="text-xs text-gray-400 font-mono">STEP 2</div>
+            <div className="text-xs text-gray-500 font-mono">STEP 2</div>
           </div>
 
           <p className="text-sm text-gray-500 font-arabic mb-4 leading-relaxed">
@@ -843,12 +843,12 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
               </span>
               {t.mod3Title}
             </h2>
-            <div className="text-xs text-gray-400 font-mono">STEP 3</div>
+            <div className="text-xs text-gray-500 font-mono">STEP 3</div>
           </div>
 
           {/* Color Presets Templates */}
           <div className="mb-6">
-            <span className="text-xs font-semibold text-gray-400 font-arabic block mb-2.5">{t.colorPresetsLabel}</span>
+            <span className="text-xs font-semibold text-gray-500 font-arabic block mb-2.5">{t.colorPresetsLabel}</span>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2" id="color_presets_grid">
               {COLOR_TEMPLATES.map((tpl, idx) => (
                 <button
@@ -889,6 +889,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                     type="text"
                     value={foregroundColor}
                     onChange={(e) => setForegroundColor(e.target.value)}
+                    aria-label={t.labelForeground}
                     className="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-200 font-mono text-sm focus:outline-none focus:border-red-500 uppercase"
                   />
                 </div>
@@ -913,6 +914,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                     type="text"
                     value={backgroundColor}
                     onChange={(e) => setBackgroundColor(e.target.value)}
+                    aria-label={t.labelBackground}
                     className="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-200 font-mono text-sm focus:outline-none focus:border-red-500 uppercase"
                   />
                 </div>
@@ -942,7 +944,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                   <option value="M">{t.errLvlM}</option>
                   <option value="L">{t.errLvlL}</option>
                 </select>
-                <span className="text-[10px] text-gray-400 mt-1 block font-arabic leading-normal">
+                <span className="text-[10px] text-gray-500 mt-1 block font-arabic leading-normal">
                   {t.errCorrectionDesc}
                 </span>
               </div>
@@ -974,7 +976,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
               </span>
               {t.mod4Title}
             </h2>
-            <div className="text-xs text-gray-400 font-mono">STEP 4</div>
+            <div className="text-xs text-gray-500 font-mono">STEP 4</div>
           </div>
 
           <p className="text-sm text-gray-500 font-arabic mb-4 leading-relaxed">
@@ -1095,9 +1097,10 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                     step="0.01"
                     value={logoScale}
                     onChange={(e) => setLogoScale(parseFloat(e.target.value))}
+                    aria-label={t.logoScaleLabel}
                     className="w-full accent-emerald-500 cursor-pointer"
                   />
-                  <div className="flex justify-between text-[9px] text-gray-400 mt-1 font-arabic">
+                  <div className="flex justify-between text-[10px] text-gray-500 mt-1 font-arabic">
                     <span>{t.balancedSmall}</span>
                     <span>{t.largeOverlay}</span>
                   </div>
