@@ -21,7 +21,10 @@ import {
   Smartphone,
   CheckCircle2,
   Eye,
-  Info
+  Info,
+  Facebook,
+  Instagram,
+  Music
 } from 'lucide-react';
 import { QRConfig, QRStyle } from '../types';
 import { parseYoutubeUrl, buildDeepLink } from '../utils';
@@ -29,19 +32,31 @@ import { translations } from '../translations';
 
 import { motion } from 'motion/react';
 
-// YouTube SVG Logo preset - Clean red play button
+/// YouTube SVG Logo preset - Clean red play button
 const PRESET_YT_CLASSIC = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI0ZGMDAwMCI+PHBhdGggZD0iTTIzLjQ5OCA2LjE2M2EzLjAwMyAzLjAwMyAwIDAgMC0yLjExLTIuMTA4QzE5LjUyIDMuNSAxMiAzLjUgMTIgMy41cy03LjUyIDAtOS4zODguNTU1YTMuMDAzIDMuMDAzIDAgMCAwLTIuMTEgMi4xMDhDMCA4LjAzIDAgMTIgMCAxMnMwIDMuOTcuNTAyIDUuODM3YTMuMDAzIDMuMDAzIDAgMCAwIDIuMTEgMi4xMDhDNC40OCAyMC41IDEyIDIwLjUgMTIgMjAuNXM3LjUyIDAgOS4zODgtLjU1NWEzLjAwMyAzLjAwMyAwIDAgMCAyLjExLTIuMTA4QzE0IDE1Ljk3IDI0IDEyIDI0IDEyczAtMy45Ny0uNTAyLTUuODM3ek05LjU0NSAxNS41NjhWOC40MzJMMTUuODE4IDEybC02LjI3MyAzLjU2OHoiLz48L3N2Zz4=`;
 
 // YouTube SVG outline white
-const PRESET_YT_WHITE = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI0ZGRkZGRiI+PHBhdGggZD0iTTIzLjQ5OCA2LjE2M2EzLjAwMyAzLjAwMyAwIDAgMC0yLjExLTIuMTA4QzE5LjUyIDMuNSAxMiAzLjUgMTIgMy41cy03LjUyIDAtOS4zODguNTU1YTMuMDAzIDMuMDAzIDAgMCAwLTIuMTEgMi4xMDhDMCA4LjAzIDAgMTIgMCAxMnMwIDMuOTcuNTAyIDUuODM3YTMuMDAzIDMuMDAzIDAgMCAwIDIuMTEgMi4xMDhDNC40OCAyMC41IDEyIDIwLjUgMTIgMjAuNXM3LjUyIDAgOS4zODgtLjU1NWEzLjAwMyAzLjAwMyAwIDAgMCAyLjExLTIuMTA4QzI0IDE1Ljk3IDI0IDEyIDI0IDEyczAtMy45Ny0uNTAyLTUuODM3ek05LjU0NSAxNS41NjhWOC40MzJMMTUuODE4IDEybC02LjI3MyAzLjU2OHoiLz48L3N2Zz4=`;
+const PRESET_YT_WHITE = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI0ZGRkZGRiI+PHBhdGggZD0iTTIzLjQ5OCA2LjE2M2EzLjAwMyAzLjAwMyAwIDAgMC0yLjExLTIuMTA4QzE5LjUyIDMuNSAxMiAzLjUgMTIgMy41cy03LjUyIDAtOS4zODguNTU1YTMuMDAzIDMuMDAzIDAgMCAwLTIuMTEgMi4xMDhDMCA4LjAzIDAgMTIgMCAxMnMwIDMuOTcuNTAyIDUuODM3YTMuMDAzIDMuMDAzIDAgMCAwIDIuMTEgMi4xMDhDNC40OCAyMC41IDEyIDIwLjUgMTIgMjAuNXM3LjUyIDAgOS4zODgtLjU1NWEzLjAwMyAzLjAwMyAwIDAgMCAyLjExLTIuMTA4QzE0IDE1Ljk3IDI0IDEyIDI0IDEyczAtMy45Ny0uNTAyLTUuODM3ek05LjU0NSAxNS41NjhWOC40MzJMMTUuODE4IDEybC02LjI3MyAzLjU2OHoiLz48L3N2Zz4=`;
 
 // YouTube Shorts preset
-const PRESET_YT_SHORTS = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI0ZGMDAwMCI+PHBhdGggZD0iTTE3LjcxIDcuMTVhMy4zIDMuMyAwIDAgMC0zLjM0LTNBMy4zNyAzLjM3IDAgMCAwIDEzIDQuNjdMOS42MSA2LjU3YTMuMzEgMy4zMSAwIDAgMC0xLjU3IDIuODJWMTIuMWEzLjMxIDMuMzEgMCAwIDAgMy4zNCAzQTMuMzcgMy4zNyAwIDAgMCAxMy4zNCAxNC41OGwzLjM5LTEuOWEzLjMxIDMuMzEgMCAwIDAgMS41Ny0yLjgydm0tMi43YTMuMjkgMy4yOSAwIDAgMC0wLjAzLS4wMXoiIG9wYWNpdHk9Ii4xIi8+PHBhdGggZD0iTTE5LjEyIDcuNzRhMyAwIDAgMC0yLjcxLTEuNjNMMTUuMSA2bDEtMi40M2EzIDAgMCAwLTIuODItNC4xM2MtLjU0IDAtMS4wNy4xNS0xLjUzLjQ0TDQuODUgNC4wOUg0Ljg0YTMuMTEgMy4xMSAwIDAgMC0xLjM5IDIuNTlhMyAwIDAgMCAxLjMgMi41bDEuMzIuODEtMSAyLjQ1YTMgMCAwIDAgMi44MiA0LjE0Yy41NCAwIDEuMDctLjE1IDEuNTMtLjQ0bDYuODQtNC4xNGEzLjExIDMuMTEgMCAwIDAgMS4zOS0yLjU5YTMgMCAwIDAtMS41My0yLjYzTDE5LjEyIDcuNzR6TTkuNTIgMTQuMjJWOS44TDEzLyc4IDEybC00LjI2IDIuMjJ6IiBmaWxsPSIjRkYwMDAwIi8+PC9zdmc+`;
+const PRESET_YT_SHORTS = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI0ZGMDAwMCI+PHBhdGggZD0iTTE3LjcxIDcuMTVhMy4zIDMuMyAwIDAgMC0zLjM0LTNBMy4zNyAzLjM3IDAgMCAwIDEzIDQuNjdMOS42MSA2LjU3YTMuMzEgMy4zMSAwIDAgMC0xLjU3IDIuODJWMTIuMWEzLjMxIDMuMzEgMCAwIDAgMy4zNCAzQTMuMzcgMy4zNyAwIDAgMCAxMy4zNCAxNC41OGwzLjM5LTEuOWEzLjMxIDMuMzEgMCAwIDAgMS41Ny0yLjgydm0tMi43YTMuMjkgMy4yOSAwIDAgMC0wLjAzLS4wMXoiIG9wYWNpdHk9Ii4xIi8+PHBhdGggZD0iTTE5LjEyIDcuNzRhMyAwIDAgMC0yLjcxLTEuNjNMMTUuMSA2bDEtMi40M2EzIDAgMCAwLTIuODItNC4xM2MtLjU0IDAtMS4wNy4xNS0xLjUzLjQ0TDQuODUgNC4wOUg0Ljg0YTMuMTEgMy4xMSAwIDAgMC0xLjM5IDIuNTlhMyAwIDAgMCAxLjMgMi41bDEuMzIuODEtMSAyLjQ1YTMgMCAwIDAgMi44MiA0LjE4Yy41NCAwIDEuMDctLjE1IDEuNTMtLjQ0bDYuODQtNC4xNGEzLjExIDMuMTEgMCAwIDAgMS4zOS0yLjU5YTMgMCAwIDAtMS41My0yLjYzTDE5LjEyIDcuNzR6TTkuNTIgMTQuMjJWOS44TDEzLyc4IDEybC00LjI2IDIuMjJ6IiBmaWxsPSIjRkYwMDAwIi8+PC9zdmc+`;
+
+// Facebook Solid Filled SVG Badge
+const PRESET_FB = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%231877F2"><rect width="24" height="24" rx="5" fill="%231877F2"/><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="%23FFFFFF"/></svg>`;
+
+// Instagram Filled Gradient SVG Badge
+const PRESET_IG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23E1306C"><rect width="24" height="24" rx="5" fill="%23E1306C"/><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z" fill="%23FFFFFF"/></svg>`;
+
+// TikTok Filled Black/White SVG Badge
+const PRESET_TT = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23010101"><rect width="24" height="24" rx="5" fill="%23010101"/><path d="M12.525.02c1.31 0 2.593.38 3.658 1.08.136-1.04.856-1.1 1.08-1.1v4c-1.353 0-2.433-.787-2.905-1.893V14c0 3.314-2.686 6-6 6s-6-2.686-6-6 2.686-6 6-6c.414 0 .813.042 1.2.12v4.06c-.382-.12-.782-.18-1.2-.18-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V0h3.167z" fill="%23FFFFFF"/></svg>`;
 
 const PRESETS = [
   { id: 'yt-classic', name: 'يوتيوب أحمر', url: PRESET_YT_CLASSIC, isYT: true },
   { id: 'yt-white', name: 'يوتيوب أبيض', url: PRESET_YT_WHITE, isYT: true },
   { id: 'yt-shorts', name: 'شورتس', url: PRESET_YT_SHORTS, isYT: true },
+  { id: 'fb-classic', name: 'فيسبوك', url: PRESET_FB, isYT: false },
+  { id: 'ig-classic', name: 'إنستغرام', url: PRESET_IG, isYT: false },
+  { id: 'tt-classic', name: 'تيك توك', url: PRESET_TT, isYT: false },
 ];
 
 const COLOR_TEMPLATES = [
@@ -77,6 +92,9 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
       case 'يوتيوب أحمر': return t.presetYtClassic;
       case 'يوتيوب أبيض': return t.presetYtWhite;
       case 'شورتس': return t.presetYtShorts;
+      case 'فيسبوك': return t.presetFb;
+      case 'إنستغرام': return t.presetIg;
+      case 'تيك توك': return t.presetTt;
       default: return name;
     }
   };
@@ -101,16 +119,39 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Parse YouTube URL to show useful UI statistics
+  // Parse URL to show useful UI statistics
   const urlInfo = parseYoutubeUrl(urlInput);
   const formattedDeepLink = buildDeepLink(urlInput, deepLinkType);
+
+  // Auto-switch logo presets and colors when platform changes
+  useEffect(() => {
+    if (urlInfo.isValid) {
+      if (urlInfo.platform === 'youtube' && !logoPreset.startsWith('yt')) {
+        setLogoPreset('yt-classic');
+        setForegroundColor('#FF0000');
+        setEyeColor('#FF0000');
+      } else if (urlInfo.platform === 'facebook' && logoPreset !== 'fb-classic') {
+        setLogoPreset('fb-classic');
+        setForegroundColor('#1877F2');
+        setEyeColor('#1877F2');
+      } else if (urlInfo.platform === 'instagram' && logoPreset !== 'ig-classic') {
+        setLogoPreset('ig-classic');
+        setForegroundColor('#E1306C');
+        setEyeColor('#E1306C');
+      } else if (urlInfo.platform === 'tiktok' && logoPreset !== 'tt-classic') {
+        setLogoPreset('tt-classic');
+        setForegroundColor('#000000');
+        setEyeColor('#000000');
+      }
+    }
+  }, [urlInfo.platform]);
 
   // Active payload to embed inside the QR
   const getActivePayload = () => {
     if (useSmartLink) {
       return `${window.location.origin}/?r=${encodeURIComponent(urlInput.trim())}&type=${deepLinkType}`;
     }
-    return formattedDeepLink.trim() || 'https://www.youtube.com';
+    return formattedDeepLink.trim() || urlInput.trim() || 'https://www.youtube.com';
   };
 
   // Check if QR colors are dangerously inverted for standard mobile lenses
@@ -522,34 +563,152 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
         
         {/* Module 1: The Link Input */}
         <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-100 flex flex-col justify-start" id="module_link_input">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold font-arabic text-gray-800 flex items-center gap-2">
-              <span className="p-2 bg-red-50 text-red-600 rounded-xl">
-                <Youtube size={20} />
-              </span>
-              {t.mod1Title}
-            </h2>
-            <div className="text-xs text-gray-500 font-mono">STEP 1</div>
-          </div>
-
-          <label className="text-sm font-medium font-arabic text-gray-600 mb-2 block" htmlFor="yt_url">
-            {t.labelYtUrl}
-          </label>
           
-          <div className="relative">
-            <input
-              id="yt_url"
-              type="text"
-              value={urlInput}
-              onChange={(e) => setUrlInput(e.target.value)}
-              placeholder={t.placeholderYtUrl}
-              className="w-full pl-4 pr-12 py-3.5 bg-gray-50/50 hover:bg-gray-50 focus:bg-white rounded-2xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-100 font-mono text-sm transition-all focus:outline-none"
-              dir="ltr"
-            />
-            <div className={`absolute ${lang === 'ar' ? 'right-3.5' : 'left-3.5'} top-1/2 -translate-y-1/2 text-slate-500`}>
-              <Youtube size={20} className={urlInfo.isValid && urlInfo.type !== 'unknown' ? 'text-red-500' : 'text-slate-500'} />
-            </div>
-          </div>
+          {/* Dynamic Platform Accent Resolver */}
+          {(() => {
+            const getPlatformStyles = () => {
+              switch(urlInfo.platform) {
+                case 'facebook':
+                  return {
+                    focusClass: 'focus:border-blue-500 focus:ring-blue-100',
+                    bgClass: 'bg-sky-50 text-sky-600',
+                    icon: <Facebook size={20} className="text-[#1877F2]" />,
+                    badgeIcon: <Facebook size={20} />
+                  };
+                case 'instagram':
+                  return {
+                    focusClass: 'focus:border-rose-500 focus:ring-rose-100',
+                    bgClass: 'bg-rose-50 text-rose-600',
+                    icon: <Instagram size={20} className="text-[#E1306C]" />,
+                    badgeIcon: <Instagram size={20} />
+                  };
+                case 'tiktok':
+                  return {
+                    focusClass: 'focus:border-slate-800 focus:ring-slate-200',
+                    bgClass: 'bg-slate-100 text-slate-800',
+                    icon: <Music size={20} className="text-black" />,
+                    badgeIcon: <Music size={20} />
+                  };
+                case 'youtube':
+                default:
+                  return {
+                    focusClass: 'focus:border-red-500 focus:ring-red-100',
+                    bgClass: 'bg-red-50 text-red-600',
+                    icon: <Youtube size={20} className={urlInfo.isValid && urlInfo.type !== 'unknown' ? 'text-red-500' : 'text-slate-500'} />,
+                    badgeIcon: <Youtube size={20} />
+                  };
+              }
+            };
+            const pStyle = getPlatformStyles();
+
+            return (
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold font-arabic text-gray-800 flex items-center gap-2">
+                    <span className={`p-2 rounded-xl transition-all duration-300 ${pStyle.bgClass}`}>
+                      {pStyle.badgeIcon}
+                    </span>
+                    {t.mod1Title}
+                  </h2>
+                  <div className="text-xs text-gray-500 font-mono">STEP 1</div>
+                </div>
+
+                {/* Horizontal Quick Swappers */}
+                <div className="grid grid-cols-4 gap-2 mb-5" id="social_swappers">
+                  <button
+                    onClick={() => {
+                      setUrlInput('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+                      setLogoPreset('yt-classic');
+                      setForegroundColor('#FF0000');
+                      setEyeColor('#FF0000');
+                    }}
+                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer ${
+                      urlInfo.platform === 'youtube'
+                        ? 'border-red-500 bg-red-50/40 text-red-600 shadow-xs'
+                        : 'border-gray-50 hover:border-gray-150 text-slate-400 bg-gray-50/20'
+                    }`}
+                    type="button"
+                  >
+                    <Youtube size={20} className="mb-1" />
+                    <span className="text-[10px] font-bold font-arabic">يوتيوب</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setUrlInput('https://www.facebook.com/facebook');
+                      setLogoPreset('fb-classic');
+                      setForegroundColor('#1877F2');
+                      setEyeColor('#1877F2');
+                    }}
+                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer ${
+                      urlInfo.platform === 'facebook'
+                        ? 'border-blue-500 bg-blue-50/40 text-blue-600 shadow-xs'
+                        : 'border-gray-50 hover:border-gray-150 text-slate-400 bg-gray-50/20'
+                    }`}
+                    type="button"
+                  >
+                    <Facebook size={20} className="mb-1" />
+                    <span className="text-[10px] font-bold font-arabic">فيسبوك</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setUrlInput('https://www.instagram.com/instagram');
+                      setLogoPreset('ig-classic');
+                      setForegroundColor('#E1306C');
+                      setEyeColor('#E1306C');
+                    }}
+                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer ${
+                      urlInfo.platform === 'instagram'
+                        ? 'border-rose-500 bg-rose-50/40 text-rose-600 shadow-xs'
+                        : 'border-gray-50 hover:border-gray-150 text-slate-400 bg-gray-50/20'
+                    }`}
+                    type="button"
+                  >
+                    <Instagram size={20} className="mb-1" />
+                    <span className="text-[10px] font-bold font-arabic">إنستغرام</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setUrlInput('https://www.tiktok.com/@tiktok');
+                      setLogoPreset('tt-classic');
+                      setForegroundColor('#000000');
+                      setEyeColor('#000000');
+                    }}
+                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer ${
+                      urlInfo.platform === 'tiktok'
+                        ? 'border-slate-800 bg-slate-100 text-slate-800 shadow-xs'
+                        : 'border-gray-50 hover:border-gray-150 text-slate-400 bg-gray-50/20'
+                    }`}
+                    type="button"
+                  >
+                    <Music size={20} className="mb-1" />
+                    <span className="text-[10px] font-bold font-arabic">تيك توك</span>
+                  </button>
+                </div>
+
+                <label className="text-sm font-medium font-arabic text-gray-600 mb-2 block" htmlFor="yt_url">
+                  {t.labelYtUrl}
+                </label>
+                
+                <div className="relative">
+                  <input
+                    id="yt_url"
+                    type="text"
+                    value={urlInput}
+                    onChange={(e) => setUrlInput(e.target.value)}
+                    placeholder={t.placeholderYtUrl}
+                    className={`w-full pl-4 pr-12 py-3.5 bg-gray-50/50 hover:bg-gray-50 focus:bg-white rounded-2xl border border-gray-200 font-mono text-sm transition-all focus:outline-none focus:ring-2 ${pStyle.focusClass}`}
+                    dir="ltr"
+                  />
+                  <div className={`absolute ${lang === 'ar' ? 'right-3.5' : 'left-3.5'} top-1/2 -translate-y-1/2`}>
+                    {pStyle.icon}
+                  </div>
+                </div>
+              </>
+            );
+          })()}
 
           {/* Dynamic Parsing Status Badge removed as per request */}
 
@@ -796,21 +955,29 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
             <div className="space-y-3">
               <span className="text-xs font-bold text-gray-600 font-arabic block">{t.presetsSubLabel}</span>
               <div className="grid grid-cols-3 gap-2">
-                {PRESETS.map((p) => (
-                  <button
-                    key={p.id}
-                    onClick={() => setLogoPreset(p.id)}
-                    className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-1.5 ${
-                      logoPreset === p.id
-                        ? 'border-red-500 bg-red-50/20 ring-1 ring-red-200'
-                        : 'border-gray-100 hover:border-gray-200 bg-white'
-                    }`}
-                    type="button"
-                  >
-                    <img src={p.url} alt={p.name} className="w-8 h-8 object-contain" referrerPolicy="no-referrer" />
-                    <span className="text-[10px] font-arabic font-medium text-gray-700 truncate w-full">{getPresetName(p.name)}</span>
-                  </button>
-                ))}
+                {PRESETS.map((p) => {
+                  const isSelected = logoPreset === p.id;
+                  let activeBorderClass = 'border-red-500 bg-red-50/20 ring-1 ring-red-200';
+                  if (p.id.startsWith('fb')) activeBorderClass = 'border-blue-500 bg-blue-50/20 ring-1 ring-blue-200';
+                  if (p.id.startsWith('ig')) activeBorderClass = 'border-pink-500 bg-pink-50/20 ring-1 ring-pink-200';
+                  if (p.id.startsWith('tt')) activeBorderClass = 'border-slate-800 bg-slate-50 ring-1 ring-slate-100';
+
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => setLogoPreset(p.id)}
+                      className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-1.5 ${
+                        isSelected
+                          ? activeBorderClass
+                          : 'border-gray-100 hover:border-gray-200 bg-white'
+                      }`}
+                      type="button"
+                    >
+                      <img src={p.url} alt={p.name} className="w-8 h-8 object-contain" referrerPolicy="no-referrer" />
+                      <span className="text-[10px] font-arabic font-medium text-gray-700 truncate w-full">{getPresetName(p.name)}</span>
+                    </button>
+                  );
+                })}
               </div>
 
               {/* No Logo Option */}

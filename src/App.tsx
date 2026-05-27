@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import QRGenerator from './components/QRGenerator';
-import { buildDeepLink } from './utils';
+import { buildDeepLink, parseYoutubeUrl } from './utils';
 import { 
   Youtube, 
   Sparkles, 
@@ -22,7 +22,10 @@ import {
   Languages,
   BookOpen,
   FileText,
-  ShieldAlert
+  ShieldAlert,
+  Facebook,
+  Instagram,
+  Music
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { translations } from './translations';
@@ -86,19 +89,48 @@ export default function App() {
   if (redirectUrl) {
     let decodedUrl = '';
     let deepLink = '';
+    let platform = 'youtube';
     try {
       decodedUrl = decodeURIComponent(redirectUrl);
       deepLink = buildDeepLink(decodedUrl, redirectType as any);
+      platform = parseYoutubeUrl(decodedUrl).platform;
     } catch (_) {}
+
+    const getLoadingIconStyles = () => {
+      switch(platform) {
+        case 'facebook':
+          return {
+            bgClass: 'bg-[#1877F2] shadow-blue-500/40',
+            icon: <Facebook size={48} />
+          };
+        case 'instagram':
+          return {
+            bgClass: 'bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] shadow-pink-500/40',
+            icon: <Instagram size={48} />
+          };
+        case 'tiktok':
+          return {
+            bgClass: 'bg-black border border-slate-800 shadow-slate-950/40',
+            icon: <Music size={48} />
+          };
+        case 'youtube':
+        default:
+          return {
+            bgClass: 'bg-red-600 shadow-red-500/40',
+            icon: <Youtube size={48} />
+          };
+      }
+    };
+    const loadingStyle = getLoadingIconStyles();
 
     return (
       <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 text-center" id="redirect_fallback_screen" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
         <div className="max-w-md w-full space-y-8">
           
-          {/* Animated pulsing massive YouTube logo */}
+          {/* Animated pulsing massive Brand logo */}
           <div className="flex justify-center">
-            <span className="p-6 bg-red-600 text-white rounded-3xl animate-pulse shadow-2xl shadow-red-500/40">
-              <Youtube size={48} />
+            <span className={`p-6 text-white rounded-3xl animate-pulse shadow-2xl ${loadingStyle.bgClass}`}>
+              {loadingStyle.icon}
             </span>
           </div>
 

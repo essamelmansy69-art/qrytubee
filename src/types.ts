@@ -19,9 +19,12 @@ export interface QRConfig {
   errorCorrectionLevel: 'L' | 'M' | 'Q' | 'H';
 }
 
+export type PlatformType = 'youtube' | 'facebook' | 'instagram' | 'tiktok' | 'other';
+
 export interface youtubeUrlInfo {
   isValid: boolean;
-  type: 'video' | 'channel' | 'shorts' | 'playlist' | 'unknown';
+  platform: PlatformType;
+  type: 'video' | 'channel' | 'shorts' | 'playlist' | 'profile' | 'post' | 'unknown';
   id: string;
   cleanUrl: string;
 }

@@ -56,10 +56,10 @@ export const translations = {
     faq4A: "ج: نعم، الخدمة مجانية 100% للأبد ودون عرض أي نوع من الإعلانات المزعجة لصناع المحتوى. الروابط آمنة تماماً لأن التشفير والتحويل وتضمين الصورة يتم بالكامل محلياً داخل متصفحك وبشكل سريع!",
 
     // QRGenerator Strings
-    mod1Title: "بيانات رابط اليوتيوب",
-    labelYtUrl: "أدخل رابط اليوتيوب (فيديو، شورتس، قناة، قائمة تشغيل)",
-    placeholderYtUrl: "مثال: https://www.youtube.com/watch?v=...",
-    validLink: "رابط يوتيوب صحيح تم التعرف عليه بنجاح",
+    mod1Title: "بيانات وقناة الرابط الاجتماعي",
+    labelYtUrl: "أدخل رابط منصة التواصل الاجتماعي (المنصات الأربعة المدعومة)",
+    placeholderYtUrl: "سواء يوتيوب، أو فيسبوك، أو إنستجرام، أو تيك توك...",
+    validLink: "تم التعرف على رابط المنصة وتحليله بنجاح",
     fallbackLinkMsg: "سيتم توليد كود QR للرابط المُدخل مباشرة كرابط عام",
     
     mod2Title: "تقنية الرابط العميق (Deep Link)",
@@ -104,11 +104,14 @@ export const translations = {
     darkInvertedWarnDesc: "لقد حددت لون مربعات فاتحة مع خلفية داكنة! على الرغم من شكلها الليلي الجذاب، إلا أن العديد من كاميرات الهواتف الافتراضية والقديمة تعجز تماماً عن التعرف على رموز الـ QR المعكوسة. ننصح بشدة بتبديل دمج الألوان (مربعات داكنة وخلفية فاتحة) لضمان مسح فوري وناجح لجميع هواتف الزوار بنسبة 100%!",
 
     mod4Title: "شعار منتصف الـ QR كود",
-    mod4Desc: "اختر أحد الشعارات الجاهزة الخاصة باليوتيوب أو قم بتحميل شعار قناتك المخصص مباشرة من جهازك لوضعه بمنتصف الكود!",
+    mod4Desc: "اختر أحد الشعارات الجاهزة الخاصة بالمنصات الأربعة أو قم بتحميل شعار قناتك المخصص مباشرة من جهازك لوضعه بمنتصف الكود!",
     presetsSubLabel: "الشعارات الافتراضية الجاهزة:",
     presetYtClassic: "يوتيوب أحمر",
     presetYtWhite: "يوتيوب أبيض",
     presetYtShorts: "شورتس",
+    presetFb: "فيسبوك الأزرق",
+    presetIg: "إنستغرام الملون",
+    presetTt: "تيك توك الأسود",
     presetNoneColor: "بدون وضع أي شعار بالمنتصف",
     uploadCustomLabel: "تحميل شعار قناتك المخصص:",
     successUploadMsg: "تم تحميل الشعار الخاص بنجاح!",
@@ -221,10 +224,10 @@ export const translations = {
     faq4A: "A: Yes, this service is 100% free forever for all digital creators and does not display annoying ads. The conversion, coloring, and logo integrations are executed locally inside your browser, guaranteeing extreme speed and privacy.",
 
     // QRGenerator Strings
-    mod1Title: "YouTube URL Details",
-    labelYtUrl: "Enter YouTube Link (Video, Shorts, Channel, Playlist)",
-    placeholderYtUrl: "e.g., https://www.youtube.com/watch?v=...",
-    validLink: "Valid YouTube address identified successfully",
+    mod1Title: "Social Media Link Details",
+    labelYtUrl: "Enter Social Media URL (Supports 4 major platforms)",
+    placeholderYtUrl: "e.g., YouTube video, Facebook profile, Instagram, or TikTok...",
+    validLink: "Valid social media address identified successfully",
     fallbackLinkMsg: "Code will be built directly to redirect to this standard URL input",
 
     mod2Title: "Deep Link Strategy Options",
@@ -269,11 +272,14 @@ export const translations = {
     darkInvertedWarnDesc: "You have selected a light foreground on top of a dark background! While visually impressive, many native and legacy mobile camera systems struggle to scan inverted QR codes. We highly recommend using dark foreground blocks with a light background to guarantee 100% scanning compatibility on any smartphone!",
 
     mod4Title: "Center Emblem Configuration",
-    mod4Desc: "Pick one of our premium pre-configured YouTube badges or upload your own channel avatar to brand the center of the QR code!",
-    presetsSubLabel: "Default YouTube Presets:",
+    mod4Desc: "Pick one of our premium pre-configured social brand badges or upload your own channel avatar to brand the center of the QR code!",
+    presetsSubLabel: "Default Brand Presets:",
     presetYtClassic: "YouTube Classic",
     presetYtWhite: "Minimalist White",
     presetYtShorts: "Sleek Shorts",
+    presetFb: "Facebook Classic Blue",
+    presetIg: "Instagram Aura Glow",
+    presetTt: "TikTok Dark Note",
     presetNoneColor: "Remove Center Logo Overlay",
     uploadCustomLabel: "Upload Creator Avatar:",
     successUploadMsg: "Your custom brand avatar loaded successfully!",
