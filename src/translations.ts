@@ -103,26 +103,7 @@ export const translations = {
     darkInvertedWarnTitle: "⚠️ تنبيه الألوان المعكوسة (الوضع الداكن):",
     darkInvertedWarnDesc: "لقد حددت لون مربعات فاتحة مع خلفية داكنة! على الرغم من شكلها الليلي الجذاب، إلا أن العديد من كاميرات الهواتف الافتراضية والقديمة تعجز تماماً عن التعرف على رموز الـ QR المعكوسة. ننصح بشدة بتبديل دمج الألوان (مربعات داكنة وخلفية فاتحة) لضمان مسح فوري وناجح لجميع هواتف الزوار بنسبة 100%!",
 
-    mod4Title: "شعار منتصف الـ QR كود",
-    mod4Desc: "اختر أحد الشعارات الجاهزة الخاصة بالمنصات الأربعة أو قم بتحميل شعار قناتك المخصص مباشرة من جهازك لوضعه بمنتصف الكود!",
-    presetsSubLabel: "الشعارات الافتراضية الجاهزة:",
-    presetYtClassic: "يوتيوب أحمر",
-    presetYtWhite: "يوتيوب أبيض",
-    presetYtShorts: "شورتس",
-    presetFb: "فيسبوك الأزرق",
-    presetIg: "إنستغرام الملون",
-    presetTt: "تيك توك الأسود",
-    presetNoneColor: "بدون وضع أي شعار بالمنتصف",
-    uploadCustomLabel: "تحميل شعار قناتك المخصص:",
-    successUploadMsg: "تم تحميل الشعار الخاص بنجاح!",
-    changeImgTip: "انقر لتغيير الصورة",
-    dragDropText: "اسحب وأفلت شعارك هنا أو تصفح ملفاتك",
-    uploadFormatTip: "يدعم PNG ، JPG (يفضل لوغو ذو شكل متكامل)",
-    visualControlHeading: "التحكم البصري بالشعار:",
-    logoScaleLabel: "حجم الشعار بالمنتصف:",
-    balancedSmall: "حجم صغير (مثالي)",
-    largeOverlay: "حجم كبير (أقصى حماية)",
-    maskCheckboxLabel: "وضع طبقة عازلة بيضاء خلف الشعار لمنع تداخل نقاط الـ QR",
+
 
     previewHeading: "نافذة المعاينة التفاعلية المباشرة",
     finalQrLabel: "رمز الاستجابة السريعة النهائي (QR Code)",
@@ -158,7 +139,6 @@ export const translations = {
     loveText: "بُنيت الأداة بكل حب لتطوير وتعميم المحتوى العربي والكوني الذكي 🚀",
 
     // Validation alerts
-    alertUploadType: "الرجاء تحميل ملف صورة صالح.",
     alertInputFirst: "الرجاء إدخال رابط يوتيوب صحيح أولاً لتتمكن من تحميل رمز الـ QR!",
     clipboardFallbackMsg: "تم نسخ رابط الـ Deep Link كبديل لعدم دعم متصفحك نسخ الصور!",
 
@@ -271,26 +251,7 @@ export const translations = {
     darkInvertedWarnTitle: "⚠️ Dark/Inverted Colors Detected:",
     darkInvertedWarnDesc: "You have selected a light foreground on top of a dark background! While visually impressive, many native and legacy mobile camera systems struggle to scan inverted QR codes. We highly recommend using dark foreground blocks with a light background to guarantee 100% scanning compatibility on any smartphone!",
 
-    mod4Title: "Center Emblem Configuration",
-    mod4Desc: "Pick one of our premium pre-configured social brand badges or upload your own channel avatar to brand the center of the QR code!",
-    presetsSubLabel: "Default Brand Presets:",
-    presetYtClassic: "YouTube Classic",
-    presetYtWhite: "Minimalist White",
-    presetYtShorts: "Sleek Shorts",
-    presetFb: "Facebook Classic Blue",
-    presetIg: "Instagram Aura Glow",
-    presetTt: "TikTok Dark Note",
-    presetNoneColor: "Remove Center Logo Overlay",
-    uploadCustomLabel: "Upload Creator Avatar:",
-    successUploadMsg: "Your custom brand avatar loaded successfully!",
-    changeImgTip: "Click to select a different file",
-    dragDropText: "Drag & drop avatar here, or click to browse",
-    uploadFormatTip: "Supports PNG, JPG (Squared formats with alpha channels work best)",
-    visualControlHeading: "Logo Display Controls:",
-    logoScaleLabel: "Branding Display Scale Size:",
-    balancedSmall: "Optimized small",
-    largeOverlay: "High resilience large",
-    maskCheckboxLabel: "Draw white protective backdrop frame behind logo to prevent overlapping dots",
+
 
     previewHeading: "Live Dashboard Preview Workspace",
     finalQrLabel: "Your Finished QR Code Rendering",
@@ -326,7 +287,6 @@ export const translations = {
     loveText: "Crafted beautifully for creators and marketers worldwide 🚀",
 
     // Validation alerts
-    alertUploadType: "Please select a valid image file formatting.",
     alertInputFirst: "Please specify a valid YouTube URL address first before trying to download!",
     clipboardFallbackMsg: "Deep Link URL copied successfully to clipboard!",
 

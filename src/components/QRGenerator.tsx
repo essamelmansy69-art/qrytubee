@@ -8,11 +8,9 @@ import QRCode from 'qrcode';
 import { 
   Youtube, 
   Sparkles, 
-  Upload, 
   Download, 
   Copy, 
   RotateCcw, 
-  FileImage, 
   Settings, 
   ExternalLink, 
   Check, 
@@ -31,33 +29,6 @@ import { parseYoutubeUrl, buildDeepLink } from '../utils';
 import { translations } from '../translations';
 
 import { motion } from 'motion/react';
-
-/// YouTube SVG Logo preset - Clean red play button
-const PRESET_YT_CLASSIC = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI0ZGMDAwMCI+PHBhdGggZD0iTTIzLjQ5OCA2LjE2M2EzLjAwMyAzLjAwMyAwIDAgMC0yLjExLTIuMTA4QzE5LjUyIDMuNSAxMiAzLjUgMTIgMy41cy03LjUyIDAtOS4zODguNTU1YTMuMDAzIDMuMDAzIDAgMCAwLTIuMTEgMi4xMDhDMCA4LjAzIDAgMTIgMCAxMnMwIDMuOTcuNTAyIDUuODM3YTMuMDAzIDMuMDAzIDAgMCAwIDIuMTEgMi4xMDhDNC40OCAyMC41IDEyIDIwLjUgMTIgMjAuNXM3LjUyIDAgOS4zODgtLjU1NWEzLjAwMyAzLjAwMyAwIDAgMCAyLjExLTIuMTA4QzE0IDE1Ljk3IDI0IDEyIDI0IDEyczAtMy45Ny0uNTAyLTUuODM3ek05LjU0NSAxNS41NjhWOC40MzJMMTUuODE4IDEybC02LjI3MyAzLjU2OHoiLz48L3N2Zz4=`;
-
-// YouTube SVG outline white
-const PRESET_YT_WHITE = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI0ZGRkZGRiI+PHBhdGggZD0iTTIzLjQ5OCA2LjE2M2EzLjAwMyAzLjAwMyAwIDAgMC0yLjExLTIuMTA4QzE5LjUyIDMuNSAxMiAzLjUgMTIgMy41cy03LjUyIDAtOS4zODguNTU1YTMuMDAzIDMuMDAzIDAgMCAwLTIuMTEgMi4xMDhDMCA4LjAzIDAgMTIgMCAxMnMwIDMuOTcuNTAyIDUuODM3YTMuMDAzIDMuMDAzIDAgMCAwIDIuMTEgMi4xMDhDNC40OCAyMC41IDEyIDIwLjUgMTIgMjAuNXM3LjUyIDAgOS4zODgtLjU1NWEzLjAwMyAzLjAwMyAwIDAgMCAyLjExLTIuMTA4QzE0IDE1Ljk3IDI0IDEyIDI0IDEyczAtMy45Ny0uNTAyLTUuODM3ek05LjU0NSAxNS41NjhWOC40MzJMMTUuODE4IDEybC02LjI3MyAzLjU2OHoiLz48L3N2Zz4=`;
-
-// YouTube Shorts preset
-const PRESET_YT_SHORTS = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI0ZGMDAwMCI+PHBhdGggZD0iTTE3LjcxIDcuMTVhMy4zIDMuMyAwIDAgMC0zLjM0LTNBMy4zNyAzLjM3IDAgMCAwIDEzIDQuNjdMOS42MSA2LjU3YTMuMzEgMy4zMSAwIDAgMC0xLjU3IDIuODJWMTIuMWEzLjMxIDMuMzEgMCAwIDAgMy4zNCAzQTMuMzcgMy4zNyAwIDAgMCAxMy4zNCAxNC41OGwzLjM5LTEuOWEzLjMxIDMuMzEgMCAwIDAgMS41Ny0yLjgydm0tMi43YTMuMjkgMy4yOSAwIDAgMC0wLjAzLS4wMXoiIG9wYWNpdHk9Ii4xIi8+PHBhdGggZD0iTTE5LjEyIDcuNzRhMyAwIDAgMC0yLjcxLTEuNjNMMTUuMSA2bDEtMi40M2EzIDAgMCAwLTIuODItNC4xM2MtLjU0IDAtMS4wNy4xNS0xLjUzLjQ0TDQuODUgNC4wOUg0Ljg0YTMuMTEgMy4xMSAwIDAgMC0xLjM5IDIuNTlhMyAwIDAgMCAxLjMgMi41bDEuMzIuODEtMSAyLjQ1YTMgMCAwIDAgMi44MiA0LjE4Yy41NCAwIDEuMDctLjE1IDEuNTMtLjQ0bDYuODQtNC4xNGEzLjExIDMuMTEgMCAwIDAgMS4zOS0yLjU5YTMgMCAwIDAtMS41My0yLjYzTDE5LjEyIDcuNzR6TTkuNTIgMTQuMjJWOS44TDEzLyc4IDEybC00LjI2IDIuMjJ6IiBmaWxsPSIjRkYwMDAwIi8+PC9zdmc+`;
-
-// Facebook Solid Filled SVG Badge
-const PRESET_FB = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%231877F2"><rect width="24" height="24" rx="5" fill="%231877F2"/><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" fill="%23FFFFFF"/></svg>`;
-
-// Instagram Filled Gradient SVG Badge
-const PRESET_IG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23E1306C"><rect width="24" height="24" rx="5" fill="%23E1306C"/><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z" fill="%23FFFFFF"/></svg>`;
-
-// TikTok Filled Black/White SVG Badge
-const PRESET_TT = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23010101"><rect width="24" height="24" rx="5" fill="%23010101"/><path d="M12.525.02c1.31 0 2.593.38 3.658 1.08.136-1.04.856-1.1 1.08-1.1v4c-1.353 0-2.433-.787-2.905-1.893V14c0 3.314-2.686 6-6 6s-6-2.686-6-6 2.686-6 6-6c.414 0 .813.042 1.2.12v4.06c-.382-.12-.782-.18-1.2-.18-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V0h3.167z" fill="%23FFFFFF"/></svg>`;
-
-const PRESETS = [
-  { id: 'yt-classic', name: 'يوتيوب أحمر', url: PRESET_YT_CLASSIC, isYT: true },
-  { id: 'yt-white', name: 'يوتيوب أبيض', url: PRESET_YT_WHITE, isYT: true },
-  { id: 'yt-shorts', name: 'شورتس', url: PRESET_YT_SHORTS, isYT: true },
-  { id: 'fb-classic', name: 'فيسبوك', url: PRESET_FB, isYT: false },
-  { id: 'ig-classic', name: 'إنستغرام', url: PRESET_IG, isYT: false },
-  { id: 'tt-classic', name: 'تيك توك', url: PRESET_TT, isYT: false },
-];
 
 const COLOR_TEMPLATES = [
   { name: 'يوتيوب الكلاسيكي', dark: '#FF0000', light: '#FFFFFF', eye: '#FF0000' },
@@ -87,59 +58,37 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
     }
   };
 
-  const getPresetName = (name: string) => {
-    switch (name) {
-      case 'يوتيوب أحمر': return t.presetYtClassic;
-      case 'يوتيوب أبيض': return t.presetYtWhite;
-      case 'شورتس': return t.presetYtShorts;
-      case 'فيسبوك': return t.presetFb;
-      case 'إنستغرام': return t.presetIg;
-      case 'تيك توك': return t.presetTt;
-      default: return name;
-    }
-  };
-
   const [urlInput, setUrlInput] = useState('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
   const [deepLinkType, setDeepLinkType] = useState<'vnd' | 'ios' | 'android' | 'standard'>('vnd');
   const [useSmartLink, setUseSmartLink] = useState<boolean>(true);
   const [foregroundColor, setForegroundColor] = useState('#FF0000');
   const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
   const [eyeColor, setEyeColor] = useState('#FF0000');
-  const [logoPreset, setLogoPreset] = useState<string>('yt-classic');
-  const [customLogoUrl, setCustomLogoUrl] = useState<string | null>(null);
-  const [logoScale, setLogoScale] = useState<number>(0.22);
-  const [logoMargin, setLogoMargin] = useState<boolean>(true);
   const [errorCorrectionLevel, setErrorCorrectionLevel] = useState<'L' | 'M' | 'Q' | 'H'>('H');
   const [downloadSize, setDownloadSize] = useState<number>(2048);
   const [downloadFormat, setDownloadFormat] = useState<'png' | 'jpg'>('png');
   const [copied, setCopied] = useState<boolean>(false);
-  const [isDragging, setIsDragging] = useState<boolean>(false);
   const [renderedPayload, setRenderedPayload] = useState<string>('');
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Parse URL to show useful UI statistics
   const urlInfo = parseYoutubeUrl(urlInput);
   const formattedDeepLink = buildDeepLink(urlInput, deepLinkType);
 
-  // Auto-switch logo presets and colors when platform changes
+  // Auto-switch colors when platform changes
   useEffect(() => {
     if (urlInfo.isValid) {
-      if (urlInfo.platform === 'youtube' && !logoPreset.startsWith('yt')) {
-        setLogoPreset('yt-classic');
+      if (urlInfo.platform === 'youtube') {
         setForegroundColor('#FF0000');
         setEyeColor('#FF0000');
-      } else if (urlInfo.platform === 'facebook' && logoPreset !== 'fb-classic') {
-        setLogoPreset('fb-classic');
+      } else if (urlInfo.platform === 'facebook') {
         setForegroundColor('#1877F2');
         setEyeColor('#1877F2');
-      } else if (urlInfo.platform === 'instagram' && logoPreset !== 'ig-classic') {
-        setLogoPreset('ig-classic');
+      } else if (urlInfo.platform === 'instagram') {
         setForegroundColor('#E1306C');
         setEyeColor('#E1306C');
-      } else if (urlInfo.platform === 'tiktok' && logoPreset !== 'tt-classic') {
-        setLogoPreset('tt-classic');
+      } else if (urlInfo.platform === 'tiktok') {
         setForegroundColor('#000000');
         setEyeColor('#000000');
       }
@@ -181,15 +130,6 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
     }
   };
 
-  // Load selected logo (either custom or preset)
-  const getSelectedLogoUrl = () => {
-    if (logoPreset === 'custom') {
-      return customLogoUrl;
-    }
-    const preset = PRESETS.find(p => p.id === logoPreset);
-    return preset ? preset.url : null;
-  };
-
   // Re-generate QR Code in Preview Canvas
   const generateQRCode = async () => {
     const canvas = canvasRef.current;
@@ -199,8 +139,8 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
     setRenderedPayload(payload);
 
     try {
-      // 1. Draw base QR Code on invisible high resolution or scaling canvas
-      // To get crisp rendering, we'll draw at 512x512 initially for preview
+      // Draw base QR Code on high-resolution canvas
+      // To get crisp rendering, we draw at 512x512 initially for preview
       const qrOptions = {
         width: 512,
         margin: 2,
@@ -212,85 +152,6 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
       };
 
       await QRCode.toCanvas(canvas, payload, qrOptions);
-
-      // 2. Custom Draw Eyes with specific eye color if requested
-      // (Advanced Canvas customization to make eye borders match configured eyeColor)
-      const ctx = canvas.getContext('2d');
-      if (ctx && eyeColor && eyeColor !== foregroundColor) {
-        // Draw custom corner colors (Advanced aesthetics)
-        const size = 512;
-        const matrixSize = 21 + 4 * 6; // Standard QR V4 ~ 33 grids or auto
-        // To be safe we keep it clean. We'll paint custom eye accents.
-        // Let's draw standard YouTube accents or just let the base color flow, 
-        // to customize further, we find where the eyes are located.
-        // For a generic way, we can draw a circle/rect over the 3 corner eyes.
-        // Standard eyes are 7x7 modules at top-left, top-right, bottom-left.
-        // Instead of hardcoding grid coordinates which vary with QR version, 
-        // a simple and robust custom drawing is perfect.
-      }
-
-      // 3. Draw central badge & logo if configured
-      const logoUrl = getSelectedLogoUrl();
-      if (logoUrl) {
-        const logoImg = new Image();
-        logoImg.crossOrigin = 'anonymous';
-        logoImg.src = logoUrl;
-        
-        logoImg.onload = () => {
-          const ctx = canvas.getContext('2d');
-          if (!ctx) return;
-
-          const cx = canvas.width / 2;
-          const cy = canvas.height / 2;
-          const logoSize = canvas.width * logoScale;
-
-          // Save context
-          ctx.save();
-
-          // Draw backdrop badge/container
-          if (logoMargin) {
-            ctx.fillStyle = backgroundColor;
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
-            ctx.shadowBlur = 10;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 4;
-
-            // Draw a smooth rounded rectangle badge
-            const badgeSize = logoSize * 1.25;
-            const radius = badgeSize * 0.25;
-            const x = cx - badgeSize / 2;
-            const y = cy - badgeSize / 2;
-
-            ctx.beginPath();
-            ctx.moveTo(x + radius, y);
-            ctx.lineTo(x + badgeSize - radius, y);
-            ctx.quadraticCurveTo(x + badgeSize, y, x + badgeSize, y + radius);
-            ctx.lineTo(x + badgeSize, y + badgeSize - radius);
-            ctx.quadraticCurveTo(x + badgeSize, y + badgeSize, x + badgeSize - radius, y + badgeSize);
-            ctx.lineTo(x + radius, y + badgeSize);
-            ctx.quadraticCurveTo(x, y + badgeSize, x, y + badgeSize - radius);
-            ctx.lineTo(x, y + radius);
-            ctx.quadraticCurveTo(x, y, x + radius, y);
-            ctx.closePath();
-            ctx.fill();
-          }
-
-          // Draw custom logo clip circular or round standard
-          ctx.beginPath();
-          const r = logoSize / 2;
-          // Apply clipping if uploader is custom image, to make it a perfect circle
-          if (logoPreset === 'custom') {
-            ctx.arc(cx, cy, r, 0, 2 * Math.PI);
-            ctx.clip();
-            ctx.drawImage(logoImg, cx - r, cy - r, logoSize, logoSize);
-          } else {
-            // Draw clean svg icons
-            ctx.drawImage(logoImg, cx - logoSize / 2, cy - logoSize / 2, logoSize, logoSize);
-          }
-
-          ctx.restore();
-        };
-      }
     } catch (err) {
       console.error("Error generating QR", err);
     }
@@ -305,47 +166,8 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
     useSmartLink,
     foregroundColor, 
     backgroundColor, 
-    logoPreset, 
-    customLogoUrl, 
-    logoScale, 
-    logoMargin, 
     errorCorrectionLevel
   ]);
-
-  // Handle Logo uploading
-  const handleLogoUpload = (file: File) => {
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      alert(t.alertUploadType);
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        setCustomLogoUrl(e.target.result as string);
-        setLogoPreset('custom');
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    if (e.dataTransfer.files?.length) {
-      handleLogoUpload(e.dataTransfer.files[0]);
-    }
-  };
 
   const selectColorTemplate = (tpl: typeof COLOR_TEMPLATES[0]) => {
     setForegroundColor(tpl.dark);
@@ -377,70 +199,6 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
       };
 
       await QRCode.toCanvas(tempCanvas, payload, qrOptions);
-
-      // Draw custom logo onto high-res canvas
-      const logoUrl = getSelectedLogoUrl();
-      if (logoUrl) {
-        const logoImg = new Image();
-        logoImg.crossOrigin = 'anonymous';
-        logoImg.src = logoUrl;
-
-        await new Promise((resolve) => {
-          logoImg.onload = () => {
-            const ctx = tempCanvas.getContext('2d');
-            if (ctx) {
-              const cx = tempCanvas.width / 2;
-              const cy = tempCanvas.height / 2;
-              const logoSize = tempCanvas.width * logoScale;
-
-              ctx.save();
-
-              if (logoMargin) {
-                ctx.fillStyle = backgroundColor;
-                ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
-                ctx.shadowBlur = downloadSize * 0.02; // relative shadow blur
-                ctx.shadowOffsetX = 0;
-                ctx.shadowOffsetY = downloadSize * 0.008;
-
-                const badgeSize = logoSize * 1.25;
-                const radius = badgeSize * 0.25;
-                const x = cx - badgeSize / 2;
-                const y = cy - badgeSize / 2;
-
-                ctx.beginPath();
-                ctx.moveTo(x + radius, y);
-                ctx.lineTo(x + badgeSize - radius, y);
-                ctx.quadraticCurveTo(x + badgeSize, y, x + badgeSize, y + radius);
-                ctx.lineTo(x + badgeSize, y + badgeSize - radius);
-                ctx.quadraticCurveTo(x + badgeSize, y + badgeSize, x + badgeSize - radius, y + badgeSize);
-                ctx.lineTo(x + radius, y + badgeSize);
-                ctx.quadraticCurveTo(x, y + badgeSize, x, y + badgeSize - radius);
-                ctx.lineTo(x, y + radius);
-                ctx.quadraticCurveTo(x, y, x + radius, y);
-                ctx.closePath();
-                ctx.fill();
-              }
-
-              ctx.beginPath();
-              const r = logoSize / 2;
-              if (logoPreset === 'custom') {
-                ctx.arc(cx, cy, r, 0, 2 * Math.PI);
-                ctx.clip();
-                ctx.drawImage(logoImg, cx - r, cy - r, logoSize, logoSize);
-              } else {
-                ctx.drawImage(logoImg, cx - logoSize / 2, cy - logoSize / 2, logoSize, logoSize);
-              }
-
-              ctx.restore();
-            }
-            resolve(true);
-          };
-          logoImg.onerror = () => {
-            console.error("Failed to load preset/custom logo image into download canvas");
-            resolve(true);
-          };
-        });
-      }
 
       // Trigger download
       const mimeType = downloadFormat === 'png' ? 'image/png' : 'image/jpeg';
@@ -480,38 +238,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
         ...qrOptions
       });
 
-      let finalSvg = svgString;
-      const logoUrl = getSelectedLogoUrl();
-      if (logoUrl) {
-        // Compute standard central position inside SVG viewBox coordinate grid
-        const viewBoxMatch = svgString.match(/viewBox="0 0 (\d+) (\d+)"/);
-        if (viewBoxMatch) {
-          const w = parseInt(viewBoxMatch[1]);
-          const h = parseInt(viewBoxMatch[2]);
-          const logoSize = w * logoScale;
-          const cx = w / 2;
-          const cy = h / 2;
-          const lx = cx - logoSize / 2;
-          const ly = cy - logoSize / 2;
-          
-          let logoElements = '';
-          if (logoMargin) {
-            const badgeSize = logoSize * 1.25;
-            const bx = cx - badgeSize / 2;
-            const by = cy - badgeSize / 2;
-            const radius = badgeSize * 0.2;
-            logoElements += `<rect x="${bx}" y="${by}" width="${badgeSize}" height="${badgeSize}" fill="${backgroundColor}" rx="${radius}" ry="${radius}" />`;
-          }
-          
-          // Embed the base64 or custom logo image inside the SVG vector
-          logoElements += `<image href="${logoUrl}" x="${lx}" y="${ly}" width="${logoSize}" height="${logoSize}" />`;
-          
-          // Insert inside SVG root before closing tag
-          finalSvg = svgString.replace('</svg>', `${logoElements}</svg>`);
-        }
-      }
-
-      const blob = new Blob([finalSvg], { type: 'image/svg+xml;charset=utf-8' });
+      const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
       const blobUrl = URL.createObjectURL(blob);
       
       const link = document.createElement('a');
@@ -618,7 +345,6 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                   <button
                     onClick={() => {
                       setUrlInput('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
-                      setLogoPreset('yt-classic');
                       setForegroundColor('#FF0000');
                       setEyeColor('#FF0000');
                     }}
@@ -636,7 +362,6 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                   <button
                     onClick={() => {
                       setUrlInput('https://www.facebook.com/facebook');
-                      setLogoPreset('fb-classic');
                       setForegroundColor('#1877F2');
                       setEyeColor('#1877F2');
                     }}
@@ -654,7 +379,6 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                   <button
                     onClick={() => {
                       setUrlInput('https://www.instagram.com/instagram');
-                      setLogoPreset('ig-classic');
                       setForegroundColor('#E1306C');
                       setEyeColor('#E1306C');
                     }}
@@ -672,7 +396,6 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                   <button
                     onClick={() => {
                       setUrlInput('https://www.tiktok.com/@tiktok');
-                      setLogoPreset('tt-classic');
                       setForegroundColor('#000000');
                       setEyeColor('#000000');
                     }}
@@ -901,171 +624,6 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                 <p className="text-[11px] text-amber-800 font-arabic leading-relaxed">
                   {t.darkInvertedWarnDesc}
                 </p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Module 4: Central Logo Picker & Uploader */}
-        <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-100" id="module_central_logo">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold font-arabic text-gray-800 flex items-center gap-2">
-              <span className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
-                <Sparkles size={20} />
-              </span>
-              {t.mod4Title}
-            </h2>
-            <div className="text-xs text-gray-500 font-mono">STEP 4</div>
-          </div>
-
-          <p className="text-sm text-gray-500 font-arabic mb-4 leading-relaxed">
-            {t.mod4Desc}
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5" id="logo_picker_grid">
-            
-            {/* Presets Grid */}
-            <div className="space-y-3">
-              <span className="text-xs font-bold text-gray-600 font-arabic block">{t.presetsSubLabel}</span>
-              <div className="grid grid-cols-3 gap-2">
-                {PRESETS.map((p) => {
-                  const isSelected = logoPreset === p.id;
-                  let activeBorderClass = 'border-red-500 bg-red-50/20 ring-1 ring-red-200';
-                  if (p.id.startsWith('fb')) activeBorderClass = 'border-blue-500 bg-blue-50/20 ring-1 ring-blue-200';
-                  if (p.id.startsWith('ig')) activeBorderClass = 'border-pink-500 bg-pink-50/20 ring-1 ring-pink-200';
-                  if (p.id.startsWith('tt')) activeBorderClass = 'border-slate-800 bg-slate-50 ring-1 ring-slate-100';
-
-                  return (
-                    <button
-                      key={p.id}
-                      onClick={() => setLogoPreset(p.id)}
-                      className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-1.5 ${
-                        isSelected
-                          ? activeBorderClass
-                          : 'border-gray-100 hover:border-gray-200 bg-white'
-                      }`}
-                      type="button"
-                    >
-                      <img src={p.url} alt={p.name} className="w-8 h-8 object-contain" referrerPolicy="no-referrer" />
-                      <span className="text-[10px] font-arabic font-medium text-gray-700 truncate w-full">{getPresetName(p.name)}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* No Logo Option */}
-              <button
-                onClick={() => setLogoPreset('none')}
-                className={`w-full py-2 px-3 rounded-xl border text-center transition-all cursor-pointer text-xs font-arabic font-medium ${
-                  logoPreset === 'none'
-                    ? 'border-gray-800 bg-gray-800 text-white'
-                    : 'border-gray-200 text-gray-600 hover:bg-gray-100 bg-white'
-                }`}
-                type="button"
-              >
-                {t.presetNoneColor}
-              </button>
-            </div>
-
-            {/* Custom PC/Mobile Logo file drag-drop area */}
-            <div className="space-y-3">
-              <span className="text-xs font-bold text-gray-600 font-arabic block">{t.uploadCustomLabel}</span>
-              
-              <div
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onClick={() => fileInputRef.current?.click()}
-                className={`relative border-2 border-dashed rounded-2xl p-4 text-center cursor-pointer transition-all flex flex-col items-center justify-center min-h-[140px] ${
-                  isDragging
-                    ? 'border-emerald-500 bg-emerald-50/30'
-                    : 'border-gray-200 hover:border-emerald-500 bg-gray-50/50 hover:bg-white'
-                } ${logoPreset === 'custom' ? 'border-emerald-600 bg-emerald-50/10' : ''}`}
-                id="logo_drag_zone"
-              >
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    if (e.target.files?.length) {
-                      handleLogoUpload(e.target.files[0]);
-                    }
-                  }}
-                  className="hidden"
-                />
-
-                {logoPreset === 'custom' && customLogoUrl ? (
-                  <div className="flex flex-col items-center space-y-2">
-                    <img
-                      src={customLogoUrl}
-                      alt="Custom logo"
-                      className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500 shadow-sm"
-                      referrerPolicy="no-referrer"
-                    />
-                    <div className="text-xs font-arabic font-semibold text-emerald-700">
-                      {t.successUploadMsg}
-                    </div>
-                    <span className="text-[10px] text-slate-500 font-arabic underline">{t.changeImgTip}</span>
-                  </div>
-                ) : (
-                  <div className="space-y-1.5 flex flex-col items-center">
-                    <div className="p-2 bg-emerald-50 rounded-full text-emerald-600">
-                      <Upload size={18} />
-                    </div>
-                    <div className="text-xs font-arabic text-gray-700 font-medium">
-                      {t.dragDropText}
-                    </div>
-                    <div className="text-[10px] text-slate-500 font-arabic">
-                      {t.uploadFormatTip}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Logo Sizing and Margins */}
-          {logoPreset !== 'none' && (
-            <div className="mt-5 bg-gray-50 p-4 rounded-2xl border border-gray-100 space-y-4">
-              <span className="text-xs font-semibold text-gray-700 font-arabic block mb-1">{t.visualControlHeading}</span>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Logo Scale Slider */}
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-gray-600 font-arabic">{t.logoScaleLabel}</span>
-                    <span className="text-xs font-mono font-medium text-gray-800">{Math.round(logoScale * 100)}%</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0.15"
-                    max="0.28"
-                    step="0.01"
-                    value={logoScale}
-                    onChange={(e) => setLogoScale(parseFloat(e.target.value))}
-                    aria-label={t.logoScaleLabel}
-                    className="w-full accent-emerald-500 cursor-pointer"
-                  />
-                  <div className="flex justify-between text-[10px] text-gray-500 mt-1 font-arabic">
-                    <span>{t.balancedSmall}</span>
-                    <span>{t.largeOverlay}</span>
-                  </div>
-                </div>
-
-                {/* Draw Background Badge Border Checkbox */}
-                <div className="flex items-center gap-3 bg-white px-3.5 py-2.5 rounded-xl border border-gray-200">
-                  <input
-                    id="checkbox_logo_margin"
-                    type="checkbox"
-                    checked={logoMargin}
-                    onChange={(e) => setLogoMargin(e.target.checked)}
-                    className="w-4.5 h-4.5 text-emerald-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-emerald-500 focus:outline-none accent-emerald-600 cursor-pointer"
-                  />
-                  <label htmlFor="checkbox_logo_margin" className="text-xs font-medium text-gray-700 font-arabic cursor-pointer">
-                    {t.maskCheckboxLabel}
-                  </label>
-                </div>
               </div>
             </div>
           )}
