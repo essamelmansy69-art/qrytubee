@@ -103,6 +103,21 @@ export const translations = {
     darkInvertedWarnTitle: "⚠️ تنبيه الألوان المعكوسة (الوضع الداكن):",
     darkInvertedWarnDesc: "لقد حددت لون مربعات فاتحة مع خلفية داكنة! على الرغم من شكلها الليلي الجذاب، إلا أن العديد من كاميرات الهواتف الافتراضية والقديمة تعجز تماماً عن التعرف على رموز الـ QR المعكوسة. ننصح بشدة بتبديل دمج الألوان (مربعات داكنة وخلفية فاتحة) لضمان مسح فوري وناجح لجميع هواتف الزوار بنسبة 100%!",
 
+    mod4Title: "شعار منتصف الـ QR كود (اختياري)",
+    mod4Desc: "قم بتحميل شعار قناتك المفضل لوضعه في المنتصف مع حمايته بطبقة خلفية ملونة!",
+    uploadCustomLabel: "تحميل شعار من جهازك:",
+    successUploadMsg: "تم تحميل الشعار الخاص بنجاح!",
+    changeImgTip: "انقر لتغيير الصورة",
+    dragDropText: "اسحب وأفلت شعارك هنا أو تصفح ملفاتك",
+    uploadFormatTip: "يدعم PNG، JPG، JPEG (يفضل المربعات الشفافة)",
+    visualControlHeading: "أبعاد وحدود الشعار:",
+    logoScaleLabel: "حجم الشعار بالمنتصف:",
+    balancedSmall: "حجم متوازن وصغير (مثالي)",
+    largeOverlay: "حجم كبير كعلامة مائية",
+    maskCheckboxLabel: "وضع طبقة عازلة بيضاء خلف الشعار لمنع تداخل نقاط الـ QR كود",
+    removeLogoBtn: "حذف الشعار الحالي",
+    alertUploadType: "الرجاء اختيار ملف صورة صالح (PNG, JPG, JPEG) فقط.",
+
 
 
     previewHeading: "نافذة المعاينة التفاعلية المباشرة",
@@ -146,6 +161,8 @@ export const translations = {
     navArticles: "مقالات النمو والـ SEO",
     navTerms: "شروط الخدمة",
     navPrivacy: "سياسة الخصوصية",
+    navAbout: "من نحن",
+    navContact: "اتصل بنا",
     readMore: "اقرأ المقال كاملاً ←",
     lastUpdated: "آخر تحديث:",
     seoArticlesHeading: "مقالات النمو وسيو اليوتيوب والمواقع",
@@ -251,6 +268,21 @@ export const translations = {
     darkInvertedWarnTitle: "⚠️ Dark/Inverted Colors Detected:",
     darkInvertedWarnDesc: "You have selected a light foreground on top of a dark background! While visually impressive, many native and legacy mobile camera systems struggle to scan inverted QR codes. We highly recommend using dark foreground blocks with a light background to guarantee 100% scanning compatibility on any smartphone!",
 
+    mod4Title: "Center Logo Configuration (Optional)",
+    mod4Desc: "Upload your custom logo/avatar to brand the dead center of your QR code with automatic protective clipping!",
+    uploadCustomLabel: "Upload Channel Logo:",
+    successUploadMsg: "Your custom brand logo loaded successfully!",
+    changeImgTip: "Click to select a different image",
+    dragDropText: "Drag & drop your logo here, or browse files",
+    uploadFormatTip: "Supports PNG, JPG, JPEG formats (Squared works best)",
+    visualControlHeading: "Logo Display Tuning:",
+    logoScaleLabel: "Emblem Scaling Factor:",
+    balancedSmall: "Balanced small scale (Recommended)",
+    largeOverlay: "Maximum visibility watermark",
+    maskCheckboxLabel: "Draw solid white background under logo to prevent QR blocks overlapping",
+    removeLogoBtn: "Remove Current Logo",
+    alertUploadType: "Please choose a valid image format file (PNG, JPG, or JPEG).",
+
 
 
     previewHeading: "Live Dashboard Preview Workspace",
@@ -294,6 +326,8 @@ export const translations = {
     navArticles: "Growth & SEO Articles",
     navTerms: "Terms of Service",
     navPrivacy: "Privacy Policy",
+    navAbout: "About Us",
+    navContact: "Contact Us",
     readMore: "Read full article ←",
     lastUpdated: "Last updated:",
     seoArticlesHeading: "YouTube Growth & Web SEO Insights",

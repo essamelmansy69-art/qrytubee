@@ -57,7 +57,50 @@ export default function App() {
 
   const t = translations[lang];
 
-  const [activeTab, setActiveTab] = useState<'generator' | 'faq' | 'tips' | 'articles' | 'terms' | 'privacy'>('generator');
+  const [activeTab, setActiveTab] = useState<'generator' | 'faq' | 'tips' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact'>(() => {
+    try {
+      const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
+      if (path === 'terms') return 'terms';
+      if (path === 'privacy') return 'privacy';
+      if (path === 'about') return 'about';
+      if (path === 'contact') return 'contact';
+      if (path === 'articles') return 'articles';
+    } catch (_) {}
+    return 'generator';
+  });
+
+  useEffect(() => {
+    try {
+      const currentPath = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
+      const targetPath = activeTab === 'generator' ? '/' : `/${activeTab}`;
+      if (currentPath !== targetPath.replace(/^\/|\/$/g, '')) {
+        window.history.pushState({ tab: activeTab }, '', targetPath);
+      }
+    } catch (_) {}
+  }, [activeTab]);
+
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      if (e.state && e.state.tab) {
+        setActiveTab(e.state.tab);
+      } else {
+        const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
+        if (['terms', 'privacy', 'about', 'contact', 'articles'].includes(path)) {
+          setActiveTab(path as any);
+        } else {
+          setActiveTab('generator');
+        }
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const handleNavClick = (tab: 'generator' | 'tips' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact', event: React.MouseEvent) => {
+    event.preventDefault();
+    setActiveTab(tab);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Detect and handle deep-link redirected scans
   const queryParams = new URL(window.location.href).searchParams;
@@ -417,6 +460,30 @@ export default function App() {
           </div>
         )}
 
+        {activeTab === 'about' && (
+          <div className="transition-opacity duration-300">
+            <LegalView lang={lang} docType="about" />
+          </div>
+        )}
+
+        {activeTab === 'contact' && (
+          <div className="transition-opacity duration-300">
+            <LegalView lang={lang} docType="contact" />
+          </div>
+        )}
+
+        {['terms', 'privacy', 'about', 'contact'].includes(activeTab) && (
+          <div className="text-center pt-8">
+            <button
+              onClick={() => setActiveTab('generator')}
+              className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold font-arabic transition-all cursor-pointer shadow-md inline-flex items-center gap-2 hover:scale-102 transition-transform duration-200"
+              type="button"
+            >
+              <span>{t.btnReturn}</span>
+            </button>
+          </div>
+        )}
+
       </main>
 
       {/* 4. PROFESSIONAL BEAUTIFUL FOOTER */}
@@ -441,12 +508,14 @@ export default function App() {
             <div className="md:col-span-4 space-y-3 font-arabic">
               <span className="text-xs font-bold text-white uppercase block">{t.quickLinks}</span>
               <div className="flex flex-col gap-2 text-xs items-start">
-                <button onClick={() => { setActiveTab('generator'); window.scrollTo({top:0, behavior:'smooth'}); }} className={`hover:text-white ${lang === 'ar' ? 'text-right' : 'text-left'} cursor-pointer transition-colors`}>{t.navGenerator}</button>
-                <button onClick={() => { setActiveTab('tips'); window.scrollTo({top:0, behavior:'smooth'}); }} className={`hover:text-white ${lang === 'ar' ? 'text-right' : 'text-left'} cursor-pointer transition-colors`}>{t.optGuidanceLabel}</button>
-                <button onClick={() => { setActiveTab('articles'); window.scrollTo({top:0, behavior:'smooth'}); }} className={`hover:text-white ${lang === 'ar' ? 'text-right' : 'text-left'} cursor-pointer transition-colors`}>{t.navArticles}</button>
-                <button onClick={() => { setActiveTab('faq'); window.scrollTo({top:0, behavior:'smooth'}); }} className={`hover:text-white ${lang === 'ar' ? 'text-right' : 'text-left'} cursor-pointer transition-colors`}>{t.faqDetailsLabel}</button>
-                <button onClick={() => { setActiveTab('terms'); window.scrollTo({top:0, behavior:'smooth'}); }} className={`hover:text-white ${lang === 'ar' ? 'text-right' : 'text-left'} cursor-pointer transition-colors`}>{t.navTerms}</button>
-                <button onClick={() => { setActiveTab('privacy'); window.scrollTo({top:0, behavior:'smooth'}); }} className={`hover:text-white ${lang === 'ar' ? 'text-right' : 'text-left'} cursor-pointer transition-colors`}>{t.navPrivacy}</button>
+                <a href="/" onClick={(e) => handleNavClick('generator', e)} className="hover:text-white cursor-pointer transition-colors block">{t.navGenerator}</a>
+                <a href="/tips" onClick={(e) => handleNavClick('tips', e)} className="hover:text-white cursor-pointer transition-colors block">{t.optGuidanceLabel}</a>
+                <a href="/articles" onClick={(e) => handleNavClick('articles', e)} className="hover:text-white cursor-pointer transition-colors block">{t.navArticles}</a>
+                <a href="/faq" onClick={(e) => handleNavClick('faq', e)} className="hover:text-white cursor-pointer transition-colors block">{t.faqDetailsLabel}</a>
+                <a href="/about" onClick={(e) => handleNavClick('about', e)} className="hover:text-white cursor-pointer transition-colors block">{t.navAbout}</a>
+                <a href="/contact" onClick={(e) => handleNavClick('contact', e)} className="hover:text-white cursor-pointer transition-colors block">{t.navContact}</a>
+                <a href="/privacy" onClick={(e) => handleNavClick('privacy', e)} className="hover:text-white cursor-pointer transition-colors block">{t.navPrivacy}</a>
+                <a href="/terms" onClick={(e) => handleNavClick('terms', e)} className="hover:text-white cursor-pointer transition-colors block">{t.navTerms}</a>
               </div>
             </div>
 

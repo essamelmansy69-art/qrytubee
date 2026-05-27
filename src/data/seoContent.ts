@@ -413,7 +413,10 @@ Domain authority relies on incoming references from high-value marketing and con
   ]
 };
 
-export const legalData: { ar: { terms: LegalDocument; privacy: LegalDocument }; en: { terms: LegalDocument; privacy: LegalDocument } } = {
+export const legalData: { 
+  ar: { terms: LegalDocument; privacy: LegalDocument; about: LegalDocument; contact: LegalDocument }; 
+  en: { terms: LegalDocument; privacy: LegalDocument; about: LegalDocument; contact: LegalDocument } 
+} = {
   ar: {
     terms: {
       title: "شروط الاستخدام والخدمة",
@@ -456,6 +459,42 @@ export const legalData: { ar: { terms: LegalDocument; privacy: LegalDocument }; 
         {
           heading: "4. خدمات الأطراف الثالثة وسرية يوتيوب",
           body: "الأداة تولد روابط عميقة متوافقة مع شروط استخدام YouTube ومواصفات أندرويد وآبل. نحن لا نمتلك أي شراكة مباشرة مع يوتيوب، وننصحك دائماً بمطالعة شروط يوتيوب لضمان تجربة بث نظيفة."
+        }
+      ]
+    },
+    about: {
+      title: "من نحن",
+      lastUpdated: "2026-05-27",
+      sections: [
+        {
+          heading: "رؤيتنا وهدفنا الأساسي",
+          body: "انطلاقاً من رغبتنا المستمرة في تذليل العقبات التقنية أمام المبدعين الرقميين، قمنا بتطوير Qrytube (أو QR Deep Linker) ليكون المنصة العربية والعالمية المجانية الرائدة في صناعة وتوليد الأكواد والروابط الذكية. نؤمن بأن كل مبدع يستحق حصد ثمار جهده الكاملة دون أن تضيع زيارات جمهوره في فخ المتصفحات الداخلية المعقدة."
+        },
+        {
+          heading: "أداة ذكية متخصصة ومتطورة",
+          body: "موقعنا هو أداة رقمية متطورة مصممة خصيصاً لمساعدة صناع المحتوى ومسوقي قنوات اليوتيوب ومنصات التواصل الاجتماعي في توليد روابط عميقة ذكية (Deep Links) تتجاور المتصفحات الداخلية وتفتح التطبيقات الرسمية مباشرة لزيادة التفاعل، الاشتراكات والمشاهدات بنسبة تصل إلى 200% بضغطة واحدة."
+        },
+        {
+          heading: "مجانية ومتاحة للجميع بأمان مطلق",
+          body: "نرجو من خلال هذه الخدمة توفير أداة قوية، مستقرة، آمنة ومجانية 100% بدون إعلانات مزعجة وبأعلى دقة تصدير للطباعة (تصل إلى دقة 4K) لتناسب جميع استخداماتكم الورقية والترويجية والخدمية بلغات متعددة."
+        }
+      ]
+    },
+    contact: {
+      title: "اتصل بنا",
+      lastUpdated: "2026-05-27",
+      sections: [
+        {
+          heading: "يرحب فريق الموقع باستفساراتكم ورسائلكم دائماً!",
+          body: "يسعدنا جداً ويشرفنا تواصلكم المستمر والمثمر معنا. سواء كنت صانع محتوى متميز، مسوقاً رقمياً، أو زائر للأداة للتو، فإن آراءك ومقترحاتك تُمثّل الأساس والبوصلة التي نستعين بها في تحسين وتطوير وتوسيع نطاق هذه الأداة."
+        },
+        {
+          heading: "قنوات التواصل والبريد الإلكتروني الرسمي",
+          body: "لاستقبال الاستفسارات العامة، الاقتراحات التجارية، تدوين تقارير الأخطاء، أو أي مبادرات وشكاوى حول الرموز والروابط، يرجى التكرم بمراسلتنا مباشرة عبر البريد الإلكتروني الرسمي للموقع وسنقوم بالرد عليكم خلال مدة قصيرة وجيزة:"
+        },
+        {
+          heading: "البريد الإلكتروني للدعم والمقترحات",
+          body: "essamelmansy70@gmail.com"
         }
       ]
     }
@@ -502,6 +541,42 @@ export const legalData: { ar: { terms: LegalDocument; privacy: LegalDocument }; 
         {
           heading: "4. Third-Party Integrations & Affiliations",
           body: "Our tool creates protocol outputs compliant with Android OS and Apple iOS platforms. We have no commercial affiliations with YouTube or Alphabet, and we advise reading standard video delivery guidelines protectively."
+        }
+      ]
+    },
+    about: {
+      title: "About Us",
+      lastUpdated: "2026-05-27",
+      sections: [
+        {
+          heading: "Our Vision & Core Mission",
+          body: "Driven by our goal to dismantle digital hurdles for active creators, we designed Qrytube (or QR Deep Linker) to become a leading, free, worldwide smart routing utility. We believe creators deserve 100% translation of social views directly into active subscriber conversions."
+        },
+        {
+          heading: "Advanced Deep-Linking Service",
+          body: "Our platform is a state-of-the-art web suite developed specifically to aid builders, bloggers, and visual marketers in forging smart Deep Links that bypass default smartphone in-app browser sandboxes, instantly opening official social media apps directly on users' operating systems."
+        },
+        {
+          heading: "Safe, Reliable & Always Free",
+          body: "We are committed to delivering persistent service uptime, high redundancy configurations, and pixel-perfect high-resolution image outputs (up to pro 4K ready prints) completely free of charge and without disruptive advertisements."
+        }
+      ]
+    },
+    contact: {
+      title: "Contact Us",
+      lastUpdated: "2026-05-27",
+      sections: [
+        {
+          heading: "We Welcome Your Inquiries & Feedback!",
+          body: "We cherish your persistent input, reports, and questions. Whether you represent an emerging brand, a distinguished YouTube creator, or are just testing our custom design workspace, your feedback steers our continuous roadmap upgrades."
+        },
+        {
+          heading: "Official Contact Channels",
+          body: "For general questions, business cooperation, reporting system glitches, or submitting copyright notices, please direct your message straight to our official support mailbox below programmatically:"
+        },
+        {
+          heading: "Corporate Support Email Address",
+          body: "essamelmansy70@gmail.com"
         }
       ]
     }

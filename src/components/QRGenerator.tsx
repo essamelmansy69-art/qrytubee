@@ -22,7 +22,9 @@ import {
   Info,
   Facebook,
   Instagram,
-  Music
+  Music,
+  UploadCloud,
+  Trash2
 } from 'lucide-react';
 import { QRConfig, QRStyle } from '../types';
 import { parseYoutubeUrl, buildDeepLink } from '../utils';
@@ -69,6 +71,47 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
   const [downloadFormat, setDownloadFormat] = useState<'png' | 'jpg'>('png');
   const [copied, setCopied] = useState<boolean>(false);
   const [renderedPayload, setRenderedPayload] = useState<string>('');
+
+  // Custom Logo upload & styling states
+  const [customLogo, setCustomLogo] = useState<string | null>(null);
+  const [logoScale, setLogoScale] = useState<number>(0.18);
+  const [logoMargin, setLogoMargin] = useState<boolean>(true);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+
+  // File Upload Handlers for custom central logo
+  const handleLogoUpload = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      alert(t.alertUploadType);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (e.target?.result) {
+        setCustomLogo(e.target.result as string);
+        // Automatically ensure high quality error correction (H) is selected if safe central logo branding is set
+        setErrorCorrectionLevel('H');
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleLogoUpload(e.dataTransfer.files[0]);
+    }
+  };
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -152,6 +195,54 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
       };
 
       await QRCode.toCanvas(canvas, payload, qrOptions);
+
+      // Dynamically overlay uploaded custom logo if set
+      if (customLogo) {
+        const logoImg = new Image();
+        logoImg.src = customLogo;
+        await new Promise((resolve) => {
+          logoImg.onload = () => {
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              const cx = canvas.width / 2;
+              const cy = canvas.height / 2;
+              const logoSize = canvas.width * logoScale;
+
+              if (logoMargin) {
+                ctx.fillStyle = backgroundColor;
+                const badgeSize = logoSize * 1.25;
+                const badgeX = cx - badgeSize / 2;
+                const badgeY = cy - badgeSize / 2;
+                const radius = badgeSize * 0.2;
+
+                ctx.beginPath();
+                if (ctx.roundRect) {
+                  ctx.roundRect(badgeX, badgeY, badgeSize, badgeSize, radius);
+                } else {
+                  ctx.moveTo(badgeX + radius, badgeY);
+                  ctx.lineTo(badgeX + badgeSize - radius, badgeY);
+                  ctx.quadraticCurveTo(badgeX + badgeSize, badgeY, badgeX + badgeSize, badgeY + radius);
+                  ctx.lineTo(badgeX + badgeSize, badgeY + badgeSize - radius);
+                  ctx.quadraticCurveTo(badgeX + badgeSize, badgeY + badgeSize, badgeX + badgeSize - radius, badgeY + badgeSize);
+                  ctx.lineTo(badgeX + radius, badgeY + badgeSize);
+                  ctx.quadraticCurveTo(badgeX, badgeY + badgeSize, badgeX, badgeY + badgeSize - radius);
+                  ctx.lineTo(badgeX, badgeY + radius);
+                  ctx.quadraticCurveTo(badgeX, badgeY, badgeX + radius, badgeY);
+                }
+                ctx.closePath();
+                ctx.fill();
+              }
+
+              ctx.drawImage(logoImg, cx - logoSize / 2, cy - logoSize / 2, logoSize, logoSize);
+            }
+            resolve(true);
+          };
+          logoImg.onerror = () => {
+            console.error("Failed to load custom logo in preview render");
+            resolve(true);
+          };
+        });
+      }
     } catch (err) {
       console.error("Error generating QR", err);
     }
@@ -166,7 +257,10 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
     useSmartLink,
     foregroundColor, 
     backgroundColor, 
-    errorCorrectionLevel
+    errorCorrectionLevel,
+    customLogo,
+    logoScale,
+    logoMargin
   ]);
 
   const selectColorTemplate = (tpl: typeof COLOR_TEMPLATES[0]) => {
@@ -199,6 +293,55 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
       };
 
       await QRCode.toCanvas(tempCanvas, payload, qrOptions);
+
+      // Draw custom logo onto high-res canvas before generating download URL
+      if (customLogo) {
+        const logoImg = new Image();
+        logoImg.src = customLogo;
+
+        await new Promise((resolve) => {
+          logoImg.onload = () => {
+            const ctx = tempCanvas.getContext('2d');
+            if (ctx) {
+              const cx = tempCanvas.width / 2;
+              const cy = tempCanvas.height / 2;
+              const logoSize = tempCanvas.width * logoScale;
+
+              if (logoMargin) {
+                ctx.fillStyle = backgroundColor;
+                const badgeSize = logoSize * 1.25;
+                const badgeX = cx - badgeSize / 2;
+                const badgeY = cy - badgeSize / 2;
+                const radius = badgeSize * 0.2;
+
+                ctx.beginPath();
+                if (ctx.roundRect) {
+                  ctx.roundRect(badgeX, badgeY, badgeSize, badgeSize, radius);
+                } else {
+                  ctx.moveTo(badgeX + radius, badgeY);
+                  ctx.lineTo(badgeX + badgeSize - radius, badgeY);
+                  ctx.quadraticCurveTo(badgeX + badgeSize, badgeY, badgeX + badgeSize, badgeY + radius);
+                  ctx.lineTo(badgeX + badgeSize, badgeY + badgeSize - radius);
+                  ctx.quadraticCurveTo(badgeX + badgeSize, badgeY + badgeSize, badgeX + badgeSize - radius, badgeY + badgeSize);
+                  ctx.lineTo(badgeX + radius, badgeY + badgeSize);
+                  ctx.quadraticCurveTo(badgeX, badgeY + badgeSize, badgeX, badgeY + badgeSize - radius);
+                  ctx.lineTo(badgeX, badgeY + radius);
+                  ctx.quadraticCurveTo(badgeX, badgeY, badgeX + radius, badgeY);
+                }
+                ctx.closePath();
+                ctx.fill();
+              }
+
+              ctx.drawImage(logoImg, cx - logoSize / 2, cy - logoSize / 2, logoSize, logoSize);
+            }
+            resolve(true);
+          };
+          logoImg.onerror = () => {
+            console.error("Failed to load uploaded logo image into download canvas");
+            resolve(true);
+          };
+        });
+      }
 
       // Trigger download
       const mimeType = downloadFormat === 'png' ? 'image/png' : 'image/jpeg';
@@ -238,7 +381,37 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
         ...qrOptions
       });
 
-      const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      let finalSvg = svgString;
+      if (customLogo) {
+        // Compute standard central position inside SVG viewBox coordinate grid
+        const viewBoxMatch = svgString.match(/viewBox="0 0 (\d+) (\d+)"/);
+        if (viewBoxMatch) {
+          const w = parseInt(viewBoxMatch[1]);
+          const h = parseInt(viewBoxMatch[2]);
+          const logoSize = w * logoScale;
+          const cx = w / 2;
+          const cy = h / 2;
+          const lx = cx - logoSize / 2;
+          const ly = cy - logoSize / 2;
+          
+          let logoElements = '';
+          if (logoMargin) {
+            const badgeSize = logoSize * 1.25;
+            const bx = cx - badgeSize / 2;
+            const by = cy - badgeSize / 2;
+            const radius = badgeSize * 0.2;
+            logoElements += `<rect x="${bx}" y="${by}" width="${badgeSize}" height="${badgeSize}" fill="${backgroundColor}" rx="${radius}" ry="${radius}" />`;
+          }
+          
+          // Embed the base64 or custom logo image inside the SVG vector using standard self-contained image tag
+          logoElements += `<image href="${customLogo}" x="${lx}" y="${ly}" width="${logoSize}" height="${logoSize}" />`;
+          
+          // Insert inside SVG root before closing tag
+          finalSvg = svgString.replace('</svg>', `${logoElements}</svg>`);
+        }
+      }
+
+      const blob = new Blob([finalSvg], { type: 'image/svg+xml;charset=utf-8' });
       const blobUrl = URL.createObjectURL(blob);
       
       const link = document.createElement('a');
@@ -626,6 +799,144 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                 </p>
               </div>
             </div>
+          )}
+        </div>
+
+        {/* Module 4: Center Custom Logo (Optional) */}
+        <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-100" id="module_center_logo">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold font-arabic text-gray-800 flex items-center gap-2">
+              <span className="p-2 bg-rose-50 text-rose-600 rounded-xl">
+                <Youtube size={20} />
+              </span>
+              {t.mod4Title}
+            </h2>
+            <div className="text-xs text-gray-500 font-mono">STEP 4</div>
+          </div>
+
+          <p className="text-xs font-arabic text-gray-500 mb-4 leading-relaxed">
+            {t.mod4Desc}
+          </p>
+
+          {/* Drag & Drop Upload Zone */}
+          <div
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`relative rounded-2xl border-2 border-dashed p-6 transition-all duration-200 text-center flex flex-col items-center justify-center cursor-pointer ${
+              isDragging
+                ? 'border-red-500 bg-red-50/50'
+                : customLogo
+                ? 'border-emerald-300 bg-emerald-50/10'
+                : 'border-gray-200 bg-gray-50/30 hover:border-gray-300 hover:bg-gray-50/80'
+            }`}
+            onClick={() => document.getElementById('logo_file_input')?.click()}
+            id="logo_dropzone"
+          >
+            <input
+              id="logo_file_input"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                if (e.target.files && e.target.files[0]) {
+                  handleLogoUpload(e.target.files[0]);
+                }
+              }}
+            />
+
+            {customLogo ? (
+              <div className="space-y-3">
+                <div className="mx-auto w-16 h-16 rounded-xl border border-gray-100 shadow-sm p-1.5 bg-white flex items-center justify-center overflow-hidden">
+                  <img
+                    src={customLogo}
+                    alt="Channel Logo Preview"
+                    className="w-full h-full object-contain rounded-md animate-scaleIn"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-emerald-700 font-arabic flex items-center justify-center gap-1.5">
+                    <CheckCircle2 size={14} className="text-emerald-500" />
+                    {t.successUploadMsg}
+                  </p>
+                  <p className="text-[10px] text-gray-400 font-arabic mt-0.5">
+                    {t.changeImgTip}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="mx-auto p-3 bg-red-50 text-red-600 rounded-2xl w-fit">
+                  <UploadCloud size={24} />
+                </div>
+                <p className="text-xs font-bold text-gray-700 font-arabic">
+                  {t.dragDropText}
+                </p>
+                <p className="text-[10px] text-gray-400 font-arabic">
+                  {t.uploadFormatTip}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Logo visual adjustments controls (appears only when custom logo is set) */}
+          {customLogo && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="mt-5 pt-4 border-t border-gray-100 space-y-4"
+              id="logo_visual_controls"
+            >
+              <h3 className="font-bold text-xs font-arabic text-gray-700 block">
+                🛠️ {t.visualControlHeading}
+              </h3>
+
+              {/* Slider for scaling */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs font-arabic">
+                  <span className="text-gray-600 font-semibold">{t.logoScaleLabel}</span>
+                  <span className="text-red-600 font-mono font-bold">{(logoScale * 100).toFixed(0)}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="0.15"
+                  max="0.30"
+                  step="0.01"
+                  value={logoScale}
+                  onChange={(e) => setLogoScale(parseFloat(e.target.value))}
+                  className="w-full min-h-[1.5rem] accent-red-600 hover:accent-red-700 cursor-pointer"
+                />
+                <div className="flex justify-between text-[9px] text-gray-400 font-arabic">
+                  <span>{t.balancedSmall}</span>
+                  <span>{t.largeOverlay}</span>
+                </div>
+              </div>
+
+              {/* Protective white boundary mask toggle */}
+              <label className="flex items-center gap-2.5 cursor-pointer bg-slate-50/50 hover:bg-slate-50 border border-slate-100 p-3 rounded-2xl select-none transition-all">
+                <input
+                  type="checkbox"
+                  checked={logoMargin}
+                  onChange={(e) => setLogoMargin(e.target.checked)}
+                  className="w-4 h-4 rounded text-red-600 focus:ring-red-500 border-gray-300 accent-red-600 cursor-pointer"
+                />
+                <span className="text-xs text-gray-700 font-arabic leading-relaxed font-semibold">
+                  {t.maskCheckboxLabel}
+                </span>
+              </label>
+
+              {/* Remove current logo button */}
+              <button
+                type="button"
+                onClick={() => setCustomLogo(null)}
+                className="w-full py-2.5 px-3 bg-red-50 hover:bg-red-100 text-red-600 font-bold font-arabic rounded-xl transition-all cursor-pointer text-xs flex items-center justify-center gap-1.5"
+                id="remove_logo_btn"
+              >
+                <Trash2 size={14} />
+                <span>{t.removeLogoBtn}</span>
+              </button>
+            </motion.div>
           )}
         </div>
 

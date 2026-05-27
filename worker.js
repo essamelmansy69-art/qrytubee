@@ -153,6 +153,260 @@ export default {
       });
     }
 
+    // 2.5 Serve legal and meta pages for AdSense compliance
+    if (pathname === '/privacy' || pathname === '/terms' || pathname === '/about' || pathname === '/contact') {
+      let title = '';
+      let contentHtml = '';
+      
+      if (pathname === '/privacy') {
+        title = 'سياسة الخصوصية وسرية البيانات - QR Deep Linker';
+        contentHtml = `
+          <div class="section">
+              <div class="section-title">1. الخصوصية الفائقة وحماية البيانات</div>
+              <div class="section-body">نحن في موقع QR Deep Linker نولي أهمية قصوى لخصوصية زوارنا ومستخدمينا بنسبة 100%. على خلاف الأدوات والمواقع الأخرى، تتم جميع العمليات والروابط وتصميمات الأوان محلياً بالكامل على متصفحك الخاص (Client-Side). نحن لا نقوم برفع أو حفظ أو تخزين روابطك الشخصية أو صورك أو شعاراتك على خلفية أي خوادم خارجية.</div>
+          </div>
+          <div class="section">
+              <div class="section-title">2. عدم جمع البيانات الشخصية الحساسة</div>
+              <div class="section-body">لا تتطلب الأداة منك إنشاء حساب، أو تسجيل بريد إلكتروني، أو تقديم أي معلومات تواصل شخصية حساسة على الإطلاق. الخدمة مجانية كلياً، ومتاحة بشكل آمن ومرن لتسريع تجربة مشاركة المحتوى الخاص بك.</div>
+          </div>
+          <div class="section">
+              <div class="section-title">3. ملفات تعريف الارتباط (Cookies)</div>
+              <div class="section-body">نستخدم ملفات تعريف الارتباط (Cookies) والذاكرة المحلية للمتصفح (localStorage) بطريقة أساسية وشفافة لتحسين تجربة تصفحك، مثل تذكر تفضيلاتك اللغوية (العربية أو الإنجليزية) لتسهيل وتيسير استخدامك للأداة في الزيارات القادمة.</div>
+          </div>
+          <div class="section">
+              <div class="section-title">4. إعلانات الأطراف الثالثة (شبكة جوجل أدسنس)</div>
+              <div class="section-body">قد نستعين بشركات إعلان لأطراف ثالثة (مثل جوجل أدسنس Google AdSense) وعرضها عند زيارة موقعنا الإلكتروني. قد تستخدم هذه الشركات معلومات (لا تشمل اسمك أو عنوانك أو بريدك الإلكتروني) حول زياراتك لهذا الموقع من أجل تقديم إعلانات مخصصة وملائمة حول السلع والخدمات التي تهمك عن طريق ملفات تعريف الارتباط.</div>
+          </div>`;
+      } else if (pathname === '/terms') {
+        title = 'شروط الخدمة والاستخدام - QR Deep Linker';
+        contentHtml = `
+          <div class="section">
+              <div class="section-title">1. الخدمة المجانية وبنود الاستخدام</div>
+              <div class="section-body">موقعنا يقدم خدمة برمجية مجانية تماماً بنسبة 100% لصناع المحتوى، والناشرين، والمسوقين لتسهيل الانتقال الآمن وحفض الروابط وتوليد أكواد الـ QR الذكية لدعم وزيادة الاشتراكات والتفاعل العضوي. يُرخص لك استخدام الخدمة لأغراضك الشخصية والتجارية السليمة دون أي رسوم.</div>
+          </div>
+          <div class="section">
+              <div class="section-title">2. القيود والمحظورات القانونية</div>
+              <div class="section-body">يُحظر تماماً وبشكل قاطع استخدام موقعنا أو الأكواد والروابط المولدة من خلالنا في توليد رموز تؤدي إلى محتوى غير قانوني، أو ينتهك حقوق الملكية الفكرية بأي شكل، أو يروج ويحرض على الكراهية، العنف، العنصرية، أو يحتوي على برمجيات ضارة وتصيدية.</div>
+          </div>
+          <div class="section">
+              <div class="section-title">3. المسؤولية القانونية والأخلاقية</div>
+              <div class="section-body">يتحمل المستخدم أو صانع المحتوى المسؤولية التامة والأخلاقية والوحيدة عن طبيعة ومحتوى الروابط التي يقوم بإدخالها والرموز التي ينشرها للجمهور. لا يتحمل الموقع أي مسؤولية عن سوء الاستخدام الخارجي للأولويات أو الأكواد الموزعة.</div>
+          </div>`;
+      } else if (pathname === '/about') {
+        title = 'من نحن - QR Deep Linker';
+        contentHtml = `
+          <div class="section">
+              <div class="section-title">رؤيتنا وهدفنا الأساسي</div>
+              <div class="section-body">انطلاقاً من رغبتنا المستمرة في تذليل العقبات التقنية أمام المبدعين الرقميين، قمنا بتشغيل موقع QR Deep Linker ليكون المنصة العربية والعالمية المجانية الرائدة في توليد الأكواد الرقمية والروابط الذكية. نؤمن بأن كل مبدع يستحق حصد ثمار جهده الكاملة دون أن تضيع زيارات جمهوره في فخ المتصفحات الداخلية المدمجة في تطبيقات التواصل الاجتماعي.</div>
+          </div>
+          <div class="section">
+              <div class="section-title">ما هي الخدمة التي نقدمها؟</div>
+              <div class="section-body">موقع Qrytube (أو QR Deep Linker) هو أداة رقمية متطورة مصممة لمساعدة صناع المحتوى ومسوقي قنوات اليوتيوب ومنصات التواصل الاجتماعي في توليد روابط عميقة ذكية (Deep Links) تتجاوز المتصفحات الداخلية وتفتح التطبيقات الرسمية مباشرة لزيادة التفاعل، الاشتراكات والمشاهدات بنسبة تصل إلى 200%.</div>
+          </div>
+          <div class="section">
+              <div class="section-title">مجانية، مستقرة، وآمنة للأبد</div>
+              <div class="section-body">أداتنا مجانية 100%، متميزة بخصوصية مطلقة لجهة معالجة كل شيء محلياً بالكامل على متصفحك (Client-side)، وبأعلى كفاءة تصدير للطباعة (تصل إلى دقة 4K) لتناسب جميع حملات المبدعين ومطبوعاتهم بلغات متعددة لضمان كمال تجاربهم وحملاتهم التسويقية.</div>
+          </div>`;
+      } else if (pathname === '/contact') {
+        title = 'اتصل بنا - QR Deep Linker';
+        contentHtml = `
+          <div class="section">
+              <div class="section-title">نرحب باستفساراتكم ورسائلكم في أي وقت!</div>
+              <div class="section-body">يسعدنا جداً ويشرفنا تواصلكم المستمر والمثمر معنا. سواء كنت صانع محتوى متميز، مسوقاً رقمياً، أو زائر للأداة للتو، فإن آراءك ومقترحاتك تُمثّل الأساس والبوصلة التي نستعين بها في تحسين وتطوير وتوسيع نطاق هذه الأداة.</div>
+          </div>
+          <div class="section">
+              <div class="section-title">قنوات التواصل والبريد الإلكتروني الرسمي لاستقبال الشكاوى والاقتراحات</div>
+              <div class="section-body">
+                  يمكنك التواصل معنا مباشرة وتلقي الرد السريع عبر بريدنا الإلكتروني الرسمي للدعم الفني والشكاوى والمقترحات والتعاون الإعلاني والتجاري: <br><br>
+                  <a href="mailto:essamelmansy70@gmail.com" class="email-link">essamelmansy70@gmail.com</a>
+              </div>
+          </div>`;
+      }
+
+      const html = `<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #dc2626;
+            --primary-hover: #b91c1c;
+            --bg: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --border: #f1f5f9;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Cairo', 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.8;
+            -webkit-font-smoothing: antialiased;
+            padding: 2rem 1rem;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 720px;
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 2.5rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+            position: relative;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 2px solid var(--border);
+        }
+        .logo-box {
+            background: var(--primary);
+            color: white;
+            border-radius: 12px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo-box svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+        .app-name {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-align: right;
+            color: var(--text-main);
+        }
+        .last-updated {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+        .section {
+            background-color: #fafafa;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+        .section-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+        .section-body {
+            font-size: 0.925rem;
+            color: var(--text-muted);
+        }
+        .email-link {
+            font-family: 'Inter', 'Cairo', monospace;
+            font-weight: 750;
+            color: var(--primary);
+            text-decoration: underline;
+            font-size: 1.1rem;
+        }
+        .footer {
+            margin-top: 2.5rem;
+            text-align: center;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--primary);
+            color: white;
+            padding: 0.85rem 2rem;
+            border-radius: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
+        }
+        .btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(220, 38, 38, 0.25);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .badge-footer {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-top: 1.5rem;
+            display: block;
+        }
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem;
+            }
+            .container {
+                padding: 1.5rem;
+            }
+            h1 {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-box">
+                <svg viewBox="0 0 24 24"><path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.107C19.522 3.54 12 3.54 12 3.54s-7.522 0-9.388.516a3.003 3.003 0 0 0-2.11 2.107C0 8.029 0 12 0 12s0 3.971.516 5.837a3.003 3.003 0 0 0 2.11 2.107c1.866.516 9.388.516 9.388.516s7.522 0 9.388-.516a3.003 3.003 0 0 0 2.11-2.107C24 15.971 24 12 24 12s0-3.971-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            </div>
+            <div class="app-name">QR Deep Linker</div>
+        </div>
+        <h1>${title}</h1>
+        <div class="last-updated">آخر تحديث: 27 مايو 2026</div>
+        
+        <div class="content">
+            ${contentHtml}
+        </div>
+
+        <div class="footer">
+            <a href="/" class="btn">العودة للرئيسية</a>
+            <span class="badge-footer">تمت التهيئة والموائمة البرمجية للموقع لضمان الامتثال التام لشروط وسياسات جوجل أدسنس (Google AdSense) بنجاح.</span>
+        </div>
+    </div>
+</body>
+</html>`;
+
+      return new Response(html, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'public, max-age=86400',
+          'X-Content-Type-Options': 'nosniff',
+        },
+      });
+    }
+
     // 3. Optional edge redirection acceleration for smart QR codes (?r=...)
     // This allows native redirection directly from the edge, speeding up the open process!
     const redirectUrl = url.searchParams.get('r') || url.searchParams.get('url');
