@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { QRConfig, QRStyle } from '../types';
 import { parseYoutubeUrl, buildDeepLink } from '../utils';
+import { translations } from '../translations';
 
 import { motion } from 'motion/react';
 
@@ -54,7 +55,32 @@ const COLOR_TEMPLATES = [
   { name: 'أسود مونوكروم', dark: '#000000', light: '#FFFFFF', eye: '#000000' },
 ];
 
-export default function QRGenerator() {
+export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
+  const t = translations[lang];
+
+  const getColorTemplateName = (name: string) => {
+    switch (name) {
+      case 'يوتيوب الكلاسيكي': return t.classicYtTemplate;
+      case 'الوضع الداكن الفاخر': return t.luxuryDarkTemplate;
+      case 'الذهبي الأنيق': return t.goldTemplate;
+      case 'أزرق نيون': return t.neonBlueTemplate;
+      case 'بنفسجي إنستغرام': return t.instagramTemplate;
+      case 'أحمر مطفي ناعم': return t.softRedTemplate;
+      case 'أخضر ملكي': return t.royalGreenTemplate;
+      case 'أسود مونوكروم': return t.monochromeTemplate;
+      default: return name;
+    }
+  };
+
+  const getPresetName = (name: string) => {
+    switch (name) {
+      case 'يوتيوب أحمر': return t.presetYtClassic;
+      case 'يوتيوب أبيض': return t.presetYtWhite;
+      case 'شورتس': return t.presetYtShorts;
+      default: return name;
+    }
+  };
+
   const [urlInput, setUrlInput] = useState('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
   const [deepLinkType, setDeepLinkType] = useState<'vnd' | 'ios' | 'android' | 'standard'>('vnd');
   const [useSmartLink, setUseSmartLink] = useState<boolean>(true);
@@ -249,7 +275,7 @@ export default function QRGenerator() {
   const handleLogoUpload = (file: File) => {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      alert('الرجاء تحميل ملف صورة صالح.');
+      alert(t.alertUploadType);
       return;
     }
 
@@ -289,8 +315,8 @@ export default function QRGenerator() {
   // Download High-Resolution version of the QR Code
   const handleDownload = async () => {
     const payload = getActivePayload();
-    if (!payload) {
-      alert('الرجاء إدخال رابط يوتيوب صحيح أولاً لتتمكن من تحميل رمز الـ QR!');
+    if (!payload || !urlInput.trim()) {
+      alert(t.alertInputFirst);
       return;
     }
     try {
@@ -411,7 +437,7 @@ export default function QRGenerator() {
           // Fallback context link
           try {
             await navigator.clipboard.writeText(getActivePayload());
-            alert('تم نسخ رابط الـ Deep Link كبديل لعدم دعم متصفحك نسخ الصور!');
+            alert(t.clipboardFallbackMsg);
           } catch (_) {}
         }
       }, 'image/png');
@@ -433,13 +459,13 @@ export default function QRGenerator() {
               <span className="p-2 bg-red-50 text-red-600 rounded-xl">
                 <Youtube size={20} />
               </span>
-              بيانات رابط اليوتيوب
+              {t.mod1Title}
             </h2>
             <div className="text-xs text-gray-400 font-mono">STEP 1</div>
           </div>
 
           <label className="text-sm font-medium font-arabic text-gray-600 mb-2 block" htmlFor="yt_url">
-            أدخل رابط اليوتيوب (فيديو، شورتس، قناة، قائمة تشغيل)
+            {t.labelYtUrl}
           </label>
           
           <div className="relative">
@@ -448,11 +474,11 @@ export default function QRGenerator() {
               type="text"
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
-              placeholder="مثال: https://www.youtube.com/watch?v=..."
+              placeholder={t.placeholderYtUrl}
               className="w-full pl-4 pr-12 py-3.5 bg-gray-50/50 hover:bg-gray-50 focus:bg-white rounded-2xl border border-gray-200 focus:border-red-500 focus:ring-2 focus:ring-red-100 font-mono text-sm transition-all focus:outline-none"
               dir="ltr"
             />
-            <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+            <div className={`absolute ${lang === 'ar' ? 'right-3.5' : 'left-3.5'} top-1/2 -translate-y-1/2 text-gray-400`}>
               <Youtube size={20} className={urlInfo.isValid && urlInfo.type !== 'unknown' ? 'text-red-500' : 'text-gray-400'} />
             </div>
           </div>
@@ -464,7 +490,7 @@ export default function QRGenerator() {
                 <>
                   <span className="inline-flex items-center gap-1 py-1 px-2.5 rounded-lg bg-emerald-50 text-emerald-700 font-medium border border-emerald-100">
                     <CheckCircle2 size={13} />
-                    رابط يوتيوب صحيح تم التعرف عليه بنجاح
+                    {t.validLink}
                   </span>
                   
                   <span className="inline-flex items-center gap-1 py-1 px-2.5 rounded-lg bg-red-50 text-red-700 font-medium capitalize border border-red-100 font-sans">
@@ -479,7 +505,7 @@ export default function QRGenerator() {
               ) : (
                 <span className="inline-flex items-center gap-1 py-1 px-2.5 rounded-lg bg-amber-50 text-amber-700 font-medium border border-amber-100">
                   <AlertCircle size={13} />
-                  سيتم توليد كود QR للرابط المُدخل مباشرة كرابط عام
+                  {t.fallbackLinkMsg}
                 </span>
               )}
             </div>
@@ -493,13 +519,13 @@ export default function QRGenerator() {
               <span className="p-2 bg-blue-50 text-blue-600 rounded-xl">
                 <Smartphone size={20} />
               </span>
-              تقنية الرابط العميق (Deep Link)
+              {t.mod2Title}
             </h2>
             <div className="text-xs text-gray-400 font-mono">STEP 2</div>
           </div>
 
           <p className="text-sm text-gray-500 font-arabic mb-4 leading-relaxed">
-            الروابط العميقة تجبر الهاتف على تشغيل تطبيق YouTube الرسمي مباشرة بدلاً من فتحه داخل المتصفح الداخلي لـ (Instagram/Facebook) الذي لا يتيح الاشتراك أو التفاعل إلا بعد تسجيل الدخول المعقد.
+            {t.mod2Desc}
           </p>
 
           {/* Interactive QR Link Mode selector block */}
@@ -508,14 +534,14 @@ export default function QRGenerator() {
               <span className="p-1.5 bg-red-500 text-white rounded-lg flex items-center justify-center animate-pulse">
                 <Sparkles size={14} />
               </span>
-              <span className="font-bold text-sm text-gray-800 font-arabic">وضع ترميز كود الـ QR لليوتيوب:</span>
+              <span className="font-bold text-sm text-gray-800 font-arabic">{t.encodingModeTitle}</span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" id="smart_link_mode_selector">
               {/* Option 1: Smart Link (Recommended) */}
               <button
                 onClick={() => setUseSmartLink(true)}
-                className={`p-4 rounded-xl border text-right transition-all cursor-pointer flex flex-col gap-1.5 ${
+                className={`p-4 rounded-xl border ${lang === 'ar' ? 'text-right' : 'text-left'} transition-all cursor-pointer flex flex-col gap-1.5 ${
                   useSmartLink 
                     ? 'border-red-500 bg-red-50/40 ring-2 ring-red-100'
                     : 'border-gray-200 bg-white hover:bg-gray-50'
@@ -524,19 +550,19 @@ export default function QRGenerator() {
               >
                 <div className="flex items-center justify-between w-full">
                   <span className="font-black text-xs text-red-600 font-arabic flex items-center gap-1">
-                    🌟 وضع الرابط الذكي (مستحسن ومعتمد)
+                    {t.modeSmartTitle}
                   </span>
                   {useSmartLink && <span className="w-2 h-2 bg-red-600 rounded-full" />}
                 </div>
                 <p className="text-[11px] text-gray-500 font-arabic leading-relaxed">
-                  يولّد رابط ويب آمن (<span className="font-sans">https://</span>) تقرأه كاميرا الهاتف بكل سهولة ويفتح تطبيق اليوتيوب تلقائياً بدون أي تجميد.
+                  {t.modeSmartDesc}
                 </p>
               </button>
 
               {/* Option 2: Direct Protocol Scheme */}
               <button
                 onClick={() => setUseSmartLink(false)}
-                className={`p-4 rounded-xl border text-right transition-all cursor-pointer flex flex-col gap-1.5 ${
+                className={`p-4 rounded-xl border ${lang === 'ar' ? 'text-right' : 'text-left'} transition-all cursor-pointer flex flex-col gap-1.5 ${
                   !useSmartLink 
                     ? 'border-slate-500 bg-slate-50 ring-2 ring-slate-100'
                     : 'border-gray-200 bg-white hover:bg-gray-50'
@@ -545,12 +571,12 @@ export default function QRGenerator() {
               >
                 <div className="flex items-center justify-between w-full">
                   <span className="font-bold text-xs text-slate-700 font-arabic">
-                    البروتوكول المباشر (لشعارات مخصصة)
+                    {t.modeDirectTitle}
                   </span>
                   {!useSmartLink && <span className="w-2 h-2 bg-slate-600 rounded-full" />}
                 </div>
                 <p className="text-[11px] text-gray-500 font-arabic leading-relaxed">
-                  يكتب الكود بالبروتوكول الداخلي للجهاز مباشرة. قد لا تقبله بعض أنواع كاميرات الهواتف الافتراضية.
+                  {t.modeDirectDesc}
                 </p>
               </button>
             </div>
@@ -561,7 +587,7 @@ export default function QRGenerator() {
             {/* option 1: VND (Universal Deep Link) */}
             <button
               onClick={() => setDeepLinkType('vnd')}
-              className={`p-4 rounded-2xl border text-right transition-all cursor-pointer flex flex-col justify-between h-full ${
+              className={`p-4 rounded-2xl border ${lang === 'ar' ? 'text-right' : 'text-left'} transition-all cursor-pointer flex flex-col justify-between h-full ${
                 deepLinkType === 'vnd'
                   ? 'border-blue-500 bg-blue-50/40 col-span-1 ring-2 ring-blue-100'
                   : 'border-gray-100 hover:border-gray-200 bg-white'
@@ -570,11 +596,11 @@ export default function QRGenerator() {
               id="vnd_strategy_btn"
             >
               <div className="flex items-start justify-between w-full mb-1">
-                <span className="font-bold text-sm text-gray-800 font-arabic">بروتوكول التطبيق الذكي (vnd.youtube)</span>
+                <span className="font-bold text-sm text-gray-800 font-arabic">{t.scheme1Title}</span>
                 {deepLinkType === 'vnd' && <span className="bg-blue-500 text-white rounded-full p-0.5"><Check size={12} /></span>}
               </div>
               <span className="text-xs text-gray-500 font-arabic leading-relaxed">
-                الأكثر موثوقية لمسح رموز الـ QR على كل من هواتف Android و iPhone. يفتح التطبيق مباشرة.
+                {t.scheme1Desc}
               </span>
               <span className="text-xs font-mono text-blue-600 mt-2 block" dir="ltr">vnd.youtube:...</span>
             </button>
@@ -582,7 +608,7 @@ export default function QRGenerator() {
             {/* option 2: Intent-based Android */}
             <button
               onClick={() => setDeepLinkType('android')}
-              className={`p-4 rounded-2xl border text-right transition-all cursor-pointer flex flex-col justify-between h-full ${
+              className={`p-4 rounded-2xl border ${lang === 'ar' ? 'text-right' : 'text-left'} transition-all cursor-pointer flex flex-col justify-between h-full ${
                 deepLinkType === 'android'
                   ? 'border-blue-500 bg-blue-50/40 col-span-1 ring-2 ring-blue-100'
                   : 'border-gray-100 hover:border-gray-200 bg-white'
@@ -591,11 +617,11 @@ export default function QRGenerator() {
               id="android_intent_btn"
             >
               <div className="flex items-start justify-between w-full mb-1">
-                <span className="font-bold text-sm text-gray-800 font-arabic">مُوجه أندرويد القوي (Android Intent)</span>
+                <span className="font-bold text-sm text-gray-800 font-arabic">{t.scheme2Title}</span>
                 {deepLinkType === 'android' && <span className="bg-blue-500 text-white rounded-full p-0.5"><Check size={12} /></span>}
               </div>
               <span className="text-xs text-gray-500 font-arabic leading-relaxed">
-                إجبار تام لنظام Android لفتح تطبيق يوتيوب ويدعم تحويل تلقائي فوري للمتصفح إذا لزم الأمر.
+                {t.scheme2Desc}
               </span>
               <span className="text-xs font-mono text-blue-600 mt-2 block" dir="ltr">intent://youtube...</span>
             </button>
@@ -603,7 +629,7 @@ export default function QRGenerator() {
             {/* option 3: iOS youtube:// */}
             <button
               onClick={() => setDeepLinkType('ios')}
-              className={`p-4 rounded-2xl border text-right transition-all cursor-pointer flex flex-col justify-between h-full ${
+              className={`p-4 rounded-2xl border ${lang === 'ar' ? 'text-right' : 'text-left'} transition-all cursor-pointer flex flex-col justify-between h-full ${
                 deepLinkType === 'ios'
                   ? 'border-blue-500 bg-blue-50/40 col-span-1 ring-2 ring-blue-100'
                   : 'border-gray-100 hover:border-gray-200 bg-white'
@@ -612,11 +638,11 @@ export default function QRGenerator() {
               id="ios_scheme_btn"
             >
               <div className="flex items-start justify-between w-full mb-1">
-                <span className="font-bold text-sm text-gray-800 font-arabic">مخطط آبل المباشر (youtube://)</span>
+                <span className="font-bold text-sm text-gray-800 font-arabic">{t.scheme3Title}</span>
                 {deepLinkType === 'ios' && <span className="bg-blue-500 text-white rounded-full p-0.5"><Check size={12} /></span>}
               </div>
               <span className="text-xs text-gray-500 font-arabic leading-relaxed">
-                مخصص بشكل ممتاز لعشاق وهواتف iPhone/iPad لتشغيل تطبيق العرض الرسمي دون تأخير.
+                {t.scheme3Desc}
               </span>
               <span className="text-xs font-mono text-blue-600 mt-2 block" dir="ltr">youtube://www.youtube...</span>
             </button>
@@ -624,7 +650,7 @@ export default function QRGenerator() {
             {/* option 4: Standard Standard (Browser Fallback) */}
             <button
               onClick={() => setDeepLinkType('standard')}
-              className={`p-4 rounded-2xl border text-right transition-all cursor-pointer flex flex-col justify-between h-full ${
+              className={`p-4 rounded-2xl border ${lang === 'ar' ? 'text-right' : 'text-left'} transition-all cursor-pointer flex flex-col justify-between h-full ${
                 deepLinkType === 'standard'
                   ? 'border-blue-500 bg-blue-50/40 col-span-1 ring-2 ring-blue-100'
                   : 'border-gray-100 hover:border-gray-200 bg-white'
@@ -633,11 +659,11 @@ export default function QRGenerator() {
               id="browser_link_btn"
             >
               <div className="flex items-start justify-between w-full mb-1">
-                <span className="font-bold text-sm text-gray-800 font-arabic">رابط ويب عادي (متصفح قياسي)</span>
+                <span className="font-bold text-sm text-gray-800 font-arabic">{t.scheme4Title}</span>
                 {deepLinkType === 'standard' && <span className="bg-blue-500 text-white rounded-full p-0.5"><Check size={12} /></span>}
               </div>
               <span className="text-xs text-gray-500 font-arabic leading-relaxed">
-                الرابط الكلاسيكي الافتراضي بدون أي تعديلات. يفتح الرابط كالمعتاد في المتصفح المتاح بالهاتف.
+                {t.scheme4Desc}
               </span>
               <span className="text-xs font-mono text-blue-600 mt-2 block" dir="ltr">https://www.youtube...</span>
             </button>
@@ -647,7 +673,7 @@ export default function QRGenerator() {
           <div className="mt-4 bg-gray-50 p-3.5 rounded-xl border border-gray-100" id="deeplink_technical_preview">
             <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500 mb-1 font-arabic">
               <Info size={14} />
-              الرابط المُشفر الفعلي داخل الـ QR Code:
+              {t.rawPayloadLabel}
             </div>
             <div className="font-mono text-xs text-slate-600 break-all bg-white px-2.5 py-1.5 rounded-lg border border-gray-200" dir="ltr">
               {getActivePayload()}
@@ -662,27 +688,27 @@ export default function QRGenerator() {
               <span className="p-2 bg-purple-50 text-purple-600 rounded-xl">
                 <Settings size={20} />
               </span>
-              الألوان والتخصيص البصري
+              {t.mod3Title}
             </h2>
             <div className="text-xs text-gray-400 font-mono">STEP 3</div>
           </div>
 
           {/* Color Presets Templates */}
           <div className="mb-6">
-            <span className="text-xs font-semibold text-gray-400 font-arabic block mb-2.5">نماذج ألوان جاهزة وبنقرة واحدة:</span>
+            <span className="text-xs font-semibold text-gray-400 font-arabic block mb-2.5">{t.colorPresetsLabel}</span>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2" id="color_presets_grid">
               {COLOR_TEMPLATES.map((tpl, idx) => (
                 <button
                   key={idx}
                   onClick={() => selectColorTemplate(tpl)}
-                  className="flex items-center gap-2 p-2 rounded-xl border border-gray-100 hover:border-gray-200 hover:bg-gray-50 text-right cursor-pointer text-xs font-arabic"
+                  className={`flex items-center gap-2 p-2 rounded-xl border border-gray-100 hover:border-gray-200 hover:bg-gray-50 ${lang === 'ar' ? 'text-right' : 'text-left'} cursor-pointer text-xs font-arabic`}
                   type="button"
                 >
                   <div className="flex -space-x-1 pl-1" dir="ltr">
                     <span className="w-4 h-4 rounded-full border border-gray-200 inline-block shrink-0 shadow-xs" style={{ backgroundColor: tpl.dark }} />
                     <span className="w-4 h-4 rounded-full border border-gray-200 inline-block shrink-0 shadow-xs" style={{ backgroundColor: tpl.light }} />
                   </div>
-                  <span className="text-gray-700 truncate font-medium">{tpl.name}</span>
+                  <span className="text-gray-700 truncate font-medium">{getColorTemplateName(tpl.name)}</span>
                 </button>
               ))}
             </div>
@@ -694,7 +720,7 @@ export default function QRGenerator() {
               {/* Foreground Color picker */}
               <div>
                 <label className="text-xs font-semibold text-gray-600 font-arabic mb-2 block" htmlFor="foreground_color">
-                  لون مربعات الـ QR الرئيسية (المقدمة):
+                  {t.labelForeground}
                 </label>
                 <div className="flex items-center gap-2.5">
                   <div className="relative w-12 h-10 rounded-xl overflow-hidden border border-gray-200 shrink-0 cursor-pointer">
@@ -718,7 +744,7 @@ export default function QRGenerator() {
               {/* Background Color picker */}
               <div>
                 <label className="text-xs font-semibold text-gray-600 font-arabic mb-2 block" htmlFor="background_color">
-                  لون خلفية الـ QR Code:
+                  {t.labelBackground}
                 </label>
                 <div className="flex items-center gap-2.5">
                   <div className="relative w-12 h-10 rounded-xl overflow-hidden border border-gray-200 shrink-0 cursor-pointer">
@@ -742,15 +768,15 @@ export default function QRGenerator() {
 
             {/* Advanced configurations */}
             <div className="space-y-4 rounded-2xl bg-gray-50 p-4 border border-gray-100">
-              <span className="text-xs font-bold text-gray-700 font-arabic block mb-1">إعدادات الحماية والتكامل:</span>
+              <span className="text-xs font-bold text-gray-700 font-arabic block mb-1">{t.advConfigTitle}</span>
               
               {/* Error correction level info & selector */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-xs font-medium text-gray-600 font-arabic" htmlFor="error_correction_level">
-                    مستوى تصحيح الخطأ وللأخطاء:
+                    {t.labelErrorCorrection}
                   </label>
-                  <span className="text-[10px] text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded font-arabic">بسبب وجود الشعار</span>
+                  <span className="text-[10px] text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded font-arabic">{t.logoOptimized}</span>
                 </div>
                 <select
                   id="error_correction_level"
@@ -758,13 +784,13 @@ export default function QRGenerator() {
                   onChange={(e) => setErrorCorrectionLevel(e.target.value as 'L' | 'M' | 'Q' | 'H')}
                   className="w-full px-3 py-2 bg-white rounded-xl border border-gray-200 text-xs font-arabic focus:outline-none focus:ring-1 focus:ring-red-500 cursor-pointer"
                 >
-                  <option value="H">عالي جداً (H - 30% استرداد) - الأفضل للشعار</option>
-                  <option value="Q">متوسط عالي (Q - 25% استرداد)</option>
-                  <option value="M">متوسط (M - 15% استرداد)</option>
-                  <option value="L">ضعيف (L - 7% استرداد)</option>
+                  <option value="H">{t.errLvlH}</option>
+                  <option value="Q">{t.errLvlQ}</option>
+                  <option value="M">{t.errLvlM}</option>
+                  <option value="L">{t.errLvlL}</option>
                 </select>
                 <span className="text-[10px] text-gray-400 mt-1 block font-arabic leading-normal">
-                  تحديد مستوى أعلى يحمي الرمز ويضمن سلامة فك قراءة الكود حتى لو كان الشعار يغطي مساحة من الرمز بالمنتصف.
+                  {t.errCorrectionDesc}
                 </span>
               </div>
             </div>
@@ -772,14 +798,14 @@ export default function QRGenerator() {
 
           {/* Dynamic Inverted colors warning banner */}
           {isColorWayInverted() && (
-            <div className="mt-5 p-4 bg-amber-50 rounded-2xl border border-amber-200 flex items-start gap-3 text-right animate-fadeIn" id="inverted_color_banner">
+            <div className={`mt-5 p-4 bg-amber-50 rounded-2xl border border-amber-200 flex items-start gap-3 ${lang === 'ar' ? 'text-right' : 'text-left'} animate-fadeIn`} id="inverted_color_banner">
               <span className="p-2 bg-amber-100 text-amber-700 rounded-xl mt-0.5 shrink-0">
                 <AlertCircle size={18} />
               </span>
               <div className="space-y-1">
-                <h4 className="font-extrabold text-xs text-amber-950 font-arabic">⚠️ تنبيه الألوان المعكوسة (الوضع الداكن):</h4>
+                <h4 className="font-extrabold text-xs text-amber-950 font-arabic">{t.darkInvertedWarnTitle}</h4>
                 <p className="text-[11px] text-amber-800 font-arabic leading-relaxed">
-                  لقد حددت لون مربعات فاتحة مع خلفية داكنة! على الرغم من شكلها الليلي الجذاب، إلا أن <strong>العديد من كاميرات الهواتف الافتراضية والقديمة</strong> تعجز تماماً عن التعرف على رموز الـ QR المعكوسة. ننصح بشدة بتبديل دمج الألوان (مربعات داكنة وخلفية فاتحة) لضمان مسح فوري وناجح لجميع هواتف الزوار بنسبة 100%!
+                  {t.darkInvertedWarnDesc}
                 </p>
               </div>
             </div>
@@ -793,20 +819,20 @@ export default function QRGenerator() {
               <span className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
                 <Sparkles size={20} />
               </span>
-              شعار منتصف الـ QR كود
+              {t.mod4Title}
             </h2>
             <div className="text-xs text-gray-400 font-mono">STEP 4</div>
           </div>
 
           <p className="text-sm text-gray-500 font-arabic mb-4 leading-relaxed">
-            اختر أحد الشعارات الجاهزة الخاصة باليوتيوب أو قم بتحميل شعار قناتك المخصص مباشرة من جهازك لوضعه بمنتصف الكود!
+            {t.mod4Desc}
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5" id="logo_picker_grid">
             
             {/* Presets Grid */}
             <div className="space-y-3">
-              <span className="text-xs font-bold text-gray-600 font-arabic block">الشعارات الافتراضية الجاهزة:</span>
+              <span className="text-xs font-bold text-gray-600 font-arabic block">{t.presetsSubLabel}</span>
               <div className="grid grid-cols-3 gap-2">
                 {PRESETS.map((p) => (
                   <button
@@ -820,7 +846,7 @@ export default function QRGenerator() {
                     type="button"
                   >
                     <img src={p.url} alt={p.name} className="w-8 h-8 object-contain" referrerPolicy="no-referrer" />
-                    <span className="text-[10px] font-arabic font-medium text-gray-700 truncate w-full">{p.name}</span>
+                    <span className="text-[10px] font-arabic font-medium text-gray-700 truncate w-full">{getPresetName(p.name)}</span>
                   </button>
                 ))}
               </div>
@@ -835,13 +861,13 @@ export default function QRGenerator() {
                 }`}
                 type="button"
               >
-                بدون وضع أي شعار بالمنتصف
+                {t.presetNoneColor}
               </button>
             </div>
 
             {/* Custom PC/Mobile Logo file drag-drop area */}
             <div className="space-y-3">
-              <span className="text-xs font-bold text-gray-600 font-arabic block">تحميل شعار قناتك المخصص:</span>
+              <span className="text-xs font-bold text-gray-600 font-arabic block">{t.uploadCustomLabel}</span>
               
               <div
                 onDragOver={handleDragOver}
@@ -876,9 +902,9 @@ export default function QRGenerator() {
                       referrerPolicy="no-referrer"
                     />
                     <div className="text-xs font-arabic font-semibold text-emerald-700">
-                      تم تحميل الشعار الخاص بنجاح!
+                      {t.successUploadMsg}
                     </div>
-                    <span className="text-[10px] text-gray-400 font-arabic underline">انقر لتغيير الصورة</span>
+                    <span className="text-[10px] text-gray-400 font-arabic underline">{t.changeImgTip}</span>
                   </div>
                 ) : (
                   <div className="space-y-1.5 flex flex-col items-center">
@@ -886,10 +912,10 @@ export default function QRGenerator() {
                       <Upload size={18} />
                     </div>
                     <div className="text-xs font-arabic text-gray-700 font-medium">
-                      اسحب وأفلت شعارك هنا أو تصفح ملفاتك
+                      {t.dragDropText}
                     </div>
                     <div className="text-[10px] text-gray-400 font-arabic">
-                      يدعم PNG ، JPG (يفضل لوغو ذو شكل متكامل)
+                      {t.uploadFormatTip}
                     </div>
                   </div>
                 )}
@@ -900,13 +926,13 @@ export default function QRGenerator() {
           {/* Logo Sizing and Margins */}
           {logoPreset !== 'none' && (
             <div className="mt-5 bg-gray-50 p-4 rounded-2xl border border-gray-100 space-y-4">
-              <span className="text-xs font-semibold text-gray-700 font-arabic block mb-1">التحكم البصري بالشعار:</span>
+              <span className="text-xs font-semibold text-gray-700 font-arabic block mb-1">{t.visualControlHeading}</span>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Logo Scale Slider */}
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-gray-600 font-arabic">حجم الشعار بالمنتصف:</span>
+                    <span className="text-xs text-gray-600 font-arabic">{t.logoScaleLabel}</span>
                     <span className="text-xs font-mono font-medium text-gray-800">{Math.round(logoScale * 100)}%</span>
                   </div>
                   <input
@@ -919,8 +945,8 @@ export default function QRGenerator() {
                     className="w-full accent-emerald-500 cursor-pointer"
                   />
                   <div className="flex justify-between text-[9px] text-gray-400 mt-1 font-arabic">
-                    <span>حجم صغير (مثالي)</span>
-                    <span>حجم كبير (أقصى حماية)</span>
+                    <span>{t.balancedSmall}</span>
+                    <span>{t.largeOverlay}</span>
                   </div>
                 </div>
 
@@ -934,7 +960,7 @@ export default function QRGenerator() {
                     className="w-4.5 h-4.5 text-emerald-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-emerald-500 focus:outline-none accent-emerald-600 cursor-pointer"
                   />
                   <label htmlFor="checkbox_logo_margin" className="text-xs font-medium text-gray-700 font-arabic cursor-pointer">
-                    وضع طبقة عازلة بيضاء خلف الشعار لمنع تداخل نقاط الـ QR
+                    {t.maskCheckboxLabel}
                   </label>
                 </div>
               </div>
@@ -947,9 +973,9 @@ export default function QRGenerator() {
       <div className="lg:col-span-5 space-y-6" id="qr_right_panel">
         
         {/* Preview and basic action Card */}
-        <div className="bg-white rounded-3xl p-6 shadow-md border border-gray-100 flex flex-col items-center justify-center text-center stick top-6" id="preview_sticky_container">
-          <span className="text-xs font-bold text-gray-400 font-arabic tracking-wider uppercase mb-1 block">نافذة المعاينة التفاعلية المباشرة</span>
-          <h3 className="text-lg font-bold font-arabic text-gray-800 mb-6">رمز الاستجابة السريعة النهائي (QR Code)</h3>
+        <div className="bg-white rounded-3xl p-6 shadow-md border border-gray-100 flex flex-col items-center justify-center text-center sticky top-6" id="preview_sticky_container">
+          <span className="text-xs font-bold text-gray-400 font-arabic tracking-wider uppercase mb-1 block">{t.previewHeading}</span>
+          <h3 className="text-lg font-bold font-arabic text-gray-800 mb-6">{t.finalQrLabel}</h3>
 
           {/* QR Code Canvas container */}
           <div className="p-6 bg-slate-50/60 rounded-3xl border border-dashed border-gray-200 relative group flex items-center justify-center glow-youtube">
@@ -960,16 +986,11 @@ export default function QRGenerator() {
               className="w-60 h-60 max-w-full rounded-2xl bg-white shadow-xs p-2 transition-transform duration-300 group-hover:scale-102"
               id="final_qr_canvas"
             />
-
-            {/* Quick scanning guidance icon overlays */}
-            <div className="absolute top-3 right-3 bg-white px-2.5 py-1 rounded-full text-[10px] text-gray-500 border border-gray-200 shadow-2xs font-arabic font-medium pointer-events-none">
-              مسح مباشر للهاتف
-            </div>
           </div>
 
           {/* Sub description of encoded data */}
           <p className="mt-4 text-xs font-arabic text-gray-400 max-w-xs leading-relaxed">
-            تمت المزامنة والتحديث حياً! يدعم هذا الرمز فتح تطبيق يوتيوب من الكاميرا الافتراضية للـ iPhone والـ Android مباشرة بمجرد المسح.
+            {t.previewSyncMsg}
           </p>
 
           <div className="w-full h-px bg-gray-100 my-6" />
@@ -991,48 +1012,48 @@ export default function QRGenerator() {
               {copied ? (
                 <>
                   <Check size={18} />
-                  <span>تم نسخ الـ QR كصورة للحافظة!</span>
+                  <span>{t.copiedToast}</span>
                 </>
               ) : (
                 <>
                   <Copy size={18} />
-                  <span>نسخ صورة الـ QR لنسخها في التصاميم</span>
+                  <span>{t.btnCopyImage}</span>
                 </>
               )}
             </button>
 
             {/* High-Resolution Professional Download form */}
-            <div className="bg-slate-50 p-4 rounded-2xl border border-gray-100 text-right space-y-3" id="high_res_download_form">
-              <span className="text-xs font-bold text-gray-700 font-arabic block">خيارات تصدير الملفات عالية الجودة للطباعة:</span>
+            <div className={`bg-slate-50 p-4 rounded-2xl border border-gray-100 ${lang === 'ar' ? 'text-right' : 'text-left'} space-y-3`} id="high_res_download_form">
+              <span className="text-xs font-bold text-gray-700 font-arabic block">{t.exportConfigHeading}</span>
               
               <div className="grid grid-cols-2 gap-2">
                 {/* Resolution selector */}
                 <div>
-                  <label className="text-[10px] font-semibold text-gray-500 font-arabic block mb-1">دقة الصورة المستخرجة:</label>
+                  <label className="text-[10px] font-semibold text-gray-500 font-arabic block mb-1">{t.exportLvlLabel}</label>
                   <select
                     value={downloadSize}
                     onChange={(e) => setDownloadSize(parseInt(e.target.value))}
                     className="w-full bg-white border border-gray-200 rounded-lg p-1.5 text-xs focus:outline-none"
                     id="download_size_select"
                   >
-                    <option value="512">512 × 512 بكسل (شبكات التواصل)</option>
-                    <option value="1024">1024 × 1024 بكسل (جودة قياسية)</option>
-                    <option value="2048">2048 × 2048 بكسل (طباعة لافتات)</option>
-                    <option value="4096">4096 × 4096 بكسل (دقة فائقة فائقة)</option>
+                    <option value="512">{t.exportLvl512}</option>
+                    <option value="1024">{t.exportLvl1024}</option>
+                    <option value="2048">{t.exportLvl2048}</option>
+                    <option value="4096">{t.exportLvl4096}</option>
                   </select>
                 </div>
 
                 {/* Format selection */}
                 <div>
-                  <label className="text-[10px] font-semibold text-gray-500 font-arabic block mb-1">امتداد وصيغة الملف:</label>
+                  <label className="text-[10px] font-semibold text-gray-500 font-arabic block mb-1">{t.exportFormatLabel}</label>
                   <select
                     value={downloadFormat}
                     onChange={(e) => setDownloadFormat(e.target.value as 'png' | 'jpg')}
                     className="w-full bg-white border border-gray-200 rounded-lg p-1.5 text-xs focus:outline-none"
                     id="download_format_select"
                   >
-                    <option value="png">PNG (شفافة مفرغة للشعارات)</option>
-                    <option value="jpg">JPEG (خفيف ومتوافق للمطابع)</option>
+                    <option value="png">PNG ({t.exportFormatPng})</option>
+                    <option value="jpg">JPEG ({t.exportFormatJpg})</option>
                   </select>
                 </div>
               </div>
@@ -1045,26 +1066,26 @@ export default function QRGenerator() {
                 id="mega_download_btn"
               >
                 <Download size={18} />
-                <span>تحميل كود الـ QR بدقة احترافية</span>
+                <span>{t.btnDownloadQr}</span>
               </button>
             </div>
           </div>
         </div>
 
         {/* Guidance and education panel on Deep Links */}
-        <div className="bg-slate-50 rounded-3xl p-6 border border-gray-200 text-right space-y-4" id="deep_link_education_guidance">
-          <h4 className="text-sm font-bold font-arabic text-gray-800 flex items-center gap-2 justify-end">
-            💡 كيف تعمل هذه الأداة في زيادة تفاعلك؟
+        <div className={`bg-slate-50 rounded-3xl p-6 border border-gray-200 ${lang === 'ar' ? 'text-right' : 'text-left'} space-y-4`} id="deep_link_education_guidance">
+          <h4 className={`text-sm font-bold font-arabic text-gray-800 flex items-center gap-2 ${lang === 'ar' ? 'justify-end' : 'justify-start'}`}>
+            💡 {t.optGuidanceHeading}
           </h4>
           <ul className="space-y-2 text-xs text-gray-600 font-arabic leading-relaxed list-inside list-disc">
             <li>
-              عندما تصنع كود QR لليوتيوب العادي، تفتح الكاميرا الرابط داخل الويب، وإذا رغب الزائر بالاشتراك، سيتطلب منه تسجيل دخوله بقوة، مما يسبب خسارة <strong className="text-red-600">80% من الاشتراكات المحتملة</strong>.
+              {t.optTip1}
             </li>
             <li>
-              مع ميزة الـ <strong className="text-blue-600">Deep Link</strong> من أداتنا، يتم إجبار نظام تشغيل الهاتف على تشغيل التطبيق الرسمي لليوتيوب فوراً، حاملاً حساب المستخدم المفعل، فيتمكن بنقرة واحدة من <strong className="text-emerald-700">الاشتراك، الإعجاب، التعليق</strong>.
+              {t.optTip2}
             </li>
             <li>
-              ننصح دائمًا بالاختيار الافتراضي <strong className="font-semibold text-slate-800">vnd.youtube</strong> لتجربة مسح ذكية شاملة.
+              {t.optTip3}
             </li>
           </ul>
         </div>

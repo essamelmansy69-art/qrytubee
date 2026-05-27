@@ -18,11 +18,24 @@ import {
   CheckCircle2, 
   Share2, 
   ShieldCheck, 
-  Layers
+  Layers,
+  Languages
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { translations } from './translations';
 
 export default function App() {
+  const [lang, setLang] = useState<'ar' | 'en'>(() => {
+    const saved = localStorage.getItem('qr_language');
+    return (saved === 'en' || saved === 'ar') ? saved : 'ar';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('qr_language', lang);
+  }, [lang]);
+
+  const t = translations[lang];
+
   const [activeTab, setActiveTab] = useState<'generator' | 'faq' | 'tips'>('generator');
 
   // Detect and handle deep-link redirected scans
@@ -61,7 +74,7 @@ export default function App() {
     } catch (_) {}
 
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 text-center" id="redirect_fallback_screen">
+      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 text-center" id="redirect_fallback_screen" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
         <div className="max-w-md w-full space-y-8">
           
           {/* Animated pulsing massive YouTube logo */}
@@ -73,17 +86,17 @@ export default function App() {
 
           <div className="space-y-3">
             <h2 className="text-2xl font-black font-arabic text-white leading-normal">
-              جاري توجيهك لتطبيق يوتيوب...
+              {t.redirecting}
             </h2>
             <p className="text-xs text-slate-400 font-arabic leading-relaxed">
-              نقوم بفتح الرابط بشكل مباشر في تطبيق YouTube الرسمي بخصائص الـ Deep Link لتجربة تفاعل فورية فائقة السرعة.
+              {t.redirectDesc}
             </p>
           </div>
 
           {/* Quick spinner fallback button card */}
           <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4" id="fallback_actions_card">
             <span className="text-xs text-slate-300 font-arabic block font-semibold leading-relaxed">
-              إذا لم يفتح الهاتف تطبيق يوتيوب تلقائياً خلال لحظة، يرجى الضغط على أحد الأزرار بالأسفل:
+              {t.redirectFallback}
             </span>
 
             <div className="flex flex-col gap-2.5">
@@ -94,7 +107,7 @@ export default function App() {
                 type="button"
                 id="force_open_app_btn"
               >
-                اضغط هنا لتفعيل فتح التطبيق فوراً
+                {t.btnForceOpen}
               </button>
 
               {/* standard web fallback */}
@@ -104,13 +117,13 @@ export default function App() {
                 type="button"
                 id="open_via_browser_btn"
               >
-                المواصلة عبر متصفح الويب العادي لقناتنا
+                {t.btnWebBrowser}
               </button>
             </div>
           </div>
 
           <div className="text-[10px] text-slate-600 font-arabic">
-            توليد وإدارة وتوجيه آمن بالكامل بواسطة QR Deep Linker 🚀
+            {t.managedBy}
           </div>
 
         </div>
@@ -119,7 +132,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 selection:bg-red-100 selection:text-red-700" id="main_app_wrapper">
+    <div className="min-h-screen bg-slate-50 text-slate-800 selection:bg-red-100 selection:text-red-700" id="main_app_wrapper" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       
       {/* 1. STUNNING HEADER NAVIGATION BAR */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100" id="app_header">
@@ -129,12 +142,12 @@ export default function App() {
             <span className="p-2.5 bg-red-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-red-500/20 glow-youtube">
               <Youtube size={22} />
             </span>
-            <div className="flex flex-col text-right">
+            <div className={`flex flex-col ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
               <h1 className="text-md sm:text-lg font-extrabold font-arabic text-gray-900 tracking-tight leading-none">
-                QR Deep Linker
+                {t.appTitle}
               </h1>
               <span className="text-[10px] font-medium font-arabic text-gray-400 mt-0.5">
-                مولد كيو آر يوتيوب الذكي
+                {t.appSubTitle}
               </span>
             </div>
           </div>
@@ -148,7 +161,7 @@ export default function App() {
               }`}
               type="button"
             >
-              المنصة والأداة
+              {t.navGenerator}
             </button>
             <button
               onClick={() => setActiveTab('tips')}
@@ -157,7 +170,7 @@ export default function App() {
               }`}
               type="button"
             >
-              نصائح التفاعل والمشاهدات
+              {t.navTips}
             </button>
             <button
               onClick={() => setActiveTab('faq')}
@@ -166,18 +179,29 @@ export default function App() {
               }`}
               type="button"
             >
-              الأسئلة الشائعة
+              {t.navFaq}
             </button>
           </nav>
 
-          {/* Right badge / Action badge */}
+          {/* Right badge / Action badge & Language Toggle */}
           <div className="flex items-center gap-3">
+            {/* Language Toggle Button */}
+            <button
+              onClick={() => setLang(l => l === 'ar' ? 'en' : 'ar')}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-xs font-semibold rounded-xl font-arabic transition-all cursor-pointer border border-slate-200"
+              title={lang === 'ar' ? 'Switch to English' : 'تحويل للغة العربية'}
+              id="language_toggle_btn"
+            >
+              <Languages size={14} />
+              <span>{lang === 'ar' ? 'English' : 'العربية'}</span>
+            </button>
+
             <span className="hidden sm:inline-flex items-center gap-1 py-1 px-3 bg-red-50 text-red-600 text-xs font-semibold rounded-full font-arabic">
               <Flame size={12} />
-              مجاني بالكامل بدون إعلانات
+              {t.navFreeBadge}
             </span>
             <span className="text-xs bg-slate-900 text-white font-semibold py-1.5 px-3 rounded-xl shadow-xs font-arabic">
-              إصدار بيتا الذكي v1.2
+              {t.navBetaBadge}
             </span>
           </div>
 
@@ -195,32 +219,12 @@ export default function App() {
           
           <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-500/10 text-yellow-700 text-xs font-bold rounded-lg font-arabic mb-4">
             <Sparkles size={13} className="text-yellow-600" />
-            أفضل أداة مجانية لرفع اشتراكات وتفاعل قناتك لعام 2026
+            {t.heroBadge}
           </span>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black font-arabic text-slate-900 leading-tight tracking-tight lg:leading-normal">
-            حول روابط اليوتيوب إلى رموز <span className="text-red-600 block sm:inline-block">QR بالروابط العميقة</span>
+            {t.heroTitlePart1}<span className="text-red-600 block sm:inline-block">{t.heroTitlePart2}</span>
           </h1>
-
-          <p className="mt-4 text-sm sm:text-base md:text-lg text-slate-500 font-arabic max-w-2xl leading-relaxed">
-            اجبر هواتف المستخدمين على فتح <strong className="text-slate-800">تطبيق YouTube الرسمي مباشرة</strong> بدلاً من المتصفحات الميتة للإنستغرام والفيسبوك. ضع شعارك المخصص وتحكّم بالألوان مجاناً!
-          </p>
-
-          {/* Core Values badges */}
-          <div className="mt-8 flex flex-wrap justify-center gap-6 text-xs text-gray-500 font-arabic font-medium" id="value_badges">
-            <div className="flex items-center gap-1.5 bg-white px-3 py-2 rounded-xl border border-gray-100 shadow-3xs">
-              <CheckCircle2 size={14} className="text-emerald-500" />
-              <span>لوجو مخصص بالمنتصف</span>
-            </div>
-            <div className="flex items-center gap-1.5 bg-white px-3 py-2 rounded-xl border border-gray-100 shadow-3xs">
-              <Smartphone size={14} className="text-red-500" />
-              <span>ديب لينك (Deep Link) مباشر</span>
-            </div>
-            <div className="flex items-center gap-1.5 bg-white px-3 py-2 rounded-xl border border-gray-100 shadow-3xs">
-              <ShieldCheck size={14} className="text-indigo-500" />
-              <span>جودة طباعة فائقة 4K</span>
-            </div>
-          </div>
 
         </div>
       </section>
@@ -231,15 +235,15 @@ export default function App() {
         {/* Dynamic Navigation Tabs Content render */}
         {activeTab === 'generator' && (
           <div className="transition-opacity duration-300">
-            <QRGenerator />
+            <QRGenerator lang={lang} />
           </div>
         )}
 
         {activeTab === 'tips' && (
-          <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-xs max-w-4xl mx-auto text-right space-y-8" id="tips_tab_content">
-            <div className="flex items-center gap-3 justify-end pb-4 border-b border-slate-100">
+          <div className={`bg-white rounded-3xl p-8 border border-gray-100 shadow-xs max-w-4xl mx-auto ${lang === 'ar' ? 'text-right' : 'text-left'} space-y-8`} id="tips_tab_content">
+            <div className={`flex items-center gap-3 ${lang === 'ar' ? 'justify-end' : 'justify-start'} pb-4 border-b border-slate-100`}>
               <h2 className="text-2xl font-bold font-arabic text-slate-900">
-                كيف تستغل كود الـ QR لزيادة عدد المشتركين الحقيقيين؟
+                {t.tipsHeading}
               </h2>
               <span className="p-2.5 bg-gradient-to-br from-amber-400 to-yellow-500 text-white rounded-2xl">
                 <TrendingUp size={22} />
@@ -248,30 +252,30 @@ export default function App() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-slate-50 p-6 rounded-2xl space-y-3 border border-slate-100">
-                <h3 className="font-bold text-gray-800 font-arabic text-base">📌 طباعة الكود على المنتجات والكراتين</h3>
+                <h3 className="font-bold text-gray-800 font-arabic text-base">{t.tip1Title}</h3>
                 <p className="text-xs text-gray-600 font-arabic leading-relaxed">
-                  إذا كنت تملك متجراً إلكترونياً أو مطعماً، قم بطباعة رمز كود الـ QR للرابط العميق لقناتك على الكرتون الخارجي أو الفاتورة. مع كتابة جملة محفزة مثل: "امسح لمشاهدة طريقة الاستخدام المثالية والاشتراك في عائلتنا بضغطة واحدة!".
+                  {t.tip1Desc}
                 </p>
               </div>
 
               <div className="bg-slate-50 p-6 rounded-2xl space-y-3 border border-slate-100">
-                <h3 className="font-bold text-gray-800 font-arabic text-base">📌 على بطاقات العمل وبروشور المعارض</h3>
+                <h3 className="font-bold text-gray-800 font-arabic text-base">{t.tip2Title}</h3>
                 <p className="text-xs text-gray-600 font-arabic leading-relaxed">
-                  عند تصميم بطاقة الأعمال الخاصة بك (Business Card)، ضع رمز الـ QR بالمنتصف للروابط العميقة لكي يتمكن العميل من فتح قناتك أو الفيديو التعريفي لك مباشرة على تلفونه دون عناء كتابة الرابط أو البحث باسم القناة.
+                  {t.tip2Desc}
                 </p>
               </div>
 
               <div className="bg-slate-50 p-6 rounded-2xl space-y-3 border border-slate-100">
-                <h3 className="font-bold text-gray-800 font-arabic text-base">📌 صور وفيديوهات إنستغرام وتيك توك</h3>
+                <h3 className="font-bold text-gray-800 font-arabic text-base">{t.tip3Title}</h3>
                 <p className="text-xs text-gray-600 font-arabic leading-relaxed">
-                  إنستغرام وتيك توك لا يسمحان بالوصول للروابط بسهولة، يمكنك وضع صورة لكود الـ QR في نهاية الفيديوهات الخاصة بك، حاداً المشاهدين على إجراء لقطة شاشة (Screenshot) ومن ثم مسحها مباشرة للانتقال لجزء آخر من المقاطع على يوتيوب.
+                  {t.tip3Desc}
                 </p>
               </div>
 
               <div className="bg-slate-50 p-6 rounded-2xl space-y-3 border border-slate-100">
-                <h3 className="font-bold text-gray-800 font-arabic text-base">📌 قنوات البث المباشر (Streaming)</h3>
+                <h3 className="font-bold text-gray-800 font-arabic text-base">{t.tip4Title}</h3>
                 <p className="text-xs text-gray-600 font-arabic leading-relaxed">
-                  إذا كنت تبث مباشرة على Twitch أو Facebook Gaming، ضع كود الـ QR المخصص في زاوية الشاشة طوال البث. بمجرد أن يمسحه الزوار، سيفتح تطبيق يوتيوب لديهم مباشرة، ويشتركون بقناتك على الفور دون قطع مشاهدة البث الحالي بشكل مزعج.
+                  {t.tip4Desc}
                 </p>
               </div>
             </div>
@@ -282,16 +286,16 @@ export default function App() {
                 className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold font-arabic transition-all cursor-pointer shadow-md"
                 type="button"
               >
-                العودة لتوليد كود الـ QR الآن
+                {t.btnReturn}
               </button>
             </div>
           </div>
         )}
 
         {activeTab === 'faq' && (
-          <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-xs max-w-4xl mx-auto text-right space-y-6" id="faq_tab_content">
-            <div className="flex items-center gap-3 justify-end pb-4 border-b border-slate-100">
-              <h2 className="text-2xl font-bold font-arabic text-slate-900">الأسئلة المتكررة والشائعة</h2>
+          <div className={`bg-white rounded-3xl p-8 border border-gray-100 shadow-xs max-w-4xl mx-auto ${lang === 'ar' ? 'text-right' : 'text-left'} space-y-6`} id="faq_tab_content">
+            <div className={`flex items-center gap-3 ${lang === 'ar' ? 'justify-end' : 'justify-start'} pb-4 border-b border-slate-100`}>
+              <h2 className="text-2xl font-bold font-arabic text-slate-900">{t.faqHeading}</h2>
               <span className="p-2.5 bg-purple-50 text-purple-600 rounded-2xl">
                 <HelpCircle size={22} />
               </span>
@@ -299,30 +303,30 @@ export default function App() {
 
             <div className="space-y-4" id="faq_accordion">
               <div className="p-5 bg-slate-50 rounded-2xl space-y-2 border border-slate-100">
-                <h3 className="font-bold text-slate-800 font-arabic text-sm">س: لماذا يختلف الرابط داخل كود الـ QR عن الرابط العادي؟</h3>
+                <h3 className="font-bold text-slate-800 font-arabic text-sm">{t.faq1Q}</h3>
                 <p className="text-xs text-slate-500 font-arabic leading-relaxed">
-                  ج: نقوم بتحويل الرابط من الصيغة الافتراضية للويب (https) إلى بروتوكول تطبيق اليوتيوب (مثل vnd.youtube لـ Android و iOS أو youtube://). الهاتف يقرأ هذا البروتوكول فيعرف مباشرة أن المستلم هو تطبيق اليوتيوب الأساسي وليس متصفح إنترنت عادي، فيفتح التطبيق الرسمي فوراً.
+                  {t.faq1A}
                 </p>
               </div>
 
               <div className="p-5 bg-slate-50 rounded-2xl space-y-2 border border-slate-100">
-                <h3 className="font-bold text-slate-800 font-arabic text-sm">س: هل يمكنني تعديل لون الـ QR أو وضع شعاري دون أن يتعطل المسح؟</h3>
+                <h3 className="font-bold text-slate-800 font-arabic text-sm">{t.faq2Q}</h3>
                 <p className="text-xs text-slate-500 font-arabic leading-relaxed">
-                  ج: نعم وبكل ثقة! أداتنا تقوم بصنع الكود مع تفعيل ميزة "تصحيح الخطأ بمستوى عالي جدًا H". تعني هذه الميزة أن كود الـ QR يحمل نقاطاً إضافية احتياطية تعويضية تمكن الكاميرا من قراءة الرابط بالكامل وبسرعة قصوى حتى وإن كان هناك شعار أو لوجو يغلق 30% من مساحة منتصف الكود.
+                  {t.faq2A}
                 </p>
               </div>
 
               <div className="p-5 bg-slate-50 rounded-2xl space-y-2 border border-slate-100">
-                <h3 className="font-bold text-slate-800 font-arabic text-sm">س: هل أحصل على الصورة بأعلى جودة للطباعة الورقية الكبيرة والمطابع؟</h3>
+                <h3 className="font-bold text-slate-800 font-arabic text-sm">{t.faq3Q}</h3>
                 <p className="text-xs text-slate-500 font-arabic leading-relaxed">
-                  ج: بالتأكيد! تتيح لك الأداة تحميل الصورة بدقات فائقة تبدأ من 512 بكسل وتصل إلى 4096 × 4096 بكسل (أكثر من جودة 4K)، مما يتيح لك طباعة الكود على لافتات كبيرة جداً في الشوارع أو صالات العرض دون حدوث أي تغبيش أو بكسلة في الصورة.
+                  {t.faq3A}
                 </p>
               </div>
 
               <div className="p-5 bg-slate-50 rounded-2xl space-y-2 border border-slate-100">
-                <h3 className="font-bold text-slate-800 font-arabic text-sm">س: هل الخدمة مجانية وهل الروابط آمنة؟</h3>
+                <h3 className="font-bold text-slate-800 font-arabic text-sm">{t.faq4Q}</h3>
                 <p className="text-xs text-slate-500 font-arabic leading-relaxed">
-                  ج: نعم، الخدمة مجانية 100% للأبد ودون عرض أي نوع من الإعلانات المزعجة لصناع المحتوى. الروابط آمنة تماماً لأن التشفير والتحويل وتضمين الصورة يتم بالكامل محلياً داخل متصفحك وبشكل سريع!
+                  {t.faq4A}
                 </p>
               </div>
             </div>
@@ -333,7 +337,7 @@ export default function App() {
                 className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold font-arabic transition-all cursor-pointer shadow-md"
                 type="button"
               >
-                العودة لتوليد كود الـ QR الآن
+                {t.btnReturn}
               </button>
             </div>
           </div>
@@ -342,46 +346,46 @@ export default function App() {
       </main>
 
       {/* 4. PROFESSIONAL BEAUTIFUL FOOTER */}
-      <footer className="bg-slate-900 text-slate-400 py-12 border-t border-slate-800 text-right mt-16" id="app_footer">
+      <footer className={`bg-slate-900 text-slate-400 py-12 border-t border-slate-800 ${lang === 'ar' ? 'text-right' : 'text-left'} mt-16`} id="app_footer">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
             
             {/* Column 1: Branding block */}
             <div className="md:col-span-5 space-y-4">
-              <div className="flex items-center gap-2.5 justify-end">
+              <div className={`flex items-center gap-2.5 ${lang === 'ar' ? 'justify-end' : 'justify-start'}`}>
                 <span className="p-2.5 bg-red-600/90 text-white rounded-2xl flex items-center justify-center">
                   <Youtube size={18} />
                 </span>
                 <span className="text-lg font-bold font-arabic text-white">QR Deep Linker for Creators</span>
               </div>
               <p className="text-xs text-slate-400 max-w-sm leading-relaxed font-arabic">
-                أداة متقدمة تم بناؤها لصناع المحتوى ومسوقي قنوات يوتيوب لتجاوز عوائق المتصفحات الداخلية في تطبيقات التواصل الاجتماعي وتحقيق نسبة تحويل تفاعل قياسية.
+                {t.footerDesc}
               </p>
             </div>
 
             {/* Column 2: Navigation Links */}
             <div className="md:col-span-4 space-y-3 font-arabic">
-              <span className="text-xs font-bold text-white uppercase block">روابط سريعة</span>
+              <span className="text-xs font-bold text-white uppercase block">{t.quickLinks}</span>
               <div className="flex flex-col gap-2 text-xs">
-                <button onClick={() => setActiveTab('generator')} className="hover:text-white text-right cursor-pointer">منصة التوليد</button>
-                <button onClick={() => setActiveTab('tips')} className="hover:text-white text-right cursor-pointer">نصائح لزيادة المشاهدات والاستجابة</button>
-                <button onClick={() => setActiveTab('faq')} className="hover:text-white text-right cursor-pointer">الأسئلة والأجوبة التفصيلية</button>
+                <button onClick={() => setActiveTab('generator')} className={`hover:text-white ${lang === 'ar' ? 'text-right' : 'text-left'} cursor-pointer`}>{t.navGenerator}</button>
+                <button onClick={() => setActiveTab('tips')} className={`hover:text-white ${lang === 'ar' ? 'text-right' : 'text-left'} cursor-pointer`}>{t.optGuidanceLabel}</button>
+                <button onClick={() => setActiveTab('faq')} className={`hover:text-white ${lang === 'ar' ? 'text-right' : 'text-left'} cursor-pointer`}>{t.faqDetailsLabel}</button>
               </div>
             </div>
 
             {/* Column 3: Quality declarations */}
             <div className="md:col-span-3 space-y-3 font-arabic">
-              <span className="text-xs font-bold text-white uppercase block">ضمان الموثوقية والأمان</span>
+              <span className="text-xs font-bold text-white uppercase block">{t.trustLabel}</span>
               <p className="text-[11px] leading-relaxed text-slate-500">
-                هذه الأداة تتم معالجة بياناتها بالكامل محلياً على جهاز المستخدم لضمان الخصوصية وسرية الروابط التي يتم إدخالها.
+                {t.trustDesc}
               </p>
             </div>
 
           </div>
 
-          <div className="border-t border-slate-800 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 font-arabic gap-4">
-            <span dir="ltr">© 2026 YouTube QR Deep Linker. All rights reserved.</span>
-            <span>بُنيت الأداة بكل حب لتطوير وتعميم المحتوى العربي الذكي 🚀</span>
+          <div className={`border-t border-slate-800 mt-10 pt-6 flex flex-col ${lang === 'ar' ? 'sm:flex-row' : 'sm:flex-row-reverse'} items-center justify-between text-xs text-slate-500 font-arabic gap-4`}>
+            <span dir="ltr">{t.copyrightText}</span>
+            <span>{t.loveText}</span>
           </div>
         </div>
       </footer>
