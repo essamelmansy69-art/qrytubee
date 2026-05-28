@@ -15,6 +15,49 @@
     <noscript>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400&display=swap" />
     </noscript>
+    <style>
+      /* Critical Above-The-Fold Inline CSS */
+      :root {
+        --font-sans: "Inter", "Cairo", sans-serif;
+        --font-display-swap: swap;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #f8fafc;
+        color: #1e293b;
+        font-family: var(--font-sans);
+        font-display: var(--font-display-swap);
+        -webkit-font-smoothing: antialiased;
+      }
+      #root {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .critical-header-placeholder {
+        background-color: #ffffff;
+        border-bottom: 1px solid #f1f5f9;
+        height: 72px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 1.5rem;
+        box-sizing: border-box;
+      }
+      .critical-logo {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+      }
+      .critical-logo-icon {
+        width: 42px;
+        height: 42px;
+        background-color: #dc2626;
+        border-radius: 12px;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

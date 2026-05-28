@@ -1094,6 +1094,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                     alt="Channel Logo Preview"
                     width={64}
                     height={64}
+                    loading="lazy"
                     className="w-full h-full object-contain rounded-md animate-scaleIn"
                     referrerPolicy="no-referrer"
                   />
