@@ -70,7 +70,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
   }, [urlInput]);
 
   const registerCurrentQR = async () => {
-    if (!useSmartLink || !urlInput.trim()) return;
+    if (!urlInput.trim()) return;
     try {
       const stored = localStorage.getItem('qrytube_generated_codes');
       const list = stored ? JSON.parse(stored) : [];
@@ -185,10 +185,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
   const getActivePayload = () => {
     const trimmed = urlInput.trim();
     const fallbackUrl = trimmed || 'https://www.youtube.com';
-    if (useSmartLink) {
-      return `${window.location.origin}/?r=${encodeURIComponent(fallbackUrl)}&type=${deepLinkType}&tid=${trackingId}`;
-    }
-    return convertUrlToDeepLink(fallbackUrl);
+    return `https://qrytubee.essamelmansy69.workers.dev/redirect?url=${encodeURIComponent(fallbackUrl)}&tid=${trackingId}`;
   };
 
   // Check if QR colors are dangerously inverted for standard mobile lenses

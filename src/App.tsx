@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import QRGenerator from './components/QRGenerator';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
-import { buildDeepLink, parseYoutubeUrl, extractInstagramUsername, extractTiktokUsername } from './utils';
+import { buildDeepLink, parseYoutubeUrl, extractInstagramUsername, extractTiktokUsername, convertUrlToDeepLink } from './utils';
 import { 
   Youtube, 
   Sparkles, 
@@ -232,46 +232,25 @@ export default function App() {
   useEffect(() => {
     if (redirectUrl) {
       try {
+        const decodedUrl = decodeURIComponent(redirectUrl);
+        const platformInfo = parseYoutubeUrl(decodedUrl);
         const scanId = queryParams.get('tid') || queryParams.get('id');
+        
         if (scanId) {
-          const platformParam = queryParams.get('platform') || 'youtube';
+          const platformParam = platformInfo.platform || 'youtube';
           const fetchUrl = `/api/track-scan?tid=${encodeURIComponent(scanId)}&r=${encodeURIComponent(redirectUrl)}&platform=${encodeURIComponent(platformParam)}&type=${encodeURIComponent(redirectType)}`;
           fetch(fetchUrl, { method: 'POST', keepalive: true }).catch(() => {});
         }
 
-        const decodedUrl = decodeURIComponent(redirectUrl);
-        const resolvedType = redirectType === 'vnd' ? getRedirectionTypeForDevice() : redirectType;
-        const platformInfo = parseYoutubeUrl(decodedUrl);
-        
-        const isFacebook = platformInfo.platform === 'facebook';
-        const isInstagram = platformInfo.platform === 'instagram';
-        const isTiktok = platformInfo.platform === 'tiktok';
-        const isFastPlatform = isFacebook || isInstagram || isTiktok;
-        
-        // If standard redirection is determined, open immediately
-        if (resolvedType === 'standard') {
-          window.location.href = isFastPlatform ? (platformInfo.cleanUrl || decodedUrl) : buildDeepLink(decodedUrl, resolvedType as any);
-          return;
-        }
+        // Generate the native App Scheme using the professional unified helper
+        const deepLink = convertUrlToDeepLink(decodedUrl);
+        const fallbackUrl = platformInfo.cleanUrl || decodedUrl;
 
-        let deepLink = '';
-        if (isFacebook) {
-          deepLink = `fb://facewebmodal/f?href=${encodeURIComponent(platformInfo.cleanUrl || decodedUrl)}`;
-        } else if (isInstagram) {
-          const username = extractInstagramUsername(decodedUrl) || '';
-          deepLink = username ? `instagram://user?username=${username}` : (platformInfo.cleanUrl || decodedUrl);
-        } else if (isTiktok) {
-          const username = extractTiktokUsername(decodedUrl) || '';
-          deepLink = username ? `snssdk1128://user/profile/${username}` : (platformInfo.cleanUrl || decodedUrl);
-        } else {
-          deepLink = buildDeepLink(decodedUrl, resolvedType as any);
-        }
+        // Fallback timing parameters: strictly 500 milliseconds timeout
+        const timeoutDuration = 500;
+        const maxElapsed = 1500;
 
-        const timeoutDuration = isFastPlatform ? 500 : 4000;
-        const maxElapsed = isFastPlatform ? 1500 : 5500;
-        const fallbackUrl = isFastPlatform ? (platformInfo.cleanUrl || decodedUrl) : decodedUrl;
-
-        // Record time to monitor transition status
+        // Monitor if target application successfully captures focus
         const startTime = Date.now();
         let isRedirected = false;
 
@@ -290,13 +269,13 @@ export default function App() {
         };
         document.addEventListener('visibilitychange', handleVisibilityChange);
         
-        // Try launching native mobile app
+        // A. Direct trigger attempt to open native official social media application scheme
         window.location.href = deepLink;
 
-        // Failsafe fallback: if app isn't installed, the browser stays here.
+        // B. Clear 500ms failsafe fallback timer to seamlessly open the browser URL if app fails
         const retryTimer = setTimeout(() => {
           const elapsed = Date.now() - startTime;
-          // Ensure we don't redirect if focus was lost, the app started, or page went to background
+          // Verify that user hasn't successfully switched apps
           if (!isRedirected && elapsed < maxElapsed && !document.hidden) {
             window.location.href = fallbackUrl;
           }
@@ -321,22 +300,9 @@ export default function App() {
     let platform = 'youtube';
     try {
       decodedUrl = decodeURIComponent(redirectUrl);
-      const resolvedType = redirectType === 'vnd' ? getRedirectionTypeForDevice() : redirectType;
-      
       const platformInfo = parseYoutubeUrl(decodedUrl);
       platform = platformInfo.platform;
-      
-      if (platform === 'facebook') {
-        deepLink = `fb://facewebmodal/f?href=${encodeURIComponent(platformInfo.cleanUrl || decodedUrl)}`;
-      } else if (platform === 'instagram') {
-        const username = extractInstagramUsername(decodedUrl) || '';
-        deepLink = username ? `instagram://user?username=${username}` : (platformInfo.cleanUrl || decodedUrl);
-      } else if (platform === 'tiktok') {
-        const username = extractTiktokUsername(decodedUrl) || '';
-        deepLink = username ? `snssdk1128://user/profile/${username}` : (platformInfo.cleanUrl || decodedUrl);
-      } else {
-        deepLink = buildDeepLink(decodedUrl, resolvedType as any);
-      }
+      deepLink = convertUrlToDeepLink(decodedUrl);
     } catch (_) {}
 
     const getLoadingIconStyles = () => {
@@ -344,45 +310,83 @@ export default function App() {
         case 'facebook':
           return {
             bgClass: 'bg-[#1877F2] shadow-blue-500/40',
+            buttonClass: 'bg-[#1877F2] hover:bg-[#1565C0]',
             icon: <Facebook size={48} />
           };
         case 'instagram':
           return {
             bgClass: 'bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] shadow-pink-500/40',
+            buttonClass: 'bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] hover:opacity-90',
             icon: <Instagram size={48} />
           };
         case 'tiktok':
           return {
             bgClass: 'bg-black border border-slate-800 shadow-slate-950/40',
+            buttonClass: 'bg-slate-950 hover:bg-black border border-slate-850',
             icon: <Music size={48} />
           };
         case 'youtube':
         default:
           return {
             bgClass: 'bg-red-600 shadow-red-500/40',
+            buttonClass: 'bg-red-600 hover:bg-red-700',
             icon: <Youtube size={48} />
           };
       }
     };
     const loadingStyle = getLoadingIconStyles();
 
+    const getDynamicRedirectionContent = () => {
+      const isAr = lang === 'ar';
+      switch (platform) {
+        case 'facebook':
+          return {
+            title: isAr ? "جاري فتح تطبيق فيسبوك..." : "Opening Facebook App...",
+            desc: isAr ? "نقوم بفتح الصفحة مباشرة في تطبيق Facebook الرسمي لضمان أفضل تفاعل وتصفح." : "Opening the page directly inside the official Facebook App for the best interaction and browsing."
+          };
+        case 'instagram':
+          return {
+            title: isAr ? "جاري فتح تطبيق إنستغرام..." : "Opening Instagram App...",
+            desc: isAr ? "نقوم بفتح الحساب مباشرة في تطبيق Instagram الرسمي لمتابعة الحساب والمنشورات فوراً." : "Opening the account directly inside the official Instagram App to follow and view posts instantly."
+          };
+        case 'tiktok':
+          return {
+            title: isAr ? "جاري فتح تطبيق تيك توك..." : "Opening TikTok App...",
+            desc: isAr ? "نقوم بفتح الحساب أو الفيديو في تطبيق TikTok الرسمي لتتمكن من التفاعل والمتابعة بسهولة." : "Opening the account or video directly inside the official TikTok App to let you interact and follow smoothly."
+          };
+        case 'youtube':
+        default:
+          return {
+            title: isAr ? "جاري فتح تطبيق يوتيوب..." : "Opening YouTube App...",
+            desc: isAr ? "نقوم بفتح الرابط بشكل مباشر في تطبيق YouTube الرسمي بخصائص الـ Deep Link لتجربة تفاعل فورية." : "We are opening the link directly inside the official YouTube App for an instant, engaging experience."
+          };
+      }
+    };
+    const dynamicContent = getDynamicRedirectionContent();
+
     return (
       <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 text-center" id="redirect_fallback_screen" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
         <div className="max-w-md w-full space-y-8">
           
-          {/* Animated pulsing massive Brand logo */}
-          <div className="flex justify-center">
-            <span className={`p-6 text-white rounded-3xl animate-pulse shadow-2xl ${loadingStyle.bgClass}`}>
-              {loadingStyle.icon}
-            </span>
+          {/* Elegant Circular Spinner with Icon Overlay */}
+          <div className="flex flex-col items-center justify-center">
+            <div className="relative w-32 h-32 flex items-center justify-center">
+              {/* Spinning loading concentric ring */}
+              <div className="absolute inset-0 rounded-full border-4 border-slate-800/60 border-t-red-650 animate-spin" style={{ animationDuration: '0.8s' }} />
+              
+              {/* Pulsing social media icon container */}
+              <span className={`p-5 text-white rounded-3xl shadow-2xl z-10 ${loadingStyle.bgClass} flex items-center justify-center`}>
+                {loadingStyle.icon}
+              </span>
+            </div>
           </div>
 
           <div className="space-y-3">
             <h2 className="text-2xl font-black font-arabic text-white leading-normal">
-              {t.redirecting}
+              {dynamicContent.title}
             </h2>
             <p className="text-xs text-slate-400 font-arabic leading-relaxed">
-              {t.redirectDesc}
+              {dynamicContent.desc}
             </p>
           </div>
 
@@ -396,7 +400,7 @@ export default function App() {
               {/* Force App link */}
               <button
                 onClick={() => { if (deepLink) window.location.href = deepLink; }}
-                className="w-full py-3.5 px-4 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold font-arabic text-sm transition-all shadow-md active:scale-98 cursor-pointer"
+                className={`w-full py-3.5 px-4 text-white rounded-xl font-bold font-arabic text-sm transition-all shadow-md active:scale-98 cursor-pointer ${loadingStyle.buttonClass}`}
                 type="button"
                 id="force_open_app_btn"
               >
