@@ -35,6 +35,14 @@ const LegalView = React.lazy(() => import('./components/LegalView'));
 
 export default function App() {
   const [lang, setLang] = useState<'ar' | 'en'>(() => {
+    // Check URL Parameter first (highest priority)
+    try {
+      const queryParams = new URL(window.location.href).searchParams;
+      const urlLang = queryParams.get('lang');
+      if (urlLang === 'en') return 'en';
+      if (urlLang === 'ar') return 'ar';
+    } catch (_) {}
+
     const saved = localStorage.getItem('qr_language');
     if (saved === 'en' || saved === 'ar') return saved;
 
@@ -54,6 +62,55 @@ export default function App() {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     localStorage.setItem('qr_language', lang);
+
+    // Update dynamic Meta Tags (Title & Description)
+    if (lang === 'ar') {
+      document.title = "Qrytube | أداة إنشاء رموز QR ذكية لقنوات اليوتيوب";
+      const descEl = document.querySelector('meta[name="description"]');
+      if (descEl) {
+        descEl.setAttribute('content', 'اصنع رموز QR ذكية (Deep Links) لـقناتك على اليوتيوب مجاناً. تتيح للمتابعين فتح قناتك أو فيديوهاتك داخل تطبيق اليوتيوب مباشرة لزيادة المشاهدات والاشتراكات.');
+      }
+    } else {
+      document.title = "Viral QR Code Generator | Open Social Links Directly in Apps";
+      const descEl = document.querySelector('meta[name="description"]');
+      if (descEl) {
+        descEl.setAttribute('content', 'Create smart deep-link QR codes for social media influencers. Force links to open directly inside YouTube, Facebook, Instagram, and TikTok apps.');
+      }
+    }
+
+    // Programmatically render hreflang tags in <head> for search engines
+    try {
+      document.querySelectorAll('link[hreflang]').forEach(el => el.remove());
+
+      const arLink = document.createElement('link');
+      arLink.rel = 'alternate';
+      arLink.setAttribute('hreflang', 'ar');
+      arLink.href = '/';
+      document.head.appendChild(arLink);
+
+      const enLink = document.createElement('link');
+      enLink.rel = 'alternate';
+      enLink.setAttribute('hreflang', 'en');
+      enLink.href = '/?lang=en';
+      document.head.appendChild(enLink);
+    } catch (_) {}
+
+    // Update URL query parameters based on language without page reload
+    try {
+      const url = new URL(window.location.href);
+      if (lang === 'en') {
+        url.searchParams.set('lang', 'en');
+      } else {
+        url.searchParams.delete('lang');
+      }
+      
+      // Keep state clean and safe
+      if (window.location.search !== url.search) {
+        window.history.pushState(null, '', url.pathname + url.search + url.hash);
+      }
+    } catch (e) {
+      console.error(e);
+    }
   }, [lang]);
 
   const t = translations[lang];
@@ -74,12 +131,16 @@ export default function App() {
   useEffect(() => {
     try {
       const currentPath = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
-      const targetPath = activeTab === 'generator' ? '/' : `/${activeTab}`;
-      if (currentPath !== targetPath.replace(/^\/|\/$/g, '')) {
+      // Include the language parameter in the target path during transitions so it persists if active
+      const langParam = lang === 'en' ? '?lang=en' : '';
+      const targetBase = activeTab === 'generator' ? '/' : `/${activeTab}`;
+      const targetPath = targetBase + langParam;
+      
+      if (currentPath !== targetBase.replace(/^\/|\/$/g, '')) {
         window.history.pushState({ tab: activeTab }, '', targetPath);
       }
     } catch (_) {}
-  }, [activeTab]);
+  }, [activeTab, lang]);
 
   useEffect(() => {
     const handlePopState = (e: PopStateEvent) => {
@@ -93,6 +154,17 @@ export default function App() {
           setActiveTab('generator');
         }
       }
+      
+      // Sync language from URL search parameter on back/forward navigation
+      try {
+        const queryParams = new URL(window.location.href).searchParams;
+        const urlLang = queryParams.get('lang');
+        if (urlLang === 'en') {
+          setLang('en');
+        } else if (urlLang === 'ar') {
+          setLang('ar');
+        }
+      } catch (_) {}
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
