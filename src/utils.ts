@@ -536,18 +536,32 @@ export function convertUrlToDeepLink(url: string, deviceOverride?: 'android' | '
       }
     }
 
-    // Direct custom URI scheme works perfectly on both iOS and Android
-    if (playlistId) {
-      return `youtube://www.youtube.com/playlist?list=${playlistId}`;
-    } else if (videoId) {
-      return `youtube://www.youtube.com/watch?v=${videoId}`;
-    } else if (channelId) {
-      if (channelId.startsWith('@')) {
-        return `youtube://www.youtube.com/${channelId}`;
+    // Direct custom URI scheme works perfectly on iOS, but Android Chrome requires secure Intents with fallback configuration
+    if (deviceType === 'android') {
+      if (playlistId) {
+        return `intent://www.youtube.com/playlist?list=${playlistId}#Intent;package=com.google.android.youtube;scheme=https;S.browser_fallback_url=${encodeURIComponent('https://www.youtube.com/playlist?list=' + playlistId)};end`;
+      } else if (videoId) {
+        return `intent://www.youtube.com/watch?v=${videoId}#Intent;package=com.google.android.youtube;scheme=https;S.browser_fallback_url=${encodeURIComponent('https://www.youtube.com/watch?v=' + videoId)};end`;
+      } else if (channelId) {
+        if (channelId.startsWith('@')) {
+          return `intent://www.youtube.com/${channelId}#Intent;package=com.google.android.youtube;scheme=https;S.browser_fallback_url=${encodeURIComponent('https://www.youtube.com/' + channelId)};end`;
+        }
+        return `intent://www.youtube.com/channel/${channelId}#Intent;package=com.google.android.youtube;scheme=https;S.browser_fallback_url=${encodeURIComponent('https://www.youtube.com/channel/' + channelId)};end`;
       }
-      return `youtube://www.youtube.com/channel/${channelId}`;
+      return `intent://www.youtube.com#Intent;package=com.google.android.youtube;scheme=https;S.browser_fallback_url=${encodeURIComponent('https://www.youtube.com')};end`;
+    } else {
+      if (playlistId) {
+        return `youtube://www.youtube.com/playlist?list=${playlistId}`;
+      } else if (videoId) {
+        return `youtube://www.youtube.com/watch?v=${videoId}`;
+      } else if (channelId) {
+        if (channelId.startsWith('@')) {
+          return `youtube://www.youtube.com/${channelId}`;
+        }
+        return `youtube://www.youtube.com/channel/${channelId}`;
+      }
+      return `youtube://`;
     }
-    return `youtube://`;
   }
 
   // 2. INSTAGRAM ADVANCED PARSING
@@ -575,13 +589,22 @@ export function convertUrlToDeepLink(url: string, deviceOverride?: 'android' | '
       }
     }
 
-    // Direct custom URI scheme works perfectly on both iOS and Android
-    if (instagramMediaId) {
-      return `instagram://media?id=${instagramMediaId}`;
-    } else if (instagramUsername) {
-      return `instagram://user?username=${instagramUsername}`;
+    // Direct custom URI scheme works perfectly on iOS, but Android Chrome requires secure Intents with fallback configuration
+    if (deviceType === 'android') {
+      if (instagramMediaId) {
+        return `intent://instagram.com/p/${instagramMediaId}#Intent;package=com.instagram.android;scheme=https;S.browser_fallback_url=${encodeURIComponent('https://www.instagram.com/p/' + instagramMediaId)};end`;
+      } else if (instagramUsername) {
+        return `intent://instagram.com/_u/${instagramUsername}#Intent;package=com.instagram.android;scheme=https;S.browser_fallback_url=${encodeURIComponent('https://www.instagram.com/' + instagramUsername)};end`;
+      }
+      return `intent://instagram.com#Intent;package=com.instagram.android;scheme=https;S.browser_fallback_url=${encodeURIComponent('https://www.instagram.com')};end`;
+    } else {
+      if (instagramMediaId) {
+        return `instagram://media?id=${instagramMediaId}`;
+      } else if (instagramUsername) {
+        return `instagram://user?username=${instagramUsername}`;
+      }
+      return `instagram://`;
     }
-    return `instagram://`;
   }
 
   // 3. FACEBOOK ADVANCED PARSING
@@ -599,14 +622,25 @@ export function convertUrlToDeepLink(url: string, deviceOverride?: 'android' | '
       }
     }
 
-    // Direct custom URI scheme works perfectly on both iOS and Android to avoid Google Play redirects
-    if (fbId) {
-      if (pathname.includes('/groups/')) {
-        return `fb://group/${fbId}`;
+    // Direct custom URI scheme works perfectly on iOS, but Android Chrome requires secure Intents with fallback configuration
+    if (deviceType === 'android') {
+      const normalizedFallback = trimmed.startsWith('http') ? trimmed : `https://${trimmed}`;
+      if (fbId) {
+        if (pathname.includes('/groups/')) {
+          return `intent://facebook.com/groups/${fbId}#Intent;package=com.facebook.katana;scheme=https;S.browser_fallback_url=${encodeURIComponent('https://www.facebook.com/groups/' + fbId)};end`;
+        }
+        return `intent://facebook.com/${fbId}#Intent;package=com.facebook.katana;scheme=https;S.browser_fallback_url=${encodeURIComponent('https://www.facebook.com/' + fbId)};end`;
       }
-      return `fb://profile/${fbId}`;
+      return `intent://facebook.com#Intent;package=com.facebook.katana;scheme=https;S.browser_fallback_url=${encodeURIComponent(normalizedFallback)};end`;
+    } else {
+      if (fbId) {
+        if (pathname.includes('/groups/')) {
+          return `fb://group/${fbId}`;
+        }
+        return `fb://profile/${fbId}`;
+      }
+      return `fb://facewebmodal/f?href=${encodeURIComponent(trimmed)}`;
     }
-    return `fb://facewebmodal/f?href=${encodeURIComponent(trimmed)}`;
   }
 
   // 4. TIKTOK ADVANCED PARSING
@@ -624,13 +658,23 @@ export function convertUrlToDeepLink(url: string, deviceOverride?: 'android' | '
       username = ttUserMatch[1];
     }
 
-    // Direct custom URI scheme works perfectly on both iOS and Android
-    if (videoId) {
-      return `snssdk1128://feed?detail_id=${videoId}`;
-    } else if (username) {
-      return `snssdk1128://user/profile/${username}`;
+    // Direct custom URI scheme works perfectly on iOS, but Android Chrome requires secure Intents with fallback configuration
+    if (deviceType === 'android') {
+      const normalizedFallback = trimmed.startsWith('http') ? trimmed : `https://${trimmed}`;
+      if (videoId) {
+        return `intent://tiktok.com/video/${videoId}#Intent;package=com.zhiliaoapp.musically;scheme=https;S.browser_fallback_url=${encodeURIComponent('https://www.tiktok.com/video/' + videoId)};end`;
+      } else if (username) {
+        return `intent://tiktok.com/@${username}#Intent;package=com.zhiliaoapp.musically;scheme=https;S.browser_fallback_url=${encodeURIComponent('https://www.tiktok.com/@' + username)};end`;
+      }
+      return `intent://tiktok.com#Intent;package=com.zhiliaoapp.musically;scheme=https;S.browser_fallback_url=${encodeURIComponent(normalizedFallback)};end`;
+    } else {
+      if (videoId) {
+        return `snssdk1128://feed?detail_id=${videoId}`;
+      } else if (username) {
+        return `snssdk1128://user/profile/${username}`;
+      }
+      return `snssdk1128://`;
     }
-    return `snssdk1128://`;
   }
 
   return trimmed.startsWith('http') ? trimmed : `https://${trimmed}`;
