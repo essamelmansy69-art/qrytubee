@@ -63,20 +63,46 @@ export default function App() {
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     localStorage.setItem('qr_language', lang);
 
-    // Update dynamic Meta Tags (Title & Description)
-    if (lang === 'ar') {
-      document.title = "Qrytube | أداة إنشاء رموز QR ذكية لقنوات اليوتيوب";
-      const descEl = document.querySelector('meta[name="description"]');
-      if (descEl) {
-        descEl.setAttribute('content', 'اصنع رموز QR ذكية (Deep Links) لـقناتك على اليوتيوب مجاناً. تتيح للمتابعين فتح قناتك أو فيديوهاتك داخل تطبيق اليوتيوب مباشرة لزيادة المشاهدات والاشتراكات.');
+    const title = lang === 'ar' 
+      ? "Qrytube | أداة إنشاء رموز QR ذكية لقنوات اليوتيوب" 
+      : "Viral QR Code Generator | Open Social Links Directly in Apps";
+
+    const desc = lang === 'ar'
+      ? "اصنع رموز QR ذكية (Deep Links) لـقناتك على اليوتيوب مجاناً. تتيح للمتابعين فتح قناتك أو فيديوهاتك داخل تطبيق اليوتيوب مباشرة لزيادة المشاهدات والاشتراكات."
+      : "Create smart deep-link QR codes for social media influencers. Force links to open directly inside YouTube, Facebook, Instagram, and TikTok apps.";
+
+    // Update document title
+    document.title = title;
+
+    // Helper to safely upsert meta elements
+    const setMetaTag = (attrName: 'name' | 'property', attrValue: string, contentValue: string) => {
+      try {
+        let el = document.querySelector(`meta[${attrName}="${attrValue}"]`);
+        if (!el) {
+          el = document.createElement('meta');
+          el.setAttribute(attrName, attrValue);
+          document.head.appendChild(el);
+        }
+        el.setAttribute('content', contentValue);
+      } catch (e) {
+        console.error(e);
       }
-    } else {
-      document.title = "Viral QR Code Generator | Open Social Links Directly in Apps";
-      const descEl = document.querySelector('meta[name="description"]');
-      if (descEl) {
-        descEl.setAttribute('content', 'Create smart deep-link QR codes for social media influencers. Force links to open directly inside YouTube, Facebook, Instagram, and TikTok apps.');
-      }
-    }
+    };
+
+    // Update core description, Open Graph and Twitter tags
+    setMetaTag('name', 'description', desc);
+
+    setMetaTag('property', 'og:type', 'website');
+    setMetaTag('property', 'og:title', title);
+    setMetaTag('property', 'og:description', desc);
+    setMetaTag('property', 'og:url', 'https://qrytubee.essamelmansy69.workers.dev/');
+    setMetaTag('property', 'og:image', 'https://qrytubee.essamelmansy69.workers.dev/og-image.png');
+    setMetaTag('property', 'og:site_name', 'QR Code Best');
+
+    setMetaTag('name', 'twitter:card', 'summary_large_image');
+    setMetaTag('name', 'twitter:title', title);
+    setMetaTag('name', 'twitter:description', desc);
+    setMetaTag('name', 'twitter:image', 'https://qrytubee.essamelmansy69.workers.dev/og-image.png');
 
     // Programmatically render hreflang tags in <head> for search engines
     try {
