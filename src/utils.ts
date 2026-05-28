@@ -437,3 +437,66 @@ export function buildDeepLink(url: string, type: 'vnd' | 'ios' | 'android' | 'st
 
   return info.cleanUrl;
 }
+
+/**
+ * Converts a standard URL directly to a native app deep link protocol.
+ * Follows the specific platform conversion rules:
+ * 1. YouTube -> youtube:// protocol with extracted video/channel ID.
+ * 2. Instagram -> instagram://user?username= with extracted username.
+ * 3. Facebook -> fb:// compatible format.
+ * 4. TikTok -> snssdk1128:// custom app protocol.
+ */
+export function convertUrlToDeepLink(url: string): string {
+  const trimmed = url.trim();
+  if (!trimmed) return trimmed;
+
+  const info = parseYoutubeUrl(trimmed);
+  if (!info.isValid) {
+    return trimmed;
+  }
+
+  if (info.platform === 'youtube') {
+    if (info.type === 'video' || info.type === 'shorts') {
+      return `youtube://www.youtube.com/watch?v=${info.id}`;
+    } else if (info.type === 'playlist') {
+      return `youtube://www.youtube.com/playlist?list=${info.id}`;
+    } else if (info.type === 'channel') {
+      if (info.id.startsWith('@')) {
+        return `youtube://www.youtube.com/${info.id}`;
+      }
+      return `youtube://www.youtube.com/channel/${info.id}`;
+    }
+    return `youtube://www.youtube.com/watch?v=${info.id}`;
+  }
+
+  if (info.platform === 'instagram') {
+    const username = extractInstagramUsername(trimmed);
+    if (username) {
+      return `instagram://user?username=${username}`;
+    }
+    return trimmed;
+  }
+
+  if (info.platform === 'facebook') {
+    const fbId = extractFacebookId(trimmed);
+    if (fbId) {
+      if (info.type === 'playlist') {
+        return `fb://group/${fbId}`;
+      }
+      return `fb://profile/${fbId}`;
+    }
+    return `fb://facewebmodal/f?href=${encodeURIComponent(info.cleanUrl || trimmed)}`;
+  }
+
+  if (info.platform === 'tiktok') {
+    const username = extractTiktokUsername(trimmed);
+    if (info.type === 'video' && info.id) {
+      return `snssdk1128://feed?detail_id=${info.id}`;
+    } else if (username) {
+      return `snssdk1128://user/profile/${username}`;
+    }
+    return `snssdk1128://`;
+  }
+
+  return info.cleanUrl || trimmed;
+}

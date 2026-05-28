@@ -28,7 +28,7 @@ import {
   FileText
 } from 'lucide-react';
 import { QRConfig, QRStyle } from '../types';
-import { parseYoutubeUrl, buildDeepLink } from '../utils';
+import { parseYoutubeUrl, buildDeepLink, convertUrlToDeepLink } from '../utils';
 import { translations } from '../translations';
 
 import { motion } from 'motion/react';
@@ -101,7 +101,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
   };
 
   const [deepLinkType, setDeepLinkType] = useState<'vnd' | 'ios' | 'android' | 'standard'>('vnd');
-  const [useSmartLink, setUseSmartLink] = useState<boolean>(true);
+  const [useSmartLink, setUseSmartLink] = useState<boolean>(false);
   const [foregroundColor, setForegroundColor] = useState('#FF0000');
   const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
   const [eyeColor, setEyeColor] = useState('#FF0000');
@@ -188,7 +188,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
     if (useSmartLink) {
       return `${window.location.origin}/?r=${encodeURIComponent(fallbackUrl)}&type=${deepLinkType}&tid=${trackingId}`;
     }
-    return formattedDeepLink.trim() || fallbackUrl;
+    return convertUrlToDeepLink(fallbackUrl);
   };
 
   // Check if QR colors are dangerously inverted for standard mobile lenses
