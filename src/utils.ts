@@ -259,6 +259,86 @@ export function parseYoutubeUrl(url: string): youtubeUrlInfo {
  * Converts a regular url into a native mobile app deep link.
  * Supports multiple social media platforms beautifully.
  */
+// Helpers for extracting accurate platform identifiers and URLs
+export function getFacebookRelativePath(url: string): string {
+  try {
+    const parsed = new URL(url);
+    const path = parsed.pathname.replace(/^\//, '') + parsed.search;
+    return path || '';
+  } catch (_) {
+    return url.replace(/^(https?:\/\/)?(www\.)?(facebook\.com|fb\.com|fb\.watch)\//i, '');
+  }
+}
+
+export function extractFacebookId(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    const idParam = parsed.searchParams.get('id');
+    if (idParam) return idParam;
+    const pathParts = parsed.pathname.split('/').filter(Boolean);
+    const filteredParts = pathParts.filter(p => !['groups', 'watch', 'share', 'photo', 'events', 'marketplace', 'profile.php', 'pages'].includes(p.toLowerCase()));
+    if (filteredParts.length > 0) {
+      return filteredParts[0];
+    }
+  } catch (_) {
+    const match = url.match(/[?&]id=([0-9]+)/i);
+    if (match) return match[1];
+    const matchUrl = url.replace(/^(https?:\/\/)?(www\.)?(facebook\.com|fb\.com|fb\.watch)\//i, '').split(/[?#]/)[0];
+    const parts = matchUrl.split('/').filter(Boolean).filter(p => !['groups', 'watch', 'share', 'photo', 'events', 'marketplace', 'profile.php', 'pages'].includes(p.toLowerCase()));
+    if (parts.length > 0) return parts[0];
+  }
+  return null;
+}
+
+export function extractInstagramUsername(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    const pathParts = parsed.pathname.split('/').filter(Boolean);
+    const filtered = pathParts.filter(p => !['p', 'reel', 'stories', 'explore', 'direct', 'developer'].includes(p.toLowerCase()));
+    if (filtered.length > 0) {
+      return filtered[0];
+    }
+  } catch (_) {
+    const clean = url.replace(/^(https?:\/\/)?(www\.)?instagram\.com\//i, '').split(/[?#]/)[0];
+    const parts = clean.split('/').filter(Boolean).filter(p => !['p', 'reel', 'stories', 'explore', 'direct', 'developer'].includes(p.toLowerCase()));
+    if (parts.length > 0) return parts[0];
+  }
+  return null;
+}
+
+export function extractTiktokUsername(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    const pathParts = parsed.pathname.split('/').filter(Boolean);
+    for (const part of pathParts) {
+      if (part.startsWith('@')) {
+        return part.substring(1);
+      }
+    }
+    const filtered = pathParts.filter(p => !['video', 'trending', 'explore', 'music'].includes(p.toLowerCase()));
+    if (filtered.length > 0) {
+      return filtered[0];
+    }
+  } catch (_) {
+    const clean = url.replace(/^(https?:\/\/)?(www\.)?tiktok\.com\//i, '').split(/[?#]/)[0];
+    const parts = clean.split('/').filter(Boolean);
+    for (const part of parts) {
+      if (part.startsWith('@')) {
+        return part.substring(1);
+      }
+    }
+    const filtered = parts.filter(p => !['video', 'trending', 'explore', 'music'].includes(p.toLowerCase()));
+    if (filtered.length > 0) {
+      return filtered[0];
+    }
+  }
+  return null;
+}
+
+/**
+ * Converts a regular url into a native mobile app deep link.
+ * Supports multiple social media platforms beautifully.
+ */
 export function buildDeepLink(url: string, type: 'vnd' | 'ios' | 'android' | 'standard'): string {
   const info = parseYoutubeUrl(url);
   if (!info.isValid) {
@@ -273,45 +353,38 @@ export function buildDeepLink(url: string, type: 'vnd' | 'ios' | 'android' | 'st
 
   // ROUTING BY PLATFORM
   if (info.platform === 'facebook') {
-    if (type === 'vnd' || type === 'ios') {
-      if (/^\d+$/.test(info.id)) {
-        return `fb://profile/${info.id}`;
-      }
-      return `fb://facewebmodal/f?href=${encodeURIComponent(info.cleanUrl)}`;
-    } else if (type === 'android') {
-      if (/^\d+$/.test(info.id)) {
-        return `intent://facebook.com/profile.php?id=${info.id}#Intent;package=com.facebook.katana;scheme=https;S.browser_fallback_url=${fallbackUrl};end`;
-      }
-      return `intent://facebook.com/${info.id}#Intent;package=com.facebook.katana;scheme=https;S.browser_fallback_url=${fallbackUrl};end`;
+    if (type === 'android') {
+      const relPath = getFacebookRelativePath(url);
+      return `intent://facebook.com/${relPath}#Intent;package=com.facebook.katana;scheme=https;end`;
     }
+    // iOS or other custom schemes
+    const id = extractFacebookId(url);
+    if (id) {
+      if (url.toLowerCase().includes('page')) {
+        return `fb://page/${id}`;
+      }
+      return `fb://profile/${id}`;
+    }
+    return info.cleanUrl;
   }
 
   if (info.platform === 'instagram') {
-    if (type === 'vnd' || type === 'ios') {
-      if (info.type === 'profile') {
-        return `instagram://user?username=${info.id}`;
-      }
-      return `instagram://media?id=${info.id}`;
-    } else if (type === 'android') {
-      if (info.type === 'profile') {
-        return `intent://instagram.com/_u/${info.id}#Intent;package=com.instagram.android;scheme=https;S.browser_fallback_url=${fallbackUrl};end`;
-      }
-      return `intent://instagram.com/p/${info.id}#Intent;package=com.instagram.android;scheme=https;S.browser_fallback_url=${fallbackUrl};end`;
+    const username = extractInstagramUsername(url);
+    if (username) {
+      return `instagram://user?username=${username}`;
     }
+    return info.cleanUrl;
   }
 
   if (info.platform === 'tiktok') {
-    if (type === 'vnd' || type === 'ios') {
-      if (info.type === 'profile') {
-        return `tiktok://user?username=${info.id}`;
+    const username = extractTiktokUsername(url);
+    if (username) {
+      if (type === 'ios' || type === 'vnd') {
+        return `snssdk1128://user/profile/${username}`;
       }
-      return `tiktok://video/${info.id}`;
-    } else if (type === 'android') {
-      if (info.type === 'profile') {
-        return `intent://tiktok.com/@${info.id}#Intent;package=com.zhiliaoapp.musically;scheme=https;S.browser_fallback_url=${fallbackUrl};end`;
-      }
-      return `intent://tiktok.com/video/${info.id}#Intent;package=com.zhiliaoapp.musically;scheme=https;S.browser_fallback_url=${fallbackUrl};end`;
+      return `tiktok://user?username=${username}`;
     }
+    return info.cleanUrl;
   }
 
   // YOUTUBE PLATFORM (DEFAULT)

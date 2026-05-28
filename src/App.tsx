@@ -153,21 +153,42 @@ export default function App() {
 
         // Record time to monitor transition status
         const startTime = Date.now();
+        let isRedirected = false;
+
+        const handleBlurOrHide = () => {
+          isRedirected = true;
+          clearTimeout(retryTimer);
+        };
+
+        window.addEventListener('blur', handleBlurOrHide, { once: true });
+        window.addEventListener('pagehide', handleBlurOrHide, { once: true });
+        
+        const handleVisibilityChange = () => {
+          if (document.hidden) {
+            handleBlurOrHide();
+          }
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
         
         // Try launching native mobile app
         window.location.href = deepLink;
 
         // Failsafe fallback: if app isn't installed, the browser stays here.
-        // After 1.5 seconds, we redirect them to standard Web browser URL to avoid error pages.
+        // We increase this to 4.5 seconds to give the user plenty of time to read and accept browser prompts ("Open in 'Facebook'?").
         const retryTimer = setTimeout(() => {
           const elapsed = Date.now() - startTime;
-          // If browser is active (it didn't go to background)
-          if (elapsed < 2200) {
+          // Ensure we don't redirect if focus was lost, the app started, or page went to background
+          if (!isRedirected && elapsed < 5500 && !document.hidden) {
             window.location.href = decodedUrl;
           }
-        }, 1500);
+        }, 4000);
 
-        return () => clearTimeout(retryTimer);
+        return () => {
+          clearTimeout(retryTimer);
+          window.removeEventListener('blur', handleBlurOrHide);
+          window.removeEventListener('pagehide', handleBlurOrHide);
+          document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
       } catch (err) {
         console.error("Redirection failure", err);
       }
