@@ -450,53 +450,151 @@ export function convertUrlToDeepLink(url: string): string {
   const trimmed = url.trim();
   if (!trimmed) return trimmed;
 
-  const info = parseYoutubeUrl(trimmed);
-  if (!info.isValid) {
-    return trimmed;
-  }
+  // Let's parse with native URL class first for bulletproof safety
+  let hostname = '';
+  let pathname = '';
+  let searchParams: URLSearchParams | null = null;
+  try {
+    const tempUrl = trimmed.startsWith('http') ? trimmed : `https://${trimmed}`;
+    const parsed = new URL(tempUrl);
+    hostname = parsed.hostname.toLowerCase();
+    pathname = parsed.pathname;
+    searchParams = parsed.searchParams;
+  } catch (_) {}
 
-  if (info.platform === 'youtube') {
-    if (info.type === 'video' || info.type === 'shorts') {
-      return `youtube://www.youtube.com/watch?v=${info.id}`;
-    } else if (info.type === 'playlist') {
-      return `youtube://www.youtube.com/playlist?list=${info.id}`;
-    } else if (info.type === 'channel') {
-      if (info.id.startsWith('@')) {
-        return `youtube://www.youtube.com/${info.id}`;
+  // 1. YOUTUBE ADVANCED PARSING
+  if (hostname.includes('youtube.com') || hostname.includes('youtu.be') || trimmed.includes('youtube.com') || trimmed.includes('youtu.be')) {
+    let videoId = '';
+    let playlistId = '';
+    let channelId = '';
+
+    // Check query params
+    if (searchParams) {
+      const v = searchParams.get('v');
+      if (v && /^[a-zA-Z0-9_-]{11}$/.test(v)) {
+        videoId = v;
       }
-      return `youtube://www.youtube.com/channel/${info.id}`;
+      const list = searchParams.get('list');
+      if (list) {
+        playlistId = list;
+      }
     }
-    return `youtube://www.youtube.com/watch?v=${info.id}`;
+
+    // Check pathname patterns if query extraction is blank
+    if (!videoId) {
+      // Check for youtu.be/VIDEO_ID
+      const shortMatch = trimmed.match(/(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]{11})/i);
+      if (shortMatch) {
+        videoId = shortMatch[1];
+      }
+    }
+
+    if (!videoId) {
+      // Check for shorts: /shorts/VIDEO_ID
+      const shortsMatch = pathname.match(/\/shorts\/([a-zA-Z0-9_-]{11})/i);
+      if (shortsMatch) {
+        videoId = shortsMatch[1];
+      }
+    }
+
+    if (!videoId) {
+      // Check embeds
+      const embedMatch = pathname.match(/\/embed\/([a-zA-Z0-9_-]{11})/i);
+      if (embedMatch) {
+         videoId = embedMatch[1];
+      }
+    }
+
+    // Map channels
+    const handleMatch = pathname.match(/\/(@[a-zA-Z0-9_.-]+)/i);
+    if (handleMatch) {
+      channelId = handleMatch[1];
+    } else {
+      const channelMatch = pathname.match(/\/channel\/([a-zA-Z0-9_-]+)/i);
+      if (channelMatch) {
+        channelId = channelMatch[1];
+      } else {
+        const cMatch = pathname.match(/\/(?:c|user)\/([a-zA-Z0-9_-]+)/i);
+        if (cMatch) {
+          channelId = cMatch[1]; // custom/user alias
+        }
+      }
+    }
+
+    if (playlistId) {
+      return `youtube://www.youtube.com/playlist?list=${playlistId}`;
+    } else if (videoId) {
+      return `youtube://www.youtube.com/watch?v=${videoId}`;
+    } else if (channelId) {
+      if (channelId.startsWith('@')) {
+        return `youtube://www.youtube.com/${channelId}`;
+      }
+      return `youtube://www.youtube.com/channel/${channelId}`;
+    }
+    
+    // fallbacks
+    return `youtube://www.youtube.com/watch?v=${videoId}`;
   }
 
-  if (info.platform === 'instagram') {
-    const username = extractInstagramUsername(trimmed);
-    if (username) {
+  // 2. INSTAGRAM ADVANCED PARSING
+  if (hostname.includes('instagram.com') || hostname.includes('instagr.am') || trimmed.includes('instagram.com') || trimmed.includes('instagr.am')) {
+    // Extract username: ignore static directories like p, reel, stories, etc.
+    const parts = pathname.split('/').filter(Boolean);
+    const filtered = parts.filter(p => !['p', 'reel', 'stories', 'explore', 'direct', 'developer', 'tv'].includes(p.toLowerCase()));
+    
+    if (filtered.length > 0) {
+      const username = filtered[0];
       return `instagram://user?username=${username}`;
     }
-    return trimmed;
+    // Also try matching standard pattern as fallback
+    const match = trimmed.match(/(?:https?:\/\/)?(?:www\.)?instagram\.com\/([a-zA-Z0-9._-]+)/i);
+    if (match && !['p', 'reel', 'stories', 'explore', 'direct'].includes(match[1].toLowerCase())) {
+      return `instagram://user?username=${match[1]}`;
+    }
+    return `instagram://`;
   }
 
-  if (info.platform === 'facebook') {
-    const fbId = extractFacebookId(trimmed);
+  // 3. FACEBOOK ADVANCED PARSING
+  if (hostname.includes('facebook.com') || hostname.includes('fb.com') || hostname.includes('fb.watch') || trimmed.includes('facebook.com') || trimmed.includes('fb.com')) {
+    let fbId = '';
+    if (searchParams) {
+      const idVal = searchParams.get('id');
+      if (idVal) fbId = idVal;
+    }
+    if (!fbId) {
+      const parts = pathname.split('/').filter(Boolean);
+      const filtered = parts.filter(p => !['groups', 'watch', 'share', 'photo', 'events', 'marketplace', 'profile.php', 'pages'].includes(p.toLowerCase()));
+      if (filtered.length > 0) {
+        fbId = filtered[0];
+      }
+    }
     if (fbId) {
-      if (info.type === 'playlist') {
+      if (pathname.includes('/groups/')) {
         return `fb://group/${fbId}`;
       }
       return `fb://profile/${fbId}`;
     }
-    return `fb://facewebmodal/f?href=${encodeURIComponent(info.cleanUrl || trimmed)}`;
+    // Webview fallback schema
+    return `fb://facewebmodal/f?href=${encodeURIComponent(trimmed.startsWith('http') ? trimmed : `https://${trimmed}`)}`;
   }
 
-  if (info.platform === 'tiktok') {
-    const username = extractTiktokUsername(trimmed);
-    if (info.type === 'video' && info.id) {
-      return `snssdk1128://feed?detail_id=${info.id}`;
-    } else if (username) {
-      return `snssdk1128://user/profile/${username}`;
+  // 4. TIKTOK ADVANCED PARSING
+  if (hostname.includes('tiktok.com') || trimmed.includes('tiktok.com')) {
+    // Check for video
+    // e.g. /@user/video/123456
+    const ttVideoMatch = pathname.match(/\/@[a-zA-Z0-9._-]+\/video\/([0-9]+)/i);
+    if (ttVideoMatch) {
+      return `snssdk1128://feed?detail_id=${ttVideoMatch[1]}`;
     }
+    
+    // Check for user
+    const ttUserMatch = pathname.match(/\/@([a-zA-Z0-9._-]+)/i);
+    if (ttUserMatch) {
+      return `snssdk1128://user/profile/${ttUserMatch[1]}`;
+    }
+
     return `snssdk1128://`;
   }
 
-  return info.cleanUrl || trimmed;
+  return trimmed.startsWith('http') ? trimmed : `https://${trimmed}`;
 }

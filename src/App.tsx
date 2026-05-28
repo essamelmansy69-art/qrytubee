@@ -226,11 +226,12 @@ export default function App() {
   };
 
   const queryParams = new URL(window.location.href).searchParams;
-  const redirectUrl = queryParams.get('r') || queryParams.get('url');
+  const redirectUrl = queryParams.get('url') || queryParams.get('r');
   const redirectType = queryParams.get('type') || 'vnd';
+  const isRedirectRoute = window.location.pathname.startsWith('/redirect') || !!redirectUrl;
 
   useEffect(() => {
-    if (redirectUrl) {
+    if (isRedirectRoute && redirectUrl) {
       try {
         const decodedUrl = decodeURIComponent(redirectUrl);
         const platformInfo = parseYoutubeUrl(decodedUrl);
@@ -246,16 +247,19 @@ export default function App() {
         const deepLink = convertUrlToDeepLink(decodedUrl);
         const fallbackUrl = platformInfo.cleanUrl || decodedUrl;
 
-        // Fallback timing parameters: strictly 500 milliseconds timeout
-        const timeoutDuration = 500;
-        const maxElapsed = 1500;
-
-        // Monitor if target application successfully captures focus
+        // Fallback timing parameters: 3000ms (3 seconds) limit before routing browser fallback
+        const timeoutDuration = 3000;
         const startTime = Date.now();
         let isRedirected = false;
 
+        let t2: any = null;
+        let t3: any = null;
+        let retryTimer: any = null;
+
         const handleBlurOrHide = () => {
           isRedirected = true;
+          clearTimeout(t2);
+          clearTimeout(t3);
           clearTimeout(retryTimer);
         };
 
@@ -269,19 +273,35 @@ export default function App() {
         };
         document.addEventListener('visibilitychange', handleVisibilityChange);
         
-        // A. Direct trigger attempt to open native official social media application scheme
+        // 1. First trigger instantly
         window.location.href = deepLink;
 
-        // B. Clear 500ms failsafe fallback timer to seamlessly open the browser URL if app fails
-        const retryTimer = setTimeout(() => {
+        // 2. Second trigger fallback after 150ms to force launch under low responsive environments
+        t2 = setTimeout(() => {
+          if (!isRedirected && !document.hidden) {
+            window.location.href = deepLink;
+          }
+        }, 150);
+
+        // 3. Third trigger fallback after 450ms for slow webviews
+        t3 = setTimeout(() => {
+          if (!isRedirected && !document.hidden) {
+            window.location.href = deepLink;
+          }
+        }, 450);
+
+        // 4. Absolute failsafe fallback: standard web page replace redirection after 3 seconds
+        retryTimer = setTimeout(() => {
           const elapsed = Date.now() - startTime;
           // Verify that user hasn't successfully switched apps
-          if (!isRedirected && elapsed < maxElapsed && !document.hidden) {
-            window.location.href = fallbackUrl;
+          if (!isRedirected && elapsed < 4500 && !document.hidden) {
+            window.location.replace(fallbackUrl);
           }
         }, timeoutDuration);
 
         return () => {
+          clearTimeout(t2);
+          clearTimeout(t3);
           clearTimeout(retryTimer);
           window.removeEventListener('blur', handleBlurOrHide);
           window.removeEventListener('pagehide', handleBlurOrHide);
@@ -291,10 +311,10 @@ export default function App() {
         console.error("Redirection failure", err);
       }
     }
-  }, [redirectUrl, redirectType]);
+  }, [isRedirectRoute, redirectUrl, redirectType]);
 
   // If redirect parameter is active, render a loading screen instead of the full landing page
-  if (redirectUrl) {
+  if (isRedirectRoute && redirectUrl) {
     let decodedUrl = '';
     let deepLink = '';
     let platform = 'youtube';
