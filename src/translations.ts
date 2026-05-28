@@ -20,7 +20,7 @@ export const translations = {
 
     // Navbar
     appTitle: "QR Deep Linker",
-    appSubTitle: "مولد كيو آر يوتيوب الذكي",
+    appSubTitle: "مولد كيو آر الذكي لقنوات اليوتيوب",
     navGenerator: "المنصة والأداة",
     navTips: "نصائح التفاعل والمشاهدات",
     navFaq: "الأسئلة الشائعة",
