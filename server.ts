@@ -127,6 +127,42 @@ async function startServer() {
     return res.json(results);
   });
 
+  // Dynamic Sitemap Route
+  app.get("/sitemap.xml", (req, res) => {
+    const protocol = req.headers["x-forwarded-proto"] || req.protocol || "https";
+    const host = `${protocol}://${req.get("host")}`;
+    const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${host}/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>${host}/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${host}/contact</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${host}/privacy</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>${host}/terms</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+</urlset>`;
+    res.header("Content-Type", "application/xml");
+    res.status(200).send(sitemap);
+  });
+
   // FRONTEND HANDLING / STATIC SERVING
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
