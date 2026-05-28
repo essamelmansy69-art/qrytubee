@@ -446,9 +446,24 @@ export function buildDeepLink(url: string, type: 'vnd' | 'ios' | 'android' | 'st
  * 3. Facebook -> fb:// compatible format.
  * 4. TikTok -> snssdk1128:// custom app protocol.
  */
-export function convertUrlToDeepLink(url: string): string {
+export function convertUrlToDeepLink(url: string, deviceOverride?: 'android' | 'ios' | 'standard'): string {
   const trimmed = url.trim();
   if (!trimmed) return trimmed;
+
+  // Detect device type
+  let deviceType: 'android' | 'ios' | 'standard' = 'standard';
+  if (deviceOverride) {
+    deviceType = deviceOverride;
+  } else if (typeof window !== 'undefined' && window.navigator) {
+    const ua = window.navigator.userAgent || '';
+    if (/android/i.test(ua)) {
+      deviceType = 'android';
+    } else if (/iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream) {
+      deviceType = 'ios';
+    } else if (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) {
+      deviceType = 'ios';
+    }
+  }
 
   // Let's parse with native URL class first for bulletproof safety
   let hostname = '';
@@ -463,7 +478,7 @@ export function convertUrlToDeepLink(url: string): string {
   } catch (_) {}
 
   // 1. YOUTUBE ADVANCED PARSING
-  if (hostname.includes('youtube.com') || hostname.includes('youtu.be') || trimmed.includes('youtube.com') || trimmed.includes('youtu.be')) {
+  if (hostname.includes('youtube.com') || hostname.includes('youtu.be') || hostname.includes('youtube-nocookie.com')) {
     let videoId = '';
     let playlistId = '';
     let channelId = '';
@@ -521,41 +536,79 @@ export function convertUrlToDeepLink(url: string): string {
       }
     }
 
-    if (playlistId) {
-      return `youtube://www.youtube.com/playlist?list=${playlistId}`;
-    } else if (videoId) {
-      return `youtube://www.youtube.com/watch?v=${videoId}`;
-    } else if (channelId) {
-      if (channelId.startsWith('@')) {
-        return `youtube://www.youtube.com/${channelId}`;
+    if (deviceType === 'android') {
+      if (playlistId) {
+        return `intent://www.youtube.com/playlist?list=${playlistId}#Intent;package=com.google.android.youtube;scheme=https;end`;
+      } else if (videoId) {
+        return `intent://www.youtube.com/watch?v=${videoId}#Intent;package=com.google.android.youtube;scheme=https;end`;
+      } else if (channelId) {
+        if (channelId.startsWith('@')) {
+          return `intent://www.youtube.com/${channelId}#Intent;package=com.google.android.youtube;scheme=https;end`;
+        }
+        return `intent://www.youtube.com/channel/${channelId}#Intent;package=com.google.android.youtube;scheme=https;end`;
       }
-      return `youtube://www.youtube.com/channel/${channelId}`;
+      return `intent://www.youtube.com#Intent;package=com.google.android.youtube;scheme=https;end`;
+    } else {
+      // iOS / Standard Web
+      if (playlistId) {
+        return `youtube://www.youtube.com/playlist?list=${playlistId}`;
+      } else if (videoId) {
+        return `youtube://www.youtube.com/watch?v=${videoId}`;
+      } else if (channelId) {
+        if (channelId.startsWith('@')) {
+          return `youtube://www.youtube.com/${channelId}`;
+        }
+        return `youtube://www.youtube.com/channel/${channelId}`;
+      }
+      return `youtube://`;
     }
-    
-    // fallbacks
-    return `youtube://www.youtube.com/watch?v=${videoId}`;
   }
 
   // 2. INSTAGRAM ADVANCED PARSING
-  if (hostname.includes('instagram.com') || hostname.includes('instagr.am') || trimmed.includes('instagram.com') || trimmed.includes('instagr.am')) {
-    // Extract username: ignore static directories like p, reel, stories, etc.
-    const parts = pathname.split('/').filter(Boolean);
-    const filtered = parts.filter(p => !['p', 'reel', 'stories', 'explore', 'direct', 'developer', 'tv'].includes(p.toLowerCase()));
-    
-    if (filtered.length > 0) {
-      const username = filtered[0];
-      return `instagram://user?username=${username}`;
+  if (hostname.includes('instagram.com') || hostname.includes('instagr.am')) {
+    let instagramUsername = '';
+    let instagramMediaId = '';
+
+    const igMediaMatch = pathname.match(/\/(?:p|reel|tv)\/([a-zA-Z0-9_-]+)/i);
+    if (igMediaMatch) {
+      instagramMediaId = igMediaMatch[1];
     }
-    // Also try matching standard pattern as fallback
-    const match = trimmed.match(/(?:https?:\/\/)?(?:www\.)?instagram\.com\/([a-zA-Z0-9._-]+)/i);
-    if (match && !['p', 'reel', 'stories', 'explore', 'direct'].includes(match[1].toLowerCase())) {
-      return `instagram://user?username=${match[1]}`;
+
+    const igUserMatch = trimmed.match(/(?:https?:\/\/)?(?:www\.)?(?:instagram\.com|instagr\.am)\/([a-zA-Z0-9._-]+)/i);
+    if (igUserMatch) {
+      const candidate = igUserMatch[1].toLowerCase();
+      if (!['p', 'reel', 'stories', 'explore', 'direct', 'developer', 'tv', 'about', 'legal', 'privacy'].includes(candidate)) {
+        instagramUsername = igUserMatch[1];
+      }
     }
-    return `instagram://`;
+
+    if (instagramUsername === 'stories') {
+      const storiesMatch = trimmed.match(/\/stories\/([a-zA-Z0-9._-]+)/i);
+      if (storiesMatch) {
+        instagramUsername = storiesMatch[1];
+      }
+    }
+
+    if (deviceType === 'android') {
+      if (instagramMediaId) {
+        return `intent://instagram.com/p/${instagramMediaId}#Intent;package=com.instagram.android;scheme=https;end`;
+      } else if (instagramUsername) {
+        return `intent://instagram.com/_u/${instagramUsername}#Intent;package=com.instagram.android;scheme=https;end`;
+      }
+      return `intent://instagram.com#Intent;package=com.instagram.android;scheme=https;end`;
+    } else {
+      // iOS / Standard Web
+      if (instagramMediaId) {
+        return `instagram://media?id=${instagramMediaId}`;
+      } else if (instagramUsername) {
+        return `instagram://user?username=${instagramUsername}`;
+      }
+      return `instagram://`;
+    }
   }
 
   // 3. FACEBOOK ADVANCED PARSING
-  if (hostname.includes('facebook.com') || hostname.includes('fb.com') || hostname.includes('fb.watch') || trimmed.includes('facebook.com') || trimmed.includes('fb.com')) {
+  if (hostname.includes('facebook.com') || hostname.includes('fb.com') || hostname.includes('fb.watch')) {
     let fbId = '';
     if (searchParams) {
       const idVal = searchParams.get('id');
@@ -568,32 +621,58 @@ export function convertUrlToDeepLink(url: string): string {
         fbId = filtered[0];
       }
     }
-    if (fbId) {
-      if (pathname.includes('/groups/')) {
-        return `fb://group/${fbId}`;
+
+    if (deviceType === 'android') {
+      if (fbId) {
+        if (pathname.includes('/groups/')) {
+          return `intent://facebook.com/groups/${fbId}#Intent;package=com.facebook.katana;scheme=https;end`;
+        }
+        return `intent://facebook.com/${fbId}#Intent;package=com.facebook.katana;scheme=https;end`;
       }
-      return `fb://profile/${fbId}`;
+      return `intent://facebook.com#Intent;package=com.facebook.katana;scheme=https;end`;
+    } else {
+      // iOS / Standard Web
+      if (fbId) {
+        if (pathname.includes('/groups/')) {
+          return `fb://group/${fbId}`;
+        }
+        return `fb://profile/${fbId}`;
+      }
+      return `fb://facewebmodal/f?href=${encodeURIComponent(trimmed)}`;
     }
-    // Webview fallback schema
-    return `fb://facewebmodal/f?href=${encodeURIComponent(trimmed.startsWith('http') ? trimmed : `https://${trimmed}`)}`;
   }
 
   // 4. TIKTOK ADVANCED PARSING
-  if (hostname.includes('tiktok.com') || trimmed.includes('tiktok.com')) {
-    // Check for video
-    // e.g. /@user/video/123456
+  if (hostname.includes('tiktok.com')) {
+    let videoId = '';
+    let username = '';
+
     const ttVideoMatch = pathname.match(/\/@[a-zA-Z0-9._-]+\/video\/([0-9]+)/i);
     if (ttVideoMatch) {
-      return `snssdk1128://feed?detail_id=${ttVideoMatch[1]}`;
+      videoId = ttVideoMatch[1];
     }
     
-    // Check for user
     const ttUserMatch = pathname.match(/\/@([a-zA-Z0-9._-]+)/i);
     if (ttUserMatch) {
-      return `snssdk1128://user/profile/${ttUserMatch[1]}`;
+      username = ttUserMatch[1];
     }
 
-    return `snssdk1128://`;
+    if (deviceType === 'android') {
+      if (videoId) {
+        return `intent://tiktok.com/video/${videoId}#Intent;package=com.zhiliaoapp.musically;scheme=https;end`;
+      } else if (username) {
+        return `intent://tiktok.com/@${username}#Intent;package=com.zhiliaoapp.musically;scheme=https;end`;
+      }
+      return `intent://tiktok.com#Intent;package=com.zhiliaoapp.musically;scheme=https;end`;
+    } else {
+      // iOS / Standard Web
+      if (videoId) {
+        return `snssdk1128://feed?detail_id=${videoId}`;
+      } else if (username) {
+        return `snssdk1128://user/profile/${username}`;
+      }
+      return `snssdk1128://`;
+    }
   }
 
   return trimmed.startsWith('http') ? trimmed : `https://${trimmed}`;

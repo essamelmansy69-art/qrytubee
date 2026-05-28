@@ -225,6 +225,10 @@ export default function App() {
     return 'standard';
   };
 
+  const fallbackTimerRef = React.useRef<any>(null);
+  const t2Ref = React.useRef<any>(null);
+  const t3Ref = React.useRef<any>(null);
+
   const queryParams = new URL(window.location.href).searchParams;
   const redirectUrl = queryParams.get('url') || queryParams.get('r');
   const redirectType = queryParams.get('type') || 'vnd';
@@ -243,8 +247,9 @@ export default function App() {
           fetch(fetchUrl, { method: 'POST', keepalive: true }).catch(() => {});
         }
 
-        // Generate the native App Scheme using the professional unified helper
-        const deepLink = convertUrlToDeepLink(decodedUrl);
+        // Generate the native App Scheme using the professional unified helper with active device sensing
+        const deviceType = getRedirectionTypeForDevice();
+        const deepLink = convertUrlToDeepLink(decodedUrl, deviceType);
         const fallbackUrl = platformInfo.cleanUrl || decodedUrl;
 
         // Fallback timing parameters: 3000ms (3 seconds) limit before routing browser fallback
@@ -252,15 +257,11 @@ export default function App() {
         const startTime = Date.now();
         let isRedirected = false;
 
-        let t2: any = null;
-        let t3: any = null;
-        let retryTimer: any = null;
-
         const handleBlurOrHide = () => {
           isRedirected = true;
-          clearTimeout(t2);
-          clearTimeout(t3);
-          clearTimeout(retryTimer);
+          if (t2Ref.current) clearTimeout(t2Ref.current);
+          if (t3Ref.current) clearTimeout(t3Ref.current);
+          if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
         };
 
         window.addEventListener('blur', handleBlurOrHide, { once: true });
@@ -277,21 +278,21 @@ export default function App() {
         window.location.href = deepLink;
 
         // 2. Second trigger fallback after 150ms to force launch under low responsive environments
-        t2 = setTimeout(() => {
+        t2Ref.current = setTimeout(() => {
           if (!isRedirected && !document.hidden) {
             window.location.href = deepLink;
           }
         }, 150);
 
         // 3. Third trigger fallback after 450ms for slow webviews
-        t3 = setTimeout(() => {
+        t3Ref.current = setTimeout(() => {
           if (!isRedirected && !document.hidden) {
             window.location.href = deepLink;
           }
         }, 450);
 
         // 4. Absolute failsafe fallback: standard web page replace redirection after 3 seconds
-        retryTimer = setTimeout(() => {
+        fallbackTimerRef.current = setTimeout(() => {
           const elapsed = Date.now() - startTime;
           // Verify that user hasn't successfully switched apps
           if (!isRedirected && elapsed < 4500 && !document.hidden) {
@@ -300,9 +301,9 @@ export default function App() {
         }, timeoutDuration);
 
         return () => {
-          clearTimeout(t2);
-          clearTimeout(t3);
-          clearTimeout(retryTimer);
+          if (t2Ref.current) clearTimeout(t2Ref.current);
+          if (t3Ref.current) clearTimeout(t3Ref.current);
+          if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
           window.removeEventListener('blur', handleBlurOrHide);
           window.removeEventListener('pagehide', handleBlurOrHide);
           document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -322,8 +323,18 @@ export default function App() {
       decodedUrl = decodeURIComponent(redirectUrl);
       const platformInfo = parseYoutubeUrl(decodedUrl);
       platform = platformInfo.platform;
-      deepLink = convertUrlToDeepLink(decodedUrl);
+      const deviceType = getRedirectionTypeForDevice();
+      deepLink = convertUrlToDeepLink(decodedUrl, deviceType);
     } catch (_) {}
+
+    const handleForceOpenClick = () => {
+      if (t2Ref.current) clearTimeout(t2Ref.current);
+      if (t3Ref.current) clearTimeout(t3Ref.current);
+      if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
+      if (deepLink) {
+        window.location.href = deepLink;
+      }
+    };
 
     const getLoadingIconStyles = () => {
       switch(platform) {
@@ -419,7 +430,7 @@ export default function App() {
             <div className="flex flex-col gap-2.5">
               {/* Force App link */}
               <button
-                onClick={() => { if (deepLink) window.location.href = deepLink; }}
+                onClick={handleForceOpenClick}
                 className={`w-full py-3.5 px-4 text-white rounded-xl font-bold font-arabic text-sm transition-all shadow-md active:scale-98 cursor-pointer ${loadingStyle.buttonClass}`}
                 type="button"
                 id="force_open_app_btn"
