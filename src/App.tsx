@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import QRGenerator from './components/QRGenerator';
+import AnalyticsDashboard from './components/AnalyticsDashboard';
 import { buildDeepLink, parseYoutubeUrl } from './utils';
 import { 
   Youtube, 
@@ -57,7 +58,7 @@ export default function App() {
 
   const t = translations[lang];
 
-  const [activeTab, setActiveTab] = useState<'generator' | 'faq' | 'tips' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact'>(() => {
+  const [activeTab, setActiveTab] = useState<'generator' | 'analytics' | 'faq' | 'tips' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact'>(() => {
     try {
       const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
       if (path === 'terms') return 'terms';
@@ -65,6 +66,7 @@ export default function App() {
       if (path === 'about') return 'about';
       if (path === 'contact') return 'contact';
       if (path === 'articles') return 'articles';
+      if (path === 'analytics') return 'analytics';
     } catch (_) {}
     return 'generator';
   });
@@ -85,7 +87,7 @@ export default function App() {
         setActiveTab(e.state.tab);
       } else {
         const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
-        if (['terms', 'privacy', 'about', 'contact', 'articles'].includes(path)) {
+        if (['terms', 'privacy', 'about', 'contact', 'articles', 'analytics'].includes(path)) {
           setActiveTab(path as any);
         } else {
           setActiveTab('generator');
@@ -96,7 +98,7 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  const handleNavClick = (tab: 'generator' | 'tips' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact', event: React.MouseEvent) => {
+  const handleNavClick = (tab: 'generator' | 'analytics' | 'tips' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact', event: React.MouseEvent) => {
     event.preventDefault();
     setActiveTab(tab);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -132,6 +134,13 @@ export default function App() {
   useEffect(() => {
     if (redirectUrl) {
       try {
+        const scanId = queryParams.get('tid') || queryParams.get('id');
+        if (scanId) {
+          const platformParam = queryParams.get('platform') || 'youtube';
+          const fetchUrl = `/api/track-scan?tid=${encodeURIComponent(scanId)}&r=${encodeURIComponent(redirectUrl)}&platform=${encodeURIComponent(platformParam)}&type=${encodeURIComponent(redirectType)}`;
+          fetch(fetchUrl, { method: 'POST', keepalive: true }).catch(() => {});
+        }
+
         const decodedUrl = decodeURIComponent(redirectUrl);
         const resolvedType = redirectType === 'vnd' ? getRedirectionTypeForDevice() : redirectType;
         const deepLink = buildDeepLink(decodedUrl, resolvedType as any);
@@ -295,6 +304,15 @@ export default function App() {
               {t.navGenerator}
             </button>
             <button
+              onClick={() => setActiveTab('analytics')}
+              className={`px-4 py-2 rounded-lg font-medium transition-all cursor-pointer ${
+                activeTab === 'analytics' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'
+              }`}
+              type="button"
+            >
+              {t.analyticsTitle}
+            </button>
+            <button
               onClick={() => setActiveTab('tips')}
               className={`px-4 py-2 rounded-lg font-medium transition-all cursor-pointer ${
                 activeTab === 'tips' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'
@@ -369,10 +387,50 @@ export default function App() {
       {/* 3. MAIN WORKSPACE / INTERACTIVE PLATFORM */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" id="main_workspace">
         
+        {/* Mobile quick tab list */}
+        <div className="md:hidden overflow-x-auto flex items-center gap-1.5 bg-gray-100/70 p-1 rounded-2xl mb-8 font-arabic text-xs font-semibold scrollbar-none" id="mobile_navbar" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
+          <button
+            onClick={() => { setActiveTab('generator'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            className={`whitespace-nowrap px-4 py-2.5 rounded-xl transition-all ${activeTab === 'generator' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            {t.navGenerator}
+          </button>
+          <button
+            onClick={() => { setActiveTab('analytics'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            className={`whitespace-nowrap px-4 py-2.5 rounded-xl transition-all ${activeTab === 'analytics' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            {t.analyticsTitle}
+          </button>
+          <button
+            onClick={() => { setActiveTab('tips'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            className={`whitespace-nowrap px-4 py-2.5 rounded-xl transition-all ${activeTab === 'tips' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            {t.navTips}
+          </button>
+          <button
+            onClick={() => { setActiveTab('articles'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            className={`whitespace-nowrap px-4 py-2.5 rounded-xl transition-all ${activeTab === 'articles' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            {t.navArticles}
+          </button>
+          <button
+            onClick={() => { setActiveTab('faq'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            className={`whitespace-nowrap px-4 py-2.5 rounded-xl transition-all ${activeTab === 'faq' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
+          >
+            {t.navFaq}
+          </button>
+        </div>
+
         {/* Dynamic Navigation Tabs Content render */}
         {activeTab === 'generator' && (
           <div className="transition-opacity duration-300">
             <QRGenerator lang={lang} />
+          </div>
+        )}
+
+        {activeTab === 'analytics' && (
+          <div className="transition-opacity duration-300">
+            <AnalyticsDashboard lang={lang} onNavigateToGenerator={() => setActiveTab('generator')} />
           </div>
         )}
 

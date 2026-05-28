@@ -117,27 +117,7 @@ export default defineConfig(() => {
       minify: 'esbuild',
       cssMinify: true,
       reportCompressedSize: false,
-      rollupOptions: {
-        output: {
-          manualChunks(id) {
-            if (id.includes('node_modules')) {
-              if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler')) {
-                return 'vendor-react';
-              }
-              if (id.includes('jspdf')) {
-                return 'vendor-jspdf';
-              }
-              if (id.includes('lucide-react')) {
-                return 'vendor-lucide';
-              }
-              if (id.includes('motion')) {
-                return 'vendor-motion';
-              }
-              return 'vendor-others';
-            }
-          }
-        }
-      }
+      cssCodeSplit: false,
     },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.

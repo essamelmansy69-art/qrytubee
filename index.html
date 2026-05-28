@@ -18,16 +18,14 @@
     <style>
       /* Critical Above-The-Fold Inline CSS */
       :root {
-        --font-sans: "Inter", "Cairo", sans-serif;
-        --font-display-swap: swap;
+        --font-sans: "Inter", "Cairo", system-ui, sans-serif;
       }
       body {
         margin: 0;
         padding: 0;
-        background-color: #f8fafc;
-        color: #1e293b;
+        background-color: #fbfafe; /* Matches the soft purple/slate background of the app */
+        color: #0f172a;
         font-family: var(--font-sans);
-        font-display: var(--font-display-swap);
         -webkit-font-smoothing: antialiased;
       }
       #root {
@@ -35,9 +33,11 @@
         display: flex;
         flex-direction: column;
       }
-      .critical-header-placeholder {
-        background-color: #ffffff;
-        border-bottom: 1px solid #f1f5f9;
+      .crit-nav {
+        background-color: rgba(255, 255, 255, 0.82);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid rgba(226, 232, 240, 0.8);
         height: 72px;
         width: 100%;
         display: flex;
@@ -46,21 +46,110 @@
         padding: 0 1.5rem;
         box-sizing: border-box;
       }
-      .critical-logo {
+      .crit-logo {
         display: flex;
         align-items: center;
-        gap: 0.625rem;
+        gap: 0.75rem;
       }
-      .critical-logo-icon {
-        width: 42px;
-        height: 42px;
-        background-color: #dc2626;
+      .crit-logo-icon {
+        width: 44px;
+        height: 44px;
+        background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
         border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+      }
+      .crit-logo-svg {
+        width: 20px;
+        height: 20px;
+        fill: #ffffff;
+      }
+      .crit-logo-text {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #0f172a;
+        letter-spacing: -0.025em;
+      }
+      .crit-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 2.5rem 1rem;
+        box-sizing: border-box;
+      }
+      .crit-hero {
+        text-align: center;
+        max-width: 640px;
+        margin-bottom: 2rem;
+        margin-top: 1rem;
+      }
+      .crit-title {
+        font-size: 1.875rem;
+        font-weight: 800;
+        line-height: 1.25;
+        color: #0f172a;
+        margin: 0 0 0.75rem 0;
+      }
+      .crit-subtitle {
+        font-size: 0.95rem;
+        color: #64748b;
+        margin: 0;
+      }
+      .crit-card {
+        background-color: #ffffff;
+        border-radius: 20px;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+        width: 100%;
+        max-width: 580px;
+        padding: 1.75rem;
+        box-sizing: border-box;
+      }
+      .crit-input-lbl {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+      .crit-input-box {
+        height: 48px;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        width: 100%;
+        box-sizing: border-box;
       }
     </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Critical View Instant Render Mock Structure (Hydrates instantly to React) -->
+      <nav class="crit-nav">
+        <div class="crit-logo">
+          <div class="crit-logo-icon">
+            <svg class="crit-logo-svg" viewBox="0 0 24 24">
+              <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.517 3.545 12 3.545 12 3.545s-7.517 0-9.388.508a3.003 3.003 0 0 0-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.871.507 9.388.507 9.388.507s7.517 0 9.388-.507a3.003 3.003 0 0 0 2.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+            </svg>
+          </div>
+          <span class="crit-logo-text">Qrytube</span>
+        </div>
+      </nav>
+      <main class="crit-main">
+        <div class="crit-hero">
+          <h1 class="crit-title">منشئ رموز QR الذكية لليوتيوب</h1>
+          <p class="crit-subtitle">قم بتوليد الباركود الذكي الذي يفتح روابط قناتك مباشرة في التطبيق الرسمي لزيادة التفاعل ✨</p>
+        </div>
+        <div class="crit-card">
+          <label class="crit-input-lbl">أدخل رابط قناة اليوتيوب أو الفيديو الخاص بك</label>
+          <div class="crit-input-box"></div>
+        </div>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

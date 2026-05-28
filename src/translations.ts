@@ -168,7 +168,27 @@ export const translations = {
     lastUpdated: "آخر تحديث:",
     seoArticlesHeading: "مقالات النمو وسيو اليوتيوب والمواقع",
     seoArticlesDesc: "دليلك المتكامل لتصدر محركات البحث، تنشيط خوارزميات يوتيوب، واستعمال تقنيات التوجيه المتقدمة لمضاعفة المشتركين مجاناً.",
-    backToArticles: "العودة لجميع المقالات"
+    backToArticles: "العودة لجميع المقالات",
+
+    // Analytics Dashboard
+    analyticsTitle: "لوحة تحكم التحليلات",
+    analyticsSub: "تتبع مسح رموز الـ QR الخاصة بك في الوقت الفعلي",
+    scansCount: "عدد المسحات",
+    scanDate: "تاريخ الإنشاء",
+    scannedPlatform: "المنصة",
+    originalUrlLabel: "الرابط الأصلي",
+    scansZero: "لا توجد مسحات بعد",
+    noDataTitle: "لم تقم بتوليد أي كود QR ذكي بعد!",
+    noDataDesc: "قم بتوليد كود QR بتفعيل خيار \"الرابط الذكي\" لتظهر تحليلات مسح الكود هنا فوراً.",
+    lastScanned: "آخر مسح",
+    loadingAnalytics: "جاري تحميل التحليلات المباشرة...",
+    trackLabel: "عنوان تعريفي (اختياري لسهولة التتبع)",
+    trackPlaceholder: "مثال: رول أب المعرض، بروشور المطعم...",
+    refreshStats: "تحديث الإحصاءات",
+    generatedCodesTitle: "الرموز المُولدة النشطة",
+    tagLabel: "العلامة التمييزية",
+    anonymousLabel: "رابط غير معنون",
+    searchPlaceholder: "البحث عن رابط أو منصة..."
   },
   en: {
     // General
@@ -334,6 +354,26 @@ export const translations = {
     lastUpdated: "Last updated:",
     seoArticlesHeading: "YouTube Growth & Web SEO Insights",
     seoArticlesDesc: "Your ultimate playbook to top search engines, trigger YouTube's recommendation flywheels, and leverage advanced deep links to multiply subscribers.",
-    backToArticles: "Back to all articles"
+    backToArticles: "Back to all articles",
+
+    // Analytics Dashboard
+    analyticsTitle: "Real-Time Analytics Dashboard",
+    analyticsSub: "Track scans and traffic performance of your smart QR codes live",
+    scansCount: "Scans Count",
+    scanDate: "Created At",
+    scannedPlatform: "Platform",
+    originalUrlLabel: "Original Destination",
+    scansZero: "No scans yet",
+    noDataTitle: "No smart QR codes generated yet!",
+    noDataDesc: "Use the 'Smart Link' option to build QR codes, and see real-time scan metrics tracked instantly.",
+    lastScanned: "Last Scanned",
+    loadingAnalytics: "Loading live analytics...",
+    trackLabel: "Tag label (Optional for easy tracking)",
+    trackPlaceholder: "e.g., Roll-up banner, Restaurant Invoice...",
+    refreshStats: "Refresh Stats",
+    generatedCodesTitle: "Your Generated Smart Codes",
+    tagLabel: "Tag label",
+    anonymousLabel: "Untitled QR link",
+    searchPlaceholder: "Search links, labels, platforms..."
   }
 };
