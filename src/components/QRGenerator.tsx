@@ -61,7 +61,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
     }
   };
 
-  const [urlInput, setUrlInput] = useState('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+  const [urlInput, setUrlInput] = useState('');
   const [labelInput, setLabelInput] = useState<string>('');
   const [trackingId, setTrackingId] = useState<string>(() => 'qr_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36).substring(4));
 
@@ -183,10 +183,12 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
 
   // Active payload to embed inside the QR
   const getActivePayload = () => {
+    const trimmed = urlInput.trim();
+    const fallbackUrl = trimmed || 'https://www.youtube.com';
     if (useSmartLink) {
-      return `${window.location.origin}/?r=${encodeURIComponent(urlInput.trim())}&type=${deepLinkType}&tid=${trackingId}`;
+      return `${window.location.origin}/?r=${encodeURIComponent(fallbackUrl)}&type=${deepLinkType}&tid=${trackingId}`;
     }
-    return formattedDeepLink.trim() || urlInput.trim() || 'https://www.youtube.com';
+    return formattedDeepLink.trim() || fallbackUrl;
   };
 
   // Check if QR colors are dangerously inverted for standard mobile lenses
@@ -225,6 +227,10 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
     setRenderedPayload(payload);
 
     try {
+      const isUrlEmpty = !urlInput.trim();
+      const isUrlValid = isUrlEmpty || (urlInfo.isValid && urlInfo.platform !== 'other');
+      const isInvalid = !isUrlValid || isUrlEmpty;
+
       // Draw base QR Code on high-resolution canvas
       // To get crisp rendering, we draw at 512x512 initially for preview
       const qrOptions = {
@@ -232,8 +238,8 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
         margin: 2,
         errorCorrectionLevel: errorCorrectionLevel,
         color: {
-          dark: foregroundColor,
-          light: backgroundColor
+          dark: isInvalid ? '#94A3B8' : foregroundColor,
+          light: isInvalid ? '#F8FAFC' : backgroundColor
         }
       };
 
@@ -724,6 +730,94 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
     }
   };
 
+  const renderActionButtons = () => {
+    const isUrlEmpty = !urlInput.trim();
+    const isUrlValid = isUrlEmpty || (urlInfo.isValid && urlInfo.platform !== 'other');
+    const isInvalid = !isUrlValid || isUrlEmpty;
+
+    return (
+      <div className="space-y-4 w-full">
+        {/* Copy to clipboard button */}
+        <button
+          onClick={handleCopyToClipboard}
+          disabled={isInvalid}
+          className={`w-full py-3 px-4 rounded-xl font-arabic font-semibold transition-all flex items-center justify-center gap-2 text-xs ${
+            isInvalid
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-60'
+              : copied 
+              ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-inner cursor-pointer'
+              : 'bg-gray-100 hover:bg-gray-200 text-gray-700 cursor-pointer'
+          }`}
+          type="button"
+          id="copy_qr_btn"
+        >
+          {copied ? (
+            <>
+              <Check size={16} />
+              <span>{t.copiedToast}</span>
+            </>
+          ) : (
+            <>
+              <Copy size={16} />
+              <span>{t.btnCopyImage}</span>
+            </>
+          )}
+        </button>
+
+        {/* Pro Print Export - PNG, SVG & PDF Download buttons */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5" id="pro_export_action_buttons">
+          {/* PNG Download Button */}
+          <button
+            onClick={handleDownload}
+            disabled={isInvalid}
+            className={`py-3 px-2 text-white rounded-xl font-semibold font-arabic flex items-center justify-center gap-1.5 transition-all text-[11px] ${
+              isInvalid
+                ? 'bg-red-400/60 text-white/75 cursor-not-allowed'
+                : 'bg-red-600 hover:bg-red-700 cursor-pointer shadow-xs hover:shadow-md'
+            }`}
+            type="button"
+            id="direct_download_png_btn"
+          >
+            <Download size={14} />
+            <span>{t.btnDownloadPng}</span>
+          </button>
+
+          {/* SVG Download Button */}
+          <button
+            onClick={handleDownloadSvg}
+            disabled={isInvalid}
+            className={`py-3 px-2 text-white rounded-xl font-semibold font-arabic flex items-center justify-center gap-1.5 transition-all text-[11px] ${
+              isInvalid
+                ? 'bg-slate-500/40 text-white/50 cursor-not-allowed'
+                : 'bg-slate-800 hover:bg-slate-900 cursor-pointer shadow-xs hover:shadow-md'
+            }`}
+            type="button"
+            id="direct_download_svg_btn"
+          >
+            <Sparkles size={14} />
+            <span>{t.btnDownloadSvg}</span>
+          </button>
+
+          {/* PDF Download Button */}
+          <button
+            onClick={handleDownloadPdf}
+            disabled={isInvalid}
+            className={`py-3 px-2 text-white rounded-xl font-semibold font-arabic flex items-center justify-center gap-1.5 transition-all text-[11px] ${
+              isInvalid
+                ? 'bg-emerald-500/40 text-white/50 cursor-not-allowed'
+                : 'bg-emerald-600 hover:bg-emerald-700 cursor-pointer shadow-xs hover:shadow-md'
+            }`}
+            type="button"
+            id="direct_download_pdf_btn"
+          >
+            <FileText size={14} />
+            <span>{t.btnDownloadPdf}</span>
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full max-w-7xl mx-auto" id="qr_main_layout">
       
@@ -872,6 +966,42 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                   </div>
                 </div>
 
+                {/* Validation Status Badge and Warning Banner */}
+                {(() => {
+                  const isUrlEmpty = !urlInput.trim();
+                  const isUrlValid = isUrlEmpty || (urlInfo.isValid && urlInfo.platform !== 'other');
+                  
+                  if (!isUrlValid) {
+                    return (
+                      <div className="mt-3 p-3.5 bg-red-50 rounded-2xl border border-red-200 flex items-start gap-2.5 text-red-800 text-xs font-arabic leading-relaxed animate-fadeIn" id="url_validation_warning">
+                        <span className="p-1 bg-red-100 text-red-600 rounded-lg shrink-0 mt-0.5">
+                          <AlertCircle size={14} />
+                        </span>
+                        <div>
+                          <p className="font-bold">{t.unsupportedUrlWarn}</p>
+                        </div>
+                      </div>
+                    );
+                  } else if (!isUrlEmpty) {
+                    const platformLabels: Record<string, string> = {
+                      youtube: 'YouTube',
+                      facebook: 'Facebook',
+                      instagram: 'Instagram',
+                      tiktok: 'TikTok'
+                    };
+                    const matchedPlatform = platformLabels[urlInfo.platform] || urlInfo.platform;
+                    return (
+                      <div className="mt-3 p-3 bg-emerald-50 rounded-2xl border border-emerald-150 flex items-center gap-2.5 text-emerald-800 text-xs font-arabic animate-fadeIn">
+                        <span className="p-1 bg-emerald-100 text-emerald-600 rounded-lg shrink-0">
+                          <Check size={14} />
+                        </span>
+                        <span>{t.validLink} ({matchedPlatform})</span>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+
                 {/* Optional Tracking Tag Input */}
                 {useSmartLink && (
                   <div className="mt-4 animate-scaleIn">
@@ -900,75 +1030,15 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
           <div className="w-full h-px bg-gray-100 my-6" />
 
           {/* Moved Live Preview & Actions Section */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center" id="direct_preview_area">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center" id="direct_preview_area">
             
-            {/* Left: Copy & High-Res download (7 cols on md) located directly under the link input field */}
-            <div className="md:col-span-7 space-y-4 w-full order-1 md:order-1" id="direct_actions_container">
-              
-              {/* Copy to clipboard button */}
-              <button
-                onClick={handleCopyToClipboard}
-                className={`w-full py-3 px-4 rounded-xl font-arabic font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer text-xs ${
-                  copied 
-                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-inner'
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                }`}
-                type="button"
-                id="copy_qr_btn"
-              >
-                {copied ? (
-                  <>
-                    <Check size={16} />
-                    <span>{t.copiedToast}</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy size={16} />
-                    <span>{t.btnCopyImage}</span>
-                  </>
-                )}
-              </button>
-
-              {/* Pro Print Export - PNG, SVG & PDF Download buttons */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5" id="pro_export_action_buttons">
-                {/* PNG Download Button */}
-                <button
-                  onClick={handleDownload}
-                  className="py-3 px-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold font-arabic flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs hover:shadow-md text-[11px]"
-                  type="button"
-                  id="direct_download_png_btn"
-                >
-                  <Download size={14} />
-                  <span>{t.btnDownloadPng}</span>
-                </button>
-
-                {/* SVG Download Button */}
-                <button
-                  onClick={handleDownloadSvg}
-                  className="py-3 px-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-semibold font-arabic flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs hover:shadow-md text-[11px]"
-                  type="button"
-                  id="direct_download_svg_btn"
-                >
-                  <Sparkles size={14} />
-                  <span>{t.btnDownloadSvg}</span>
-                </button>
-
-                {/* PDF Download Button */}
-                <button
-                  onClick={handleDownloadPdf}
-                  className="py-3 px-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold font-arabic flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs hover:shadow-md text-[11px]"
-                  type="button"
-                  id="direct_download_pdf_btn"
-                >
-                  <FileText size={14} />
-                  <span>{t.btnDownloadPdf}</span>
-                </button>
-              </div>
-
+            {/* Left: Copy & High-Res download (7 cols on lg) - Visible on lg screens and up */}
+            <div className="hidden lg:block lg:col-span-7 space-y-4 w-full" id="direct_actions_container">
+              {renderActionButtons()}
             </div>
 
-            {/* Right: The QR Code canvas (5 cols on md) rendered next or below */}
-            <div className="md:col-span-5 flex flex-col items-center justify-center text-center p-4 sm:p-5 bg-slate-50/40 rounded-2xl border border-gray-100 group relative w-full shadow-xs order-2 md:order-2" id="direct_canvas_container">
+            {/* Right: The QR Code canvas (5 cols on lg) rendered next or below */}
+            <div className="lg:col-span-5 flex flex-col items-center justify-center text-center p-4 sm:p-5 bg-slate-50/40 rounded-2xl border border-gray-100 group relative w-full shadow-xs" id="direct_canvas_container">
               <span className="text-[10px] font-bold text-slate-600 font-arabic tracking-wider uppercase mb-0.5 block">{t.previewHeading}</span>
               <h3 className="text-xs font-bold font-arabic text-gray-700 mb-2">{t.finalQrLabel}</h3>
 
@@ -980,6 +1050,17 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                   id="final_qr_canvas"
                 />
               </div>
+
+              {/* Soft overlay or caption for empty/placeholder state */}
+              {(!urlInput.trim()) ? (
+                <span className="mt-2 text-[10px] font-bold font-arabic text-slate-500 bg-slate-100/80 px-2 py-0.5 rounded-md">
+                  💡 {lang === 'ar' ? 'معاينة افتراضية نشطة' : 'Active default preview'}
+                </span>
+              ) : (!(urlInfo.isValid && urlInfo.platform !== 'other')) ? (
+                <span className="mt-2 text-[10px] font-bold font-arabic text-red-500 bg-red-50 px-2 py-0.5 rounded-md">
+                  ⚠️ {lang === 'ar' ? 'الرابط غير مدعوم' : 'Unsupported link'}
+                </span>
+              ) : null}
 
               <p className="mt-2 text-[10px] font-arabic text-slate-600 max-w-[200px] leading-relaxed">
                 {t.previewSyncMsg}
@@ -1004,7 +1085,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
               </span>
               {t.mod3Title}
             </h2>
-            <div className="text-xs text-slate-600 font-mono">STEP 3</div>
+            <div className="text-xs text-slate-600 font-mono">STEP 2</div>
           </div>
 
           {/* Color Presets Templates */}
@@ -1110,7 +1191,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
               </span>
               {t.mod4Title}
             </h2>
-            <div className="text-xs text-slate-600 font-mono">STEP 4</div>
+            <div className="text-xs text-slate-600 font-mono">STEP 3</div>
           </div>
 
           <p className="text-xs font-arabic text-slate-600 mb-4 leading-relaxed">
@@ -1264,6 +1345,14 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
             </li>
           </ul>
         </div>
+      </div>
+
+      {/* Mobile-Only Download Actions: positioned at the absolute bottom, visible only on screens smaller than lg */}
+      <div className="lg:hidden col-span-1 md:col-span-12 bg-white rounded-3xl p-6 shadow-xs border border-gray-100 mt-2" id="mobile_actions_wrapper">
+        <h3 className="text-sm font-bold font-arabic text-gray-850 mb-3 text-center flex items-center justify-center gap-2">
+          📥 {lang === 'ar' ? 'تحميل وحفظ كود الـ QR' : 'Download & Save QR Code'}
+        </h3>
+        {renderActionButtons()}
       </div>
 
     </div>

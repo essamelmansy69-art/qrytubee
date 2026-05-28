@@ -61,6 +61,7 @@ export const translations = {
     placeholderYtUrl: "سواء يوتيوب، أو فيسبوك، أو إنستجرام، أو تيك توك...",
     validLink: "تم التعرف على رابط المنصة وتحليله بنجاح",
     fallbackLinkMsg: "سيتم توليد كود QR للرابط المُدخل مباشرة كرابط عام",
+    unsupportedUrlWarn: "⚠️ الرابط المُدخل غير مدعوم أو غير صحيح! يرجى إدخال رابط يخص إحدى المنصات الأربعة المدعومة (يوتيوب، فيسبوك، إنستغرام، تيك توك) لتجنب توليد كود QR غير صالح.",
     
     mod2Title: "تقنية الرابط العميق (Deep Link)",
     mod2Desc: "الروابط العميقة تجبر الهاتف على تشغيل تطبيق YouTube الرسمي مباشرة بدلاً من فتحه داخل المتصفح الداخلي لـ (Instagram/Facebook) الذي لا يتيح الاشتراك أو التفاعل إلا بعد تسجيل الدخول المعقد.",
@@ -247,6 +248,7 @@ export const translations = {
     placeholderYtUrl: "e.g., YouTube video, Facebook profile, Instagram, or TikTok...",
     validLink: "Valid social media address identified successfully",
     fallbackLinkMsg: "Code will be built directly to redirect to this standard URL input",
+    unsupportedUrlWarn: "⚠️ Unsupported or invalid link! Please enter a URL belonging to one of the four supported platforms (YouTube, Facebook, Instagram, TikTok) to avoid generating an invalid QR code.",
 
     mod2Title: "Deep Link Strategy Options",
     mod2Desc: "Deep links immediately open the official YouTube app. This bypasses social media in-app browsers (Instagram, Facebook, etc.) that force users to log in before they can subscribe, like, or comment.",
