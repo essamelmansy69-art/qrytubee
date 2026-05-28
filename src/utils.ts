@@ -353,19 +353,7 @@ export function buildDeepLink(url: string, type: 'vnd' | 'ios' | 'android' | 'st
 
   // ROUTING BY PLATFORM
   if (info.platform === 'facebook') {
-    if (type === 'android') {
-      const relPath = getFacebookRelativePath(url);
-      return `intent://facebook.com/${relPath}#Intent;package=com.facebook.katana;scheme=https;end`;
-    }
-    // iOS or other custom schemes
-    const id = extractFacebookId(url);
-    if (id) {
-      if (url.toLowerCase().includes('page')) {
-        return `fb://page/${id}`;
-      }
-      return `fb://profile/${id}`;
-    }
-    return info.cleanUrl;
+    return `fb://facewebmodal/f?href=${encodeURIComponent(info.cleanUrl)}`;
   }
 
   if (info.platform === 'instagram') {
@@ -379,10 +367,7 @@ export function buildDeepLink(url: string, type: 'vnd' | 'ios' | 'android' | 'st
   if (info.platform === 'tiktok') {
     const username = extractTiktokUsername(url);
     if (username) {
-      if (type === 'ios' || type === 'vnd') {
-        return `snssdk1128://user/profile/${username}`;
-      }
-      return `tiktok://user?username=${username}`;
+      return `snssdk1128://user/profile/${username}`;
     }
     return info.cleanUrl;
   }

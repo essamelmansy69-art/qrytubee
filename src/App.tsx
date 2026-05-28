@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import QRGenerator from './components/QRGenerator';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
-import { buildDeepLink, parseYoutubeUrl } from './utils';
+import { buildDeepLink, parseYoutubeUrl, extractInstagramUsername, extractTiktokUsername } from './utils';
 import { 
   Youtube, 
   Sparkles, 
@@ -143,13 +143,35 @@ export default function App() {
 
         const decodedUrl = decodeURIComponent(redirectUrl);
         const resolvedType = redirectType === 'vnd' ? getRedirectionTypeForDevice() : redirectType;
-        const deepLink = buildDeepLink(decodedUrl, resolvedType as any);
+        const platformInfo = parseYoutubeUrl(decodedUrl);
+        
+        const isFacebook = platformInfo.platform === 'facebook';
+        const isInstagram = platformInfo.platform === 'instagram';
+        const isTiktok = platformInfo.platform === 'tiktok';
+        const isFastPlatform = isFacebook || isInstagram || isTiktok;
         
         // If standard redirection is determined, open immediately
         if (resolvedType === 'standard') {
-          window.location.href = deepLink;
+          window.location.href = isFastPlatform ? (platformInfo.cleanUrl || decodedUrl) : buildDeepLink(decodedUrl, resolvedType as any);
           return;
         }
+
+        let deepLink = '';
+        if (isFacebook) {
+          deepLink = `fb://facewebmodal/f?href=${encodeURIComponent(platformInfo.cleanUrl || decodedUrl)}`;
+        } else if (isInstagram) {
+          const username = extractInstagramUsername(decodedUrl) || '';
+          deepLink = username ? `instagram://user?username=${username}` : (platformInfo.cleanUrl || decodedUrl);
+        } else if (isTiktok) {
+          const username = extractTiktokUsername(decodedUrl) || '';
+          deepLink = username ? `snssdk1128://user/profile/${username}` : (platformInfo.cleanUrl || decodedUrl);
+        } else {
+          deepLink = buildDeepLink(decodedUrl, resolvedType as any);
+        }
+
+        const timeoutDuration = isFastPlatform ? 500 : 4000;
+        const maxElapsed = isFastPlatform ? 1500 : 5500;
+        const fallbackUrl = isFastPlatform ? (platformInfo.cleanUrl || decodedUrl) : decodedUrl;
 
         // Record time to monitor transition status
         const startTime = Date.now();
@@ -174,14 +196,13 @@ export default function App() {
         window.location.href = deepLink;
 
         // Failsafe fallback: if app isn't installed, the browser stays here.
-        // We increase this to 4.5 seconds to give the user plenty of time to read and accept browser prompts ("Open in 'Facebook'?").
         const retryTimer = setTimeout(() => {
           const elapsed = Date.now() - startTime;
           // Ensure we don't redirect if focus was lost, the app started, or page went to background
-          if (!isRedirected && elapsed < 5500 && !document.hidden) {
-            window.location.href = decodedUrl;
+          if (!isRedirected && elapsed < maxElapsed && !document.hidden) {
+            window.location.href = fallbackUrl;
           }
-        }, 4000);
+        }, timeoutDuration);
 
         return () => {
           clearTimeout(retryTimer);
@@ -203,8 +224,21 @@ export default function App() {
     try {
       decodedUrl = decodeURIComponent(redirectUrl);
       const resolvedType = redirectType === 'vnd' ? getRedirectionTypeForDevice() : redirectType;
-      deepLink = buildDeepLink(decodedUrl, resolvedType as any);
-      platform = parseYoutubeUrl(decodedUrl).platform;
+      
+      const platformInfo = parseYoutubeUrl(decodedUrl);
+      platform = platformInfo.platform;
+      
+      if (platform === 'facebook') {
+        deepLink = `fb://facewebmodal/f?href=${encodeURIComponent(platformInfo.cleanUrl || decodedUrl)}`;
+      } else if (platform === 'instagram') {
+        const username = extractInstagramUsername(decodedUrl) || '';
+        deepLink = username ? `instagram://user?username=${username}` : (platformInfo.cleanUrl || decodedUrl);
+      } else if (platform === 'tiktok') {
+        const username = extractTiktokUsername(decodedUrl) || '';
+        deepLink = username ? `snssdk1128://user/profile/${username}` : (platformInfo.cleanUrl || decodedUrl);
+      } else {
+        deepLink = buildDeepLink(decodedUrl, resolvedType as any);
+      }
     } catch (_) {}
 
     const getLoadingIconStyles = () => {
