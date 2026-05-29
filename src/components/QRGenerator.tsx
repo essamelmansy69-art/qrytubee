@@ -60,44 +60,12 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
     }
   };
 
-  const [urlInput, setUrlInput] = useState('');
-  const [labelInput, setLabelInput] = useState<string>('');
+   const [urlInput, setUrlInput] = useState('');
   const [trackingId, setTrackingId] = useState<string>(() => 'qr_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36).substring(4));
 
   useEffect(() => {
     setTrackingId('qr_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36).substring(4));
   }, [urlInput]);
-
-  const registerCurrentQR = async () => {
-    if (!urlInput.trim()) return;
-    try {
-      const stored = localStorage.getItem('qrytube_generated_codes');
-      const list = stored ? JSON.parse(stored) : [];
-      const exists = list.some((item: any) => item.id === trackingId);
-      if (!exists) {
-        const newItem = {
-          id: trackingId,
-          url: urlInput.trim(),
-          platform: urlInfo.platform,
-          type: deepLinkType,
-          label: labelInput.trim() || '',
-          createdAt: new Date().toISOString()
-        };
-        list.unshift(newItem);
-        localStorage.setItem('qrytube_generated_codes', JSON.stringify(list));
-
-        await fetch('/api/register-qr', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(newItem)
-        }).catch(err => console.error("Register QR tracking error:", err));
-      }
-    } catch (e) {
-      console.error("Error storing tracking metadata:", e);
-    }
-  };
 
   const [deepLinkType, setDeepLinkType] = useState<'vnd' | 'ios' | 'android' | 'standard'>('vnd');
   const [useSmartLink, setUseSmartLink] = useState<boolean>(false);
@@ -322,7 +290,6 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
       alert(t.alertInputFirst);
       return;
     }
-    await registerCurrentQR();
     try {
       const tempCanvas = document.createElement('canvas');
       tempCanvas.width = downloadSize;
@@ -413,7 +380,6 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
       alert(t.alertInputFirst);
       return;
     }
-    await registerCurrentQR();
     try {
       const qrOptions = {
         margin: 2,
@@ -482,7 +448,6 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
       alert(t.alertInputFirst);
       return;
     }
-    await registerCurrentQR();
     try {
       const scale = 2; // For higher density rendering
       const canvasWidth = 595 * scale; // A4 standard point width is 595
@@ -701,7 +666,6 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
 
   // Copy QR Image directly to Clipboard
   const handleCopyToClipboard = async () => {
-    await registerCurrentQR();
     try {
       const canvas = canvasRef.current;
       if (!canvas) return;
@@ -1002,22 +966,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
                   return null;
                 })()}
 
-                {/* Optional Tracking Tag Input */}
-                {useSmartLink && (
-                  <div className="mt-4 animate-scaleIn">
-                    <label className="text-xs font-semibold font-arabic text-slate-500 mb-1.5 block" htmlFor="tag_label">
-                      {t.trackLabel}
-                    </label>
-                    <input
-                      id="tag_label"
-                      type="text"
-                      value={labelInput}
-                      onChange={(e) => setLabelInput(e.target.value)}
-                      placeholder={t.trackPlaceholder}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-arabic text-xs focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all placeholder:text-slate-400 text-slate-700"
-                    />
-                  </div>
-                )}
+
 
 
               </>
