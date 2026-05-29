@@ -107,22 +107,24 @@ export default function App() {
     // Update core description, Open Graph and Twitter tags
     setMetaTag('name', 'description', desc);
 
+    const currentOrigin = window.location.origin;
+
     setMetaTag('property', 'og:type', 'website');
     setMetaTag('property', 'og:title', title);
     setMetaTag('property', 'og:description', desc);
-    setMetaTag('property', 'og:url', 'https://qrytubee.essamelmansy69.workers.dev/');
-    setMetaTag('property', 'og:image', 'https://qrytubee.essamelmansy69.workers.dev/og-image.png');
+    setMetaTag('property', 'og:url', currentOrigin + '/');
+    setMetaTag('property', 'og:image', currentOrigin + '/og-image.png');
     setMetaTag('property', 'og:site_name', 'QR Code Best');
 
     setMetaTag('name', 'twitter:card', 'summary_large_image');
     setMetaTag('name', 'twitter:title', title);
     setMetaTag('name', 'twitter:description', desc);
-    setMetaTag('name', 'twitter:image', 'https://qrytubee.essamelmansy69.workers.dev/og-image.png');
+    setMetaTag('name', 'twitter:image', currentOrigin + '/og-image.png');
 
     // Programmatically render hreflang tags and canonical tag in <head> for search engines
     try {
       document.querySelectorAll('link[hreflang]').forEach(el => el.remove());
-      const baseDomain = 'https://qrytubee.essamelmansy69.workers.dev';
+      const baseDomain = currentOrigin;
       const pathSuffix = activeTab === 'generator' ? '/' : `/${activeTab}`;
       const fullPath = `${baseDomain}${pathSuffix}`;
 

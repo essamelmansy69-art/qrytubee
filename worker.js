@@ -150,10 +150,12 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const pathname = url.pathname.toLowerCase();
+    const origin = url.origin;
 
     // 1. Serve static sitemap.xml with correct headers
     if (pathname === '/sitemap.xml') {
-      return new Response(SITEMAP_XML.trim(), {
+      const dynamicSitemap = SITEMAP_XML.replaceAll('https://qrytubee.essamelmansy69.workers.dev', origin);
+      return new Response(dynamicSitemap.trim(), {
         status: 200,
         headers: {
           'Content-Type': 'application/xml; charset=utf-8',
@@ -166,7 +168,8 @@ export default {
 
     // 2. Serve robots.txt
     if (pathname === '/robots.txt') {
-      return new Response(ROBOTS_TXT.trim(), {
+      const dynamicRobots = ROBOTS_TXT.replaceAll('https://qrytubee.essamelmansy69.workers.dev', origin);
+      return new Response(dynamicRobots.trim(), {
         status: 200,
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
@@ -257,10 +260,10 @@ export default {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
     <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-    <link rel="alternate" hreflang="ar" href="https://qrytubee.essamelmansy69.workers.dev${pathname}" />
-    <link rel="canonical" href="https://qrytubee.essamelmansy69.workers.dev${pathname}" />
-    <link rel="alternate" hreflang="en" href="https://qrytubee.essamelmansy69.workers.dev${pathname}?lang=en" />
-    <link rel="alternate" hreflang="x-default" href="https://qrytubee.essamelmansy69.workers.dev${pathname}" />
+    <link rel="alternate" hreflang="ar" href="${origin}${pathname}" />
+    <link rel="canonical" href="${origin}${pathname}" />
+    <link rel="alternate" hreflang="en" href="${origin}${pathname}?lang=en" />
+    <link rel="alternate" hreflang="x-default" href="${origin}${pathname}" />
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;700&display=swap" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;700&display=swap" media="print" onload="this.media='all'" />
     <noscript>
@@ -453,15 +456,32 @@ export default {
         urlPath.endsWith('.ico')
       ) {
         newHeaders.set('Cache-Control', 'public, max-age=31536000, immutable');
+        return new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: newHeaders,
+        });
       } else {
         newHeaders.set('Cache-Control', 'public, max-age=3600, must-revalidate');
+        
+        // If it's the main page HTML or a meta page, replace the domain to ensure perfect dynamic SEO tags matching the exact host requested
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('text/html')) {
+          let htmlText = await response.text();
+          htmlText = htmlText.replaceAll('https://qrytubee.essamelmansy69.workers.dev', origin);
+          return new Response(htmlText, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: newHeaders,
+          });
+        }
+        
+        return new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: newHeaders,
+        });
       }
-      
-      return new Response(response.body, {
-        status: response.status,
-        statusText: response.statusText,
-        headers: newHeaders,
-      });
     } catch (e) {
       return new Response("Fallback error: " + e.message, { status: 500 });
     }
