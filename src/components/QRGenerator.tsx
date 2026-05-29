@@ -4,7 +4,14 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import QRCode from 'qrcode';
+let _cachedQRCode: any = null;
+const getQRCodeLib = async () => {
+  if (!_cachedQRCode) {
+    const mod = await import('qrcode');
+    _cachedQRCode = mod.default || mod;
+  }
+  return _cachedQRCode;
+};
 import { 
   Youtube, 
   Sparkles, 
@@ -240,7 +247,8 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
         }
       };
 
-      await QRCode.toCanvas(canvas, payload, qrOptions);
+      const qrcodeLib = await getQRCodeLib();
+      await qrcodeLib.toCanvas(canvas, payload, qrOptions);
 
       // Dynamically overlay uploaded custom logo if set
       if (customLogo) {
@@ -339,7 +347,8 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
         }
       };
 
-      await QRCode.toCanvas(tempCanvas, payload, qrOptions);
+      const qrcodeLib = await getQRCodeLib();
+      await qrcodeLib.toCanvas(tempCanvas, payload, qrOptions);
 
       // Draw custom logo onto high-res canvas before generating download URL
       if (customLogo) {
@@ -423,8 +432,9 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
         }
       };
 
+      const qrcodeLib = await getQRCodeLib();
       // Get pure vector SVG string from qrcode library
-      const svgString = await QRCode.toString(payload, {
+      const svgString = await qrcodeLib.toString(payload, {
         type: 'svg',
         ...qrOptions
       });
@@ -554,7 +564,8 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
       qrTempCanvas.width = 600;
       qrTempCanvas.height = 600;
 
-      await QRCode.toCanvas(qrTempCanvas, payload, {
+      const qrcodeLib = await getQRCodeLib();
+      await qrcodeLib.toCanvas(qrTempCanvas, payload, {
         width: 600,
         margin: 2,
         errorCorrectionLevel: errorCorrectionLevel,
