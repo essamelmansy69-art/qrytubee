@@ -21,20 +21,20 @@ export default function FooterView({ lang, onNavigate }: FooterViewProps) {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           
           {/* Column 1: Branding block */}
-          <div className="md:col-span-5 space-y-4">
+          <div className="md:col-span-7 space-y-4">
             <div className={`flex items-center gap-2.5 ${lang === 'ar' ? 'justify-end' : 'justify-start'}`}>
               <span className="p-2.5 bg-red-600/90 text-white rounded-2xl flex items-center justify-center">
                 <Youtube size={18} />
               </span>
               <span className="text-lg font-bold font-arabic text-white">QR Deep Linker for Creators</span>
             </div>
-            <p className="text-xs text-slate-300 max-w-sm leading-relaxed font-arabic">
+            <p className="text-xs text-slate-300 max-w-lg leading-relaxed font-arabic">
               {t.footerDesc}
             </p>
           </div>
 
           {/* Column 2: Navigation Links */}
-          <div className="md:col-span-4 space-y-3 font-arabic">
+          <div className="md:col-span-5 space-y-3 font-arabic">
             <span className="text-xs font-bold text-white uppercase block">{t.quickLinks}</span>
             <div className="flex flex-col gap-2 text-xs items-start">
               <a href="/" onClick={(e) => onNavigate('generator', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.navGenerator}</a>
@@ -46,14 +46,6 @@ export default function FooterView({ lang, onNavigate }: FooterViewProps) {
               <a href="/privacy" onClick={(e) => onNavigate('privacy', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.navPrivacy}</a>
               <a href="/terms" onClick={(e) => onNavigate('terms', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.navTerms}</a>
             </div>
-          </div>
-
-          {/* Column 3: Quality declarations */}
-          <div className="md:col-span-3 space-y-3 font-arabic">
-            <span className="text-xs font-bold text-white uppercase block">{t.trustLabel}</span>
-            <p className="text-[11px] leading-relaxed text-slate-400">
-              {t.trustDesc}
-            </p>
           </div>
 
         </div>

@@ -141,17 +141,17 @@ export const translations = {
     btnDownloadQr: "تحميل كود الـ QR بدقة احترافية",
 
     optGuidanceHeading: "💡 كيف تعمل هذه الأداة في زيادة تفاعلك؟",
-    optTip1: "عندما تصنع كود QR لليوتيوب العادي، تفتح الكاميرا الرابط داخل الويب، وإذا رغب الزائر بالاشتراك، سيتطلب منه تسجيل دخوله بقوة، مما يسبب خسارة 80% من الاشتراكات المحتملة.",
-    optTip2: "مع ميزة الـ Deep Link من أداتنا، يتم إجبار نظام تشغيل الهاتف على تشغيل التطبيق الرسمي لليوتيوب فوراً، حاملاً حساب المستخدم المفعل، فيتمكن بنقرة واحدة من الاشتراك، الإعجاب، التعليق.",
-    optTip3: "نوصي دائمًا بالاختيار الافتراضي vnd.youtube لتجربة مسح ذكية شاملة.",
+    optTip1: "الروابط التقليدية تفتح في متصفح داخلي يعوق الاشتراك والمتابعة الفورية.",
+    optTip2: "تقنية الروابط الذكية (Deep Links) تفتح التطبيقات الرسمية مباشرة لزيادة تفاعلك بضغطة واحدة.",
+    optTip3: "نوصي دائماً باستخدام التوجيه الذكي الافتراضي للتوافق الكامل.",
 
     // Footer columns
-    footerDesc: "أداة متقدمة تم بناؤها لصناع المحتوى ومسوقي قنوات يوتيوب لتجاوز عوائق المتصفحات الداخلية في تطبيقات التواصل الاجتماعي وتحقيق نسبة تحويل تفاعل قياسية.",
+    footerDesc: "أداة ذكية لمساعدة صناع المحتوى في تجاوز عوائق المتصفحات الداخلية وزيادة تفاعل الجمهور بنسبة 100%.",
     quickLinks: "روابط سريعة",
     optGuidanceLabel: "نصائح لزيادة المشاهدات والاستجابة",
     faqDetailsLabel: "الأسئلة والأجوبة التفصيلية",
     trustLabel: "ضمان الموثوقية والأمان",
-    trustDesc: "هذه الأداة يتم معالجة بياناتها بالكامل محلياً على جهاز المستخدم لضمان الخصوصية وسرية الروابط التي يتم إدخالها.",
+    trustDesc: "تتم معالجة جميع الروابط وتحديث الألوان محلياً 100% على متصفحك لضمان الخصوصية وسرية البيانات.",
     copyrightText: "جميع الحقوق محفوظة لدى QR Deep Linker للعام 2026.",
     loveText: "بُنيت الأداة بكل حب لتطوير وتعميم المحتوى العربي والكوني الذكي 🚀",
 
@@ -328,17 +328,17 @@ export const translations = {
     btnDownloadQr: "Download High-Res Print File",
 
     optGuidanceHeading: "💡 How does QR Deep Linker grow your channel?",
-    optTip1: "When you share typical links inside social bios, they load inside limiting browser wrappers. Viewers cannot subscribe or interact unless they manually log in, causing 80% to exit immediately.",
-    optTip2: "Using our advanced Deep-Linking algorithms, smartphones bypass internal sandboxes, routing viewers directly into their native pre-authenticated YouTube App to subscribe instantly.",
-    optTip3: "We highly recommend using vnd.youtube smart routing configurations for seamless operations.",
+    optTip1: "Traditional links open in sandboxed web views, requiring login to subscribe which blocks active engagement.",
+    optTip2: "Smart Deep Links launch official native apps directly, capturing subscription and interaction actions instantly.",
+    optTip3: "We recommend using our default smart routing for seamless operational compatibility.",
 
     // Footer columns
-    footerDesc: "An advanced, high-performance toolkit engineered for YouTube creators & marketers to easily bypass social sandbox wrappers and achieve maximum engagement ratios.",
+    footerDesc: "A modern social routing utility built to bypass internal browsers roadblocks and maximize subscriptions.",
     quickLinks: "Quick Navigation",
     optGuidanceLabel: "Audience Growth Tips",
     faqDetailsLabel: "In-Depth Explanations & FAQ",
     trustLabel: "Privacy & Encryption Guarantee",
-    trustDesc: "All translation rendering and styling modules are completed 100% locally inside your browser client protectively.",
+    trustDesc: "All operations and logo branding processes run locally inside your browser client to preserve security and privacy.",
     copyrightText: "© 2026 YouTube QR Deep Linker. All rights reserved.",
     loveText: "Crafted beautifully for creators and marketers worldwide 🚀",
 

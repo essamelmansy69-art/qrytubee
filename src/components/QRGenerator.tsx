@@ -44,10 +44,6 @@ const COLOR_TEMPLATES = [
   { name: 'يوتيوب الكلاسيكي', dark: '#FF0000', light: '#FFFFFF', eye: '#FF0000' },
   { name: 'الوضع الداكن الفاخر', dark: '#FFFFFF', light: '#0F0F0F', eye: '#FF0000' },
   { name: 'الذهبي الأنيق', dark: '#C5A880', light: '#121212', eye: '#C5A880' },
-  { name: 'أزرق نيون', dark: '#00F0FF', light: '#0F172A', eye: '#3B82F6' },
-  { name: 'بنفسجي إنستغرام', dark: '#833AB4', light: '#FFFFFF', eye: '#E1306C' },
-  { name: 'أحمر مطفي ناعم', dark: '#E11D48', light: '#FAFAFA', eye: '#BE123C' },
-  { name: 'أخضر ملكي', dark: '#064E3B', light: '#F0FDF4', eye: '#047857' },
   { name: 'أسود مونوكروم', dark: '#000000', light: '#FFFFFF', eye: '#000000' },
 ];
 
@@ -59,10 +55,6 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
       case 'يوتيوب الكلاسيكي': return t.classicYtTemplate;
       case 'الوضع الداكن الفاخر': return t.luxuryDarkTemplate;
       case 'الذهبي الأنيق': return t.goldTemplate;
-      case 'أزرق نيون': return t.neonBlueTemplate;
-      case 'بنفسجي إنستغرام': return t.instagramTemplate;
-      case 'أحمر مطفي ناعم': return t.softRedTemplate;
-      case 'أخضر ملكي': return t.royalGreenTemplate;
       case 'أسود مونوكروم': return t.monochromeTemplate;
       default: return name;
     }
@@ -1338,23 +1330,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
           )}
         </div>
 
-        {/* Guidance and education panel on Deep Links */}
-        <div className={`bg-slate-50 rounded-3xl p-6 border border-gray-200 ${lang === 'ar' ? 'text-right' : 'text-left'} space-y-4`} id="deep_link_education_guidance">
-          <h4 className={`text-sm font-bold font-arabic text-gray-800 flex items-center gap-2 ${lang === 'ar' ? 'justify-end' : 'justify-start'}`}>
-            💡 {t.optGuidanceHeading}
-          </h4>
-          <ul className="space-y-2 text-xs text-gray-600 font-arabic leading-relaxed list-inside list-disc">
-            <li>
-              {t.optTip1}
-            </li>
-            <li>
-              {t.optTip2}
-            </li>
-            <li>
-              {t.optTip3}
-            </li>
-          </ul>
-        </div>
+
       </div>
 
       {/* Mobile-Only Download Actions: positioned at the absolute bottom, visible only on screens smaller than lg */}

@@ -30,7 +30,6 @@ import { motion } from 'motion/react';
 import { translations } from './translations';
 
 const QRGenerator = React.lazy(() => import('./components/QRGenerator'));
-const AnalyticsDashboard = React.lazy(() => import('./components/AnalyticsDashboard'));
 const ArticlesView = React.lazy(() => import('./components/ArticlesView'));
 const LegalView = React.lazy(() => import('./components/LegalView'));
 const FAQView = React.lazy(() => import('./components/FAQView'));
@@ -62,7 +61,7 @@ export default function App() {
     return 'ar';
   });
 
-  const [activeTab, setActiveTab] = useState<'generator' | 'analytics' | 'faq' | 'tips' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact'>(() => {
+  const [activeTab, setActiveTab] = useState<'generator' | 'faq' | 'tips' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact'>(() => {
     try {
       const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
       if (path === 'terms') return 'terms';
@@ -70,7 +69,6 @@ export default function App() {
       if (path === 'about') return 'about';
       if (path === 'contact') return 'contact';
       if (path === 'articles') return 'articles';
-      if (path === 'analytics') return 'analytics';
     } catch (_) {}
     return 'generator';
   });
@@ -125,7 +123,7 @@ export default function App() {
     try {
       document.querySelectorAll('link[hreflang]').forEach(el => el.remove());
       const baseDomain = 'https://qrytubee.essamelmansy69.workers.dev';
-      const pathSuffix = activeTab === 'generator' ? '' : `/${activeTab}`;
+      const pathSuffix = activeTab === 'generator' ? '/' : `/${activeTab}`;
       const fullPath = `${baseDomain}${pathSuffix}`;
 
       // 1. Alternate Arabic
@@ -199,7 +197,7 @@ export default function App() {
         setActiveTab(e.state.tab);
       } else {
         const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
-        if (['terms', 'privacy', 'about', 'contact', 'articles', 'analytics'].includes(path)) {
+        if (['terms', 'privacy', 'about', 'contact', 'articles'].includes(path)) {
           setActiveTab(path as any);
         } else {
           setActiveTab('generator');
@@ -221,7 +219,7 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  const handleNavClick = (tab: 'generator' | 'analytics' | 'tips' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact', event: React.MouseEvent) => {
+  const handleNavClick = (tab: 'generator' | 'tips' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact', event: React.MouseEvent) => {
     event.preventDefault();
     setActiveTab(tab);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -517,15 +515,6 @@ export default function App() {
               {t.navGenerator}
             </button>
             <button
-              onClick={() => setActiveTab('analytics')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all cursor-pointer ${
-                activeTab === 'analytics' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'
-              }`}
-              type="button"
-            >
-              {t.analyticsTitle}
-            </button>
-            <button
               onClick={() => setActiveTab('tips')}
               className={`px-4 py-2 rounded-lg font-medium transition-all cursor-pointer ${
                 activeTab === 'tips' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'
@@ -609,12 +598,6 @@ export default function App() {
             {t.navGenerator}
           </button>
           <button
-            onClick={() => { setActiveTab('analytics'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-            className={`whitespace-nowrap px-4 py-2.5 rounded-xl transition-all ${activeTab === 'analytics' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
-          >
-            {t.analyticsTitle}
-          </button>
-          <button
             onClick={() => { setActiveTab('tips'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
             className={`whitespace-nowrap px-4 py-2.5 rounded-xl transition-all ${activeTab === 'tips' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
           >
@@ -670,14 +653,6 @@ export default function App() {
               </div>
             }>
               <QRGenerator lang={lang} />
-            </React.Suspense>
-          </div>
-        )}
-
-        {activeTab === 'analytics' && (
-          <div className="transition-opacity duration-300">
-            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
-              <AnalyticsDashboard lang={lang} onNavigateToGenerator={() => setActiveTab('generator')} />
             </React.Suspense>
           </div>
         )}
