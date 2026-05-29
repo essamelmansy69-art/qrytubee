@@ -83,7 +83,8 @@ async function startServer() {
           res.status(502).send("App bundle loading error");
           return;
         }
-        const dynamicContent = content.replaceAll("https://qrytubee.essamelmansy69.workers.dev", host);
+        let dynamicContent = content.replaceAll("https://qrytube.com", host);
+        dynamicContent = dynamicContent.replaceAll("https://qrytubee.essamelmansy69.workers.dev", host);
         res.setHeader("Content-Type", "text/html; charset=utf-8");
         res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         res.status(200).send(dynamicContent);

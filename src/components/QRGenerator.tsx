@@ -152,7 +152,7 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
   const getActivePayload = () => {
     const trimmed = urlInput.trim();
     const fallbackUrl = trimmed || 'https://www.youtube.com';
-    const originUrl = typeof window !== 'undefined' ? window.location.origin : 'https://qrytubee.essamelmansy69.workers.dev';
+    const originUrl = typeof window !== 'undefined' ? window.location.origin : 'https://qrytube.com';
     return `${originUrl}/redirect?url=${encodeURIComponent(fallbackUrl)}&tid=${trackingId}`;
   };
 

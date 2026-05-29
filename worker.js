@@ -5,31 +5,31 @@
 const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://qrytubee.essamelmansy69.workers.dev/</loc>
+    <loc>https://qrytube.com/</loc>
     <lastmod>2026-05-29</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://qrytubee.essamelmansy69.workers.dev/about</loc>
+    <loc>https://qrytube.com/about</loc>
     <lastmod>2026-05-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://qrytubee.essamelmansy69.workers.dev/contact</loc>
+    <loc>https://qrytube.com/contact</loc>
     <lastmod>2026-05-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://qrytubee.essamelmansy69.workers.dev/privacy</loc>
+    <loc>https://qrytube.com/privacy</loc>
     <lastmod>2026-05-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://qrytubee.essamelmansy69.workers.dev/terms</loc>
+    <loc>https://qrytube.com/terms</loc>
     <lastmod>2026-05-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
@@ -39,7 +39,7 @@ const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
 const ROBOTS_TXT = `User-agent: *
 Allow: /
 
-Sitemap: https://qrytubee.essamelmansy69.workers.dev/sitemap.xml`;
+Sitemap: https://qrytube.com/sitemap.xml`;
 
 // Lightweight social url deep link parser for edge redirection optimization
 function getEdgeDeepLink(urlStr, type) {
@@ -154,7 +154,8 @@ export default {
 
     // 1. Serve static sitemap.xml with correct headers
     if (pathname === '/sitemap.xml') {
-      const dynamicSitemap = SITEMAP_XML.replaceAll('https://qrytubee.essamelmansy69.workers.dev', origin);
+      let dynamicSitemap = SITEMAP_XML.replaceAll('https://qrytube.com', origin);
+      dynamicSitemap = dynamicSitemap.replaceAll('https://qrytubee.essamelmansy69.workers.dev', origin);
       return new Response(dynamicSitemap.trim(), {
         status: 200,
         headers: {
@@ -168,7 +169,8 @@ export default {
 
     // 2. Serve robots.txt
     if (pathname === '/robots.txt') {
-      const dynamicRobots = ROBOTS_TXT.replaceAll('https://qrytubee.essamelmansy69.workers.dev', origin);
+      let dynamicRobots = ROBOTS_TXT.replaceAll('https://qrytube.com', origin);
+      dynamicRobots = dynamicRobots.replaceAll('https://qrytubee.essamelmansy69.workers.dev', origin);
       return new Response(dynamicRobots.trim(), {
         status: 200,
         headers: {
@@ -477,6 +479,7 @@ export default {
         const contentType = (response.headers.get('content-type') || '').toLowerCase();
         if (contentType.includes('text/html')) {
           let htmlText = await response.text();
+          htmlText = htmlText.replaceAll('https://qrytube.com', origin);
           htmlText = htmlText.replaceAll('https://qrytubee.essamelmansy69.workers.dev', origin);
           return new Response(htmlText, {
             status: response.status,
