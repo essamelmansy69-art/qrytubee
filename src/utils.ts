@@ -622,24 +622,26 @@ export function convertUrlToDeepLink(url: string, deviceOverride?: 'android' | '
       }
     }
 
-    // Direct custom URI scheme works perfectly on iOS, but Android Chrome requires secure Intents with fallback configuration
+    const normalizedFallback = trimmed.startsWith('http') ? trimmed : `https://${trimmed}`;
+    const isNumericId = fbId ? /^\d+$/.test(fbId) : false;
+
+    // Direct custom URI scheme with 'scheme=fb' works perfectly on Android Chrome to force-launch the app and prevent browser hijacking
     if (deviceType === 'android') {
-      const normalizedFallback = trimmed.startsWith('http') ? trimmed : `https://${trimmed}`;
-      if (fbId) {
+      if (fbId && isNumericId) {
         if (pathname.includes('/groups/')) {
-          return `intent://facebook.com/groups/${fbId}#Intent;package=com.facebook.katana;scheme=https;S.browser_fallback_url=${encodeURIComponent('https://www.facebook.com/groups/' + fbId)};end`;
+          return `intent://group/${fbId}#Intent;package=com.facebook.katana;scheme=fb;S.browser_fallback_url=${encodeURIComponent(normalizedFallback)};end`;
         }
-        return `intent://facebook.com/${fbId}#Intent;package=com.facebook.katana;scheme=https;S.browser_fallback_url=${encodeURIComponent('https://www.facebook.com/' + fbId)};end`;
+        return `intent://profile/${fbId}#Intent;package=com.facebook.katana;scheme=fb;S.browser_fallback_url=${encodeURIComponent(normalizedFallback)};end`;
       }
-      return `intent://facebook.com#Intent;package=com.facebook.katana;scheme=https;S.browser_fallback_url=${encodeURIComponent(normalizedFallback)};end`;
+      return `intent://facewebmodal/f?href=${encodeURIComponent(normalizedFallback)}#Intent;package=com.facebook.katana;scheme=fb;S.browser_fallback_url=${encodeURIComponent(normalizedFallback)};end`;
     } else {
-      if (fbId) {
+      if (fbId && isNumericId) {
         if (pathname.includes('/groups/')) {
           return `fb://group/${fbId}`;
         }
         return `fb://profile/${fbId}`;
       }
-      return `fb://facewebmodal/f?href=${encodeURIComponent(trimmed)}`;
+      return `fb://facewebmodal/f?href=${encodeURIComponent(normalizedFallback)}`;
     }
   }
 
