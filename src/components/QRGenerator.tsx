@@ -1054,6 +1054,8 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
               <div className="w-36 h-36 min-w-[9rem] min-h-[9rem] max-w-full aspect-square bg-white rounded-xl shadow-xs border border-gray-100 p-1.5 flex items-center justify-center transition-all duration-300 group-hover:shadow-md group-hover:scale-102 overflow-hidden" id="canvas_square_box">
                 <canvas
                   ref={canvasRef}
+                  width={256}
+                  height={256}
                   className="!w-full !h-full !max-w-full !max-h-full object-contain rounded-md"
                   id="final_qr_canvas"
                 />
