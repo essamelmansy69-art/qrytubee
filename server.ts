@@ -73,8 +73,21 @@ async function startServer() {
         }
       }
     }));
+    const indexHtmlPath = path.join(distPath, "index.html");
     app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
+      const protocol = req.headers["x-forwarded-proto"] || req.protocol || "https";
+      const host = `${protocol}://${req.get("host")}`;
+      
+      fs.readFile(indexHtmlPath, "utf8", (err, content) => {
+        if (err) {
+          res.status(502).send("App bundle loading error");
+          return;
+        }
+        const dynamicContent = content.replaceAll("https://qrytubee.essamelmansy69.workers.dev", host);
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        res.status(200).send(dynamicContent);
+      });
     });
   }
 

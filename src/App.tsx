@@ -28,13 +28,13 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { translations } from './translations';
+import QRGenerator from './components/QRGenerator';
+import FooterView from './components/FooterView';
 
-const QRGenerator = React.lazy(() => import('./components/QRGenerator'));
 const ArticlesView = React.lazy(() => import('./components/ArticlesView'));
 const LegalView = React.lazy(() => import('./components/LegalView'));
 const FAQView = React.lazy(() => import('./components/FAQView'));
 const TipsView = React.lazy(() => import('./components/TipsView'));
-const FooterView = React.lazy(() => import('./components/FooterView'));
 
 export default function App() {
   const [lang, setLang] = useState<'ar' | 'en'>(() => {
@@ -621,41 +621,8 @@ export default function App() {
 
         {/* Dynamic Navigation Tabs Content render */}
         {activeTab === 'generator' && (
-          <div className="transition-opacity duration-300">
-            <React.Suspense fallback={
-              <div className="space-y-8 max-w-5xl mx-auto animate-pulse" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-                {/* Simulated Generator Card Structure */}
-                <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-xs space-y-6">
-                  <div className="h-6 bg-slate-200 rounded-lg w-1/3"></div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    <div className="h-12 bg-slate-100 rounded-2xl"></div>
-                    <div className="h-12 bg-slate-100 rounded-2xl"></div>
-                    <div className="h-12 bg-slate-100 rounded-2xl"></div>
-                    <div className="h-12 bg-slate-100 rounded-2xl"></div>
-                  </div>
-                  <div className="h-14 bg-slate-100 rounded-2xl w-full"></div>
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 pt-4">
-                    <div className="lg:col-span-7 space-y-4">
-                      <div className="h-4 bg-slate-200 rounded-lg w-1/4"></div>
-                      <div className="h-28 bg-slate-100 rounded-2xl w-full"></div>
-                      <div className="h-4 bg-slate-200 rounded-lg w-1/3"></div>
-                      <div className="grid grid-cols-4 gap-2">
-                        <div className="h-10 bg-slate-100 rounded-xl"></div>
-                        <div className="h-10 bg-slate-100 rounded-xl"></div>
-                        <div className="h-10 bg-slate-100 rounded-xl"></div>
-                        <div className="h-10 bg-slate-100 rounded-xl"></div>
-                      </div>
-                    </div>
-                    <div className="lg:col-span-5 flex flex-col items-center justify-center p-6 border border-dashed border-slate-200 rounded-2xl space-y-4">
-                      <div className="w-48 h-48 bg-slate-100 rounded-2xl"></div>
-                      <div className="h-10 bg-slate-200 rounded-xl w-3/4"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            }>
-              <QRGenerator lang={lang} />
-            </React.Suspense>
+          <div className="transition-opacity duration-300 animate-fade-in">
+            <QRGenerator lang={lang} />
           </div>
         )}
 
@@ -730,9 +697,7 @@ export default function App() {
       </main>
 
       {/* 4. PROFESSIONAL BEAUTIFUL FOOTER */}
-      <React.Suspense fallback={<div className="h-56 bg-slate-900 border-t border-slate-800" />}>
-        <FooterView lang={lang} onNavigate={handleNavClick} />
-      </React.Suspense>
+      <FooterView lang={lang} onNavigate={handleNavClick} />
 
     </div>
   );

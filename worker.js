@@ -438,7 +438,11 @@ export default {
 
     // 4. Fallback to main static assets (compiled SPA app index)
     try {
-      const response = await fetch(request);
+      const fetchHeaders = new Headers(request.headers);
+      fetchHeaders.set('Accept-Encoding', 'identity');
+      const response = await fetch(request, {
+        headers: fetchHeaders
+      });
       
       // Clone response to add performance-boosting caching headers
       const newHeaders = new Headers(response.headers);
@@ -465,7 +469,7 @@ export default {
         newHeaders.set('Cache-Control', 'public, max-age=3600, must-revalidate');
         
         // If it's the main page HTML or a meta page, replace the domain to ensure perfect dynamic SEO tags matching the exact host requested
-        const contentType = response.headers.get('content-type') || '';
+        const contentType = (response.headers.get('content-type') || '').toLowerCase();
         if (contentType.includes('text/html')) {
           let htmlText = await response.text();
           htmlText = htmlText.replaceAll('https://qrytubee.essamelmansy69.workers.dev', origin);
