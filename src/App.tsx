@@ -62,6 +62,19 @@ export default function App() {
     return 'ar';
   });
 
+  const [activeTab, setActiveTab] = useState<'generator' | 'analytics' | 'faq' | 'tips' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact'>(() => {
+    try {
+      const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
+      if (path === 'terms') return 'terms';
+      if (path === 'privacy') return 'privacy';
+      if (path === 'about') return 'about';
+      if (path === 'contact') return 'contact';
+      if (path === 'articles') return 'articles';
+      if (path === 'analytics') return 'analytics';
+    } catch (_) {}
+    return 'generator';
+  });
+
   useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
@@ -108,21 +121,42 @@ export default function App() {
     setMetaTag('name', 'twitter:description', desc);
     setMetaTag('name', 'twitter:image', 'https://qrytubee.essamelmansy69.workers.dev/og-image.png');
 
-    // Programmatically render hreflang tags in <head> for search engines
+    // Programmatically render hreflang tags and canonical tag in <head> for search engines
     try {
       document.querySelectorAll('link[hreflang]').forEach(el => el.remove());
+      const baseDomain = 'https://qrytubee.essamelmansy69.workers.dev';
+      const pathSuffix = activeTab === 'generator' ? '' : `/${activeTab}`;
+      const fullPath = `${baseDomain}${pathSuffix}`;
 
+      // 1. Alternate Arabic
       const arLink = document.createElement('link');
       arLink.rel = 'alternate';
       arLink.setAttribute('hreflang', 'ar');
-      arLink.href = '/';
+      arLink.href = fullPath;
       document.head.appendChild(arLink);
 
+      // 2. Alternate English
       const enLink = document.createElement('link');
       enLink.rel = 'alternate';
       enLink.setAttribute('hreflang', 'en');
-      enLink.href = '/?lang=en';
+      enLink.href = `${fullPath}?lang=en`;
       document.head.appendChild(enLink);
+
+      // 3. Alternate x-default
+      const defLink = document.createElement('link');
+      defLink.rel = 'alternate';
+      defLink.setAttribute('hreflang', 'x-default');
+      defLink.href = fullPath;
+      document.head.appendChild(defLink);
+
+      // 4. Update Canonical
+      let canonicalEl = document.querySelector('link[rel="canonical"]');
+      if (!canonicalEl) {
+        canonicalEl = document.createElement('link');
+        canonicalEl.setAttribute('rel', 'canonical');
+        document.head.appendChild(canonicalEl);
+      }
+      canonicalEl.setAttribute('href', lang === 'en' ? `${fullPath}?lang=en` : fullPath);
     } catch (_) {}
 
     // Update URL query parameters based on language without page reload
@@ -141,22 +175,9 @@ export default function App() {
     } catch (e) {
       console.error(e);
     }
-  }, [lang]);
+  }, [lang, activeTab]);
 
   const t = translations[lang];
-
-  const [activeTab, setActiveTab] = useState<'generator' | 'analytics' | 'faq' | 'tips' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact'>(() => {
-    try {
-      const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
-      if (path === 'terms') return 'terms';
-      if (path === 'privacy') return 'privacy';
-      if (path === 'about') return 'about';
-      if (path === 'contact') return 'contact';
-      if (path === 'articles') return 'articles';
-      if (path === 'analytics') return 'analytics';
-    } catch (_) {}
-    return 'generator';
-  });
 
   useEffect(() => {
     try {

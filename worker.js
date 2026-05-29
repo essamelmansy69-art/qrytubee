@@ -6,9 +6,33 @@ const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://qrytubee.essamelmansy69.workers.dev/</loc>
-    <lastmod>2026-05-27</lastmod>
-    <changefreq>weekly</changefreq>
+    <lastmod>2026-05-29</lastmod>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://qrytubee.essamelmansy69.workers.dev/about</loc>
+    <lastmod>2026-05-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://qrytubee.essamelmansy69.workers.dev/contact</loc>
+    <lastmod>2026-05-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://qrytubee.essamelmansy69.workers.dev/privacy</loc>
+    <lastmod>2026-05-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://qrytubee.essamelmansy69.workers.dev/terms</loc>
+    <lastmod>2026-05-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
   </url>
 </urlset>`;
 
@@ -411,7 +435,33 @@ export default {
 
     // 4. Fallback to main static assets (compiled SPA app index)
     try {
-      return fetch(request);
+      const response = await fetch(request);
+      
+      // Clone response to add performance-boosting caching headers
+      const newHeaders = new Headers(response.headers);
+      const urlPath = url.pathname.toLowerCase();
+      
+      if (
+        urlPath.includes('/assets/') ||
+        urlPath.endsWith('.js') ||
+        urlPath.endsWith('.css') ||
+        urlPath.endsWith('.woff') ||
+        urlPath.endsWith('.woff2') ||
+        urlPath.endsWith('.png') ||
+        urlPath.endsWith('.svg') ||
+        urlPath.endsWith('.webp') ||
+        urlPath.endsWith('.ico')
+      ) {
+        newHeaders.set('Cache-Control', 'public, max-age=31536000, immutable');
+      } else {
+        newHeaders.set('Cache-Control', 'public, max-age=3600, must-revalidate');
+      }
+      
+      return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: newHeaders,
+      });
     } catch (e) {
       return new Response("Fallback error: " + e.message, { status: 500 });
     }
