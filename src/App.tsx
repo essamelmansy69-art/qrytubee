@@ -5,7 +5,6 @@
 
 import React, { useState, useEffect } from 'react';
 import QRGenerator from './components/QRGenerator';
-import AnalyticsDashboard from './components/AnalyticsDashboard';
 import { buildDeepLink, parseYoutubeUrl, extractInstagramUsername, extractTiktokUsername, convertUrlToDeepLink } from './utils';
 import { 
   Youtube, 
@@ -30,8 +29,13 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { translations } from './translations';
+
+const AnalyticsDashboard = React.lazy(() => import('./components/AnalyticsDashboard'));
 const ArticlesView = React.lazy(() => import('./components/ArticlesView'));
 const LegalView = React.lazy(() => import('./components/LegalView'));
+const FAQView = React.lazy(() => import('./components/FAQView'));
+const TipsView = React.lazy(() => import('./components/TipsView'));
+const FooterView = React.lazy(() => import('./components/FooterView'));
 
 export default function App() {
   const [lang, setLang] = useState<'ar' | 'en'>(() => {
@@ -618,111 +622,25 @@ export default function App() {
 
         {activeTab === 'analytics' && (
           <div className="transition-opacity duration-300">
-            <AnalyticsDashboard lang={lang} onNavigateToGenerator={() => setActiveTab('generator')} />
+            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
+              <AnalyticsDashboard lang={lang} onNavigateToGenerator={() => setActiveTab('generator')} />
+            </React.Suspense>
           </div>
         )}
 
         {activeTab === 'tips' && (
-          <div className={`bg-white rounded-3xl p-8 border border-gray-100 shadow-xs max-w-4xl mx-auto ${lang === 'ar' ? 'text-right' : 'text-left'} space-y-8`} id="tips_tab_content">
-            <div className={`flex items-center gap-3 ${lang === 'ar' ? 'justify-end' : 'justify-start'} pb-4 border-b border-slate-100`}>
-              <h2 className="text-2xl font-bold font-arabic text-slate-900">
-                {t.tipsHeading}
-              </h2>
-              <span className="p-2.5 bg-gradient-to-br from-amber-400 to-yellow-500 text-white rounded-2xl">
-                <TrendingUp size={22} />
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-slate-50 p-6 rounded-2xl space-y-3 border border-slate-100">
-                <h3 className="font-bold text-gray-800 font-arabic text-base">{t.tip1Title}</h3>
-                <p className="text-xs text-gray-600 font-arabic leading-relaxed">
-                  {t.tip1Desc}
-                </p>
-              </div>
-
-              <div className="bg-slate-50 p-6 rounded-2xl space-y-3 border border-slate-100">
-                <h3 className="font-bold text-gray-800 font-arabic text-base">{t.tip2Title}</h3>
-                <p className="text-xs text-gray-600 font-arabic leading-relaxed">
-                  {t.tip2Desc}
-                </p>
-              </div>
-
-              <div className="bg-slate-50 p-6 rounded-2xl space-y-3 border border-slate-100">
-                <h3 className="font-bold text-gray-800 font-arabic text-base">{t.tip3Title}</h3>
-                <p className="text-xs text-gray-600 font-arabic leading-relaxed">
-                  {t.tip3Desc}
-                </p>
-              </div>
-
-              <div className="bg-slate-50 p-6 rounded-2xl space-y-3 border border-slate-100">
-                <h3 className="font-bold text-gray-800 font-arabic text-base">{t.tip4Title}</h3>
-                <p className="text-xs text-gray-600 font-arabic leading-relaxed">
-                  {t.tip4Desc}
-                </p>
-              </div>
-            </div>
-
-            <div className="text-center pt-4">
-              <button
-                onClick={() => setActiveTab('generator')}
-                className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold font-arabic transition-all cursor-pointer shadow-md"
-                type="button"
-              >
-                {t.btnReturn}
-              </button>
-            </div>
+          <div className="transition-opacity duration-300">
+            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
+              <TipsView lang={lang} onReturn={() => setActiveTab('generator')} />
+            </React.Suspense>
           </div>
         )}
 
         {activeTab === 'faq' && (
-          <div className={`bg-white rounded-3xl p-8 border border-gray-100 shadow-xs max-w-4xl mx-auto ${lang === 'ar' ? 'text-right' : 'text-left'} space-y-6`} id="faq_tab_content">
-            <div className={`flex items-center gap-3 ${lang === 'ar' ? 'justify-end' : 'justify-start'} pb-4 border-b border-slate-100`}>
-              <h2 className="text-2xl font-bold font-arabic text-slate-900">{t.faqHeading}</h2>
-              <span className="p-2.5 bg-purple-50 text-purple-600 rounded-2xl">
-                <HelpCircle size={22} />
-              </span>
-            </div>
-
-            <div className="space-y-4" id="faq_accordion">
-              <div className="p-5 bg-slate-50 rounded-2xl space-y-2 border border-slate-100">
-                <h3 className="font-bold text-slate-800 font-arabic text-sm">{t.faq1Q}</h3>
-                <p className="text-xs text-slate-500 font-arabic leading-relaxed">
-                  {t.faq1A}
-                </p>
-              </div>
-
-              <div className="p-5 bg-slate-50 rounded-2xl space-y-2 border border-slate-100">
-                <h3 className="font-bold text-slate-800 font-arabic text-sm">{t.faq2Q}</h3>
-                <p className="text-xs text-slate-500 font-arabic leading-relaxed">
-                  {t.faq2A}
-                </p>
-              </div>
-
-              <div className="p-5 bg-slate-50 rounded-2xl space-y-2 border border-slate-100">
-                <h3 className="font-bold text-slate-800 font-arabic text-sm">{t.faq3Q}</h3>
-                <p className="text-xs text-slate-500 font-arabic leading-relaxed">
-                  {t.faq3A}
-                </p>
-              </div>
-
-              <div className="p-5 bg-slate-50 rounded-2xl space-y-2 border border-slate-100">
-                <h3 className="font-bold text-slate-800 font-arabic text-sm">{t.faq4Q}</h3>
-                <p className="text-xs text-slate-500 font-arabic leading-relaxed">
-                  {t.faq4A}
-                </p>
-              </div>
-            </div>
-
-            <div className="text-center pt-4">
-              <button
-                onClick={() => setActiveTab('generator')}
-                className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold font-arabic transition-all cursor-pointer shadow-md"
-                type="button"
-              >
-                {t.btnReturn}
-              </button>
-            </div>
+          <div className="transition-opacity duration-300">
+            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
+              <FAQView lang={lang} onReturn={() => setActiveTab('generator')} />
+            </React.Suspense>
           </div>
         )}
 
@@ -781,54 +699,9 @@ export default function App() {
       </main>
 
       {/* 4. PROFESSIONAL BEAUTIFUL FOOTER */}
-      <footer className={`bg-slate-900 text-slate-300 py-12 border-t border-slate-800 ${lang === 'ar' ? 'text-right' : 'text-left'} mt-16`} id="app_footer">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-            
-            {/* Column 1: Branding block */}
-            <div className="md:col-span-5 space-y-4">
-              <div className={`flex items-center gap-2.5 ${lang === 'ar' ? 'justify-end' : 'justify-start'}`}>
-                <span className="p-2.5 bg-red-600/90 text-white rounded-2xl flex items-center justify-center">
-                  <Youtube size={18} />
-                </span>
-                <span className="text-lg font-bold font-arabic text-white">QR Deep Linker for Creators</span>
-              </div>
-              <p className="text-xs text-slate-300 max-w-sm leading-relaxed font-arabic">
-                {t.footerDesc}
-              </p>
-            </div>
-
-            {/* Column 2: Navigation Links */}
-            <div className="md:col-span-4 space-y-3 font-arabic">
-              <span className="text-xs font-bold text-white uppercase block">{t.quickLinks}</span>
-              <div className="flex flex-col gap-2 text-xs items-start">
-                <a href="/" onClick={(e) => handleNavClick('generator', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.navGenerator}</a>
-                <a href="/tips" onClick={(e) => handleNavClick('tips', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.optGuidanceLabel}</a>
-                <a href="/articles" onClick={(e) => handleNavClick('articles', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.navArticles}</a>
-                <a href="/faq" onClick={(e) => handleNavClick('faq', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.faqDetailsLabel}</a>
-                <a href="/about" onClick={(e) => handleNavClick('about', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.navAbout}</a>
-                <a href="/contact" onClick={(e) => handleNavClick('contact', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.navContact}</a>
-                <a href="/privacy" onClick={(e) => handleNavClick('privacy', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.navPrivacy}</a>
-                <a href="/terms" onClick={(e) => handleNavClick('terms', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.navTerms}</a>
-              </div>
-            </div>
-
-            {/* Column 3: Quality declarations */}
-            <div className="md:col-span-3 space-y-3 font-arabic">
-              <span className="text-xs font-bold text-white uppercase block">{t.trustLabel}</span>
-              <p className="text-[11px] leading-relaxed text-slate-400">
-                {t.trustDesc}
-              </p>
-            </div>
-
-          </div>
-
-          <div className={`border-t border-slate-800 mt-10 pt-6 flex flex-col ${lang === 'ar' ? 'sm:flex-row' : 'sm:flex-row-reverse'} items-center justify-between text-xs text-slate-400 font-arabic gap-4`}>
-            <span dir="ltr">{t.copyrightText}</span>
-            <span>{t.loveText}</span>
-          </div>
-        </div>
-      </footer>
+      <React.Suspense fallback={<div className="h-56 bg-slate-900 border-t border-slate-800" />}>
+        <FooterView lang={lang} onNavigate={handleNavClick} />
+      </React.Suspense>
 
     </div>
   );
