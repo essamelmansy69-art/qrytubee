@@ -439,7 +439,12 @@ export default {
     // 4. Fallback to main static assets (compiled SPA app index)
     try {
       const fetchHeaders = new Headers(request.headers);
-      fetchHeaders.set('Accept-Encoding', 'identity');
+      // Only request raw/uncompressed 'identity' for HTML requests so we can run string replacement.
+      // JS, CSS, fonts, and images should be fully compressed (gzip/brotli) from the origin for maximum speed!
+      const isHtmlRequest = pathname === '/' || pathname === '' || pathname.endsWith('.html') || (!pathname.includes('.') && !pathname.startsWith('/api/'));
+      if (isHtmlRequest) {
+        fetchHeaders.set('Accept-Encoding', 'identity');
+      }
       const response = await fetch(request, {
         headers: fetchHeaders
       });
