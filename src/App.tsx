@@ -220,6 +220,51 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  // Performance-optimized lazy loading for Google Analytics (GA4) G-QWM83Z109Z
+  useEffect(() => {
+    let initialized = false;
+
+    const initGA = () => {
+      if (initialized) return;
+      initialized = true;
+
+      // Create tracking script element with async attribute
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = 'https://www.googletagmanager.com/gtag/js?id=G-QWM83Z109Z';
+      document.head.appendChild(script);
+
+      // Create/Initialize dataLayer and gtag function
+      (window as any).dataLayer = (window as any).dataLayer || [];
+      const gtag = function (...args: any[]) {
+        (window as any).dataLayer.push(args);
+      };
+      (window as any).gtag = gtag;
+
+      gtag('js', new Date());
+      gtag('config', 'G-QWM83Z109Z');
+    };
+
+    const handleLoad = () => {
+      // Defer execution slightly to not block the current rendering cycle
+      setTimeout(initGA, 0);
+    };
+
+    // Lazy load approach: load after window has fully loaded, or after a 3-second fallback delay
+    const timeoutId = setTimeout(initGA, 3000);
+
+    if (document.readyState === 'complete') {
+      handleLoad();
+    } else {
+      window.addEventListener('load', handleLoad);
+    }
+
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('load', handleLoad);
+    };
+  }, []);
+
   const handleNavClick = (tab: 'generator' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact', event: React.MouseEvent) => {
     event.preventDefault();
     setActiveTab(tab);
