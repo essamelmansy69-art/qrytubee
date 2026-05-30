@@ -236,9 +236,9 @@ export default function App() {
 
       // Create/Initialize dataLayer and gtag function
       (window as any).dataLayer = (window as any).dataLayer || [];
-      const gtag = function (...args: any[]) {
-        (window as any).dataLayer.push(args);
-      };
+      function gtag(..._args: any[]) {
+        (window as any).dataLayer.push(arguments);
+      }
       (window as any).gtag = gtag;
 
       gtag('js', new Date());
