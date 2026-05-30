@@ -28,9 +28,9 @@ import {
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { translations } from './translations';
-import QRGenerator from './components/QRGenerator';
 import FooterView from './components/FooterView';
 
+const QRGenerator = React.lazy(() => import('./components/QRGenerator'));
 const ArticlesView = React.lazy(() => import('./components/ArticlesView'));
 const LegalView = React.lazy(() => import('./components/LegalView'));
 const FAQView = React.lazy(() => import('./components/FAQView'));
@@ -558,7 +558,9 @@ export default function App() {
         {/* Dynamic Navigation Tabs Content render */}
         {activeTab === 'generator' && (
           <div className="transition-opacity duration-300 animate-fade-in">
-            <QRGenerator lang={lang} />
+            <React.Suspense fallback={<div className="text-center py-12 font-arabic text-slate-500 animate-pulse bg-white rounded-3xl border border-slate-100/80 p-8 shadow-xs max-w-xl mx-auto">جاري تحميل أداة كيو آر الذكية...</div>}>
+              <QRGenerator lang={lang} />
+            </React.Suspense>
           </div>
         )}
 
