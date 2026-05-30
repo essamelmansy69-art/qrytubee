@@ -607,7 +607,46 @@ export default function App() {
         {/* Dynamic Navigation Tabs Content render */}
         {activeTab === 'generator' && (
           <div className="transition-opacity duration-300 animate-fade-in">
-            <React.Suspense fallback={<div className="text-center py-12 font-arabic text-slate-500 animate-pulse bg-white rounded-3xl border border-slate-100/80 p-8 shadow-xs max-w-xl mx-auto">جاري تحميل أداة كيو آر الذكية...</div>}>
+            <React.Suspense fallback={
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full max-w-7xl mx-auto animate-pulse" id="qr_skeleton_loader">
+                {/* Simulated Left Panel (8 cols) */}
+                <div className="lg:col-span-8 space-y-6">
+                  {/* Module 1 Skeleton */}
+                  <div className="bg-white rounded-3xl p-6 border border-gray-100 flex flex-col h-[320px] justify-between">
+                    <div className="space-y-4">
+                      <div className="h-6 w-1/3 bg-slate-200 rounded-lg"></div>
+                      <div className="grid grid-cols-4 gap-2">
+                        <div className="h-14 bg-slate-100 rounded-2xl"></div>
+                        <div className="h-14 bg-slate-100 rounded-2xl"></div>
+                        <div className="h-14 bg-slate-100 rounded-2xl"></div>
+                        <div className="h-14 bg-slate-100 rounded-2xl"></div>
+                      </div>
+                      <div className="h-4 w-1/4 bg-slate-200 rounded-md"></div>
+                      <div className="h-12 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200"></div>
+                    </div>
+                  </div>
+                  {/* Module 2 Skeleton */}
+                  <div className="bg-white rounded-3xl p-6 border border-gray-100 h-[240px]">
+                    <div className="h-6 w-1/4 bg-slate-200 rounded-lg mb-4"></div>
+                    <div className="space-y-3">
+                      <div className="h-10 bg-slate-100 rounded-xl"></div>
+                      <div className="h-10 bg-slate-100 rounded-xl w-5/6"></div>
+                    </div>
+                  </div>
+                </div>
+                {/* Simulated Right Panel (4 cols) */}
+                <div className="lg:col-span-4 space-y-6">
+                  <div className="bg-white rounded-3xl p-6 border border-gray-100 h-[500px] flex flex-col justify-between">
+                    <div className="space-y-4">
+                      <div className="h-6 w-2/3 bg-slate-200 rounded-lg"></div>
+                      <div className="h-32 bg-slate-100 rounded-2xl"></div>
+                      <div className="h-4 w-1/2 bg-slate-200 rounded-md"></div>
+                    </div>
+                    <div className="h-12 bg-slate-200 rounded-2xl"></div>
+                  </div>
+                </div>
+              </div>
+            }>
               <QRGenerator lang={lang} />
             </React.Suspense>
           </div>
