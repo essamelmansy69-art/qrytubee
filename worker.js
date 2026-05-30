@@ -190,76 +190,170 @@ export default {
 
     // 2.5 Serve legal and meta pages for AdSense compliance
     if (pathname === '/privacy' || pathname === '/terms' || pathname === '/about' || pathname === '/contact') {
+      const queryLang = url.searchParams.get('lang');
+      const isEn = queryLang === 'en';
+      
       let title = '';
       let contentHtml = '';
       
-      if (pathname === '/privacy') {
-        title = 'سياسة الخصوصية وسرية البيانات - QR Deep Linker';
-        contentHtml = `
-          <div class="section">
-              <div class="section-title">1. الخصوصية الفائقة وحماية البيانات</div>
-              <div class="section-body">نحن في موقع QR Deep Linker نولي أهمية قصوى لخصوصية زوارنا ومستخدمينا بنسبة 100%. على خلاف الأدوات والمواقع الأخرى، تتم جميع العمليات والروابط وتصميمات الأوان محلياً بالكامل على متصفحك الخاص (Client-Side). نحن لا نقوم برفع أو حفظ أو تخزين روابطك الشخصية أو صورك أو شعاراتك على خلفية أي خوادم خارجية.</div>
-          </div>
-          <div class="section">
-              <div class="section-title">2. عدم جمع البيانات الشخصية الحساسة</div>
-              <div class="section-body">لا تتطلب الأداة منك إنشاء حساب، أو تسجيل بريد إلكتروني، أو تقديم أي معلومات تواصل شخصية حساسة على الإطلاق. الخدمة مجانية كلياً، ومتاحة بشكل آمن ومرن لتسريع تجربة مشاركة المحتوى الخاص بك.</div>
-          </div>
-          <div class="section">
-              <div class="section-title">3. ملفات تعريف الارتباط (Cookies)</div>
-              <div class="section-body">نستخدم ملفات تعريف الارتباط (Cookies) والذاكرة المحلية للمتصفح (localStorage) بطريقة أساسية وشفافة لتحسين تجربة تصفحك، مثل تذكر تفضيلاتك اللغوية (العربية أو الإنجليزية) لتسهيل وتيسير استخدامك للأداة في الزيارات القادمة.</div>
-          </div>
-          <div class="section">
-              <div class="section-title">4. إعلانات الأطراف الثالثة (شبكة جوجل أدسنس)</div>
-              <div class="section-body">قد نستعين بشركات إعلان لأطراف ثالثة (مثل جوجل أدسنس Google AdSense) وعرضها عند زيارة موقعنا الإلكتروني. قد تستخدم هذه الشركات معلومات (لا تشمل اسمك أو عنوانك أو بريدك الإلكتروني) حول زياراتك لهذا الموقع من أجل تقديم إعلانات مخصصة وملائمة حول السلع والخدمات التي تهمك عن طريق ملفات تعريف الارتباط.</div>
-          </div>`;
-      } else if (pathname === '/terms') {
-        title = 'شروط الخدمة والاستخدام - QR Deep Linker';
-        contentHtml = `
-          <div class="section">
-              <div class="section-title">1. الخدمة المجانية وبنود الاستخدام</div>
-              <div class="section-body">موقعنا يقدم خدمة برمجية مجانية تماماً بنسبة 100% لصناع المحتوى، والناشرين، والمسوقين لتسهيل الانتقال الآمن وحفض الروابط وتوليد أكواد الـ QR الذكية لدعم وزيادة الاشتراكات والتفاعل العضوي. يُرخص لك استخدام الخدمة لأغراضك الشخصية والتجارية السليمة دون أي رسوم.</div>
-          </div>
-          <div class="section">
-              <div class="section-title">2. القيود والمحظورات القانونية</div>
-              <div class="section-body">يُحظر تماماً وبشكل قاطع استخدام موقعنا أو الأكواد والروابط المولدة من خلالنا في توليد رموز تؤدي إلى محتوى غير قانوني، أو ينتهك حقوق الملكية الفكرية بأي شكل، أو يروج ويحرض على الكراهية، العنف، العنصرية، أو يحتوي على برمجيات ضارة وتصيدية.</div>
-          </div>
-          <div class="section">
-              <div class="section-title">3. المسؤولية القانونية والأخلاقية</div>
-              <div class="section-body">يتحمل المستخدم أو صانع المحتوى المسؤولية التامة والأخلاقية والوحيدة عن طبيعة ومحتوى الروابط التي يقوم بإدخالها والرموز التي ينشرها للجمهور. لا يتحمل الموقع أي مسؤولية عن سوء الاستخدام الخارجي للأولويات أو الأكواد الموزعة.</div>
-          </div>`;
-      } else if (pathname === '/about') {
-        title = 'من نحن - QR Deep Linker';
-        contentHtml = `
-          <div class="section">
-              <div class="section-title">رؤيتنا وهدفنا الأساسي</div>
-              <div class="section-body">انطلاقاً من رغبتنا المستمرة في تذليل العقبات التقنية أمام المبدعين الرقميين، قمنا بتشغيل موقع QR Deep Linker ليكون المنصة العربية والعالمية المجانية الرائدة في توليد الأكواد الرقمية والروابط الذكية. نؤمن بأن كل مبدع يستحق حصد ثمار جهده الكاملة دون أن تضيع زيارات جمهوره في فخ المتصفحات الداخلية المدمجة في تطبيقات التواصل الاجتماعي.</div>
-          </div>
-          <div class="section">
-              <div class="section-title">ما هي الخدمة التي نقدمها؟</div>
-              <div class="section-body">موقع Qrytube (أو QR Deep Linker) هو أداة رقمية متطورة مصممة لمساعدة صناع المحتوى ومسوقي قنوات اليوتيوب ومنصات التواصل الاجتماعي في توليد روابط عميقة ذكية (Deep Links) تتجاوز المتصفحات الداخلية وتفتح التطبيقات الرسمية مباشرة لزيادة التفاعل، الاشتراكات والمشاهدات بنسبة تصل إلى 200%.</div>
-          </div>
-          <div class="section">
-              <div class="section-title">مجانية، مستقرة، وآمنة للأبد</div>
-              <div class="section-body">أداتنا مجانية 100%، متميزة بخصوصية مطلقة لجهة معالجة كل شيء محلياً بالكامل على متصفحك (Client-side)، وبأعلى كفاءة تصدير للطباعة (تصل إلى دقة 4K) لتناسب جميع حملات المبدعين ومطبوعاتهم بلغات متعددة لضمان كمال تجاربهم وحملاتهم التسويقية.</div>
-          </div>`;
-      } else if (pathname === '/contact') {
-        title = 'اتصل بنا - QR Deep Linker';
-        contentHtml = `
-          <div class="section">
-              <div class="section-title">نرحب باستفساراتكم ورسائلكم في أي وقت!</div>
-              <div class="section-body">يسعدنا جداً ويشرفنا تواصلكم المستمر والمثمر معنا. سواء كنت صانع محتوى متميز، مسوقاً رقمياً، أو زائر للأداة للتو، فإن آراءك ومقترحاتك تُمثّل الأساس والبوصلة التي نستعين بها في تحسين وتطوير وتوسيع نطاق هذه الأداة.</div>
-          </div>
-          <div class="section">
-              <div class="section-title">قنوات التواصل والبريد الإلكتروني الرسمي لاستقبال الشكاوى والاقتراحات</div>
-              <div class="section-body">
-                  يمكنك التواصل معنا مباشرة وتلقي الرد السريع عبر بريدنا الإلكتروني الرسمي للدعم الفني والشكاوى والمقترحات والتعاون الإعلاني والتجاري: <br><br>
-                  <a href="mailto:essamelmansy70@gmail.com" class="email-link">essamelmansy70@gmail.com</a>
-              </div>
-          </div>`;
+      if (isEn) {
+        if (pathname === '/privacy') {
+          title = 'Privacy Policy & Zero-Data Storage Pledge - QR Deep Linker';
+          contentHtml = `
+            <div class="section">
+                <div class="section-title">1. Extreme Client-Side Security</div>
+                <div class="section-body">We understand creators deserve secure sandboxes. Unlike classic SaaS, all coloring, custom URL inputs, redundancy matrices, branding configurations, and logo files are computed 100% locally inside your browser client environment. We do not upload your personal URLs or avatars to any servers.</div>
+            </div>
+            <div class="section">
+                <div class="section-title">2. Zero Personal Accounts</div>
+                <div class="section-body">You do not need to register, provide an email address, or verify third-party profiles to enjoy our high-resolution outputs. Safe, clean, and instant.</div>
+            </div>
+            <div class="section">
+                <div class="section-title">3. Browser Local Storage Utilizations</div>
+                <div class="section-body">We read minimal local browser variables (localStorage) strictly to preserve layout language preference selections (e.g. Arabic vs English) to enhance workflow speeds on future visits.</div>
+            </div>
+            <div class="section">
+                <div class="section-title">4. Third-Party Integrations & Affiliations</div>
+                <div class="section-body">Our tool creates protocol outputs compliant with Android OS and Apple iOS platforms. We have no commercial affiliations with YouTube or Alphabet, and we advise reading standard video delivery guidelines protectively. Also, we serve AdSense compliant ads using Google AdSense which can place cookies.</div>
+            </div>`;
+        } else if (pathname === '/terms') {
+          title = 'Terms of Use & Service - QR Deep Linker';
+          contentHtml = `
+            <div class="section">
+                <div class="section-title">1. Acceptance of Terms</div>
+                <div class="section-body">By accessing and using YouTube QR Deep Linker, you agree to be bound by these service terms, all applicable laws, and regulations, acknowledging complete responsibility for staying compliant with corresponding localized legal regimes.</div>
+            </div>
+            <div class="section">
+                <div class="section-title">2. Use License & Authorizations</div>
+                <div class="section-body">This software is served completely free-of-charge to general creators, marketers, and developers. You are granted clear authorizations to design, preview, and print these elements for both distinct personal and vast commercial publishing outputs.</div>
+            </div>
+            <div class="section">
+                <div class="section-title">3. General Liability Disclaimers</div>
+                <div class="section-body">All application configurations, tools, features, resources, and compiled outputs are served 'as-is' with no absolute guarantees regarding parsing speeds on generic scanning devices or future YouTube deep-linking structural changes.</div>
+            </div>
+            <div class="section">
+                <div class="section-title">4. External Link Accountability</div>
+                <div class="section-body">You bear absolute accountability for all target URLs inputted into this system for deep-linking. You commit to refrain from embedding pointers towards malware elements, fraudulent schemes, or restricted digital publishing materials.</div>
+            </div>`;
+        } else if (pathname === '/about') {
+          title = 'About Us - QR Deep Linker';
+          contentHtml = `
+            <div class="section">
+                <div class="section-title">Our Vision & Core Mission</div>
+                <div class="section-body">Driven by our goal to dismantle digital hurdles for active creators, we designed Qrytube (or QR Deep Linker) to become a leading, free, worldwide smart routing utility. We believe creators deserve 100% translation of social views directly into active subscriber conversions.</div>
+            </div>
+            <div class="section">
+                <div class="section-title">Advanced Deep-Linking Service</div>
+                <div class="section-body">Our platform is a state-of-the-art web suite developed specifically to aid builders, bloggers, and visual marketers in forging smart Deep Links that bypass default smartphone in-app browser sandboxes, instantly opening official social media apps directly on users' operating systems.</div>
+            </div>
+            <div class="section">
+                <div class="section-title">Safe, Reliable & Always Free</div>
+                <div class="section-body">We are committed to delivering persistent service uptime, high redundancy configurations, and pixel-perfect high-resolution image outputs (up to pro 4K ready prints) completely free of charge and without disruptive advertisements.</div>
+            </div>`;
+        } else if (pathname === '/contact') {
+          title = 'Contact Us - QR Deep Linker';
+          contentHtml = `
+            <div class="section">
+                <div class="section-title">We Welcome Your Inquiries & Feedback!</div>
+                <div class="section-body">We cherish your persistent input, reports, and questions. Whether you represent an emerging brand, a distinguished YouTube creator, or are just testing our custom design workspace, your feedback steers our continuous roadmap upgrades.</div>
+            </div>
+            <div class="section">
+                <div class="section-title">Official Contact Channels</div>
+                <div class="section-body">For general questions, business cooperation, reporting system glitches, or submitting copyright notices, please direct your message straight to our official support mailbox below programmatically:</div>
+            </div>
+            <div class="section">
+                <div class="section-title">Corporate Support Email Address</div>
+                <div class="section-body">
+                    You can contact us directly at our official technical support and inquiry mailbox:<br><br>
+                    <a href="mailto:essamelmansy70@gmail.com" class="email-link">essamelmansy70@gmail.com</a>
+                </div>
+            </div>`;
+        }
+      } else {
+        if (pathname === '/privacy') {
+          title = 'سياسة الخصوصية وسرية البيانات - QR Deep Linker';
+          contentHtml = `
+            <div class="section">
+                <div class="section-title">1. الخصوصية الفائقة والمعالجة المحلية</div>
+                <div class="section-body">نحن نولي أهمية قصوى لخصوصيتك. على خلاف الأدوات الأخرى، تتم معالجة جميع الروابط، تصميمات الأوان، وتحميل الشعارات وإثراء صور الـ QR الـمعلنة محلياً بالكامل على متصفحك الخاص (Client-Side). لا نقوم برفع بياناتك أو روابطك أو صورك إلى أي خادم خارجي.</div>
+            </div>
+            <div class="section">
+                <div class="section-title">2. عدم تخزين البيانات الشخصية</div>
+                <div class="section-body">لا تتطلب الأداة منك إنشاء حساب، تسجيل بريد إلكتروني، أو تقديم أي معلومات تواصل شخصية مشفرة. الخدمة مفتوحة، مرنة ومسؤولة لتسهيل مسار عملك بأمان.</div>
+            </div>
+            <div class="section">
+                <div class="section-title">3. ملفات تعريف الارتباط والإعدادات</div>
+                <div class="section-body">نحن نستخدم الذاكرة المحلية لمتصفحك (localStorage) فقط لتذكر تفضيلاتك اللغوية (مثل تذكر اختيارك للغة العربية أو الإنجليزية) لتسهيل وتيسير زيارتك القادمة.</div>
+            </div>
+            <div class="section">
+                <div class="section-title">4. خدمات الأطراف الثالثة وسرية يوتيوب</div>
+                <div class="section-body">الأداة تولد روابط عميقة متوافقة مع شروط استخدام YouTube ومواصفات أندرويد وآبل. نحن لا نمتلك أي شراكة مباشرة مع يوتيوب، وننصحك دائماً بمطالعة شروط يوتيوب لضمان تجربة بث نظيفة. كما نستعين بجوجل أدسنس Google AdSense لعرض الإعلانات التي تستعمل الكوكيز.</div>
+            </div>`;
+        } else if (pathname === '/terms') {
+          title = 'شروط الاستخدام والخدمة - QR Deep Linker';
+          contentHtml = `
+            <div class="section">
+                <div class="section-title">1. قبول الأحكام الشروط</div>
+                <div class="section-body">باستخدامك لمنصة YouTube QR Deep Linker الإلكترونية، فإنك توافق على الالتزام الكامل بشروط الخدمة هذه، وجميع القوانين واللوائح المعمول بها، كما تقر بمسؤوليتك الكاملة عن الالتزام بأي قوانين محلية سارية.</div>
+            </div>
+            <div class="section">
+                <div class="section-title">2. ترخيص الخدمة والاستخدام</div>
+                <div class="section-body">يتم تقديم هذه الأداة مجاناً بالكامل لصناّع المحتوى والمسوقين لتسهيل الانتقال الآمن وتوليد الأكواد الرقمية. يُرخص لك استخدام الخدمة للاستخدامات الشخصية والتجارية المشروعة دون رسوم أو مقابل مادي.</div>
+            </div>
+            <div class="section">
+                <div class="section-title">3. إخلاء المسؤولية عن الضمانات</div>
+                <div class="section-body">يتم توفير الخدمة والمنصة والأكواد المصدّرة والبرمجيات المرتبطة بها "كما هي" وبدون أي ضمانات صريحة أو ضمنية بما في ذلك على سبيل المثال لا الحصر ضمانات ملاءمتها لكاميرات معينة أو استمرارية الروابط إذا تم تغيير سياسة يوتيوب الداخلية.</div>
+            </div>
+            <div class="section">
+                <div class="section-title">4. سلامة وأمن الروابط الخارجية</div>
+                <div class="section-body">تتحمل كصانع محتوى المسؤولية التامة عن الروابط الخارجية التي تدخلها في الأداة لتوليد الرموز. تلتزم تماماً بعدم إدخال روابط تنتهك قوانين النشر أو تروج لبرمجيات ضارة أو محتوى غير لائق.</div>
+            </div>`;
+        } else if (pathname === '/about') {
+          title = 'من نحن - QR Deep Linker';
+          contentHtml = `
+            <div class="section">
+                <div class="section-title">رؤيتنا وهدفنا الأساسي</div>
+                <div class="section-body">انطلاقاً من رغبتنا المستمرة في تذليل العقبات التقنية أمام المبدعين الرقميين، قمنا بتطوير Qrytube (أو QR Deep Linker) ليكون المنصة العربية والعالمية المجانية الرائدة في صناعة وتوليد الأكواد والروابط الذكية. نؤمن بأن كل مبدع يستحق حصد ثمار جهده الكاملة دون أن تضيع زيارات جمهوره في فخ المتصفحات الداخلية المعقدة.</div>
+            </div>
+            <div class="section">
+                <div class="section-title">أداة ذكية متخصصة ومتطورة</div>
+                <div class="section-body">موقعنا هو أداة رقمية متطورة مصممة خصيصاً لمساعدة صناع المحتوى ومسوقي قنوات اليوتيوب ومنصات التواصل الاجتماعي في توليد روابط عميقة ذكية (Deep Links) تتجاور المتصفحات الداخلية وتفتح التطبيقات الرسمية مباشرة لزيادة التفاعل، الاشتراكات والمشاهدات بنسبة تصل إلى 200% بضغطة واحدة.</div>
+            </div>
+            <div class="section">
+                <div class="section-title">مجانية ومتاحة للجميع بأمان مطلق</div>
+                <div class="section-body">نرجو من خلال هذه الخدمة توفير أداة قوية، مستقرة، آمنة ومجانية 100% بدون إعلانات مزعجة وبأعلى دقة تصدير للطباعة (تصل إلى دقة 4K) لتناسب جميع استخداماتكم الورقية والترويجية والخدمية بلغات متعددة.</div>
+            </div>`;
+        } else if (pathname === '/contact') {
+          title = 'اتصل بنا - QR Deep Linker';
+          contentHtml = `
+            <div class="section">
+                <div class="section-title">يرحب فريق الموقع باستفساراتكم ورسائلكم دائماً!</div>
+                <div class="section-body">يسعدنا جداً ويشرفنا تواصلكم المستمر والمثمر معنا. سواء كنت صانع محتوى متميز، مسوقاً رقمياً، أو زائر للأداة للتو، فإن آراءك ومقترحاتك تُمثّل الأساس والبوصلة التي نستعين بها في تحسين وتطوير وتوسيع نطاق هذه الأداة.</div>
+            </div>
+            <div class="section">
+                <div class="section-title">قنوات التواصل والبريد الإلكتروني الرسمي</div>
+                <div class="section-body">لاستقبال الاستفسارات العامة، الاقتراحات التجارية، تدوين تقارير الأخطاء، أو أي مبادرات وشكاوى حول الرموز والروابط، يرجى التكرم بمراسلتنا مباشرة عبر البريد الإلكتروني الرسمي للموقع وسنقوم بالرد عليكم خلال مدة قصيرة وجيزة:</div>
+            </div>
+            <div class="section">
+                <div class="section-title">البريد الإلكتروني للدعم والمقترحات</div>
+                <div class="section-body">
+                    يمكنك التواصل الإلكتروني ومراسلتنا فوراً عبر البريد الرسمي التالي:<br><br>
+                    <a href="mailto:essamelmansy70@gmail.com" class="email-link">essamelmansy70@gmail.com</a>
+                </div>
+            </div>`;
+        }
       }
 
+      const langAttr = isEn ? 'en' : 'ar';
+      const dirAttr = isEn ? 'ltr' : 'rtl';
+      const lastUpdatedText = isEn ? 'Last Updated: May 27, 2026' : 'آخر تحديث: ٢٧ مايو ٢٠٢٦';
+      const homeBtnText = isEn ? 'Back to Home' : 'العودة للرئيسية';
+      const complianceNoticeText = isEn
+        ? 'These official layouts and document formulations prevent operational data transmission discrepancies and enforce standard AdSense compliance policies.'
+        : 'تمت صياغة هذه البنود والوثائق الرسمية لحفظ الخصوصية البرمجية للمستخدم وضمان الإذعان الكامل لمعايير حوكمة الخصوصية الرقمية وجوجل أدسنس (Google AdSense).';
+
       const html = `<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="${langAttr}" dir="${dirAttr}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -268,35 +362,35 @@ export default {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
     <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-    <link rel="alternate" hreflang="ar" href="${origin}${pathname}" />
-    <link rel="canonical" href="${origin}${pathname}" />
-    <link rel="alternate" hreflang="en" href="${origin}${pathname}?lang=en" />
-    <link rel="alternate" hreflang="x-default" href="${origin}${pathname}" />
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;700&display=swap" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;700&display=swap" media="print" onload="this.media='all'" />
+    <link rel="alternate" hreflang="ar" href="https://qrytube.com${pathname}" />
+    <link rel="canonical" href="https://qrytube.com${pathname}${isEn ? '?lang=en' : ''}" />
+    <link rel="alternate" hreflang="en" href="https://qrytube.com${pathname}?lang=en" />
+    <link rel="alternate" hreflang="x-default" href="https://qrytube.com${pathname}" />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;808&family=Inter:wght@400;500;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;808&family=Inter:wght@400;500;700&display=swap" media="print" onload="this.media='all'" />
     <noscript>
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;700&display=swap" />
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;808&family=Inter:wght@400;500;700&display=swap" />
     </noscript>
-    <style>:root{--primary:#dc2626;--primary-hover:#b91c1c;--bg:#f8fafc;--text-main:#0f172a;--text-muted:#475569;--border:#f1f5f9}*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Cairo','Inter',system-ui,-apple-system,sans-serif;background-color:var(--bg);color:var(--text-main);line-height:1.8;-webkit-font-smoothing:antialiased;padding:2rem 1rem;min-height:100vh;display:flex;align-items:center;justify-content:center}.container{width:100%;max-width:720px;background:#fff;border-radius:24px;padding:2.5rem;border:1px solid var(--border);box-shadow:0 4px 6px -1px rgba(0,0,0,.05),0 2px 4px -1px rgba(0,0,0,.02);position:relative}.header{display:flex;align-items:center;gap:1rem;margin-bottom:2rem;padding-bottom:1.25rem;border-bottom:2px solid var(--border)}.logo-box{background:var(--primary);color:#fff;border-radius:12px;padding:8px;display:flex;align-items:center;justify-content:center}.logo-box svg{width:24px;height:24px;fill:currentColor}.app-name{font-size:1.2rem;font-weight:800;color:var(--text-main)}h1{font-size:1.75rem;font-weight:800;margin-bottom:1rem;text-align:right;color:var(--text-main)}.last-updated{font-size:.8rem;color:var(--text-muted);margin-bottom:2rem}.section{background-color:#fafafa;border:1px solid var(--border);border-radius:16px;padding:1.25rem;margin-bottom:1.25rem}.section-title{font-weight:700;font-size:1.05rem;margin-bottom:.5rem;color:var(--text-main)}.section-body{font-size:.925rem;color:var(--text-muted)}.email-link{font-family:'Inter','Cairo',monospace;font-weight:750;color:var(--primary);text-decoration:underline;font-size:1.1rem}.footer{margin-top:2.5rem;text-align:center}.btn{display:inline-flex;align-items:center;gap:.5rem;background-color:var(--primary);color:#fff;padding:.85rem 2rem;border-radius:14px;font-weight:700;text-decoration:none;transition:all .2s ease;cursor:pointer;box-shadow:0 4px 12px rgba(220,38,38,.15)}.btn:hover{background-color:var(--primary-hover);transform:translateY(-2px);box-shadow:0 6px 16px rgba(220,38,38,.25)}.btn:active{transform:translateY(0)}.badge-footer{font-size:.7rem;color:#94a3b8;margin-top:1.5rem;display:block}@media(max-width:640px){body{padding:1rem}.container{padding:1.5rem}h1{font-size:1.4rem}}</style>
+    <style>:root{--primary:#dc2626;--primary-hover:#b91c1c;--bg:#f8fafc;--text-main:#0f172a;--text-muted:#475569;--border:#f1f5f9}*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Cairo','Inter',system-ui,-apple-system,sans-serif;background-color:var(--bg);color:var(--text-main);line-height:1.8;-webkit-font-smoothing:antialiased;padding:2rem 1rem;min-height:100vh;display:flex;align-items:center;justify-content:center}.container{width:100%;max-width:720px;background:#fff;border-radius:24px;padding:2.5rem;border:1px solid var(--border);box-shadow:0 4px 6px -1px rgba(0,0,0,.05),0 2px 4px -1px rgba(0,0,0,.02);position:relative}.header{display:flex;align-items:center;gap:1rem;margin-bottom:2rem;padding-bottom:1.25rem;border-bottom:2px solid var(--border)}.logo-box{background:var(--primary);color:#fff;border-radius:12px;padding:8px;display:flex;align-items:center;justify-content:center}.logo-box svg{width:24px;height:24px;fill:currentColor}.app-name{font-size:1.2rem;font-weight:800;color:var(--text-main)}h1{font-size:1.75rem;font-weight:800;margin-bottom:1rem;text-align:${isEn ? 'left' : 'right'};color:var(--text-main)}.last-updated{font-size:.8rem;color:var(--text-muted);margin-bottom:2rem;text-align:${isEn ? 'left' : 'right'}}.section{background-color:#fafafa;border:1px solid var(--border);border-radius:16px;padding:1.25rem;margin-bottom:1.25rem;text-align:${isEn ? 'left' : 'right'}}.section-title{font-weight:700;font-size:1.05rem;margin-bottom:.5rem;color:var(--text-main)}.section-body{font-size:.925rem;color:var(--text-muted)}.email-link{font-family:'Inter','Cairo',monospace;font-weight:750;color:var(--primary);text-decoration:underline;font-size:1.1rem}.footer{margin-top:2.5rem;text-align:center}.btn{display:inline-flex;align-items:center;gap:.5rem;background-color:var(--primary);color:#fff;padding:.85rem 2rem;border-radius:14px;font-weight:700;text-decoration:none;transition:all .2s ease;cursor:pointer;box-shadow:0 4px 12px rgba(220,38,38,.15)}.btn:hover{background-color:var(--primary-hover);transform:translateY(-2px);box-shadow:0 6px 16px rgba(220,38,38,.25)}.btn:active{transform:translateY(0)}.badge-footer{font-size:.7rem;color:#94a3b8;margin-top:1.5rem;display:block}@media(max-width:640px){body{padding:1rem}.container{padding:1.5rem}h1{font-size:1.4rem}}</style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
+        <div class="header" style="justify-content: ${isEn ? 'flex-start' : 'row-reverse'}">
             <div class="logo-box">
                 <svg viewBox="0 0 24 24"><path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.107C19.522 3.54 12 3.54 12 3.54s-7.522 0-9.388.516a3.003 3.003 0 0 0-2.11 2.107C0 8.029 0 12 0 12s0 3.971.516 5.837a3.003 3.003 0 0 0 2.11 2.107c1.866.516 9.388.516 9.388.516s7.522 0 9.388-.516a3.003 3.003 0 0 0 2.11-2.107C24 15.971 24 12 24 12s0-3.971-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
             </div>
-            <div class="app-name">QR Deep Linker</div>
+            <div class="app-name" style="margin-left: ${isEn ? '1rem' : '0'}; margin-right: ${isEn ? '0' : '1rem'}">QR Deep Linker</div>
         </div>
         <h1>${title}</h1>
-        <div class="last-updated">آخر تحديث: 27 مايو 2026</div>
+        <div class="last-updated">${lastUpdatedText}</div>
         
         <div class="content">
             ${contentHtml}
         </div>
 
         <div class="footer">
-            <a href="/" class="btn">العودة للرئيسية</a>
-            <span class="badge-footer">تمت التهيئة والموائمة البرمجية للموقع لضمان الامتثال التام لشروط وسياسات جوجل أدسنس (Google AdSense) بنجاح.</span>
+            <a href="${isEn ? '/?lang=en' : '/'}" class="btn">${homeBtnText}</a>
+            <span class="badge-footer">${complianceNoticeText}</span>
         </div>
     </div>
 </body>

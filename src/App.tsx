@@ -123,7 +123,7 @@ export default function App() {
     // Programmatically render hreflang tags and canonical tag in <head> for search engines
     try {
       document.querySelectorAll('link[hreflang]').forEach(el => el.remove());
-      const baseDomain = currentOrigin;
+      const baseDomain = 'https://qrytube.com';
       const pathSuffix = activeTab === 'generator' ? '/' : `/${activeTab}`;
       const fullPath = `${baseDomain}${pathSuffix}`;
 
