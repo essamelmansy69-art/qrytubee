@@ -124,28 +124,30 @@ export default function App() {
     try {
       document.querySelectorAll('link[hreflang]').forEach(el => el.remove());
       const baseDomain = 'https://qrytube.com';
-      const pathSuffix = activeTab === 'generator' ? '/' : `/${activeTab}`;
-      const fullPath = `${baseDomain}${pathSuffix}`;
+      const pathSuffix = activeTab === 'generator' ? '' : `/${activeTab}`;
+      const arPath = pathSuffix === '' ? `${baseDomain}/` : `${baseDomain}${pathSuffix}`;
+      const enPath = pathSuffix === '' ? `${baseDomain}/?lang=en` : `${baseDomain}${pathSuffix}?lang=en`;
+      const defPath = arPath;
 
       // 1. Alternate Arabic
       const arLink = document.createElement('link');
       arLink.rel = 'alternate';
       arLink.setAttribute('hreflang', 'ar');
-      arLink.href = fullPath;
+      arLink.href = arPath;
       document.head.appendChild(arLink);
 
       // 2. Alternate English
       const enLink = document.createElement('link');
       enLink.rel = 'alternate';
       enLink.setAttribute('hreflang', 'en');
-      enLink.href = `${fullPath}?lang=en`;
+      enLink.href = enPath;
       document.head.appendChild(enLink);
 
       // 3. Alternate x-default
       const defLink = document.createElement('link');
       defLink.rel = 'alternate';
       defLink.setAttribute('hreflang', 'x-default');
-      defLink.href = fullPath;
+      defLink.href = defPath;
       document.head.appendChild(defLink);
 
       // 4. Update Canonical
@@ -155,7 +157,7 @@ export default function App() {
         canonicalEl.setAttribute('rel', 'canonical');
         document.head.appendChild(canonicalEl);
       }
-      canonicalEl.setAttribute('href', lang === 'en' ? `${fullPath}?lang=en` : fullPath);
+      canonicalEl.setAttribute('href', lang === 'en' ? enPath : arPath);
     } catch (_) {}
 
     // Update URL query parameters based on language without page reload
