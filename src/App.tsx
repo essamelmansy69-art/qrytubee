@@ -490,7 +490,11 @@ export default function App() {
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100" id="app_header">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
           
-          <div className="flex items-center gap-2.5">
+          <button 
+            onClick={() => setActiveTab('generator')}
+            className="flex items-center gap-2.5 cursor-pointer hover:opacity-90 transition-opacity text-left outline-none border-none bg-transparent p-0"
+            id="header_logo_home_btn"
+          >
             <span className="p-2.5 bg-red-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-red-500/20 glow-youtube">
               <Youtube size={22} />
             </span>
@@ -502,7 +506,7 @@ export default function App() {
                 {t.appSubTitle}
               </span>
             </div>
-          </div>
+          </button>
 
           {/* Quick navigation links removed to keep interface clean */}
           <div className="hidden md:block" id="main_navigation"></div>
