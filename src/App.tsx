@@ -34,7 +34,6 @@ import FooterView from './components/FooterView';
 const ArticlesView = React.lazy(() => import('./components/ArticlesView'));
 const LegalView = React.lazy(() => import('./components/LegalView'));
 const FAQView = React.lazy(() => import('./components/FAQView'));
-const TipsView = React.lazy(() => import('./components/TipsView'));
 
 export default function App() {
   const [lang, setLang] = useState<'ar' | 'en'>(() => {
@@ -61,7 +60,7 @@ export default function App() {
     return 'ar';
   });
 
-  const [activeTab, setActiveTab] = useState<'generator' | 'faq' | 'tips' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact'>(() => {
+  const [activeTab, setActiveTab] = useState<'generator' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact'>(() => {
     try {
       const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
       if (path === 'terms') return 'terms';
@@ -221,7 +220,7 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  const handleNavClick = (tab: 'generator' | 'tips' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact', event: React.MouseEvent) => {
+  const handleNavClick = (tab: 'generator' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact', event: React.MouseEvent) => {
     event.preventDefault();
     setActiveTab(tab);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -505,45 +504,8 @@ export default function App() {
             </div>
           </div>
 
-          {/* Quick navigation links */}
-          <nav className="hidden md:flex items-center gap-1.5 bg-gray-100/75 p-1 rounded-xl font-arabic text-sm" id="main_navigation">
-            <button
-              onClick={() => setActiveTab('generator')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all cursor-pointer ${
-                activeTab === 'generator' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'
-              }`}
-              type="button"
-            >
-              {t.navGenerator}
-            </button>
-            <button
-              onClick={() => setActiveTab('tips')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all cursor-pointer ${
-                activeTab === 'tips' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'
-              }`}
-              type="button"
-            >
-              {t.navTips}
-            </button>
-            <button
-              onClick={() => setActiveTab('articles')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all cursor-pointer ${
-                activeTab === 'articles' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'
-              }`}
-              type="button"
-            >
-              {t.navArticles}
-            </button>
-            <button
-              onClick={() => setActiveTab('faq')}
-              className={`px-4 py-2 rounded-lg font-medium transition-all cursor-pointer ${
-                activeTab === 'faq' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'
-              }`}
-              type="button"
-            >
-              {t.navFaq}
-            </button>
-          </nav>
+          {/* Quick navigation links removed to keep interface clean */}
+          <div className="hidden md:block" id="main_navigation"></div>
 
           {/* Right badge / Action badge & Language Toggle */}
           <div className="flex items-center gap-3">
@@ -591,46 +553,12 @@ export default function App() {
       {/* 3. MAIN WORKSPACE / INTERACTIVE PLATFORM */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" id="main_workspace">
         
-        {/* Mobile quick tab list */}
-        <div className="md:hidden overflow-x-auto flex items-center gap-1.5 bg-gray-100/70 p-1 rounded-2xl mb-8 font-arabic text-xs font-semibold scrollbar-none" id="mobile_navbar" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
-          <button
-            onClick={() => { setActiveTab('generator'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-            className={`whitespace-nowrap px-4 py-2.5 rounded-xl transition-all ${activeTab === 'generator' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
-          >
-            {t.navGenerator}
-          </button>
-          <button
-            onClick={() => { setActiveTab('tips'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-            className={`whitespace-nowrap px-4 py-2.5 rounded-xl transition-all ${activeTab === 'tips' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
-          >
-            {t.navTips}
-          </button>
-          <button
-            onClick={() => { setActiveTab('articles'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-            className={`whitespace-nowrap px-4 py-2.5 rounded-xl transition-all ${activeTab === 'articles' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
-          >
-            {t.navArticles}
-          </button>
-          <button
-            onClick={() => { setActiveTab('faq'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-            className={`whitespace-nowrap px-4 py-2.5 rounded-xl transition-all ${activeTab === 'faq' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'}`}
-          >
-            {t.navFaq}
-          </button>
-        </div>
+        {/* Mobile quick tab list removed */}
 
         {/* Dynamic Navigation Tabs Content render */}
         {activeTab === 'generator' && (
           <div className="transition-opacity duration-300 animate-fade-in">
             <QRGenerator lang={lang} />
-          </div>
-        )}
-
-        {activeTab === 'tips' && (
-          <div className="transition-opacity duration-300">
-            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
-              <TipsView lang={lang} onReturn={() => setActiveTab('generator')} />
-            </React.Suspense>
           </div>
         )}
 
@@ -682,7 +610,7 @@ export default function App() {
           </div>
         )}
 
-        {['terms', 'privacy', 'about', 'contact'].includes(activeTab) && (
+        {['terms', 'privacy', 'about', 'contact', 'articles'].includes(activeTab) && (
           <div className="text-center pt-8">
             <button
               onClick={() => setActiveTab('generator')}

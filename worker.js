@@ -29,6 +29,12 @@ const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
     <priority>0.4</priority>
   </url>
   <url>
+    <loc>https://qrytube.com/articles</loc>
+    <lastmod>2026-05-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://qrytube.com/terms</loc>
     <lastmod>2026-05-29</lastmod>
     <changefreq>monthly</changefreq>
