@@ -4,6 +4,8 @@ import path from 'path';
 import {defineConfig} from 'vite';
 import { Buffer } from 'buffer';
 
+import { cloudflare } from "@cloudflare/vite-plugin";
+
 // Helper to resolve the avatar from a YouTube channel/video URL
 async function resolveAvatarUrl(targetUrl: string): Promise<string | null> {
   try {
@@ -52,62 +54,58 @@ async function resolveAvatarUrl(targetUrl: string): Promise<string | null> {
 
 export default defineConfig(() => {
   return {
-    plugins: [
-      react(),
-      tailwindcss(),
-      {
-        name: 'youtube-avatar-api',
-        configureServer(server) {
-          server.middlewares.use(async (req, res, next) => {
-            if (req.url) {
-              try {
-                const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-                if (urlObj.pathname === '/api/youtube-avatar') {
-                  const channelUrl = urlObj.searchParams.get('url');
-                  if (!channelUrl) {
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: 'Missing channel URL' }));
-                    return;
-                  }
-
-                  const avatarProxyUrl = await resolveAvatarUrl(channelUrl);
-                  if (!avatarProxyUrl) {
-                    res.writeHead(404, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: 'Could not resolve channel avatar' }));
-                    return;
-                  }
-
-                  const imgResponse = await fetch(avatarProxyUrl);
-                  if (!imgResponse.ok) {
-                    res.writeHead(502, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: 'Failed to fetch the avatar image' }));
-                    return;
-                  }
-
-                  const contentType = imgResponse.headers.get('content-type') || 'image/jpeg';
-                  const arrayBuffer = await imgResponse.arrayBuffer();
-                  const base64 = Buffer.from(arrayBuffer).toString('base64');
-                  const dataUrl = `data:${contentType};base64,${base64}`;
-
-                  res.writeHead(200, {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',
-                    'Cache-Control': 'public, max-age=3600'
-                  });
-                  res.end(JSON.stringify({ avatar: dataUrl }));
+    plugins: [react(), tailwindcss(), {
+      name: 'youtube-avatar-api',
+      configureServer(server) {
+        server.middlewares.use(async (req, res, next) => {
+          if (req.url) {
+            try {
+              const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+              if (urlObj.pathname === '/api/youtube-avatar') {
+                const channelUrl = urlObj.searchParams.get('url');
+                if (!channelUrl) {
+                  res.writeHead(400, { 'Content-Type': 'application/json' });
+                  res.end(JSON.stringify({ error: 'Missing channel URL' }));
                   return;
                 }
-              } catch (err: any) {
-                // If it fails to parse the URL, we can safely just ignore and proceed
-                next();
+
+                const avatarProxyUrl = await resolveAvatarUrl(channelUrl);
+                if (!avatarProxyUrl) {
+                  res.writeHead(404, { 'Content-Type': 'application/json' });
+                  res.end(JSON.stringify({ error: 'Could not resolve channel avatar' }));
+                  return;
+                }
+
+                const imgResponse = await fetch(avatarProxyUrl);
+                if (!imgResponse.ok) {
+                  res.writeHead(502, { 'Content-Type': 'application/json' });
+                  res.end(JSON.stringify({ error: 'Failed to fetch the avatar image' }));
+                  return;
+                }
+
+                const contentType = imgResponse.headers.get('content-type') || 'image/jpeg';
+                const arrayBuffer = await imgResponse.arrayBuffer();
+                const base64 = Buffer.from(arrayBuffer).toString('base64');
+                const dataUrl = `data:${contentType};base64,${base64}`;
+
+                res.writeHead(200, {
+                  'Content-Type': 'application/json',
+                  'Access-Control-Allow-Origin': '*',
+                  'Cache-Control': 'public, max-age=3600'
+                });
+                res.end(JSON.stringify({ avatar: dataUrl }));
                 return;
               }
+            } catch (err: any) {
+              // If it fails to parse the URL, we can safely just ignore and proceed
+              next();
+              return;
             }
-            next();
-          });
-        }
+          }
+          next();
+        });
       }
-    ],
+    }, cloudflare()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
