@@ -3,42 +3,126 @@
 // This script keeps your SEO sitemap active with the correct Content-Type: application/xml
 
 const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <!-- 1. Deep Linker (Arabic) -->
   <url>
     <loc>https://qrytube.com/</loc>
-    <lastmod>2026-05-29</lastmod>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/" />
+    <lastmod>2026-05-31</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
+  <!-- 1. Deep Linker (English) -->
+  <url>
+    <loc>https://qrytube.com/?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/" />
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <!-- 2. About Us (Arabic) -->
   <url>
     <loc>https://qrytube.com/about</loc>
-    <lastmod>2026-05-29</lastmod>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/about" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/about?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/about" />
+    <lastmod>2026-05-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+  <!-- 2. About Us (English) -->
+  <url>
+    <loc>https://qrytube.com/about?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/about" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/about?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/about" />
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- 3. Contact (Arabic) -->
   <url>
     <loc>https://qrytube.com/contact</loc>
-    <lastmod>2026-05-29</lastmod>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/contact" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/contact?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/contact" />
+    <lastmod>2026-05-31</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
   </url>
+  <!-- 3. Contact (English) -->
+  <url>
+    <loc>https://qrytube.com/contact?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/contact" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/contact?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/contact" />
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- 4. Privacy Policy (Arabic) -->
   <url>
     <loc>https://qrytube.com/privacy</loc>
-    <lastmod>2026-05-29</lastmod>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/privacy" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/privacy?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/privacy" />
+    <lastmod>2026-05-31</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
+    <priority>0.5</priority>
   </url>
+  <!-- 4. Privacy Policy (English) -->
+  <url>
+    <loc>https://qrytube.com/privacy?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/privacy" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/privacy?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/privacy" />
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <!-- 5. Articles (Arabic) -->
   <url>
     <loc>https://qrytube.com/articles</loc>
-    <lastmod>2026-05-30</lastmod>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/articles" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/articles?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/articles" />
+    <lastmod>2026-05-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
+  <!-- 5. Articles (English) -->
+  <url>
+    <loc>https://qrytube.com/articles?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/articles" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/articles?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/articles" />
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <!-- 6. Terms of Service (Arabic) -->
   <url>
     <loc>https://qrytube.com/terms</loc>
-    <lastmod>2026-05-29</lastmod>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/terms" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/terms?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/terms" />
+    <lastmod>2026-05-31</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.4</priority>
+    <priority>0.5</priority>
+  </url>
+  <!-- 6. Terms of Service (English) -->
+  <url>
+    <loc>https://qrytube.com/terms?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/terms" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/terms?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/terms" />
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
 </urlset>`;
 

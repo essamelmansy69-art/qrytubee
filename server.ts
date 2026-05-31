@@ -22,29 +22,124 @@ async function startServer() {
     const protocol = req.headers["x-forwarded-proto"] || req.protocol || "https";
     const host = `${protocol}://${req.get("host")}`;
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <!-- 1. Deep Linker (Arabic) -->
   <url>
     <loc>${host}/</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="${host}/" />
+    <xhtml:link rel="alternate" hreflang="en" href="${host}/?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/" />
+    <lastmod>2026-05-31</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
+  <!-- 1. Deep Linker (English) -->
+  <url>
+    <loc>${host}/?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="${host}/" />
+    <xhtml:link rel="alternate" hreflang="en" href="${host}/?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/" />
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <!-- 2. About Us (Arabic) -->
   <url>
     <loc>${host}/about</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="${host}/about" />
+    <xhtml:link rel="alternate" hreflang="en" href="${host}/about?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/about" />
+    <lastmod>2026-05-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+  <!-- 2. About Us (English) -->
+  <url>
+    <loc>${host}/about?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="${host}/about" />
+    <xhtml:link rel="alternate" hreflang="en" href="${host}/about?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/about" />
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- 3. Contact (Arabic) -->
   <url>
     <loc>${host}/contact</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="${host}/contact" />
+    <xhtml:link rel="alternate" hreflang="en" href="${host}/contact?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/contact" />
+    <lastmod>2026-05-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
+  <!-- 3. Contact (English) -->
+  <url>
+    <loc>${host}/contact?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="${host}/contact" />
+    <xhtml:link rel="alternate" hreflang="en" href="${host}/contact?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/contact" />
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- 4. Privacy Policy (Arabic) -->
   <url>
     <loc>${host}/privacy</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="${host}/privacy" />
+    <xhtml:link rel="alternate" hreflang="en" href="${host}/privacy?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/privacy" />
+    <lastmod>2026-05-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
+  <!-- 4. Privacy Policy (English) -->
+  <url>
+    <loc>${host}/privacy?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="${host}/privacy" />
+    <xhtml:link rel="alternate" hreflang="en" href="${host}/privacy?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/privacy" />
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <!-- 5. Articles (Arabic) -->
+  <url>
+    <loc>${host}/articles</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="${host}/articles" />
+    <xhtml:link rel="alternate" hreflang="en" href="${host}/articles?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/articles" />
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <!-- 5. Articles (English) -->
+  <url>
+    <loc>${host}/articles?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="${host}/articles" />
+    <xhtml:link rel="alternate" hreflang="en" href="${host}/articles?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/articles" />
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <!-- 6. Terms of Service (Arabic) -->
   <url>
     <loc>${host}/terms</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="${host}/terms" />
+    <xhtml:link rel="alternate" hreflang="en" href="${host}/terms?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/terms" />
+    <lastmod>2026-05-31</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <!-- 6. Terms of Service (English) -->
+  <url>
+    <loc>${host}/terms?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="${host}/terms" />
+    <xhtml:link rel="alternate" hreflang="en" href="${host}/terms?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/terms" />
+    <lastmod>2026-05-31</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
