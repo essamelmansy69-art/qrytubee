@@ -41,6 +41,91 @@ import { translations } from '../translations';
 
 import { motion } from 'motion/react';
 
+// Helper to draw Arabic/English text perfectly on canvas and return image data for PDF
+const renderTextToImage = (
+  text: string, 
+  fontSizeMm: number, 
+  options: {
+    isBold?: boolean;
+    color?: string;
+    align?: 'center' | 'left' | 'right';
+    maxWidthMm?: number;
+    scale?: number;
+  } = {}
+) => {
+  const scale = options.scale || 8; // High multiplier for print quality
+  const isBold = options.isBold ?? false;
+  const color = options.color || '#1E293B';
+  const align = options.align || 'center';
+  const maxWidthMm = options.maxWidthMm || 180;
+  const maxWidthPx = maxWidthMm * scale;
+
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+
+  const fontPx = Math.round(fontSizeMm * scale);
+  const fontWeight = isBold ? 'bold' : 'normal';
+  const fontStyle = `${fontWeight} ${fontPx}px "Cairo", "Inter", "Segoe UI", sans-serif`;
+  ctx.font = fontStyle;
+
+  const words = text.split(' ');
+  const lines: string[] = [];
+  let currentLine = '';
+
+  for (let i = 0; i < words.length; i++) {
+    const testLine = currentLine ? currentLine + ' ' + words[i] : words[i];
+    const metrics = ctx.measureText(testLine);
+    if (metrics.width > maxWidthPx && i > 0) {
+      lines.push(currentLine);
+      currentLine = words[i];
+    } else {
+      currentLine = testLine;
+    }
+  }
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+
+  const lineHeightPx = Math.round(fontSizeMm * scale * 1.5);
+  const paddingPx = Math.round(fontSizeMm * scale * 0.4);
+  const canvasWidth = maxWidthPx;
+  const canvasHeight = lines.length * lineHeightPx + paddingPx * 2;
+
+  canvas.width = canvasWidth;
+  canvas.height = canvasHeight;
+
+  ctx.font = fontStyle;
+  ctx.fillStyle = color;
+  ctx.textBaseline = 'middle';
+  
+  const isArabic = /[\u0600-\u06FF]/.test(text);
+  if (isArabic) {
+    ctx.direction = 'rtl';
+  } else {
+    ctx.direction = 'ltr';
+  }
+
+  lines.forEach((line, index) => {
+    const y = paddingPx + index * lineHeightPx + lineHeightPx / 2;
+    let x = canvasWidth / 2;
+    if (align === 'left') {
+      x = isArabic ? canvasWidth - paddingPx : paddingPx;
+    } else if (align === 'right') {
+      x = isArabic ? paddingPx : canvasWidth - paddingPx;
+    }
+    
+    ctx.textAlign = align;
+    ctx.fillText(line, x, y);
+  });
+
+  return {
+    dataUrl: canvas.toDataURL('image/png'),
+    widthMm: maxWidthMm,
+    heightMm: canvasHeight / scale
+  };
+};
+
 const COLOR_TEMPLATES = [
   { name: 'يوتيوب الكلاسيكي', dark: '#FF0000', light: '#FFFFFF', eye: '#FF0000' },
   { name: 'الوضع الداكن الفاخر', dark: '#FFFFFF', light: '#0F0F0F', eye: '#FF0000' },
@@ -482,16 +567,22 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
       doc.setFontSize(22);
       doc.text('Qrytube', 105, 22, { align: 'center' });
 
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
-      doc.setTextColor('#64748B'); // slate-500
-      doc.text(
-        lang === 'ar' 
-          ? 'رمز استجابة سريعة ذكي (روابط عميقة) مجهز للطباعة فائقة الدقة الفيكتور' 
-          : 'Smart QR Deep Link - High-Quality Vector Print Template', 
-        105, 28, 
-        { align: 'center' }
-      );
+      if (lang === 'ar') {
+        const textImg = renderTextToImage('رمز استجابة سريعة ذكي (روابط عميقة) مجهز للطباعة فائقة الدقة الفيكتور', 3.5, {
+          isBold: false,
+          color: '#64748B',
+          maxWidthMm: 160,
+          align: 'center'
+        });
+        if (textImg) {
+          doc.addImage(textImg.dataUrl, 'PNG', 105 - (textImg.widthMm / 2), 28 - (textImg.heightMm / 2), textImg.widthMm, textImg.heightMm);
+        }
+      } else {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor('#64748B'); // slate-500
+        doc.text('Smart QR Deep Link - High-Quality Vector Print Template', 105, 28, { align: 'center' });
+      }
 
       // 3. Central card outline container
       doc.setFillColor('#F8FAFC'); // light grey card area
@@ -550,14 +641,22 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
       doc.rect(20, 180, 170, 42, 'D');
 
       // Card Title
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(11);
-      doc.setTextColor('#334155'); // slate-700
-      doc.text(
-        lang === 'ar' ? 'الرابط المستهدف / Target Destination URL' : 'Target Destination URL',
-        105, 187,
-        { align: 'center' }
-      );
+      if (lang === 'ar') {
+        const textImg = renderTextToImage('الرابط المستهدف / Target Destination URL', 3.8, {
+          isBold: true,
+          color: '#334155',
+          maxWidthMm: 150,
+          align: 'center'
+        });
+        if (textImg) {
+          doc.addImage(textImg.dataUrl, 'PNG', 105 - (textImg.widthMm / 2), 187 - (textImg.heightMm / 2), textImg.widthMm, textImg.heightMm);
+        }
+      } else {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor('#334155'); // slate-700
+        doc.text('Target Destination URL', 105, 187, { align: 'center' });
+      }
 
       // Print the target URL safely with word wrapping to avoid clipping overflow
       doc.setFont('courier', 'bold');
@@ -567,16 +666,22 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
       doc.text(wrappedUrl, 105, 193, { align: 'center' });
 
       // Action subtext
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor('#475569'); // slate-600
-      doc.text(
-        lang === 'ar' 
-          ? 'المسح الضوئي يحولك تلقائيا داخل تطبيق يوتيوب الرسمي بفضل تقنية الروابط العميقة' 
-          : 'Scanning this code redirects visitors straight inside the official YouTube mobile app.',
-        105, 214,
-        { align: 'center' }
-      );
+      if (lang === 'ar') {
+        const textImg = renderTextToImage('المسح الضوئي يحولك تلقائيا داخل تطبيق يوتيوب الرسمي بفضل تقنية الروابط العميقة', 3.2, {
+          isBold: false,
+          color: '#475569',
+          maxWidthMm: 160,
+          align: 'center'
+        });
+        if (textImg) {
+          doc.addImage(textImg.dataUrl, 'PNG', 105 - (textImg.widthMm / 2), 214 - (textImg.heightMm / 2), textImg.widthMm, textImg.heightMm);
+        }
+      } else {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor('#475569'); // slate-600
+        doc.text('Scanning this code redirects visitors straight inside the official YouTube mobile app.', 105, 214, { align: 'center' });
+      }
 
       // 8. Visual instruction banner
       doc.setFillColor('#EFF6FF'); // light blue bg
@@ -585,41 +690,61 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
       doc.setLineWidth(0.4);
       doc.line(15, 232, 15, 256); // Highlight bar on left side
 
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10);
-      doc.setTextColor('#1D4ED8'); // blue-700
-      doc.text(
-        lang === 'ar' ? 'كيفية الاستخدام والمسح:' : 'Scan Directions:',
-        105, 238,
-        { align: 'center' }
-      );
+      if (lang === 'ar') {
+        const textImg = renderTextToImage('كيفية الاستخدام والمسح:', 3.5, {
+          isBold: true,
+          color: '#1D4ED8',
+          maxWidthMm: 160,
+          align: 'center'
+        });
+        if (textImg) {
+          doc.addImage(textImg.dataUrl, 'PNG', 105 - (textImg.widthMm / 2), 238 - (textImg.heightMm / 2), textImg.widthMm, textImg.heightMm);
+        }
+      } else {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor('#1D4ED8'); // blue-700
+        doc.text('Scan Directions:', 105, 238, { align: 'center' });
+      }
 
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8.5);
-      doc.setTextColor('#1E293B');
-      doc.text(
-        lang === 'ar'
-          ? '١. افتح تطبيق كاميرا هاتفك الافتراضي   ٢. وجّه الكاميرا نحو الرمز بوضوح   ٣. انقر مباشرة لفتح تطبيق يوتيوب العريض'
-          : '1. Open your default phone camera app   2. Position the lens over the QR Code   3. Click to open official app directly',
-        105, 244,
-        { align: 'center' }
-      );
+      if (lang === 'ar') {
+        const textImg = renderTextToImage('١. افتح تطبيق كاميرا هاتفك الافتراضي   ٢. وجّه الكاميرا نحو الرمز بوضوح   ٣. انقر مباشرة لفتح تطبيق يوتيوب العريض', 3.0, {
+          isBold: false,
+          color: '#1E293B',
+          maxWidthMm: 170,
+          align: 'center'
+        });
+        if (textImg) {
+          doc.addImage(textImg.dataUrl, 'PNG', 105 - (textImg.widthMm / 2), 244 - (textImg.heightMm / 2), textImg.widthMm, textImg.heightMm);
+        }
+      } else {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+        doc.setTextColor('#1E293B');
+        doc.text('1. Open your default phone camera app   2. Position the lens over the QR Code   3. Click to open official app directly', 105, 244, { align: 'center' });
+      }
 
       // 9. Document Footer
       doc.setDrawColor('#E2E8F0');
       doc.setLineWidth(0.25);
       doc.line(15, 268, 195, 268);
 
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8.5);
-      doc.setTextColor('#94A3B8');
-      doc.text(
-        lang === 'ar'
-          ? 'تم إنشاء الملف كـ ناقل (Vector) ذو أبعاد غير محدودة للطباعة الاحترافية عبر Qrytube.com'
-          : 'Print-ready Vector design generated as scalable document via Qrytube.com',
-        105, 274,
-        { align: 'center' }
-      );
+      if (lang === 'ar') {
+        const textImg = renderTextToImage('تم إنشاء الملف كـ ناقل (Vector) ذو أبعاد غير محدودة للطباعة الاحترافية عبر Qrytube.com', 2.8, {
+          isBold: false,
+          color: '#94A3B8',
+          maxWidthMm: 180,
+          align: 'center'
+        });
+        if (textImg) {
+          doc.addImage(textImg.dataUrl, 'PNG', 105 - (textImg.widthMm / 2), 274 - (textImg.heightMm / 2), textImg.widthMm, textImg.heightMm);
+        }
+      } else {
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+        doc.setTextColor('#94A3B8');
+        doc.text('Print-ready Vector design generated as scalable document via Qrytube.com', 105, 274, { align: 'center' });
+      }
 
       // Trigger automatic local browser download
       doc.save('YouTube-DeepLink-QR.pdf');
