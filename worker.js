@@ -689,8 +689,49 @@ export default {
         const contentType = (response.headers.get('content-type') || '').toLowerCase();
         if (contentType.includes('text/html')) {
           let htmlText = await response.text();
+          
+          // Detect current language for crawler on the edge worker side
+          const queryLang = url.searchParams.get('lang');
+          let isEn = queryLang === 'en';
+          if (!queryLang) {
+            const acceptLang = request.headers.get('Accept-Language') || '';
+            const arabicMatch = acceptLang.match(/ar([;,-]|$)/i);
+            isEn = !arabicMatch;
+          }
+
+          const normalizedPath = pathname === '/' ? '' : pathname;
+          const canonicalUrl = `${origin}${normalizedPath}${isEn ? '?lang=en' : ''}`;
+          const arUrl = `${origin}${normalizedPath}`;
+          const enUrl = `${origin}${normalizedPath}?lang=en`;
+          const xDefaultUrl = `${origin}${normalizedPath}`;
+          const currentUrl = `${origin}${pathname}${isEn ? '?lang=en' : ''}`;
+
+          // Replace canonical, hreflang, and og:url dynamically based on visited path details
+          htmlText = htmlText.replace(
+            /<link rel="canonical" href="[^"]*"\s*\/?>/,
+            `<link rel="canonical" href="${canonicalUrl}" />`
+          );
+          htmlText = htmlText.replace(
+            /<link rel="alternate" hreflang="ar" href="[^"]*"\s*\/?>/,
+            `<link rel="alternate" hreflang="ar" href="${arUrl}" />`
+          );
+          htmlText = htmlText.replace(
+            /<link rel="alternate" hreflang="en" href="[^"]*"\s*\/?>/,
+            `<link rel="alternate" hreflang="en" href="${enUrl}" />`
+          );
+          htmlText = htmlText.replace(
+            /<link rel="alternate" hreflang="x-default" href="[^"]*"\s*\/?>/,
+            `<link rel="alternate" hreflang="x-default" href="${xDefaultUrl}" />`
+          );
+          htmlText = htmlText.replace(
+            /<meta property="og:url" content="[^"]*"\s*\/?>/,
+            `<meta property="og:url" content="${currentUrl}" />`
+          );
+
+          // Replace domains and hostnames
           htmlText = htmlText.replaceAll('https://qrytube.com', origin);
           htmlText = htmlText.replaceAll('https://qrytubee.essamelmansy69.workers.dev', origin);
+          
           return new Response(htmlText, {
             status: response.status,
             statusText: response.statusText,

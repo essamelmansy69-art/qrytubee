@@ -197,8 +197,51 @@ async function startServer() {
           res.status(502).send("App bundle loading error");
           return;
         }
-        let dynamicContent = content.replaceAll("https://qrytube.com", host);
+        
+        // Detect current language for crawler on the server side
+        const queryLang = req.query.lang;
+        let isEn = queryLang === "en";
+        if (!queryLang) {
+          const acceptLang = (req.headers["accept-language"] || "").toString();
+          isEn = !acceptLang.match(/ar([;,-]|$)/i);
+        }
+
+        const pathname = req.path;
+        const normalizedPath = pathname === "/" ? "" : pathname;
+        
+        const canonicalUrl = `${host}${normalizedPath}${isEn ? "?lang=en" : ""}`;
+        const arUrl = `${host}${normalizedPath}`;
+        const enUrl = `${host}${normalizedPath}?lang=en`;
+        const xDefaultUrl = `${host}${normalizedPath}`;
+        const currentUrl = `${host}${pathname}${isEn ? "?lang=en" : ""}`;
+
+        // Safely replace canonical and alternate hreflang tags dynamically based on visited path details
+        let dynamicContent = content;
+        dynamicContent = dynamicContent.replace(
+          /<link rel="canonical" href="[^"]*"\s*\/?>/,
+          `<link rel="canonical" href="${canonicalUrl}" />`
+        );
+        dynamicContent = dynamicContent.replace(
+          /<link rel="alternate" hreflang="ar" href="[^"]*"\s*\/?>/,
+          `<link rel="alternate" hreflang="ar" href="${arUrl}" />`
+        );
+        dynamicContent = dynamicContent.replace(
+          /<link rel="alternate" hreflang="en" href="[^"]*"\s*\/?>/,
+          `<link rel="alternate" hreflang="en" href="${enUrl}" />`
+        );
+        dynamicContent = dynamicContent.replace(
+          /<link rel="alternate" hreflang="x-default" href="[^"]*"\s*\/?>/,
+          `<link rel="alternate" hreflang="x-default" href="${xDefaultUrl}" />`
+        );
+        dynamicContent = dynamicContent.replace(
+          /<meta property="og:url" content="[^"]*"\s*\/?>/,
+          `<meta property="og:url" content="${currentUrl}" />`
+        );
+
+        // Replace domains and hostnames
+        dynamicContent = dynamicContent.replaceAll("https://qrytube.com", host);
         dynamicContent = dynamicContent.replaceAll("https://qrytubee.essamelmansy69.workers.dev", host);
+
         res.setHeader("Content-Type", "text/html; charset=utf-8");
         res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         res.status(200).send(dynamicContent);
