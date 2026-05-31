@@ -272,6 +272,26 @@ export default {
       });
     }
 
+    // 2.3 Serve favicon.ico safely from favicon.png to prevent 404s
+    if (pathname === '/favicon.ico') {
+      try {
+        const res = await fetch(`${origin}/favicon.png`);
+        if (res.ok) {
+          // Clone the response to ensure we can modify headers if needed or return directly
+          return new Response(res.body, {
+            status: 200,
+            headers: {
+              'Content-Type': 'image/png',
+              'Cache-Control': 'public, max-age=31536000, immutable',
+              'Access-Control-Allow-Origin': '*',
+              'X-Content-Type-Options': 'nosniff'
+            }
+          });
+        }
+      } catch (e) {}
+      return Response.redirect(`${origin}/favicon.png`, 301);
+    }
+
     // 2.5 Serve legal and meta pages for AdSense compliance
     if (pathname === '/privacy' || pathname === '/terms' || pathname === '/about' || pathname === '/contact') {
       const queryLang = url.searchParams.get('lang');

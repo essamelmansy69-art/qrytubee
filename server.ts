@@ -148,6 +148,25 @@ async function startServer() {
     res.status(200).send(sitemap);
   });
 
+  // Serve favicon.ico safely to avoid 404s
+  app.get("/favicon.ico", (req, res) => {
+    const distPath = path.join(process.cwd(), "dist");
+    const favPath = path.join(distPath, "favicon.png");
+    const publicPath = path.join(process.cwd(), "public", "favicon.png");
+    
+    if (fs.existsSync(favPath)) {
+      res.setHeader("Content-Type", "image/png");
+      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      res.sendFile(favPath);
+    } else if (fs.existsSync(publicPath)) {
+      res.setHeader("Content-Type", "image/png");
+      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      res.sendFile(publicPath);
+    } else {
+      res.redirect("/favicon.png");
+    }
+  });
+
   // FRONTEND HANDLING / STATIC SERVING
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
