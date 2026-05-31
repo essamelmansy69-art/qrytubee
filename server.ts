@@ -209,14 +209,19 @@ async function startServer() {
         const pathname = req.path;
         const normalizedPath = pathname === "/" ? "" : pathname;
         
-        const canonicalUrl = `${host}${normalizedPath}${isEn ? "?lang=en" : ""}`;
-        const arUrl = `${host}${normalizedPath}`;
-        const enUrl = `${host}${normalizedPath}?lang=en`;
-        const xDefaultUrl = `${host}${normalizedPath}`;
-        const currentUrl = `${host}${pathname}${isEn ? "?lang=en" : ""}`;
+        // Define absolute SECURE production URLs specifically for SEO crawlers (pointing strictly to https://qrytube.com)
+        const canonicalUrl = `https://qrytube.com${normalizedPath}${isEn ? "?lang=en" : ""}`;
+        const arUrl = `https://qrytube.com${normalizedPath}`;
+        const enUrl = `https://qrytube.com${normalizedPath}?lang=en`;
+        const xDefaultUrl = `https://qrytube.com${normalizedPath}`;
+        const currentUrl = `https://qrytube.com${pathname}${isEn ? "?lang=en" : ""}`;
 
-        // Safely replace canonical and alternate hreflang tags dynamically based on visited path details
+        // Replace domains and hostnames for developer preview and asset loading first
         let dynamicContent = content;
+        dynamicContent = dynamicContent.replaceAll("https://qrytube.com", host);
+        dynamicContent = dynamicContent.replaceAll("https://qrytubee.essamelmansy69.workers.dev", host);
+
+        // Safely replace canonical, alternate hreflang and OpenGraph tags dynamically with absolute secure production domain https://qrytube.com
         dynamicContent = dynamicContent.replace(
           /<link rel="canonical" href="[^"]*"\s*\/?>/,
           `<link rel="canonical" href="${canonicalUrl}" />`
@@ -237,10 +242,6 @@ async function startServer() {
           /<meta property="og:url" content="[^"]*"\s*\/?>/,
           `<meta property="og:url" content="${currentUrl}" />`
         );
-
-        // Replace domains and hostnames
-        dynamicContent = dynamicContent.replaceAll("https://qrytube.com", host);
-        dynamicContent = dynamicContent.replaceAll("https://qrytubee.essamelmansy69.workers.dev", host);
 
         res.setHeader("Content-Type", "text/html; charset=utf-8");
         res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");

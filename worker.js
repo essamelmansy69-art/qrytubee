@@ -700,13 +700,19 @@ export default {
           }
 
           const normalizedPath = pathname === '/' ? '' : pathname;
-          const canonicalUrl = `${origin}${normalizedPath}${isEn ? '?lang=en' : ''}`;
-          const arUrl = `${origin}${normalizedPath}`;
-          const enUrl = `${origin}${normalizedPath}?lang=en`;
-          const xDefaultUrl = `${origin}${normalizedPath}`;
-          const currentUrl = `${origin}${pathname}${isEn ? '?lang=en' : ''}`;
+          
+          // Define absolute SECURE production URLs specifically for SEO crawlers (pointing strictly to https://qrytube.com)
+          const canonicalUrl = `https://qrytube.com${normalizedPath}${isEn ? '?lang=en' : ''}`;
+          const arUrl = `https://qrytube.com${normalizedPath}`;
+          const enUrl = `https://qrytube.com${normalizedPath}?lang=en`;
+          const xDefaultUrl = `https://qrytube.com${normalizedPath}`;
+          const currentUrl = `https://qrytube.com${pathname}${isEn ? '?lang=en' : ''}`;
 
-          // Replace canonical, hreflang, and og:url dynamically based on visited path details
+          // Replace domains and hostnames for general assets/development references first
+          htmlText = htmlText.replaceAll('https://qrytube.com', origin);
+          htmlText = htmlText.replaceAll('https://qrytubee.essamelmansy69.workers.dev', origin);
+
+          // Safely replace canonical, hreflang, and og:url dynamically with absolute secure production domain https://qrytube.com
           htmlText = htmlText.replace(
             /<link rel="canonical" href="[^"]*"\s*\/?>/,
             `<link rel="canonical" href="${canonicalUrl}" />`
@@ -727,10 +733,6 @@ export default {
             /<meta property="og:url" content="[^"]*"\s*\/?>/,
             `<meta property="og:url" content="${currentUrl}" />`
           );
-
-          // Replace domains and hostnames
-          htmlText = htmlText.replaceAll('https://qrytube.com', origin);
-          htmlText = htmlText.replaceAll('https://qrytubee.essamelmansy69.workers.dev', origin);
           
           return new Response(htmlText, {
             status: response.status,
