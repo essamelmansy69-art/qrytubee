@@ -191,7 +191,13 @@ export default {
     // 2.5 Serve legal and meta pages for AdSense compliance
     if (pathname === '/privacy' || pathname === '/terms' || pathname === '/about' || pathname === '/contact') {
       const queryLang = url.searchParams.get('lang');
-      const isEn = queryLang === 'en';
+      let isEn = queryLang === 'en';
+      if (!queryLang) {
+        // If there's no explicit lang query parameter, detect via Accept-Language header
+        const acceptLang = request.headers.get('Accept-Language') || '';
+        const arabicMatch = acceptLang.match(/ar([;,-]|$)/i);
+        isEn = !arabicMatch; // If no Arabic preference found, default to English for foreigners
+      }
       
       let title = '';
       let contentHtml = '';

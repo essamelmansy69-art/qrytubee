@@ -50,8 +50,14 @@ export default function App() {
 
     // Detect visitor's language
     try {
-      const browserLang = navigator.language || (navigator as any).userLanguage || '';
-      if (browserLang.toLowerCase().startsWith('en')) {
+      const systemLanguages = navigator.languages || [];
+      const hasArabicPreference = systemLanguages.some(l => l.toLowerCase().startsWith('ar'));
+      const mainBrowserLang = (navigator.language || (navigator as any).userLanguage || '').toLowerCase();
+      
+      if (hasArabicPreference || mainBrowserLang.startsWith('ar')) {
+        return 'ar';
+      } else {
+        // Default to English for foreigners (any non-Arabic language)
         return 'en';
       }
     } catch (e) {
