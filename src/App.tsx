@@ -29,6 +29,7 @@ import {
 import { motion } from 'motion/react';
 import { translations } from './translations';
 import FooterView from './components/FooterView';
+import QrytubeLogo from './components/QrytubeLogo';
 
 const QRGenerator = React.lazy(() => import('./components/QRGenerator'));
 const ArticlesView = React.lazy(() => import('./components/ArticlesView'));
@@ -548,9 +549,7 @@ export default function App() {
             className="flex items-center gap-2.5 cursor-pointer hover:opacity-90 transition-opacity text-left outline-none border-none bg-transparent p-0"
             id="header_logo_home_btn"
           >
-            <span className="p-2.5 bg-red-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-red-500/20 glow-youtube">
-              <Youtube size={22} />
-            </span>
+            <QrytubeLogo size={42} />
             <div className={`flex flex-col ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
               <h1 className="text-md sm:text-lg font-extrabold font-arabic text-gray-900 tracking-tight leading-none">
                 {t.appTitle}

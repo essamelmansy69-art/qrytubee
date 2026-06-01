@@ -4,8 +4,8 @@
  */
 
 import React from 'react';
-import { Youtube } from 'lucide-react';
 import { translations } from '../translations';
+import QrytubeLogo from './QrytubeLogo';
 
 interface FooterViewProps {
   lang: 'ar' | 'en';
@@ -23,9 +23,7 @@ export default function FooterView({ lang, onNavigate }: FooterViewProps) {
           {/* Column 1: Branding block */}
           <div className="md:col-span-7 space-y-4">
             <div className={`flex items-center gap-2.5 ${lang === 'ar' ? 'justify-end' : 'justify-start'}`}>
-              <span className="p-2.5 bg-red-600/90 text-white rounded-2xl flex items-center justify-center">
-                <Youtube size={18} />
-              </span>
+              <QrytubeLogo size={32} />
               <span className="text-lg font-bold font-arabic text-white">QR Deep Linker for Creators</span>
             </div>
             <p className="text-xs text-slate-300 max-w-lg leading-relaxed font-arabic">
