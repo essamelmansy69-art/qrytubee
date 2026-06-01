@@ -132,9 +132,10 @@ export default function App() {
       document.querySelectorAll('link[hreflang]').forEach(el => el.remove());
       const baseDomain = 'https://qrytube.com';
       const pathSuffix = activeTab === 'generator' ? '' : `/${activeTab}`;
-      const arPath = pathSuffix === '' ? `${baseDomain}/` : `${baseDomain}${pathSuffix}`;
+      const canonicalPath = pathSuffix === '' ? `${baseDomain}/` : `${baseDomain}${pathSuffix}`;
+      const arPath = pathSuffix === '' ? `${baseDomain}/?lang=ar` : `${baseDomain}${pathSuffix}?lang=ar`;
       const enPath = pathSuffix === '' ? `${baseDomain}/?lang=en` : `${baseDomain}${pathSuffix}?lang=en`;
-      const defPath = arPath;
+      const defPath = canonicalPath;
 
       // 1. Alternate Arabic
       const arLink = document.createElement('link');
@@ -164,7 +165,7 @@ export default function App() {
         canonicalEl.setAttribute('rel', 'canonical');
         document.head.appendChild(canonicalEl);
       }
-      canonicalEl.setAttribute('href', lang === 'en' ? enPath : arPath);
+      canonicalEl.setAttribute('href', defPath);
     } catch (_) {}
 
     // Update URL query parameters based on language without page reload
@@ -173,7 +174,7 @@ export default function App() {
       if (lang === 'en') {
         url.searchParams.set('lang', 'en');
       } else {
-        url.searchParams.delete('lang');
+        url.searchParams.set('lang', 'ar');
       }
       
       // Keep state clean and safe
@@ -191,7 +192,7 @@ export default function App() {
     try {
       const currentPath = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
       // Include the language parameter in the target path during transitions so it persists if active
-      const langParam = lang === 'en' ? '?lang=en' : '';
+      const langParam = lang === 'en' ? '?lang=en' : '?lang=ar';
       const targetBase = activeTab === 'generator' ? '/' : `/${activeTab}`;
       const targetPath = targetBase + langParam;
       

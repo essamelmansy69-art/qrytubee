@@ -700,13 +700,14 @@ export default {
           }
 
           const normalizedPath = pathname === '/' ? '' : pathname;
+          const baseSuffix = normalizedPath || '/';
           
           // Define absolute SECURE production URLs specifically for SEO crawlers (pointing strictly to https://qrytube.com)
-          const canonicalUrl = `https://qrytube.com${normalizedPath}${isEn ? '?lang=en' : ''}`;
-          const arUrl = `https://qrytube.com${normalizedPath}`;
-          const enUrl = `https://qrytube.com${normalizedPath}?lang=en`;
-          const xDefaultUrl = `https://qrytube.com${normalizedPath}`;
-          const currentUrl = `https://qrytube.com${pathname}${isEn ? '?lang=en' : ''}`;
+          const canonicalUrl = `https://qrytube.com${baseSuffix}`;
+          const arUrl = `https://qrytube.com${baseSuffix}?lang=ar`;
+          const enUrl = `https://qrytube.com${baseSuffix}?lang=en`;
+          const xDefaultUrl = `https://qrytube.com${baseSuffix}`;
+          const currentUrl = `https://qrytube.com${pathname || '/'}${isEn ? '?lang=en' : '?lang=ar'}`;
 
           // Replace domains and hostnames for general assets/development references first
           htmlText = htmlText.replaceAll('https://qrytube.com', origin);
