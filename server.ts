@@ -382,6 +382,33 @@ async function startServer() {
         dynamicContent = dynamicContent.replaceAll("https://qrytube.com", host);
         dynamicContent = dynamicContent.replaceAll("https://qrytubee.essamelmansy69.workers.dev", host);
 
+        // 1. Dynamic Preloads Generation to optimize Critical Request Chains
+        const jsRegex = /<script\s+[^>]*src="([^"]+\.js)"[^>]*>/gi;
+        const cssRegex = /<link\s+[^>]*href="([^"]+\.css)"[^>]*>/gi;
+        let preloads = "";
+        let match;
+        
+        while ((match = jsRegex.exec(content)) !== null) {
+          const url = match[1];
+          preloads += `\n    <link rel="preload" href="${url}" as="script" crossorigin />`;
+        }
+        while ((match = cssRegex.exec(content)) !== null) {
+          const url = match[1];
+          preloads += `\n    <link rel="preload" href="${url}" as="style" />`;
+        }
+        if (preloads) {
+          dynamicContent = dynamicContent.replace("</head>", `${preloads}\n  </head>`);
+        }
+
+        // 2. Resolve Render-blocking CSS by establishing media="print" with immediate media="all" restoration on load
+        dynamicContent = dynamicContent.replace(
+          /<link\s+([^>]*href="([^"]+\.css)"[^>]*rel="stylesheet"[^>]*|[^>]*rel="stylesheet"[^>]*href="([^"]+\.css)"[^>]*)\/?>/gi,
+          (m, p1, p2, p3) => {
+            const cssUrl = p2 || p3;
+            return `<link rel="stylesheet" href="${cssUrl}" media="print" onload="this.media='all'" />`;
+          }
+        );
+
         // Safely replace canonical, alternate hreflang and OpenGraph tags dynamically with absolute secure production domain https://qrytube.com
         dynamicContent = dynamicContent.replace(
           /<link rel="canonical" href="[^"]*"\s*\/?>/,
