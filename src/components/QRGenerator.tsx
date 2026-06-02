@@ -32,7 +32,8 @@ import {
   Music,
   UploadCloud,
   Trash2,
-  FileText
+  FileText,
+  BarChart3
 } from 'lucide-react';
 import { QRConfig, QRStyle } from '../types';
 import { parseYoutubeUrl, buildDeepLink, convertUrlToDeepLink } from '../utils';
@@ -47,7 +48,13 @@ const COLOR_TEMPLATES = [
   { name: 'أسود مونوكروم', dark: '#000000', light: '#FFFFFF', eye: '#000000' },
 ];
 
-export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
+export default function QRGenerator({ 
+  lang = 'ar',
+  onNavigateToAnalytics
+}: { 
+  lang?: 'ar' | 'en';
+  onNavigateToAnalytics?: () => void;
+}) {
   const t = translations[lang];
 
   const getColorTemplateName = (name: string) => {
@@ -483,13 +490,42 @@ export default function QRGenerator({ lang = 'ar' }: { lang?: 'ar' | 'en' }) {
             <span>{t.btnDownloadPdf}</span>
           </button>
         </div>
+
+        {/* Premium Analytics Quick Launcher Banner */}
+        {onNavigateToAnalytics && (
+          <div className="bg-gradient-to-br from-red-650 to-slate-950 text-white rounded-2xl p-5 border border-slate-800 shadow-lg relative overflow-hidden flex flex-col gap-3.5 animate-fade-in mt-4" id="workspace_analytics_banner">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full blur-xl pointer-events-none" />
+            <div className="relative flex items-start gap-3">
+              <div className="p-2 bg-white/10 rounded-xl shrink-0 mt-0.5">
+                <BarChart3 size={18} className="text-white" />
+              </div>
+              <div className="space-y-1 min-w-0">
+                <h4 className="text-xs sm:text-xs font-black font-arabic tracking-tight text-white flex items-center gap-1.5 leading-tight">
+                  {lang === 'ar' ? 'نظام تحليلات Qrytube الفوري' : 'Qrytube Live Analytics'}
+                  <span className="px-1.5 py-0.5 bg-red-500/35 text-red-200 border border-red-500/20 text-[8px] font-bold rounded-sm animate-pulse shrink-0">LIVE</span>
+                </h4>
+                <p className="text-[11px] text-slate-300 font-arabic leading-relaxed">
+                  {lang === 'ar' ? 'تتبع زيارات رموز الـ QR ومسحات الحملات المنشورة ونوع الأجهزة لحظة بلحظة.' : 'Monitor scanner activity, click-through paths, and device kinds dynamically.'}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={onNavigateToAnalytics}
+              className="w-full h-9 bg-white hover:bg-slate-50 text-slate-900 transition-all font-arabic text-xs font-black rounded-lg border border-white flex items-center justify-center gap-1.5 cursor-pointer shadow-xs select-none"
+              id="workspace_analytics_launch_btn"
+              type="button"
+            >
+              <span>{lang === 'ar' ? 'استكشف لوحة التحليلات 📊' : 'Browse Analytics 📊'}</span>
+            </button>
+          </div>
+        )}
       </div>
     );
   };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full max-w-7xl mx-auto" id="qr_main_layout">
-      
+
       {/* LEFT PANEL: INPUTS & PREVIEW (8 COLS) */}
       <div className="lg:col-span-8 space-y-6" id="qr_left_panel">
         

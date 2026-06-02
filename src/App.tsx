@@ -35,6 +35,7 @@ const QRGenerator = React.lazy(() => import('./components/QRGenerator'));
 const ArticlesView = React.lazy(() => import('./components/ArticlesView'));
 const LegalView = React.lazy(() => import('./components/LegalView'));
 const FAQView = React.lazy(() => import('./components/FAQView'));
+const AnalyticsView = React.lazy(() => import('./components/AnalyticsView'));
 
 export default function App() {
   const [lang, setLang] = useState<'ar' | 'en'>(() => {
@@ -67,7 +68,7 @@ export default function App() {
     return 'ar';
   });
 
-  const [activeTab, setActiveTab] = useState<'generator' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact'>(() => {
+  const [activeTab, setActiveTab] = useState<'generator' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact' | 'analytics'>(() => {
     try {
       const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
       if (path === 'terms') return 'terms';
@@ -75,6 +76,7 @@ export default function App() {
       if (path === 'about') return 'about';
       if (path === 'contact') return 'contact';
       if (path === 'articles') return 'articles';
+      if (path === 'analytics') return 'analytics';
     } catch (_) {}
     return 'generator';
   });
@@ -208,7 +210,7 @@ export default function App() {
         setActiveTab(e.state.tab);
       } else {
         const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
-        if (['terms', 'privacy', 'about', 'contact', 'articles'].includes(path)) {
+        if (['terms', 'privacy', 'about', 'contact', 'articles', 'analytics'].includes(path)) {
           setActiveTab(path as any);
         } else {
           setActiveTab('generator');
@@ -560,10 +562,7 @@ export default function App() {
               </span>
             </div>
           </button>
-
-          {/* Quick navigation links removed to keep interface clean */}
-          <div className="hidden md:block" id="main_navigation"></div>
-
+          
           {/* Right badge / Action badge & Language Toggle */}
           <div className="flex items-center gap-3">
             {/* Language Toggle Button */}
@@ -655,7 +654,7 @@ export default function App() {
                 </div>
               </div>
             }>
-              <QRGenerator lang={lang} />
+              <QRGenerator lang={lang} onNavigateToAnalytics={() => setActiveTab('analytics')} />
             </React.Suspense>
           </div>
         )}
@@ -708,7 +707,15 @@ export default function App() {
           </div>
         )}
 
-        {['terms', 'privacy', 'about', 'contact', 'articles'].includes(activeTab) && (
+        {activeTab === 'analytics' && (
+          <div className="transition-opacity duration-300 animate-fade-in">
+            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
+              <AnalyticsView lang={lang} />
+            </React.Suspense>
+          </div>
+        )}
+
+        {['terms', 'privacy', 'about', 'contact', 'articles', 'analytics'].includes(activeTab) && (
           <div className="text-center pt-8">
             <button
               onClick={() => setActiveTab('generator')}

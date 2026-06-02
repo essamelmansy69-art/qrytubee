@@ -12,9 +12,169 @@ async function startServer() {
   app.use(express.json());
 
   // API MIDDLEWARE / ROUTES
+  // Simple in-memory storage for analytics, flushed to analytics.json asynchronously
+  const ANALYTICS_FILE = path.join(process.cwd(), "analytics.json");
+  interface ScanSample {
+    date: string;
+    device: string;
+  }
+  interface CodeAnalytics {
+    total: number;
+    target: string;
+    platform: string;
+    scans: ScanSample[];
+  }
+  interface RecentScan {
+    timestamp: string;
+    tid: string;
+    target: string;
+    platform: string;
+    device: string;
+  }
+  interface AnalyticsStore {
+    totalScans: number;
+    scansByPlatform: Record<string, number>;
+    scansByDevice: Record<string, number>;
+    scansByCode: Record<string, CodeAnalytics>;
+    recentScans: RecentScan[];
+  }
+
+  let analyticsData: AnalyticsStore = {
+    totalScans: 0,
+    scansByPlatform: {},
+    scansByDevice: {},
+    scansByCode: {},
+    recentScans: []
+  };
+
+  try {
+    if (fs.existsSync(ANALYTICS_FILE)) {
+      const saved = fs.readFileSync(ANALYTICS_FILE, "utf8");
+      if (saved) {
+        analyticsData = JSON.parse(saved);
+      }
+    }
+  } catch (e) {
+    console.error("Failed to load analytics.json. Starting fresh.", e);
+  }
+
+  // Helper to save analytics asynchronously (throttled to avoid I/O bottlenecks)
+  let saveTimeout: NodeJS.Timeout | null = null;
+  function scheduleSave() {
+    if (saveTimeout) return;
+    saveTimeout = setTimeout(() => {
+      fs.writeFile(ANALYTICS_FILE, JSON.stringify(analyticsData, null, 2), "utf8", (err) => {
+        if (err) console.error("Error writing analytics file:", err);
+        saveTimeout = null;
+      });
+    }, 1000); // Wait 1 second before flushing to disk
+  }
+
   // 1. Health check
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
+  });
+
+  // 2. Track scan event
+  app.all("/api/track-scan", (req, res) => {
+    const tid = (req.query.tid || req.body?.tid || "").toString() || "unknown";
+    const target = (req.query.r || req.body?.r || "").toString() || "https://youtube.com";
+    const platform = (req.query.platform || req.body?.platform || "youtube").toString();
+    
+    // Parse user agent for device categorisation
+    const userAgent = (req.headers["user-agent"] || "").toLowerCase();
+    let device = "Desktop";
+    if (userAgent.includes("iphone") || userAgent.includes("ipad") || userAgent.includes("ipod")) {
+      device = "iOS";
+    } else if (userAgent.includes("android")) {
+      device = "Android";
+    }
+
+    const timestamp = new Date().toISOString();
+    const dateStr = timestamp.split("T")[0]; // YYYY-MM-DD
+
+    // Ensure state collections are ready
+    if (!analyticsData.scansByPlatform) analyticsData.scansByPlatform = {};
+    if (!analyticsData.scansByDevice) analyticsData.scansByDevice = {};
+    if (!analyticsData.scansByCode) analyticsData.scansByCode = {};
+    if (!analyticsData.recentScans) analyticsData.recentScans = [];
+
+    // Update global aggregates
+    analyticsData.totalScans = (analyticsData.totalScans || 0) + 1;
+    analyticsData.scansByPlatform[platform] = (analyticsData.scansByPlatform[platform] || 0) + 1;
+    analyticsData.scansByDevice[device] = (analyticsData.scansByDevice[device] || 0) + 1;
+
+    // Update code-specific analytics
+    if (!analyticsData.scansByCode[tid]) {
+      analyticsData.scansByCode[tid] = {
+        total: 0,
+        target: target,
+        platform: platform,
+        scans: []
+      };
+    }
+    
+    const codeObj = analyticsData.scansByCode[tid];
+    codeObj.total++;
+    codeObj.target = target;
+    codeObj.platform = platform;
+    if (!codeObj.scans) codeObj.scans = [];
+    
+    codeObj.scans.push({
+      date: dateStr,
+      device: device
+    });
+    if (codeObj.scans.length > 50) {
+      codeObj.scans.shift();
+    }
+
+    // Add to recent global scans (keep last 30 recent)
+    analyticsData.recentScans.unshift({
+      timestamp,
+      tid,
+      target,
+      platform,
+      device
+    });
+    if (analyticsData.recentScans.length > 30) {
+      analyticsData.recentScans.pop();
+    }
+
+    scheduleSave();
+
+    res.status(200).json({ success: true, trackingId: tid, timestamp });
+  });
+
+  // 3. Retrieve analytics summary
+  app.get("/api/analytics", (req, res) => {
+    const limit = parseInt(req.query.limit as string) || 12;
+    
+    // Sort all tracked codes by usage
+    const topCodes = Object.entries(analyticsData.scansByCode || {})
+      .map(([id, info]) => ({
+        id,
+        total: info.total,
+        target: info.target,
+        platform: info.platform
+      }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, limit);
+
+    // Filter specific code if requested
+    const specificCodeId = req.query.tid as string;
+    let specificCodeData = null;
+    if (specificCodeId && analyticsData.scansByCode && analyticsData.scansByCode[specificCodeId]) {
+      specificCodeData = analyticsData.scansByCode[specificCodeId];
+    }
+
+    res.json({
+      totalScans: analyticsData.totalScans || 0,
+      scansByPlatform: analyticsData.scansByPlatform || {},
+      scansByDevice: analyticsData.scansByDevice || {},
+      recentScans: (analyticsData.recentScans || []).slice(0, 12),
+      topCodes,
+      specificCode: specificCodeData
+    });
   });
 
   // Dynamic Sitemap Route
