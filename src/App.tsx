@@ -74,9 +74,19 @@ export default function App() {
       if (path === 'privacy') return 'privacy';
       if (path === 'about') return 'about';
       if (path === 'contact') return 'contact';
-      if (path === 'articles') return 'articles';
+      if (path === 'articles' || path.startsWith('articles/')) return 'articles';
     } catch (_) {}
     return 'generator';
+  });
+
+  const [selectedArticleId, setSelectedArticleId] = useState<string | null>(() => {
+    try {
+      const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
+      if (path.startsWith('articles/')) {
+        return path.replace('articles/', '');
+      }
+    } catch (_) {}
+    return null;
   });
 
   useEffect(() => {
@@ -193,25 +203,38 @@ export default function App() {
       const currentPath = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
       // Include the language parameter in the target path during transitions so it persists if active
       const langParam = lang === 'en' ? '?lang=en' : '?lang=ar';
-      const targetBase = activeTab === 'generator' ? '/' : `/${activeTab}`;
+      
+      let targetBase = activeTab === 'generator' ? '/' : `/${activeTab}`;
+      if (activeTab === 'articles' && selectedArticleId) {
+        targetBase = `/articles/${selectedArticleId}`;
+      }
       const targetPath = targetBase + langParam;
       
       if (currentPath !== targetBase.replace(/^\/|\/$/g, '')) {
-        window.history.pushState({ tab: activeTab }, '', targetPath);
+        window.history.pushState({ tab: activeTab, articleId: selectedArticleId }, '', targetPath);
       }
     } catch (_) {}
-  }, [activeTab, lang]);
+  }, [activeTab, lang, selectedArticleId]);
 
   useEffect(() => {
     const handlePopState = (e: PopStateEvent) => {
       if (e.state && e.state.tab) {
         setActiveTab(e.state.tab);
+        setSelectedArticleId(e.state.articleId || null);
       } else {
         const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
-        if (['terms', 'privacy', 'about', 'contact', 'articles'].includes(path)) {
+        if (['terms', 'privacy', 'about', 'contact'].includes(path)) {
           setActiveTab(path as any);
+          setSelectedArticleId(null);
+        } else if (path === 'articles') {
+          setActiveTab('articles');
+          setSelectedArticleId(null);
+        } else if (path.startsWith('articles/')) {
+          setActiveTab('articles');
+          setSelectedArticleId(path.replace('articles/', ''));
         } else {
           setActiveTab('generator');
+          setSelectedArticleId(null);
         }
       }
       
@@ -278,6 +301,9 @@ export default function App() {
   const handleNavClick = (tab: 'generator' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact', event: React.MouseEvent) => {
     event.preventDefault();
     setActiveTab(tab);
+    if (tab === 'articles') {
+      setSelectedArticleId(null);
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -668,7 +694,11 @@ export default function App() {
         {activeTab === 'articles' && (
           <div className="transition-opacity duration-300">
             <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
-              <ArticlesView lang={lang} />
+              <ArticlesView 
+                lang={lang} 
+                selectedArticleId={selectedArticleId}
+                onSelectArticle={(id) => setSelectedArticleId(id)}
+              />
             </React.Suspense>
           </div>
         )}

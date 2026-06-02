@@ -5,14 +5,16 @@ import { ArrowLeft, ArrowRight, Calendar, Clock, BookOpen, Share2 } from 'lucide
 
 interface ArticlesViewProps {
   lang: 'ar' | 'en';
+  selectedArticleId: string | null;
+  onSelectArticle: (id: string | null) => void;
 }
 
-export default function ArticlesView({ lang }: ArticlesViewProps) {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+export default function ArticlesView({ lang, selectedArticleId, onSelectArticle }: ArticlesViewProps) {
+  const [copied, setCopied] = useState(false);
   const t = translations[lang];
   const articles = articlesData[lang];
 
-  const selectedArticle = articles.find(a => a.id === selectedId);
+  const selectedArticle = articles.find(a => a.id.toLowerCase() === selectedArticleId?.toLowerCase());
 
   // Simple Markdown content renderer for articles to avoid external parser bugs
   const renderMarkdown = (text: string) => {
@@ -90,7 +92,7 @@ export default function ArticlesView({ lang }: ArticlesViewProps) {
         
         {/* Navigation bar to return */}
         <button
-          onClick={() => setSelectedId(null)}
+          onClick={() => onSelectArticle(null)}
           className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-600 hover:text-red-600 transition-colors mb-6 cursor-pointer"
           type="button"
           id="back_to_blog_btn"
@@ -124,6 +126,38 @@ export default function ArticlesView({ lang }: ArticlesViewProps) {
           </div>
         </div>
 
+        {/* Dynamic Share URL Bar */}
+        <div className="bg-slate-50 border border-slate-200/60 rounded-2xl p-4 mb-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-slate-700">
+          <div className="flex items-center gap-2 overflow-hidden w-full sm:w-auto">
+            <Share2 size={16} className="text-slate-500 shrink-0" />
+            <span className="text-xs font-bold font-arabic shrink-0 text-slate-850">
+              {lang === 'ar' ? 'رابط المقال المخصص للسيو:' : 'SEO Targeted Link:'}
+            </span>
+            <span className="text-xs font-mono bg-slate-100 px-2.5 py-1 rounded truncate text-slate-600 select-all" dir="ltr">
+              {`${window.location.origin}/articles/${selectedArticle.id}`}
+            </span>
+          </div>
+          <button
+            onClick={() => {
+              const url = `${window.location.origin}/articles/${selectedArticle.id}`;
+              navigator.clipboard.writeText(url).then(() => {
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              });
+            }}
+            type="button"
+            className={`w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold font-arabic transition-all duration-150 cursor-pointer shrink-0 ${
+              copied
+                ? 'bg-emerald-600 text-white shadow-emerald-100 shadow-md scale-98'
+                : 'bg-slate-800 hover:bg-slate-900 text-white shadow-xs'
+            }`}
+          >
+            {copied 
+              ? (lang === 'ar' ? '✓ تم نسخ الرابط' : '✓ Link Copied') 
+              : (lang === 'ar' ? 'نسخ رابط المقال' : 'Copy Article Link')}
+          </button>
+        </div>
+
         {/* Decorative banner */}
         <div className="h-1 bg-gradient-to-r from-red-500 via-amber-400 to-blue-500 mb-8 rounded-full" />
 
@@ -144,7 +178,7 @@ export default function ArticlesView({ lang }: ArticlesViewProps) {
           </div>
           <button
             onClick={() => {
-              setSelectedId(null);
+              onSelectArticle(null);
               // scroll to generator
               const workspace = document.getElementById('main_workspace');
               if (workspace) workspace.scrollIntoView({ behavior: 'smooth' });
@@ -179,7 +213,7 @@ export default function ArticlesView({ lang }: ArticlesViewProps) {
           return (
             <article
               key={article.id}
-              onClick={() => setSelectedId(article.id)}
+              onClick={() => onSelectArticle(article.id)}
               className={`bg-white rounded-3xl p-6 border transition-all cursor-pointer flex flex-col justify-between group overflow-hidden relative ${
                 isAudit 
                   ? 'border-emerald-200 hover:border-emerald-300 shadow-xs hover:shadow bg-emerald-50/10' 
