@@ -36,7 +36,6 @@ export default function FooterView({ lang, onNavigate }: FooterViewProps) {
             <span className="text-xs font-bold text-white uppercase block">{t.quickLinks}</span>
             <div className="flex flex-col gap-2 text-xs items-start">
               <a href="/" onClick={(e) => onNavigate('generator', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.navGenerator}</a>
-              <a href="/analytics" onClick={(e) => onNavigate('analytics', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{lang === 'ar' ? 'التحليلات الذكية 📊' : 'Smart Analytics 📊'}</a>
               <a href="/articles" onClick={(e) => onNavigate('articles', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.navArticles}</a>
               <a href="/faq" onClick={(e) => onNavigate('faq', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.faqDetailsLabel}</a>
               <a href="/about" onClick={(e) => onNavigate('about', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.navAbout}</a>
