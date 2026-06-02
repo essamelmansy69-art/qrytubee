@@ -390,7 +390,8 @@ async function startServer() {
         
         while ((match = jsRegex.exec(content)) !== null) {
           const url = match[1];
-          preloads += `\n    <link rel="preload" href="${url}" as="script" crossorigin />`;
+          // Use modulepreload for ES6 modules to prevent double-fetching
+          preloads += `\n    <link rel="modulepreload" href="${url}" crossorigin />`;
         }
         while ((match = cssRegex.exec(content)) !== null) {
           const url = match[1];
@@ -400,12 +401,12 @@ async function startServer() {
           dynamicContent = dynamicContent.replace("</head>", `${preloads}\n  </head>`);
         }
 
-        // 2. Resolve Render-blocking CSS by establishing media="print" with immediate media="all" restoration on load
+        // 2. Resolve Render-blocking CSS using preload + onload stylesheet fallback
         dynamicContent = dynamicContent.replace(
           /<link\s+([^>]*href="([^"]+\.css)"[^>]*rel="stylesheet"[^>]*|[^>]*rel="stylesheet"[^>]*href="([^"]+\.css)"[^>]*)\/?>/gi,
           (m, p1, p2, p3) => {
             const cssUrl = p2 || p3;
-            return `<link rel="stylesheet" href="${cssUrl}" media="print" onload="this.media='all'" />`;
+            return `<link rel="stylesheet" href="${cssUrl}" media="all" />`;
           }
         );
 
