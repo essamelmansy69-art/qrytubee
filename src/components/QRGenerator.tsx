@@ -248,7 +248,12 @@ export default function QRGenerator({
   const [logoScale, setLogoScale] = useState<number>(0.18);
   const [logoMargin, setLogoMargin] = useState<boolean>(true);
   const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [isDesktop, setIsDesktop] = useState<boolean>(false);
+  const [isDesktop, setIsDesktop] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 1024;
+    }
+    return false;
+  });
 
   useEffect(() => {
     const handleResize = () => {
@@ -450,6 +455,7 @@ export default function QRGenerator({
   useEffect(() => {
     generateQRCode();
   }, [
+    isDesktop,
     urlInput, 
     deepLinkType, 
     useSmartLink,
@@ -1301,31 +1307,33 @@ export default function QRGenerator({
       </div>
 
       {/* RIGHT PANEL: DESKTOP-ONLY STICKY DESIGN PREVIEW (4 COLS ON DESKTOP, HIDDEN ON MOBILE) */}
-      <div className="hidden lg:block lg:col-span-4 lg:sticky lg:top-24 space-y-6 self-start" id="qr_right_panel">
-        <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-100 flex flex-col items-center gap-5" id="desktop_sticky_preview_card">
-          <h2 className="text-base font-bold font-arabic text-gray-800 text-center flex items-center justify-center gap-1.5">
-            <span>📱 {lang === 'ar' ? 'معاينة حية ومباشرة' : 'Live Design Preview'}</span>
-          </h2>
-          <QRVisualPreview
-            canvasRef={canvasRef}
-            selectedFrame={selectedFrame}
-            frameColor={frameColor}
-            frameTextTop={frameTextTop}
-            frameTextBottom={frameTextBottom}
-            lang={lang}
-            t={t}
-            urlInput={urlInput}
-            urlInfo={urlInfo}
-          />
-          <div className="w-full h-px bg-gray-100 my-1" />
-          <h3 className="text-xs font-bold font-arabic text-gray-500 text-center">
-            📥 {lang === 'ar' ? 'تحميل وحفظ كود الـ QR بدقة عالية' : 'Download High-Res QR Code'}
-          </h3>
-          <div className="w-full space-y-3">
-            {renderActionButtons()}
+      {isDesktop && (
+        <div className="hidden lg:block lg:col-span-4 lg:sticky lg:top-24 space-y-6 self-start" id="qr_right_panel">
+          <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-100 flex flex-col items-center gap-5" id="desktop_sticky_preview_card">
+            <h2 className="text-base font-bold font-arabic text-gray-800 text-center flex items-center justify-center gap-1.5">
+              <span>📱 {lang === 'ar' ? 'معاينة حية ومباشرة' : 'Live Design Preview'}</span>
+            </h2>
+            <QRVisualPreview
+              canvasRef={canvasRef}
+              selectedFrame={selectedFrame}
+              frameColor={frameColor}
+              frameTextTop={frameTextTop}
+              frameTextBottom={frameTextBottom}
+              lang={lang}
+              t={t}
+              urlInput={urlInput}
+              urlInfo={urlInfo}
+            />
+            <div className="w-full h-px bg-gray-100 my-1" />
+            <h3 className="text-xs font-bold font-arabic text-gray-500 text-center">
+              📥 {lang === 'ar' ? 'تحميل وحفظ كود الـ QR بدقة عالية' : 'Download High-Res QR Code'}
+            </h3>
+            <div className="w-full space-y-3">
+              {renderActionButtons()}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Mobile-Only Download Actions: positioned at the absolute bottom, visible only on screens smaller than lg */}
       <div className="lg:hidden col-span-1 md:col-span-12 bg-white rounded-3xl p-6 shadow-xs border border-gray-100 mt-2" id="mobile_actions_wrapper">
