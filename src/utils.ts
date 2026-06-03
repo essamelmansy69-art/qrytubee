@@ -245,6 +245,31 @@ export function parseYoutubeUrl(url: string): youtubeUrlInfo {
     };
   }
 
+  // Helper inside parseYoutubeUrl or file scope to check if URL is a valid general website
+  const isValidUrlPattern = (urlStr: string): boolean => {
+    try {
+      const parsed = new URL(
+        urlStr.startsWith('http://') || urlStr.startsWith('https://') || urlStr.startsWith('ftp://') 
+          ? urlStr 
+          : `https://${urlStr}`
+      );
+      const parts = parsed.hostname.split('.');
+      return parts.length >= 2 && parts[parts.length - 1].length >= 2;
+    } catch (_) {
+      return false;
+    }
+  };
+
+  if (isValidUrlPattern(trimmed)) {
+    return {
+      isValid: true,
+      platform: 'other',
+      type: 'unknown',
+      id: trimmed,
+      cleanUrl: trimmed.startsWith('http') || trimmed.startsWith('ftp') ? trimmed : `https://${trimmed}`,
+    };
+  }
+
   // Default unsupported URL is treated as standard fallback
   return {
     isValid: false,

@@ -196,9 +196,9 @@ const QRVisualPreview: React.FC<QRVisualPreviewProps> = ({
         <span className="mt-2 text-[10px] font-bold font-arabic text-slate-505 bg-slate-100/80 px-2 py-0.5 rounded-md">
           💡 {lang === 'ar' ? 'معاينة افتراضية نشطة' : 'Active default preview'}
         </span>
-      ) : (!(urlInfo.isValid && urlInfo.platform !== 'other')) ? (
+      ) : (!urlInfo.isValid) ? (
         <span className="mt-2 text-[10px] font-bold font-arabic text-red-500 bg-red-50 px-2 py-0.5 rounded-md">
-          ⚠️ {lang === 'ar' ? 'الرابط غير مدعوم' : 'Unsupported link'}
+          ⚠️ {lang === 'ar' ? 'الرابط غير صحيح' : 'Invalid Link'}
         </span>
       ) : null}
 
@@ -312,7 +312,7 @@ export default function QRGenerator({
   const formattedDeepLink = buildDeepLink(urlInput, deepLinkType);
 
   const isUrlEmpty = !urlInput.trim();
-  const isUrlValid = isUrlEmpty || (urlInfo.isValid && urlInfo.platform !== 'other');
+  const isUrlValid = isUrlEmpty || urlInfo.isValid;
   const isInvalid = !isUrlValid || isUrlEmpty;
 
 
@@ -381,7 +381,7 @@ export default function QRGenerator({
 
     try {
       const isUrlEmpty = !urlInput.trim();
-      const isUrlValid = isUrlEmpty || (urlInfo.isValid && urlInfo.platform !== 'other');
+      const isUrlValid = isUrlEmpty || urlInfo.isValid;
       const isInvalid = !isUrlValid || isUrlEmpty;
 
       // Draw base QR Code on high-resolution canvas
@@ -611,7 +611,7 @@ export default function QRGenerator({
 
   const renderActionButtons = () => {
     const isUrlEmpty = !urlInput.trim();
-    const isUrlValid = isUrlEmpty || (urlInfo.isValid && urlInfo.platform !== 'other');
+    const isUrlValid = isUrlEmpty || urlInfo.isValid;
     const isInvalid = !isUrlValid || isUrlEmpty;
 
     return (
@@ -850,7 +850,7 @@ export default function QRGenerator({
                 {/* Validation Status Badge and Warning Banner */}
                 {(() => {
                   const isUrlEmpty = !urlInput.trim();
-                  const isUrlValid = isUrlEmpty || (urlInfo.isValid && urlInfo.platform !== 'other');
+                  const isUrlValid = isUrlEmpty || urlInfo.isValid;
                   
                   if (!isUrlValid) {
                     return (
@@ -868,7 +868,8 @@ export default function QRGenerator({
                       youtube: 'YouTube',
                       facebook: 'Facebook',
                       instagram: 'Instagram',
-                      tiktok: 'TikTok'
+                      tiktok: 'TikTok',
+                      other: lang === 'ar' ? 'موقع إلكتروني عام' : 'General Website'
                     };
                     const matchedPlatform = platformLabels[urlInfo.platform] || urlInfo.platform;
                     return (
