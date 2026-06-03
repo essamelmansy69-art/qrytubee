@@ -181,6 +181,63 @@ async function startServer() {
   app.get("/sitemap.xml", (req, res) => {
     const protocol = req.headers["x-forwarded-proto"] || req.protocol || "https";
     const host = `${protocol}://${req.get("host")}`;
+    
+    const bilingualArticles = [
+      "deep-links-growth",
+      "youtube-seo-secrets",
+      "viral-content-strategy",
+      "youtube-analytics-guide",
+      "website-seo-audit",
+      "create-youtube-qr-in-app",
+      "how-to-convert-youtube-to-deep-link",
+      "solve-social-in-app-browser-issue",
+      "increase-views-tiktok-instagram",
+      "best-free-youtube-qr-generator",
+      "increase-ad-ctr-with-qr-codes",
+      "seo-2026-ultimate-guide",
+      "generate-smart-link-bypass-sandbox",
+      "smart-link-strategies-2026"
+    ];
+    
+    const arabicOnlyArticles = [
+      "seo-2026-comprehensive-marketing"
+    ];
+
+    let articleUrls = "";
+    for (const id of bilingualArticles) {
+      articleUrls += `
+  <url>
+    <loc>${host}/articles/${id}</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="${host}/articles/${id}" />
+    <xhtml:link rel="alternate" hreflang="en" href="${host}/articles/${id}?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/articles/${id}" />
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>${host}/articles/${id}?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="${host}/articles/${id}" />
+    <xhtml:link rel="alternate" hreflang="en" href="${host}/articles/${id}?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/articles/${id}" />
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>`;
+    }
+    
+    for (const id of arabicOnlyArticles) {
+      articleUrls += `
+  <url>
+    <loc>${host}/articles/${id}</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="${host}/articles/${id}" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/articles/${id}" />
+    <lastmod>2026-06-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>`;
+    }
+
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <!-- 1. Deep Linker (Arabic) -->
@@ -189,7 +246,7 @@ async function startServer() {
     <xhtml:link rel="alternate" hreflang="ar" href="${host}/" />
     <xhtml:link rel="alternate" hreflang="en" href="${host}/?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="${host}/" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -199,7 +256,7 @@ async function startServer() {
     <xhtml:link rel="alternate" hreflang="ar" href="${host}/" />
     <xhtml:link rel="alternate" hreflang="en" href="${host}/?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="${host}/" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -209,7 +266,7 @@ async function startServer() {
     <xhtml:link rel="alternate" hreflang="ar" href="${host}/about" />
     <xhtml:link rel="alternate" hreflang="en" href="${host}/about?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="${host}/about" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -219,7 +276,7 @@ async function startServer() {
     <xhtml:link rel="alternate" hreflang="ar" href="${host}/about" />
     <xhtml:link rel="alternate" hreflang="en" href="${host}/about?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="${host}/about" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -229,7 +286,7 @@ async function startServer() {
     <xhtml:link rel="alternate" hreflang="ar" href="${host}/contact" />
     <xhtml:link rel="alternate" hreflang="en" href="${host}/contact?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="${host}/contact" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -239,7 +296,7 @@ async function startServer() {
     <xhtml:link rel="alternate" hreflang="ar" href="${host}/contact" />
     <xhtml:link rel="alternate" hreflang="en" href="${host}/contact?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="${host}/contact" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -249,7 +306,7 @@ async function startServer() {
     <xhtml:link rel="alternate" hreflang="ar" href="${host}/privacy" />
     <xhtml:link rel="alternate" hreflang="en" href="${host}/privacy?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="${host}/privacy" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -259,7 +316,7 @@ async function startServer() {
     <xhtml:link rel="alternate" hreflang="ar" href="${host}/privacy" />
     <xhtml:link rel="alternate" hreflang="en" href="${host}/privacy?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="${host}/privacy" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -269,7 +326,7 @@ async function startServer() {
     <xhtml:link rel="alternate" hreflang="ar" href="${host}/articles" />
     <xhtml:link rel="alternate" hreflang="en" href="${host}/articles?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="${host}/articles" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -279,7 +336,7 @@ async function startServer() {
     <xhtml:link rel="alternate" hreflang="ar" href="${host}/articles" />
     <xhtml:link rel="alternate" hreflang="en" href="${host}/articles?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="${host}/articles" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -289,7 +346,7 @@ async function startServer() {
     <xhtml:link rel="alternate" hreflang="ar" href="${host}/terms" />
     <xhtml:link rel="alternate" hreflang="en" href="${host}/terms?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="${host}/terms" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -299,10 +356,10 @@ async function startServer() {
     <xhtml:link rel="alternate" hreflang="ar" href="${host}/terms" />
     <xhtml:link rel="alternate" hreflang="en" href="${host}/terms?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="${host}/terms" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
-  </url>
+  </url>${articleUrls}
 </urlset>`;
     res.header("Content-Type", "application/xml");
     res.status(200).send(sitemap);
