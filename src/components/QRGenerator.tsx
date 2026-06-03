@@ -49,6 +49,166 @@ const COLOR_TEMPLATES = [
   { name: 'أسود مونوكروم', dark: '#000000', light: '#FFFFFF', eye: '#000000' },
 ];
 
+interface QRVisualPreviewProps {
+  canvasRef: React.RefObject<HTMLCanvasElement | null>;
+  selectedFrame: 'none' | 'scan_me' | 'retro' | 'smartphone' | 'modern_badge';
+  frameColor: string;
+  frameTextTop: string;
+  frameTextBottom: string;
+  lang: 'ar' | 'en';
+  t: any;
+  urlInput: string;
+  urlInfo: any;
+}
+
+const QRVisualPreview: React.FC<QRVisualPreviewProps> = ({
+  canvasRef,
+  selectedFrame,
+  frameColor,
+  frameTextTop,
+  frameTextBottom,
+  lang,
+  t,
+  urlInput,
+  urlInfo,
+}) => {
+  return (
+    <div className="w-full flex flex-col items-center justify-center text-center p-4 sm:p-5 bg-slate-50/40 rounded-2xl border border-gray-100 group relative w-full shadow-xs" id="direct_canvas_container">
+      <span className="text-[10px] font-bold text-slate-605 font-arabic tracking-wider uppercase mb-0.5 block">{t.previewHeading}</span>
+      <h3 className="text-xs font-bold font-arabic text-gray-700 mb-2">{t.finalQrLabel}</h3>
+
+      {/* Square canvas wrapper box ensuring crisp 1:1 rendering on all screens */}
+      {selectedFrame === 'none' ? (
+        <div className="w-36 h-36 min-w-[9rem] min-h-[9rem] max-w-full aspect-square bg-white rounded-xl shadow-xs border border-gray-100 p-1.5 flex items-center justify-center transition-all duration-300 group-hover:shadow-md group-hover:scale-102 overflow-hidden" id="canvas_square_box">
+          <canvas
+            ref={canvasRef}
+            width={256}
+            height={256}
+            className="!w-full !h-full !max-w-full !max-h-full object-contain rounded-md"
+            id="final_qr_canvas"
+          />
+        </div>
+      ) : selectedFrame === 'scan_me' ? (
+        <div 
+          style={{ borderColor: frameColor }} 
+          className="relative p-4 rounded-2xl bg-white border-4 shadow-sm flex flex-col items-center gap-2 max-w-[210px] select-none transition-all duration-300 transform group-hover:scale-102"
+          id="canvas_square_box"
+        >
+          <div 
+            style={{ backgroundColor: frameColor }} 
+            className="text-white text-[9px] font-black px-3 py-1 rounded-full uppercase font-arabic leading-none tracking-wider shrink-0 text-center"
+          >
+            {frameTextTop || (lang === 'ar' ? 'فيديو ذكي' : 'INSTANT LINK')}
+          </div>
+          <div className="w-28 h-28 aspect-square bg-white p-1 rounded-lg border border-gray-100 flex items-center justify-center overflow-hidden">
+            <canvas ref={canvasRef} width={256} height={256} className="w-full h-full object-contain" id="final_qr_canvas" />
+          </div>
+          <div style={{ color: frameColor }} className="text-[9px] font-extrabold font-arabic flex items-center gap-1 mt-0.5 text-center shrink-0 max-w-[170px] truncate">
+            <span>{frameTextBottom || (lang === 'ar' ? 'امسح لمشاهدة الفيديو 📱' : 'SCAN TO WATCH 📱')}</span>
+          </div>
+        </div>
+      ) : selectedFrame === 'retro' ? (
+        <div 
+          style={{ borderColor: frameColor }} 
+          className="relative p-4 rounded-none bg-white border-2 border-double shadow-xs flex flex-col items-center gap-2.5 w-48 relative select-none transition-all duration-300 transform group-hover:scale-102"
+          id="canvas_square_box"
+        >
+          <div className="absolute top-1 left-1 w-2 h-2 border-t border-l" style={{ borderColor: frameColor }} />
+          <div className="absolute top-1 right-1 w-2 h-2 border-t border-r" style={{ borderColor: frameColor }} />
+          <div className="absolute bottom-1 left-1 w-2 h-2 border-b border-l" style={{ borderColor: frameColor }} />
+          <div className="absolute bottom-1 right-1 w-2 h-2 border-b border-r" style={{ borderColor: frameColor }} />
+
+          <div 
+            style={{ color: frameColor }} 
+            className="text-[8px] font-black tracking-widest font-mono text-center shrink-0 max-w-[150px] truncate"
+          >
+            {frameTextTop || '★ DIRECT PREMIUM ★'}
+          </div>
+          <div className="w-28 h-28 aspect-square bg-white p-1 flex items-center justify-center overflow-hidden">
+            <canvas ref={canvasRef} width={256} height={256} className="w-full h-full object-contain" id="final_qr_canvas" />
+          </div>
+          <div 
+            style={{ color: frameColor }} 
+            className="text-[8px] font-black tracking-wider font-mono text-center shrink-0 max-w-[150px] truncate"
+          >
+            {frameTextBottom || (lang === 'ar' ? 'مسح سريع آمن' : 'OFFICIAL SECURE BRAND')}
+          </div>
+        </div>
+      ) : selectedFrame === 'smartphone' ? (
+        <div 
+          className="w-48 bg-slate-900 rounded-[32px] p-2 shadow-lg border-2 border-slate-700 relative overflow-hidden flex flex-col items-center select-none transition-all duration-300 transform group-hover:scale-102"
+          id="canvas_square_box"
+        >
+          <div className="absolute top-0 inset-x-0 h-3 bg-slate-900 rounded-b-lg flex items-center justify-center z-10">
+            <div className="w-10 h-1 bg-slate-800 rounded-full"></div>
+          </div>
+          
+          <div className="w-full bg-slate-950 rounded-[26px] pt-3 p-2 flex flex-col items-center justify-between min-h-[170px]">
+            <div className="w-full flex justify-between px-1.5 text-[7px] text-slate-500 font-mono mb-1">
+              <span>09:41</span>
+              <div className="flex items-center gap-0.5">
+                <span>📶</span>
+                <span>🔋</span>
+              </div>
+            </div>
+            
+            <div className="w-24 h-24 aspect-square p-1.5 bg-white rounded-lg shadow-inner overflow-hidden flex items-center justify-center">
+              <canvas ref={canvasRef} width={256} height={256} className="w-full h-full object-contain" id="final_qr_canvas" />
+            </div>
+
+            <div className="w-full mt-2 shrink-0">
+              <div 
+                style={{ backgroundColor: frameColor }} 
+                className="w-full py-1 text-center text-[7.5px] text-white font-extrabold rounded-lg shadow-xs font-arabic truncate"
+              >
+                {frameTextBottom || (lang === 'ar' ? 'افتح التطبيق مباشرة ➔' : 'OPEN IN APP ➔')}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div 
+          style={{ borderColor: frameColor }} 
+          className="relative p-4 rounded-3xl bg-slate-950 border border-slate-800 shadow-md flex flex-col items-center gap-2 max-w-[210px] select-none overflow-hidden transition-all duration-300 transform group-hover:scale-102"
+          id="canvas_square_box"
+        >
+          <div className="absolute top-0 right-0 w-16 h-16 bg-white/5 rounded-full blur-xl pointer-events-none" />
+          <div 
+            style={{ color: frameColor }} 
+            className="text-[8px] font-black tracking-widest uppercase font-arabic leading-none shrink-0 text-center max-w-[170px] truncate"
+          >
+            {frameTextTop || (lang === 'ar' ? 'رابط ذكي فوري' : 'INSTANT LINK')}
+          </div>
+          <div className="w-28 h-28 aspect-square bg-white p-1 rounded-lg border border-gray-100 flex items-center justify-center overflow-hidden">
+            <canvas ref={canvasRef} width={256} height={256} className="w-full h-full object-contain" id="final_qr_canvas" />
+          </div>
+          <div 
+            style={{ backgroundColor: frameColor }} 
+            className="text-white text-[8px] font-black px-2.5 py-1 text-center shrink-0 w-full truncate mt-0.5 rounded-full font-arabic"
+          >
+            {frameTextBottom || (lang === 'ar' ? 'مسح سريع للمشاهدة' : 'SCAN TO WATCH')}
+          </div>
+        </div>
+      )}
+
+      {/* Soft overlay or caption for empty/placeholder state */}
+      {(!urlInput.trim()) ? (
+        <span className="mt-2 text-[10px] font-bold font-arabic text-slate-505 bg-slate-100/80 px-2 py-0.5 rounded-md">
+          💡 {lang === 'ar' ? 'معاينة افتراضية نشطة' : 'Active default preview'}
+        </span>
+      ) : (!(urlInfo.isValid && urlInfo.platform !== 'other')) ? (
+        <span className="mt-2 text-[10px] font-bold font-arabic text-red-500 bg-red-50 px-2 py-0.5 rounded-md">
+          ⚠️ {lang === 'ar' ? 'الرابط غير مدعوم' : 'Unsupported link'}
+        </span>
+      ) : null}
+
+      <p className="mt-2 text-[10px] font-arabic text-slate-605 max-w-[200px] leading-relaxed">
+        {t.previewSyncMsg}
+      </p>
+    </div>
+  );
+};
+
 export default function QRGenerator({ 
   lang = 'ar'
 }: { 
@@ -88,6 +248,16 @@ export default function QRGenerator({
   const [logoScale, setLogoScale] = useState<number>(0.18);
   const [logoMargin, setLogoMargin] = useState<boolean>(true);
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [isDesktop, setIsDesktop] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Decorative print frames state variables
   const [selectedFrame, setSelectedFrame] = useState<'none' | 'scan_me' | 'retro' | 'smartphone' | 'modern_badge'>('none');
@@ -679,7 +849,7 @@ export default function QRGenerator({
                   if (!isUrlValid) {
                     return (
                       <div className="mt-3 p-3.5 bg-red-50 rounded-2xl border border-red-200 flex items-start gap-2.5 text-red-800 text-xs font-arabic leading-relaxed animate-fadeIn" id="url_validation_warning">
-                        <span className="p-1 bg-red-100 text-red-600 rounded-lg shrink-0 mt-0.5">
+                        <span className="p-1 bg-red-100 text-red-650 rounded-lg shrink-0 mt-0.5">
                           <AlertCircle size={14} />
                         </span>
                         <div>
@@ -696,7 +866,7 @@ export default function QRGenerator({
                     };
                     const matchedPlatform = platformLabels[urlInfo.platform] || urlInfo.platform;
                     return (
-                      <div className="mt-3 p-3 bg-emerald-50 rounded-2xl border border-emerald-150 flex items-center gap-2.5 text-emerald-800 text-xs font-arabic animate-fadeIn">
+                      <div className="mt-3 p-3 bg-emerald-50 rounded-2xl border border-emerald-150 flex items-center gap-2.5 text-emerald-850 text-xs font-arabic animate-fadeIn">
                         <span className="p-1 bg-emerald-100 text-emerald-600 rounded-lg shrink-0">
                           <Check size={14} />
                         </span>
@@ -707,170 +877,31 @@ export default function QRGenerator({
                   return null;
                 })()}
 
-
-
-
               </>
             );
           })()}
 
-          {/* Dynamic Parsing Status Badge removed as per request */}
+          {/* Aesthetic Divider - mobile only */}
+          <div className="w-full h-px bg-gray-100 my-6 lg:hidden" />
 
-          {/* Aesthetic Divider */}
-          <div className="w-full h-px bg-gray-100 my-6" />
-
-          {/* Moved Live Preview & Actions Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center" id="direct_preview_area">
-            
-            {/* Left: Copy & High-Res download (7 cols on lg) - Visible on lg screens and up */}
-            <div className="hidden lg:block lg:col-span-7 space-y-4 w-full" id="direct_actions_container">
-              {renderActionButtons()}
+          {/* Mobile-only Preview */}
+          {!isDesktop && (
+            <div className="lg:hidden w-full flex flex-col items-center mb-2" id="direct_preview_area_mobile">
+              <QRVisualPreview
+                canvasRef={canvasRef}
+                selectedFrame={selectedFrame}
+                frameColor={frameColor}
+                frameTextTop={frameTextTop}
+                frameTextBottom={frameTextBottom}
+                lang={lang}
+                t={t}
+                urlInput={urlInput}
+                urlInfo={urlInfo}
+              />
             </div>
+          )}
 
-            {/* Right: The QR Code canvas (5 cols on lg) rendered next or below */}
-            <div className="lg:col-span-5 flex flex-col items-center justify-center text-center p-4 sm:p-5 bg-slate-50/40 rounded-2xl border border-gray-100 group relative w-full shadow-xs" id="direct_canvas_container">
-              <span className="text-[10px] font-bold text-slate-600 font-arabic tracking-wider uppercase mb-0.5 block">{t.previewHeading}</span>
-              <h3 className="text-xs font-bold font-arabic text-gray-700 mb-2">{t.finalQrLabel}</h3>
-
-              {/* Square canvas wrapper box ensuring crisp 1:1 rendering on all screens */}
-              {selectedFrame === 'none' ? (
-                <div className="w-36 h-36 min-w-[9rem] min-h-[9rem] max-w-full aspect-square bg-white rounded-xl shadow-xs border border-gray-100 p-1.5 flex items-center justify-center transition-all duration-300 group-hover:shadow-md group-hover:scale-102 overflow-hidden" id="canvas_square_box">
-                  <canvas
-                    ref={canvasRef}
-                    width={256}
-                    height={256}
-                    className="!w-full !h-full !max-w-full !max-h-full object-contain rounded-md"
-                    id="final_qr_canvas"
-                  />
-                </div>
-              ) : selectedFrame === 'scan_me' ? (
-                <div 
-                  style={{ borderColor: frameColor }} 
-                  className="relative p-4 rounded-2xl bg-white border-4 shadow-sm flex flex-col items-center gap-2 max-w-[210px] select-none transition-all duration-300 transform group-hover:scale-102"
-                  id="canvas_square_box"
-                >
-                  <div 
-                    style={{ backgroundColor: frameColor }} 
-                    className="text-white text-[9px] font-black px-3 py-1 rounded-full uppercase font-arabic leading-none tracking-wider shrink-0 text-center"
-                  >
-                    {frameTextTop || (lang === 'ar' ? 'فيديو ذكي' : 'INSTANT LINK')}
-                  </div>
-                  <div className="w-28 h-28 aspect-square bg-white p-1 rounded-lg border border-gray-100 flex items-center justify-center overflow-hidden">
-                    <canvas ref={canvasRef} width={256} height={256} className="w-full h-full object-contain" id="final_qr_canvas" />
-                  </div>
-                  <div style={{ color: frameColor }} className="text-[9px] font-extrabold font-arabic flex items-center gap-1 mt-0.5 text-center shrink-0 max-w-[170px] truncate">
-                    <span>{frameTextBottom || (lang === 'ar' ? 'امسح لمشاهدة الفيديو 📱' : 'SCAN TO WATCH 📱')}</span>
-                  </div>
-                </div>
-              ) : selectedFrame === 'retro' ? (
-                <div 
-                  style={{ borderColor: frameColor }} 
-                  className="relative p-4 rounded-none bg-white border-2 border-double shadow-xs flex flex-col items-center gap-2.5 w-48 relative select-none transition-all duration-300 transform group-hover:scale-102"
-                  id="canvas_square_box"
-                >
-                  <div className="absolute top-1 left-1 w-2 h-2 border-t border-l" style={{ borderColor: frameColor }} />
-                  <div className="absolute top-1 right-1 w-2 h-2 border-t border-r" style={{ borderColor: frameColor }} />
-                  <div className="absolute bottom-1 left-1 w-2 h-2 border-b border-l" style={{ borderColor: frameColor }} />
-                  <div className="absolute bottom-1 right-1 w-2 h-2 border-b border-r" style={{ borderColor: frameColor }} />
-
-                  <div 
-                    style={{ color: frameColor }} 
-                    className="text-[8px] font-black tracking-widest font-mono text-center shrink-0 max-w-[150px] truncate"
-                  >
-                    {frameTextTop || '★ DIRECT PREMIUM ★'}
-                  </div>
-                  <div className="w-28 h-28 aspect-square bg-white p-1 flex items-center justify-center overflow-hidden">
-                    <canvas ref={canvasRef} width={256} height={256} className="w-full h-full object-contain" id="final_qr_canvas" />
-                  </div>
-                  <div 
-                    style={{ color: frameColor }} 
-                    className="text-[8px] font-black tracking-wider font-mono text-center shrink-0 max-w-[150px] truncate"
-                  >
-                    {frameTextBottom || (lang === 'ar' ? 'مسح سريع آمن' : 'OFFICIAL SECURE BRAND')}
-                  </div>
-                </div>
-              ) : selectedFrame === 'smartphone' ? (
-                <div 
-                  className="w-48 bg-slate-900 rounded-[32px] p-2 shadow-lg border-2 border-slate-700 relative overflow-hidden flex flex-col items-center select-none transition-all duration-300 transform group-hover:scale-102"
-                  id="canvas_square_box"
-                >
-                  <div className="absolute top-0 inset-x-0 h-3 bg-slate-900 rounded-b-lg flex items-center justify-center z-10">
-                    <div className="w-10 h-1 bg-slate-800 rounded-full"></div>
-                  </div>
-                  
-                  <div className="w-full bg-slate-950 rounded-[26px] pt-3 p-2 flex flex-col items-center justify-between min-h-[170px]">
-                    <div className="w-full flex justify-between px-1.5 text-[7px] text-slate-500 font-mono mb-1">
-                      <span>09:41</span>
-                      <div className="flex items-center gap-0.5">
-                        <span>📶</span>
-                        <span>🔋</span>
-                      </div>
-                    </div>
-                    
-                    <div className="w-24 h-24 aspect-square p-1.5 bg-white rounded-lg shadow-inner overflow-hidden flex items-center justify-center">
-                      <canvas ref={canvasRef} width={256} height={256} className="w-full h-full object-contain" id="final_qr_canvas" />
-                    </div>
-
-                    <div className="w-full mt-2 shrink-0">
-                      <div 
-                        style={{ backgroundColor: frameColor }} 
-                        className="w-full py-1 text-center text-[7.5px] text-white font-extrabold rounded-lg shadow-xs font-arabic truncate"
-                      >
-                        {frameTextBottom || (lang === 'ar' ? 'افتح التطبيق مباشرة ➔' : 'OPEN IN APP ➔')}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div 
-                  style={{ borderColor: frameColor }} 
-                  className="relative p-4 rounded-3xl bg-slate-950 border border-slate-800 shadow-md flex flex-col items-center gap-2 max-w-[210px] select-none overflow-hidden transition-all duration-300 transform group-hover:scale-102"
-                  id="canvas_square_box"
-                >
-                  <div className="absolute top-0 right-0 w-16 h-16 bg-white/5 rounded-full blur-xl pointer-events-none" />
-                  <div 
-                    style={{ color: frameColor }} 
-                    className="text-[8px] font-black tracking-widest uppercase font-arabic leading-none shrink-0 text-center max-w-[170px] truncate"
-                  >
-                    {frameTextTop || (lang === 'ar' ? 'رابط ذكي فوري' : 'INSTANT LINK')}
-                  </div>
-                  <div className="w-28 h-28 aspect-square bg-white p-1 rounded-lg border border-gray-100 flex items-center justify-center overflow-hidden">
-                    <canvas ref={canvasRef} width={256} height={256} className="w-full h-full object-contain" id="final_qr_canvas" />
-                  </div>
-                  <div 
-                    style={{ backgroundColor: frameColor }} 
-                    className="text-white text-[8px] font-black px-2.5 py-1 text-center shrink-0 w-full truncate mt-0.5 rounded-full font-arabic"
-                  >
-                    {frameTextBottom || (lang === 'ar' ? 'مسح سريع للمشاهدة' : 'SCAN TO WATCH')}
-                  </div>
-                </div>
-              )}
-
-              {/* Soft overlay or caption for empty/placeholder state */}
-              {(!urlInput.trim()) ? (
-                <span className="mt-2 text-[10px] font-bold font-arabic text-slate-500 bg-slate-100/80 px-2 py-0.5 rounded-md">
-                  💡 {lang === 'ar' ? 'معاينة افتراضية نشطة' : 'Active default preview'}
-                </span>
-              ) : (!(urlInfo.isValid && urlInfo.platform !== 'other')) ? (
-                <span className="mt-2 text-[10px] font-bold font-arabic text-red-500 bg-red-50 px-2 py-0.5 rounded-md">
-                  ⚠️ {lang === 'ar' ? 'الرابط غير مدعوم' : 'Unsupported link'}
-                </span>
-              ) : null}
-
-              <p className="mt-2 text-[10px] font-arabic text-slate-600 max-w-[200px] leading-relaxed">
-                {t.previewSyncMsg}
-              </p>
-            </div>
-
-          </div>
         </div>
-
-
-
-      </div>
-
-      {/* RIGHT PANEL: BRANDING, LOGOS, & EDUCATION (4 COLS) */}
-      <div className="lg:col-span-4 space-y-6" id="qr_right_panel">
 
         {/* Module 3: Branding & Custom Colors */}
         <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-100" id="module_colors_branding">
@@ -1267,6 +1298,33 @@ export default function QRGenerator({
         </div>
 
 
+      </div>
+
+      {/* RIGHT PANEL: DESKTOP-ONLY STICKY DESIGN PREVIEW (4 COLS ON DESKTOP, HIDDEN ON MOBILE) */}
+      <div className="hidden lg:block lg:col-span-4 lg:sticky lg:top-24 space-y-6 self-start" id="qr_right_panel">
+        <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-100 flex flex-col items-center gap-5" id="desktop_sticky_preview_card">
+          <h2 className="text-base font-bold font-arabic text-gray-800 text-center flex items-center justify-center gap-1.5">
+            <span>📱 {lang === 'ar' ? 'معاينة حية ومباشرة' : 'Live Design Preview'}</span>
+          </h2>
+          <QRVisualPreview
+            canvasRef={canvasRef}
+            selectedFrame={selectedFrame}
+            frameColor={frameColor}
+            frameTextTop={frameTextTop}
+            frameTextBottom={frameTextBottom}
+            lang={lang}
+            t={t}
+            urlInput={urlInput}
+            urlInfo={urlInfo}
+          />
+          <div className="w-full h-px bg-gray-100 my-1" />
+          <h3 className="text-xs font-bold font-arabic text-gray-500 text-center">
+            📥 {lang === 'ar' ? 'تحميل وحفظ كود الـ QR بدقة عالية' : 'Download High-Res QR Code'}
+          </h3>
+          <div className="w-full space-y-3">
+            {renderActionButtons()}
+          </div>
+        </div>
       </div>
 
       {/* Mobile-Only Download Actions: positioned at the absolute bottom, visible only on screens smaller than lg */}
