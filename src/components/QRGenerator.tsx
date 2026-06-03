@@ -59,6 +59,7 @@ interface QRVisualPreviewProps {
   t: any;
   urlInput: string;
   urlInfo: any;
+  activePayload: string;
 }
 
 const QRVisualPreview: React.FC<QRVisualPreviewProps> = ({
@@ -71,7 +72,18 @@ const QRVisualPreview: React.FC<QRVisualPreviewProps> = ({
   t,
   urlInput,
   urlInfo,
+  activePayload,
 }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(activePayload);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (_) {}
+  };
+
   return (
     <div className="w-full flex flex-col items-center justify-center text-center p-4 sm:p-5 bg-slate-50/40 rounded-2xl border border-gray-100 group relative w-full shadow-xs" id="direct_canvas_container">
       <span className="text-[10px] font-bold text-slate-605 font-arabic tracking-wider uppercase mb-0.5 block">{t.previewHeading}</span>
@@ -201,6 +213,45 @@ const QRVisualPreview: React.FC<QRVisualPreviewProps> = ({
           ⚠️ {lang === 'ar' ? 'الرابط غير صحيح' : 'Invalid Link'}
         </span>
       ) : null}
+
+      {/* Deep Link URL Copy Section */}
+      {urlInput.trim() && urlInfo.isValid && (
+        <div className="mt-4 w-full px-1 space-y-1.5 animate-fadeIn" id="deep_link_copy_section">
+          <label className="text-[10px] font-bold text-gray-500 font-arabic text-center block w-full">
+            🔗 {lang === 'ar' ? 'رابط التوجيه الذكي المباشر:' : 'Direct Deep Link URL:'}
+          </label>
+          <div className="flex gap-1 items-center bg-white border border-gray-200 rounded-xl p-1 shadow-sm w-full max-w-[240px] mx-auto">
+            <input 
+              type="text" 
+              readOnly 
+              value={activePayload} 
+              className="flex-1 bg-transparent border-none text-[10px] font-mono text-slate-700 outline-none px-1 text-center truncate" 
+              dir="ltr"
+              onClick={(e) => (e.target as HTMLInputElement).select()}
+            />
+            <button
+              onClick={handleCopyLink}
+              className={`px-1.5 py-1 rounded-lg text-[9px] font-extrabold font-arabic transition-all whitespace-nowrap shrink-0 flex items-center gap-1 ${
+                copied 
+                  ? 'bg-emerald-500 text-white shadow-sm' 
+                  : 'bg-slate-900 text-white hover:bg-slate-800 shadow-xs'
+              }`}
+            >
+              {copied ? (
+                <>
+                  <Check size={8} />
+                  <span>{lang === 'ar' ? 'تم النسخ!' : 'Copied!'}</span>
+                </>
+              ) : (
+                <>
+                  <Copy size={8} />
+                  <span>{lang === 'ar' ? 'نسخ الرابط' : 'Copy Link'}</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
 
       <p className="mt-2 text-[10px] font-arabic text-slate-605 max-w-[200px] leading-relaxed">
         {t.previewSyncMsg}
@@ -904,6 +955,7 @@ export default function QRGenerator({
                 t={t}
                 urlInput={urlInput}
                 urlInfo={urlInfo}
+                activePayload={getActivePayload()}
               />
             </div>
           )}
@@ -1324,6 +1376,7 @@ export default function QRGenerator({
               t={t}
               urlInput={urlInput}
               urlInfo={urlInfo}
+              activePayload={getActivePayload()}
             />
             <div className="w-full h-px bg-gray-100 my-1" />
             <h3 className="text-xs font-bold font-arabic text-gray-500 text-center">

@@ -24,7 +24,7 @@ export default function FooterView({ lang, onNavigate }: FooterViewProps) {
           <div className="md:col-span-7 space-y-4">
             <div className={`flex items-center gap-2.5 ${lang === 'ar' ? 'justify-end' : 'justify-start'}`}>
               <QrytubeLogo size={32} />
-              <span className="text-lg font-bold font-arabic text-white">QR Deep Linker for Creators</span>
+              <span className="text-lg font-bold font-arabic text-white">qrytube for Creators</span>
             </div>
             <p className="text-xs text-slate-300 max-w-lg leading-relaxed font-arabic">
               {t.footerDesc}
@@ -50,6 +50,10 @@ export default function FooterView({ lang, onNavigate }: FooterViewProps) {
         <div className={`border-t border-slate-800 mt-10 pt-6 flex flex-col ${lang === 'ar' ? 'sm:flex-row' : 'sm:flex-row-reverse'} items-center justify-between text-xs text-slate-400 font-arabic gap-4`}>
           <span dir="ltr">{t.copyrightText}</span>
           <span>{t.loveText}</span>
+        </div>
+
+        <div className="border-t border-slate-800/60 mt-4 pt-4 text-[10px] text-slate-500 font-arabic leading-relaxed text-center font-normal">
+          <p className="max-w-4xl mx-auto">{t.disclaimer}</p>
         </div>
       </div>
     </footer>

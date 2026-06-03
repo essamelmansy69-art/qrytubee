@@ -16,10 +16,10 @@ export const translations = {
     redirectFallback: "إذا لم يفتح الهاتف تطبيق يوتيوب تلقائياً خلال لحظة، يرجى الضغط على أحد الأزرار بالأسفل:",
     btnForceOpen: "اضغط هنا إذا لم يفتح التطبيق تلقائياً",
     btnWebBrowser: "المواصلة عبر متصفح الويب لقناتنا",
-    managedBy: "توليد وإدارة وتوجيه آمن بالكامل بواسطة QR Deep Linker 🚀",
+    managedBy: "توليد وإدارة وتوجيه آمن بالكامل بواسطة qrytube 🚀",
 
     // Navbar
-    appTitle: "QR Deep Linker",
+    appTitle: "qrytube",
     appSubTitle: "مولد كيو آر الذكي لقنوات اليوتيوب",
     navGenerator: "المنصة والأداة",
     navTips: "نصائح التفاعل والمشاهدات",
@@ -152,8 +152,9 @@ export const translations = {
     faqDetailsLabel: "الأسئلة والأجوبة التفصيلية",
     trustLabel: "ضمان الموثوقية والأمان",
     trustDesc: "تتم معالجة جميع الروابط وتحديث الألوان محلياً 100% على متصفحك لضمان الخصوصية وسرية البيانات.",
-    copyrightText: "جميع الحقوق محفوظة لدى QR Deep Linker للعام 2026.",
+    copyrightText: "جميع الحقوق محفوظة لدى qrytube للعام 2026.",
     loveText: "بُنيت الأداة بكل حب لتطوير وتعميم المحتوى العربي والكوني الذكي 🚀",
+    disclaimer: "إخلاء مسؤولية: هذا الموقع هو أداة مستقلة ومستقرة تماماً، ولا يمت بصلة ولا يتبع ولا يُمثّل ولا يحظى برعاية أو دعم من شركة يوتيوب (YouTube) أو جوجل (Google Inc) أو فيسبوك (Facebook) أو إنستجرام (Instagram) أو تيك توك (TikTok)، ولا يُعبّر عن سياساتهم الرسمية بأي شكل من الأشكال. جميع أسماء المنتجات، والشعارات، والماركات المصورة في الأداة هي حقوق ملكية فكرية وعلامات تجارية مسجلة لملاكها الأصليين والشركات التابعة لها فقط.",
 
     // Validation alerts
     alertInputFirst: "الرجاء إدخال رابط يوتيوب صحيح أولاً لتتمكن من تحميل رمز الـ QR!",
@@ -203,10 +204,10 @@ export const translations = {
     redirectFallback: "If your device does not open the YouTube App automatically in a moment, click one of the buttons below:",
     btnForceOpen: "Click here to open the YouTube App now",
     btnWebBrowser: "Continue via standard Web Browser",
-    managedBy: "Fully secure generation, management, and routing by QR Deep Linker 🚀",
+    managedBy: "Fully secure generation, management, and routing by qrytube 🚀",
 
     // Navbar
-    appTitle: "QR Deep Linker",
+    appTitle: "qrytube",
     appSubTitle: "Smart YouTube QR Code Generator",
     navGenerator: "Generator & Platform",
     navTips: "Growth & Engagement Tips",
@@ -327,7 +328,7 @@ export const translations = {
     exportFormatJpg: "JPEG (Slightly compressed standard)",
     btnDownloadQr: "Download High-Res Print File",
 
-    optGuidanceHeading: "💡 How does QR Deep Linker grow your channel?",
+    optGuidanceHeading: "💡 How does qrytube grow your channel?",
     optTip1: "Traditional links open in sandboxed web views, requiring login to subscribe which blocks active engagement.",
     optTip2: "Smart Deep Links launch official native apps directly, capturing subscription and interaction actions instantly.",
     optTip3: "We recommend using our default smart routing for seamless operational compatibility.",
@@ -339,8 +340,9 @@ export const translations = {
     faqDetailsLabel: "In-Depth Explanations & FAQ",
     trustLabel: "Privacy & Encryption Guarantee",
     trustDesc: "All operations and logo branding processes run locally inside your browser client to preserve security and privacy.",
-    copyrightText: "© 2026 YouTube QR Deep Linker. All rights reserved.",
+    copyrightText: "© 2026 qrytube. All rights reserved.",
     loveText: "Crafted beautifully for creators and marketers worldwide 🚀",
+    disclaimer: "Disclaimer: This website is an independent platform and is not affiliated, associated, authorized, endorsed by, or in any way officially connected with YouTube, Google Inc., Facebook, Instagram, TikTok, or any of their affiliates or subsidiaries. All product names, logos, copyrights, and registered trademarks displayed remain the exclusive property of their respective owners.",
 
     // Validation alerts
     alertInputFirst: "Please specify a valid YouTube URL address first before trying to download!",
