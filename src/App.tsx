@@ -24,7 +24,12 @@ import {
   ShieldAlert,
   Facebook,
   Instagram,
-  Music
+  Music,
+  Coins,
+  Banknote,
+  Play,
+  ArrowRight,
+  Cloud
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { translations } from './translations';
@@ -746,6 +751,103 @@ export default function App() {
             </button>
           </div>
         )}
+
+        {/* TeraBox Responsive Affiliate Banner */}
+        <div className="mt-12 pt-6 border-t border-gray-200" id="terabox_promotion_container">
+          <a
+            href="https://www.terabox.com/referral/4401985151231"
+            target="_blank"
+            rel="sponsored nofollow noopener noreferrer"
+            className="group relative block overflow-hidden rounded-md bg-gradient-to-r from-slate-950 via-blue-950 to-slate-900 border border-blue-900/50 py-3.5 px-4 sm:py-3 sm:px-6 shadow-xs hover:shadow-md transition-all duration-300"
+            id="terabox_affiliate_banner"
+          >
+            {/* Outer absolute visual sparks and background glow overlay */}
+            <div className="absolute -top-12 -right-12 w-36 h-36 bg-blue-600/10 rounded-full blur-2xl group-hover:bg-blue-600/20 transition-all duration-500" />
+            <div className="absolute -bottom-12 -left-12 w-36 h-36 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/15 transition-all duration-500" />
+            
+            {/* Action speed lines background overlay to represent the "fast monetization / speed" visual */}
+            <div className="absolute inset-0 opacity-15 group-hover:opacity-25 transition-opacity duration-300 pointer-events-none overflow-hidden">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.1)_0%,transparent_75%)]" />
+              <div className="absolute top-0 left-0 right-0 h-full w-full bg-[linear-gradient(45deg,transparent_45%,rgba(255,255,255,0.03)_50%,transparent_55%)] bg-[length:20px_20px] animate-[pulse_3s_infinite_ease-in-out]" />
+            </div>
+
+            {/* Flex orientation respects language dir - optimized to look strictly horizontal and rectangular */}
+            <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 ${lang === 'ar' ? 'sm:flex-row-reverse text-right' : 'text-left'} relative z-10`}>
+              
+              <div className={`flex flex-col sm:flex-row items-center gap-4 ${lang === 'ar' ? 'sm:flex-row-reverse' : ''} w-full sm:w-auto`}>
+                {/* 3D-styled visual folder/box illustration (Overflowing with coins & money) */}
+                <div className="relative shrink-0 flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-900 to-indigo-950 border border-blue-500/35 rounded-md shadow-inner group-hover:scale-105 duration-300 transition-all">
+                  {/* Glowing coins */}
+                  <div className="absolute -top-1 -right-1 bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-955 p-0.5 rounded-full text-[9px] font-extrabold flex items-center justify-center animate-bounce shadow-md border border-amber-300">
+                    <Coins size={10} className="text-amber-955" />
+                  </div>
+                  {/* Floating dollar bill */}
+                  <div className="absolute -bottom-1 -left-1 bg-gradient-to-r from-emerald-400 to-teal-500 text-white p-0.5 rounded-md text-[8px] font-extrabold flex items-center justify-center shadow-md animate-pulse border border-emerald-300">
+                    <Banknote size={10} />
+                  </div>
+
+                  {/* Video Player Card */}
+                  <div className="w-8 h-8 bg-white/10 rounded-md border border-white/20 flex items-center justify-center relative overflow-hidden backdrop-blur-xs">
+                    <div className="absolute inset-0 bg-radial-gradient from-transparent to-blue-950/40" />
+                    <Play size={14} className="text-blue-400 fill-blue-400/80 animate-pulse" />
+                  </div>
+                </div>
+
+                {/* Main banner body */}
+                <div className={`space-y-0.5 ${lang === 'ar' ? 'text-center sm:text-right' : 'text-center sm:text-left'}`}>
+                  {lang === 'ar' ? (
+                    <div className="flex items-center justify-center sm:justify-start sm:flex-row-reverse gap-1.5 mb-0.5">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/20">
+                        <Sparkles size={10} className="animate-pulse text-amber-300" />
+                        رعاية تيرابوكس الرسمية
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center sm:justify-start gap-1.5 mb-0.5">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/20">
+                        <Sparkles size={10} className="animate-pulse text-amber-300" />
+                        Official TeraBox Sponsor
+                      </span>
+                    </div>
+                  )}
+
+                  {lang === 'ar' ? (
+                    <div className="space-y-0.5">
+                      <h3 className="text-base font-black font-arabic leading-tight text-amber-400 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] group-hover:text-amber-300 transition-colors">
+                        فيديوهاتك بتجيب فلوس! 💥
+                      </h3>
+                      <p className="text-xs font-arabic text-slate-100 leading-normal font-semibold">
+                        ابدأ رحلتك في الربح من المحتوى مع تيرابوكس الآن.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-0.5">
+                      <h3 className="text-base font-black tracking-tight leading-tight text-amber-400 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] group-hover:text-amber-300 transition-colors">
+                        MONETIZE YOUR VIDEOS! 💥
+                      </h3>
+                      <p className="text-xs font-sans text-slate-100 leading-normal font-semibold">
+                        Start earning from your content with TeraBox now.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Call-to-action button & branding info */}
+              <div className={`shrink-0 flex flex-col items-center gap-1 w-full sm:w-auto ${lang === 'ar' ? 'sm:items-end' : 'sm:items-start'}`}>
+                <div className="w-full sm:w-auto px-4 py-2 rounded-md bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-center text-xs tracking-wide transition-all duration-300 group-hover:scale-102 shadow-xs hover:shadow-md border border-amber-400 select-none flex items-center justify-center gap-1.5">
+                  <span>{lang === 'ar' ? 'ابدأ الآن مجاناً!' : 'START NOW FOR FREE!'}</span>
+                  <ArrowRight size={13} className={`shrink-0 transition-transform ${lang === 'ar' ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
+                </div>
+                <div className="flex items-center gap-1 text-[8px] text-gray-400 font-bold tracking-tight">
+                  <Cloud size={9} className="text-blue-400 shrink-0" />
+                  <span>TERABOX REFERRAL INTEGRATION</span>
+                </div>
+              </div>
+
+            </div>
+          </a>
+        </div>
 
       </main>
 
