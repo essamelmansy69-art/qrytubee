@@ -33,8 +33,7 @@ import {
   UploadCloud,
   Trash2,
   FileText,
-  BarChart3,
-  LayoutGrid
+  BarChart3
 } from 'lucide-react';
 import { QRConfig, QRStyle } from '../types';
 import { parseYoutubeUrl, buildDeepLink, convertUrlToDeepLink } from '../utils';
@@ -315,8 +314,74 @@ export default function QRGenerator({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Analytics tracking state
+  const [scanCount, setScanCount] = useState<number>(0);
+  const [scanHistory, setScanHistory] = useState<Array<{ date: string; device: string }>>([]);
+  const [isRefreshingStats, setIsRefreshingStats] = useState<boolean>(false);
+
+  const fetchScanStats = async (silent = false) => {
+    if (!urlInput.trim() || !urlInfo.isValid) return;
+    try {
+      if (!silent) setIsRefreshingStats(true);
+      const response = await fetch(`/api/analytics?tid=${trackingId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.specificCode) {
+          setScanCount(data.specificCode.total || 0);
+          setScanHistory(data.specificCode.scans || []);
+        } else {
+          setScanCount(0);
+          setScanHistory([]);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching live scan stats:", err);
+    } finally {
+      if (!silent) setIsRefreshingStats(false);
+    }
+  };
+
+  const handleSimulateScan = async () => {
+    if (!urlInput.trim() || !urlInfo.isValid) return;
+    try {
+      setIsRefreshingStats(true);
+      const res = await fetch(`/api/track-scan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tid: trackingId,
+          r: urlInput.trim(),
+          platform: urlInfo.platform || 'youtube'
+        })
+      });
+      if (res.ok) {
+        await fetchScanStats(true);
+      }
+    } catch (err) {
+      console.error("Error simulating scan:", err);
+    } finally {
+      setIsRefreshingStats(false);
+    }
+  };
+
+  useEffect(() => {
+    let statInterval: any = null;
+    if (urlInput.trim() && urlInfo.isValid) {
+      fetchScanStats(false);
+      statInterval = setInterval(() => {
+        fetchScanStats(true);
+      }, 4050); // Auto-refresh silently every ~4 seconds
+    } else {
+      setScanCount(0);
+      setScanHistory([]);
+    }
+    return () => {
+      if (statInterval) clearInterval(statInterval);
+    };
+  }, [trackingId, urlInput]);
+
   // Decorative print frames state variables
-  const [selectedFrame, setSelectedFrame] = useState<'none' | 'scan_me' | 'retro' | 'smartphone' | 'modern_badge'>('none');
+  const [selectedFrame, setSelectedFrame] = useState<'none'>('none');
   const [frameColor, setFrameColor] = useState<string>('#FF0000');
   const [frameTextTop, setFrameTextTop] = useState<string>('');
   const [frameTextBottom, setFrameTextBottom] = useState<string>('');
@@ -660,6 +725,193 @@ export default function QRGenerator({
     }
   };
 
+  const renderAnalyticsSection = () => {
+    const isUrlEmpty = !urlInput.trim();
+    const isUrlValid = isUrlEmpty || urlInfo.isValid;
+    const isInvalid = !isUrlValid || isUrlEmpty;
+
+    // Calculate device percentages
+    let iosCount = 0;
+    let androidCount = 0;
+    let desktopCount = 0;
+    
+    if (scanHistory && scanHistory.length > 0) {
+      scanHistory.forEach(s => {
+        const dev = (s.device || '').toLowerCase();
+        if (dev.includes('ios') || dev.includes('iphone') || dev.includes('ipad')) iosCount++;
+        else if (dev.includes('android')) androidCount++;
+        else desktopCount++;
+      });
+    }
+
+    const totalCalculated = scanHistory ? scanHistory.length : 0;
+    const iosPct = totalCalculated > 0 ? Math.round((iosCount / totalCalculated) * 100) : 0;
+    const androidPct = totalCalculated > 0 ? Math.round((androidCount / totalCalculated) * 100) : 0;
+    const desktopPct = totalCalculated > 0 ? Math.round((desktopCount / totalCalculated) * 100) : 0;
+
+    return (
+      <div className="bg-slate-950 text-slate-100 rounded-3xl p-5 border border-slate-800 shadow-md flex flex-col gap-4 w-full text-right" dir="rtl" id="qr_live_analytics_card">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${isInvalid ? 'bg-amber-400/60' : 'bg-red-400'} opacity-75`}></span>
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${isInvalid ? 'bg-amber-500' : 'bg-red-500'}`}></span>
+            </span>
+            <span className="text-[10px] font-black tracking-wider text-slate-400 uppercase font-sans">
+              {isInvalid ? 'TRACKING DEMO' : 'LIVE TRACKING ENABLED'}
+            </span>
+          </div>
+          {!isInvalid && (
+            <button 
+              type="button" 
+              onClick={() => fetchScanStats(false)}
+              disabled={isRefreshingStats}
+              className="p-1 px-2 rounded-lg bg-slate-900 border border-slate-800 text-[10px] text-slate-300 font-bold font-arabic hover:bg-slate-850 flex items-center gap-1 transition-all cursor-pointer"
+            >
+              <RotateCcw size={10} className={isRefreshingStats ? "animate-spin" : ""} />
+              <span>{lang === 'ar' ? 'تحديث' : 'Refresh'}</span>
+            </button>
+          )}
+        </div>
+
+        <div className="space-y-1">
+          <h3 className="text-xs font-black font-arabic text-slate-300 uppercase tracking-wider flex items-center gap-1.5 justify-end">
+            <span>{lang === 'ar' ? 'إحصائيات وتحليلات المسح 📊' : 'Scan Follow & Track 📊'}</span>
+          </h3>
+          <p className="text-[10.5px] font-arabic text-slate-450 leading-normal">
+            {isInvalid 
+              ? (lang === 'ar' 
+                ? 'جاهز لتتبع تصفحات وهواتف عملائك! أدخل أي رابط بالأعلى وسيتم تنشيط بكسل تتبع مشفر لحساب عدد المسحات فورا وبالمجان.'
+                : 'Ready to track your viewers! Enter a URL in Step 1 to activate a secure, lightning-fast tracking pixel to count scans instantly for free.')
+              : (lang === 'ar' 
+                ? 'تتضمن أداتنا بكسل تتبع آمن غير مرئي مدمج بالرابط الذكي لتسجيل مرات مسح الكود فورياً مجاناً وبدون التأثير على سرعة الفتح.'
+                : 'Our system includes an invisible secure tracking pixel baked into your smart URL to count real scans instantly for free.')}
+          </p>
+        </div>
+
+        {/* Counter Big Display */}
+        <div className="grid grid-cols-2 gap-3 bg-slate-900/50 border border-slate-800/60 rounded-2xl p-3.5">
+          <div className="flex flex-col justify-center text-center border-l border-slate-850/60 pb-1">
+            <span className="text-[9.5px] font-bold text-slate-400 font-arabic mb-0.5">{lang === 'ar' ? 'إجمالي المسحات' : 'Total Scans'}</span>
+            <span className={`text-2xl font-black ${isInvalid ? 'text-amber-500/60' : 'text-amber-400'} font-sans tracking-tight ${!isInvalid && 'animate-pulse'}`}>
+              {isInvalid ? '0' : scanCount}
+            </span>
+          </div>
+          
+          <div className="flex flex-col justify-center text-center pb-1">
+            <span className="text-[9.5px] font-bold text-slate-400 font-arabic mb-0.5">{lang === 'ar' ? 'حالة التتبع' : 'Tracking State'}</span>
+            <span className={`text-xs font-black ${isInvalid ? 'text-amber-400/75' : 'text-emerald-450'} font-arabic flex items-center justify-center gap-1 mt-1`}>
+              <span className={`w-1.5 h-1.5 ${isInvalid ? 'bg-amber-400' : 'bg-emerald-450 animate-pulse'} rounded-full inline-block shrink-0`} />
+              {isInvalid 
+                ? (lang === 'ar' ? 'في انتظار الرابط' : 'Awaiting Link') 
+                : (lang === 'ar' ? 'نشط ومستقر' : 'Active')}
+            </span>
+          </div>
+        </div>
+
+        {isInvalid ? (
+          <div className="p-3.5 bg-slate-900/30 border border-dashed border-slate-850 rounded-xl text-center text-[10px] text-slate-400 font-arabic leading-relaxed">
+            💡 {lang === 'ar' 
+              ? 'بمجرد كتابة رابط في خطوة 1، سيتولد كود تتبع فريد وخاص بك، وتُفتح إمكانية مسح الكود التجريبي ومتابعة نسب نظام التشغيل ههنا.' 
+              : 'Once a URL is provided in Step 1, we provision a unique tracking code. This sandbox will then unlock real-time simulations and OS metrics.'}
+          </div>
+        ) : (
+          <>
+            {/* Simulation Scan Action */}
+            <button
+              type="button"
+              onClick={handleSimulateScan}
+              disabled={isRefreshingStats}
+              className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-xs transition-all duration-300 transform active:scale-98 shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <Smartphone size={13} className="shrink-0 animate-bounce" />
+              <span>{lang === 'ar' ? 'إجراء مسحة تجريبية (محاكاة) 📱' : 'Simulate a Test Scan 📱'}</span>
+            </button>
+
+            {scanCount === 0 ? (
+              <div className="p-3 bg-slate-900/30 border border-dashed border-slate-800 rounded-xl text-center text-[10px] text-slate-400 font-arabic leading-relaxed">
+                📢 {lang === 'ar' 
+                  ? 'في انتظار أول مسحة... امسح كود الـ QR بكاميرا تلفونك للتجربة الحية فوراً!' 
+                  : 'Awaiting the first scan... Try scanning the QR code on screen with your phone!'}
+              </div>
+            ) : (
+              <div className="space-y-3.5 pt-1">
+                {/* Device breakdown percentages */}
+                <div className="space-y-2">
+                  <h4 className="text-[10px] font-bold text-slate-400 font-arabic">{lang === 'ar' ? 'تحليل الأجهزة المستخدمة:' : 'Device Breakdown:'}</h4>
+                  <div className="space-y-1.5 text-[9.5px] font-mono text-slate-300">
+                    <div className="flex justify-between items-center gap-2">
+                      <span className="font-arabic">أندرويد (Android)</span>
+                      <div className="flex-1 max-w-[80px] h-1.5 bg-slate-800 rounded-full overflow-hidden" dir="ltr">
+                        <div className="bg-emerald-500 h-full rounded-full transition-all" style={{ width: `${androidPct}%` }} />
+                      </div>
+                      <span>{androidPct}%</span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center gap-2">
+                      <span className="font-arabic">آيفون (iOS)</span>
+                      <div className="flex-1 max-w-[80px] h-1.5 bg-slate-800 rounded-full overflow-hidden" dir="ltr">
+                        <div className="bg-blue-500 h-full rounded-full transition-all" style={{ width: `${iosPct}%` }} />
+                      </div>
+                      <span>{iosPct}%</span>
+                    </div>
+
+                    <div className="flex justify-between items-center gap-2">
+                      <span className="font-arabic">كمبيوتر (Desktop)</span>
+                      <div className="flex-1 max-w-[80px] h-1.5 bg-slate-800 rounded-full overflow-hidden" dir="ltr">
+                        <div className="bg-slate-500 h-full rounded-full transition-all" style={{ width: `${desktopPct}%` }} />
+                      </div>
+                      <span>{desktopPct}%</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Micro details */}
+                <div className="pt-2 border-t border-slate-900 flex flex-col gap-1 text-[8px] text-slate-400 font-mono">
+                  <div className="flex justify-between items-center">
+                    <span className="font-arabic text-right">رقم مُعرّف التتبع الفريد:</span>
+                    <span className="text-slate-300 bg-slate-900 px-1 py-0.5 rounded">{trackingId}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-arabic text-right">آخر تحديث من الخادم:</span>
+                    <span className="text-slate-300">{new Date().toLocaleTimeString()}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Copyable code pixel code snippet */}
+            <div className="bg-slate-900 border border-slate-800 rounded-xl p-2.5 mt-1">
+              <span className="text-[8.5px] font-bold text-slate-400 font-arabic block mb-1">
+                🔗 {lang === 'ar' ? 'بكسل التتبع للموقع أو المدونة (اختياري):' : 'HTML tracking pixel for blogs:'}
+              </span>
+              <div className="flex gap-1 items-center bg-slate-950 border border-slate-800 rounded p-1">
+                <input 
+                  type="text" 
+                  readOnly 
+                  value={`<img src="${typeof window !== 'undefined' ? window.location.origin : 'https://qrytube.com'}/api/track-scan?tid=${trackingId}" width="1" height="1" style="display:none;" />`}
+                  className="flex-1 bg-transparent border-none text-[8px] font-mono text-blue-400 outline-none select-all font-sans" 
+                  dir="ltr"
+                  onClick={(e) => (e.target as HTMLInputElement).select()}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`<img src="${typeof window !== 'undefined' ? window.location.origin : 'https://qrytube.com'}/api/track-scan?tid=${trackingId}" width="1" height="1" style="display:none;" />`);
+                    alert(lang === 'ar' ? 'تم نسخ كود البكسل!' : 'Pixel code copied!');
+                  }}
+                  className="px-1.5 py-0.5 rounded bg-slate-800 text-[8.5px] font-arabic font-bold text-slate-300 hover:text-white cursor-pointer"
+                >
+                  {lang === 'ar' ? 'نسخ' : 'Copy'}
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  };
+
   const renderActionButtons = () => {
     const isUrlEmpty = !urlInput.trim();
     const isUrlValid = isUrlEmpty || urlInfo.isValid;
@@ -944,7 +1196,7 @@ export default function QRGenerator({
 
           {/* Mobile-only Preview */}
           {!isDesktop && (
-            <div className="lg:hidden w-full flex flex-col items-center mb-2" id="direct_preview_area_mobile">
+            <div className="lg:hidden w-full flex flex-col items-center mb-2 gap-5" id="direct_preview_area_mobile">
               <QRVisualPreview
                 canvasRef={canvasRef}
                 selectedFrame={selectedFrame}
@@ -1214,147 +1466,7 @@ export default function QRGenerator({
           )}
         </div>
 
-        {/* Decorative Print Frames Selection Module directly attached to the custom options */}
-        <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-100 space-y-4 animate-fadeIn" id="decorative_print_frames">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold font-arabic text-gray-800 flex items-center gap-2">
-              <span className="p-2 bg-indigo-50 text-indigo-650 rounded-xl">
-                <LayoutGrid size={20} />
-              </span>
-              <span>{lang === 'ar' ? 'إطارات طباعة احترافية 🖼️' : 'Print Design Frames 🖼️'}</span>
-            </h2>
-            <div className="text-xs text-slate-600 font-mono">STEP 4</div>
-          </div>
 
-          <p className="text-xs font-arabic text-slate-600 leading-relaxed">
-            {lang === 'ar' 
-              ? 'تلوين وتصميم إطارات تزيينية عصرية لتبدو رموز QR جذابة ومعدة لتصاميم الفلاير، البروشور، عبوات الشحن أو اللوحات المعلقة.' 
-              : 'Add modern decorative print margins to make your QR code pop on packaging, business cards, table tents, and flyers.'}
-          </p>
-
-          {/* Grid of print frame templates styles */}
-          <div className="space-y-3">
-            <label className="text-xs font-semibold text-slate-600 font-arabic block" htmlFor="frame_style_select">
-              {lang === 'ar' ? 'اختر نمط ولون الإطار التزييني:' : 'Select Border Frame Style:'}
-            </label>
-            <div className="grid grid-cols-2 gap-2" id="frame_style_grid">
-              {(
-                [
-                  { id: 'none', labelAr: 'بدون إطار', labelEn: 'No Frame (Base)' },
-                  { id: 'scan_me', labelAr: 'ملصق فوري', labelEn: 'Scan Me Badge' },
-                  { id: 'retro', labelAr: 'زخرفي كلاسيكي', labelEn: 'Vintage Retro' },
-                  { id: 'smartphone', labelAr: 'هاتف ذكي واقعي', labelEn: 'Phone Bezel' },
-                  { id: 'modern_badge', labelAr: 'درع أسود متوهج', labelEn: 'Glowing Dark Shield' }
-                ] as const
-              ).map((styleItem) => {
-                const isActive = selectedFrame === styleItem.id;
-                return (
-                  <button
-                    key={styleItem.id}
-                    onClick={() => setSelectedFrame(styleItem.id)}
-                    className={`p-3 rounded-2xl border text-center transition-all duration-200 cursor-pointer ${
-                      isActive
-                        ? 'border-indigo-600 bg-indigo-50/50 text-indigo-900 shadow-xs ring-2 ring-indigo-100 font-extrabold'
-                        : 'border-gray-200 hover:border-gray-300 text-gray-650 hover:bg-gray-50/55'
-                    }`}
-                  >
-                    <div className="text-[11px] font-bold font-arabic leading-tight">
-                      {lang === 'ar' ? styleItem.labelAr : styleItem.labelEn}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Show color customizer and labels adjustments if frame is chosen */}
-          {selectedFrame !== 'none' && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              className="space-y-4 pt-3 border-t border-gray-100"
-              id="frame_customizer_controls"
-            >
-              {/* Frame Accent Color Picker */}
-              <div>
-                <label className="text-xs font-semibold text-gray-600 font-arabic mb-2 block" htmlFor="frame_color_picker">
-                  {lang === 'ar' ? '🎨 لون الإطار المخصص:' : '🎨 Custom Frame Color:'}
-                </label>
-                <div className="flex items-center gap-2.5">
-                  <div className="relative w-12 h-10 rounded-xl overflow-hidden border border-gray-200 shrink-0 cursor-pointer">
-                    <input
-                      id="frame_color_picker"
-                      type="color"
-                      value={frameColor}
-                      onChange={(e) => setFrameColor(e.target.value)}
-                      className="absolute inset-x-0 inset-y-0 w-20 h-20 -m-4 cursor-pointer"
-                    />
-                  </div>
-                  <input
-                    type="text"
-                    value={frameColor}
-                    onChange={(e) => setFrameColor(e.target.value)}
-                    aria-label={lang === 'ar' ? 'لون الإطار' : 'Frame Color'}
-                    className="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-200 font-mono text-sm focus:outline-none focus:border-indigo-500 uppercase"
-                  />
-                  {/* Preset quick swatches */}
-                  <div className="flex gap-1 shrink-0">
-                    {['#FF0000', '#2563EB', '#16A34A', '#7C3AED', '#0F172A'].map((cSwatch) => (
-                      <button
-                        key={cSwatch}
-                        onClick={() => setFrameColor(cSwatch)}
-                        className="w-6 h-6 rounded-full border border-gray-200 cursor-pointer transition-transform hover:scale-110 active:scale-95 shrink-0"
-                        style={{ backgroundColor: cSwatch }}
-                        title={cSwatch}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Top Text Option */}
-              {selectedFrame !== 'smartphone' && (
-                <div>
-                  <label className="text-xs font-semibold text-gray-600 font-arabic mb-1.5 block" htmlFor="frame_text_top">
-                    {lang === 'ar' ? '✏️ ملصق النص العلوي (اختياري):' : '✏️ Top Text Label (Optional):'}
-                  </label>
-                  <input
-                    id="frame_text_top"
-                    type="text"
-                    maxLength={32}
-                    value={frameTextTop}
-                    onChange={(e) => setFrameTextTop(e.target.value)}
-                    placeholder={lang === 'ar' ? 'مثال: تابعنا لمشاهدة الجديد' : 'e.g. FOLLOW TO WATCH NEW'}
-                    className="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-200 text-xs text-gray-800 font-arabic focus:outline-none focus:border-indigo-500"
-                  />
-                </div>
-              )}
-
-              {/* Bottom Text Option */}
-              <div>
-                <label className="text-xs font-semibold text-gray-600 font-arabic mb-1.5 block" htmlFor="frame_text_bottom">
-                  {lang === 'ar' ? '✏️ العبارة التشجيعية بالأسفل (اختياري):' : '✏️ Bottom Call to Action Text (Optional):'}
-                </label>
-                <input
-                  id="frame_text_bottom"
-                  type="text"
-                  maxLength={36}
-                  value={frameTextBottom}
-                  onChange={(e) => setFrameTextBottom(e.target.value)}
-                  placeholder={lang === 'ar' ? 'مثال: امسح لمشاهدة الفيديو 📱' : 'e.g. SCAN TO WATCH VIDEO 📱'}
-                  className="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-200 text-xs text-gray-800 font-arabic focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-
-              {/* Protip */}
-              <div className="p-3 bg-indigo-50/60 rounded-xl text-[10px] text-indigo-900 leading-relaxed font-arabic font-medium">
-                ✨ {lang === 'ar' 
-                  ? 'سيندمج هذا الإطار الرائع وتأثيراته تلقائياً بكامل جودته الفائقة داخل صور الـ PNG ومستندات الـ PDF الجاهزة للمطابع.' 
-                  : 'This decorative print frame will automatically be included in your high-res PNG downloads as well as print-ready vector PDF files.'}
-              </div>
-            </motion.div>
-          )}
-        </div>
 
 
       </div>
@@ -1386,15 +1498,23 @@ export default function QRGenerator({
               {renderActionButtons()}
             </div>
           </div>
+
+          {/* Real-time Scan Analytics Card */}
+          {renderAnalyticsSection()}
         </div>
       )}
 
-      {/* Mobile-Only Download Actions: positioned at the absolute bottom, visible only on screens smaller than lg */}
-      <div className="lg:hidden col-span-1 md:col-span-12 bg-white rounded-3xl p-6 shadow-xs border border-gray-100 mt-2" id="mobile_actions_wrapper">
-        <h3 className="text-sm font-bold font-arabic text-gray-850 mb-3 text-center flex items-center justify-center gap-2">
-          📥 {lang === 'ar' ? 'تحميل وحفظ كود الـ QR' : 'Download & Save QR Code'}
-        </h3>
-        {renderActionButtons()}
+      {/* Mobile-Only Download Actions & Analytics Card: positioned at the absolute bottom, visible only on screens smaller than lg */}
+      <div className="lg:hidden col-span-1 md:col-span-12 space-y-4 mt-2" id="mobile_bottom_section">
+        <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-100" id="mobile_actions_wrapper">
+          <h3 className="text-sm font-bold font-arabic text-gray-850 mb-3 text-center flex items-center justify-center gap-2">
+            📥 {lang === 'ar' ? 'تحميل وحفظ كود الـ QR' : 'Download & Save QR Code'}
+          </h3>
+          {renderActionButtons()}
+        </div>
+
+        {/* Real-time Scan Analytics Card placed below the download section */}
+        {renderAnalyticsSection()}
       </div>
 
     </div>
