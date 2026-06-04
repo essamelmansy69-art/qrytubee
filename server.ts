@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import compression from "compression";
+import { articlesData } from "./src/data/seoContent";
 
 const PORT = 3000;
 
@@ -434,10 +435,107 @@ async function startServer() {
         const xDefaultUrl = `https://qrytube.com${baseSuffix}`;
         const currentUrl = `https://qrytube.com${pathname || "/"}${isEn ? "?lang=en" : "?lang=ar"}`;
 
+        // Calculate page-specific Title and Description
+        const cleanPath = req.path.toLowerCase().replace(/^\/|\/$/g, "");
+        let title = "";
+        let desc = "";
+
+        if (cleanPath === "" || cleanPath === "generator") {
+          title = isEn 
+            ? "Viral QR Code Generator | Open Social Links Directly in Apps"
+            : "Qrytube | أداة إنشاء رموز QR ذكية لقنوات اليوتيوب";
+          desc = isEn
+            ? "Create smart deep-link QR codes for social media influencers. Force links to open directly inside YouTube, Facebook, Instagram, and TikTok apps."
+            : "اصنع رموز QR ذكية (Deep Links) لـقناتك على اليوتيوب مجاناً. تتيح للمتابعين فتح قناتك أو فيديوهاتك داخل تطبيق اليوتيوب مباشرة لزيادة المشاهدات والاشتراكات.";
+        } else if (cleanPath === "faq") {
+          title = isEn
+            ? "Frequently Asked Questions | Qrytube"
+            : "الأسئلة الشائعة | Qrytube";
+          desc = isEn
+            ? "Find answers about dynamic deep links, custom brand styling, high-resolution QR scanning, and secure browser-to-app routing on Qrytube."
+            : "أجوبة شاملة على جميع استفساراتك حول الروابط العميقة (Deep Links)، كيفية توليد رموز الـ QR كود الذكية، وتخصيص الألوان وإدراج الشعار بدون تعطل المسح.";
+        } else if (cleanPath === "articles") {
+          title = isEn
+            ? "Articles & SEO Guides | Qrytube"
+            : "المقالات وأدلة السيو | Qrytube";
+          desc = isEn
+            ? "Explore expert search engine optimization guides, video ranking algorithms, and smart link growth strategies for social media marketers."
+            : "مقالات وأدلة سيو متخصصة وحصرية لمساعدتك في تصدر نتائج البحث، وزيادة المشاهدات والاشتراكات الحقيقية على يوتيوب ومنصات التواصل الاجتماعي لعام 2026.";
+        } else if (cleanPath.startsWith("articles/")) {
+          const articleId = cleanPath.replace("articles/", "");
+          const langKey = isEn ? "en" : "ar";
+          const article = articlesData[langKey]?.find(a => a.id.toLowerCase() === articleId.toLowerCase());
+          if (article) {
+            title = `${article.title} | Qrytube`;
+            desc = article.excerpt;
+          } else {
+            title = isEn ? "Article Not Found | Qrytube" : "المقال غير موجود | Qrytube";
+            desc = isEn ? "The requested article was not found or has been moved." : "المقال المطلوب غير موجود أو تم نقله.";
+          }
+        } else if (cleanPath === "terms") {
+          title = isEn ? "Terms of Service | Qrytube" : "شروط الخدمة | Qrytube";
+          desc = isEn
+            ? "Terms and conditions of use for Qrytube QR generator tool and professional smart deep links services."
+            : "شروط الخدمة والسياسات المنظمة لاستخدام أداة كاشف الروابط وتوليد رموز الـ QR كيو آر الرسمية من Qrytube.";
+        } else if (cleanPath === "privacy") {
+          title = isEn ? "Privacy Policy | Qrytube" : "سياسة الخصوصية | Qrytube";
+          desc = isEn
+            ? "Privacy policy and client data protection pledge for Qrytube QR code generator visitors. Zero tracking cookies, fully secure local creation."
+            : "سياسة الخصوصية والأمان لزائري موقع Qrytube. نحن ملتزمون بالكامل بحماية بياناتك وخصوصيتك حيث تتم كافة عمليات توليد الرموز محلياً في متصفحك.";
+        } else if (cleanPath === "about") {
+          title = isEn ? "About Us | Qrytube" : "من نحن | Qrytube";
+          desc = isEn
+            ? "Learn about Qrytube’s mission to help creators, influencers, and brands boost engagement and drive mobile app traffic seamlessly."
+            : "تعرف على قصة Qrytube ورؤيتنا في مساعدة صناع المحتوى والمؤثرين العرب على النمو وزيادة الاشتراكات بنسب تصل إلى 200% باستخدام الروابط العميقة والـ QR الذكي.";
+        } else if (cleanPath === "contact") {
+          title = isEn ? "Contact Us | Qrytube" : "اتصل بنا | Qrytube";
+          desc = isEn
+            ? "Get in touch with the Qrytube professional team for support, feature feedback, partnership proposals, or customized enterprise integration solutions."
+            : "تواصل مع فريق الدعم الفني لموقع Qrytube للإبلاغ عن أي مشاكل أو المساعدة في تصميم وطباعة أكواد الـ QR كود والشعارات المخصصة لقنواتك.";
+        } else {
+          // default/fallback
+          title = isEn 
+            ? "Viral QR Code Generator | Open Social Links Directly in Apps"
+            : "Qrytube | أداة إنشاء رموز QR ذكية لقنوات اليوتيوب";
+          desc = isEn
+            ? "Create smart deep-link QR codes for social media influencers. Force links to open directly inside YouTube, Facebook, Instagram, and TikTok apps."
+            : "اصنع رموز QR ذكية (Deep Links) لـقناتك على اليوتيوب مجاناً. تتيح للمتابعين فتح قناتك أو فيديوهاتك داخل تطبيق اليوتيوب مباشرة لزيادة المشاهدات والاشتراكات.";
+        }
+
         // Replace domains and hostnames for developer preview and asset loading first
         let dynamicContent = content;
         dynamicContent = dynamicContent.replaceAll("https://qrytube.com", host);
         dynamicContent = dynamicContent.replaceAll("https://qrytubee.essamelmansy69.workers.dev", host);
+
+        // Inject dynamic page Title and Description elements
+        dynamicContent = dynamicContent.replace(
+          /<title>[^<]*<\/title>/i,
+          `<title>${title}</title>`
+        );
+        dynamicContent = dynamicContent.replace(
+          /<meta name="description" content="[^"]*"\s*\/?>/i,
+          `<meta name="description" content="${desc}" />`
+        );
+        dynamicContent = dynamicContent.replace(
+          /<meta property="og:title" content="[^"]*"\s*\/?>/i,
+          `<meta property="og:title" content="${title}" />`
+        );
+        dynamicContent = dynamicContent.replace(
+          /<meta property="og:description" content="[^"]*"\s*\/?>/i,
+          `<meta property="og:description" content="${desc}" />`
+        );
+        dynamicContent = dynamicContent.replace(
+          /<meta name="twitter:title" content="[^"]*"\s*\/?>/i,
+          `<meta name="twitter:title" content="${title}" />`
+        );
+        dynamicContent = dynamicContent.replace(
+          /<meta name="twitter:description" content="[^"]*"\s*\/?>/i,
+          `<meta name="twitter:description" content="${desc}" />`
+        );
+        dynamicContent = dynamicContent.replace(
+          /<html[^>]*>/i,
+          `<html lang="${isEn ? "en" : "ar"}" dir="${isEn ? "ltr" : "rtl"}">`
+        );
 
         // 1. Dynamic Preloads Generation to optimize Critical Request Chains
         const jsRegex = /<script\s+[^>]*src="([^"]+\.js)"[^>]*>/gi;

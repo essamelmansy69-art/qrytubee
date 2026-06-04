@@ -35,6 +35,7 @@ import { motion } from 'motion/react';
 import { translations } from './translations';
 import FooterView from './components/FooterView';
 import QrytubeLogo from './components/QrytubeLogo';
+import { articlesData } from './data/seoContent';
 
 const QRGenerator = React.lazy(() => import('./components/QRGenerator'));
 const ArticlesView = React.lazy(() => import('./components/ArticlesView'));
@@ -99,13 +100,70 @@ export default function App() {
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     localStorage.setItem('qr_language', lang);
 
-    const title = lang === 'ar' 
-      ? "Qrytube | أداة إنشاء رموز QR ذكية لقنوات اليوتيوب" 
-      : "Viral QR Code Generator | Open Social Links Directly in Apps";
+    // Calculate page-specific Title and Description
+    let title = "";
+    let desc = "";
 
-    const desc = lang === 'ar'
-      ? "اصنع رموز QR ذكية (Deep Links) لـقناتك على اليوتيوب مجاناً. تتيح للمتابعين فتح قناتك أو فيديوهاتك داخل تطبيق اليوتيوب مباشرة لزيادة المشاهدات والاشتراكات."
-      : "Create smart deep-link QR codes for social media influencers. Force links to open directly inside YouTube, Facebook, Instagram, and TikTok apps.";
+    if (activeTab === 'generator') {
+      title = lang === 'ar' 
+        ? "Qrytube | أداة إنشاء رموز QR ذكية لقنوات اليوتيوب" 
+        : "Viral QR Code Generator | Open Social Links Directly in Apps";
+      desc = lang === 'ar'
+        ? "اصنع رموز QR ذكية (Deep Links) لـقناتك على اليوتيوب مجاناً. تتيح للمتابعين فتح قناتك أو فيديوهاتك داخل تطبيق اليوتيوب مباشرة لزيادة المشاهدات والاشتراكات."
+        : "Create smart deep-link QR codes for social media influencers. Force links to open directly inside YouTube, Facebook, Instagram, and TikTok apps.";
+    } else if (activeTab === 'faq') {
+      title = lang === 'ar'
+        ? "الأسئلة الشائعة | Qrytube"
+        : "Frequently Asked Questions | Qrytube";
+      desc = lang === 'ar'
+        ? "أجوبة شاملة على جميع استفساراتك حول الروابط العميقة (Deep Links)، كيفية توليد رموز الـ QR كود الذكية، وتخصيص الألوان وإدراج الشعار بدون تعطل المسح."
+        : "Find answers about dynamic deep links, custom brand styling, high-resolution QR scanning, and secure browser-to-app routing on Qrytube.";
+    } else if (activeTab === 'articles') {
+      if (selectedArticleId) {
+        const article = articlesData[lang]?.find(a => a.id.toLowerCase() === selectedArticleId.toLowerCase());
+        if (article) {
+          title = `${article.title} | Qrytube`;
+          desc = article.excerpt;
+        } else {
+          title = lang === 'ar' ? "المقال غير موجود | Qrytube" : "Article Not Found | Qrytube";
+          desc = lang === 'ar' ? "المقال المطلوب غير موجود أو تم نقله." : "The requested article was not found or has been moved.";
+        }
+      } else {
+        title = lang === 'ar'
+          ? "المقالات وأدلة السيو | Qrytube"
+          : "Articles & SEO Guides | Qrytube";
+        desc = lang === 'ar'
+          ? "مقالات وأدلة سيو متخصصة وحصرية لمساعدتك في تصدر نتائج البحث، وزيادة المشاهدات والاشتراكات الحقيقية على يوتيوب ومنصات التواصل الاجتماعي لعام 2026."
+          : "Explore expert search engine optimization guides, video ranking algorithms, and smart link growth strategies for social media marketers.";
+      }
+    } else if (activeTab === 'terms') {
+      title = lang === 'ar' ? "شروط الخدمة | Qrytube" : "Terms of Service | Qrytube";
+      desc = lang === 'ar'
+        ? "شروط الخدمة والسياسات المنظمة لاستخدام أداة كاشف الروابط وتوليد رموز الـ QR كيو آر الرسمية من Qrytube."
+        : "Terms and conditions of use for Qrytube QR generator tool and professional smart deep links services.";
+    } else if (activeTab === 'privacy') {
+      title = lang === 'ar' ? "سياسة الخصوصية | Qrytube" : "Privacy Policy | Qrytube";
+      desc = lang === 'ar'
+        ? "سياسة الخصوصية والأمان لزائري موقع Qrytube. نحن ملتزمون بالكامل بحماية بياناتك وخصوصيتك حيث تتم كافة عمليات توليد الرموز محلياً في متصفحك."
+        : "Privacy policy and client data protection pledge for Qrytube QR code generator visitors. Zero tracking cookies, fully secure local creation.";
+    } else if (activeTab === 'about') {
+      title = lang === 'ar' ? "من نحن | Qrytube" : "About Us | Qrytube";
+      desc = lang === 'ar'
+        ? "تعرف على قصة Qrytube ورؤيتنا في مساعدة صناع المحتوى والمؤثرين العرب على النمو وزيادة الاشتراكات بنسب تصل إلى 200% باستخدام الروابط العميقة والـ QR الذكي."
+        : "Learn about Qrytube’s mission to help creators, influencers, and brands boost engagement and drive mobile app traffic seamlessly.";
+    } else if (activeTab === 'contact') {
+      title = lang === 'ar' ? "اتصل بنا | Qrytube" : "Contact Us | Qrytube";
+      desc = lang === 'ar'
+        ? "تواصل مع فريق الدعم الفني لموقع Qrytube للإبلاغ عن أي مشاكل أو المساعدة في تصميم وطباعة أكواد الـ QR كود والشعارات المخصصة لقنواتك."
+        : "Get in touch with the Qrytube professional team for support, feature feedback, partnership proposals, or customized enterprise integration solutions.";
+    } else {
+      title = lang === 'ar' 
+        ? "Qrytube | أداة إنشاء رموز QR ذكية لقنوات اليوتيوب" 
+        : "Viral QR Code Generator | Open Social Links Directly in Apps";
+      desc = lang === 'ar'
+        ? "اصنع رموز QR ذكية (Deep Links) لـقناتك على اليوتيوب مجاناً. تتيح للمتابعين فتح قناتك أو فيديوهاتك داخل تطبيق اليوتيوب مباشرة لزيادة المشاهدات والاشتراكات."
+        : "Create smart deep-link QR codes for social media influencers. Force links to open directly inside YouTube, Facebook, Instagram, and TikTok apps.";
+    }
 
     // Update document title
     document.title = title;
@@ -146,7 +204,10 @@ export default function App() {
     try {
       document.querySelectorAll('link[hreflang]').forEach(el => el.remove());
       const baseDomain = 'https://qrytube.com';
-      const pathSuffix = activeTab === 'generator' ? '' : `/${activeTab}`;
+      let pathSuffix = activeTab === 'generator' ? '' : `/${activeTab}`;
+      if (activeTab === 'articles' && selectedArticleId) {
+        pathSuffix = `/articles/${selectedArticleId}`;
+      }
       const canonicalPath = pathSuffix === '' ? `${baseDomain}/` : `${baseDomain}${pathSuffix}`;
       const arPath = pathSuffix === '' ? `${baseDomain}/?lang=ar` : `${baseDomain}${pathSuffix}?lang=ar`;
       const enPath = pathSuffix === '' ? `${baseDomain}/?lang=en` : `${baseDomain}${pathSuffix}?lang=en`;
