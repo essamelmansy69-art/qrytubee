@@ -45,3 +45,184 @@
 .glow-youtube {
   animation: pulseGlow 3s infinite ease-in-out;
 }
+
+/* ==========================================
+   PREMIUM DARK MODE DESIGN SYSTEM & STYLING
+   ========================================== */
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #090d16 !important;
+  color: #f1f5f9;
+}
+
+html.dark #main_app_wrapper {
+  background-color: #090d16 !important;
+  color: #f1f5f9;
+}
+
+/* Navigation bar */
+html.dark #app_header {
+  background-color: rgba(13, 20, 35, 0.85);
+  border-color: #1e293b;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+}
+
+html.dark #app_header h1 {
+  color: #ffffff;
+}
+
+/* Theme / Lang Toggle widgets */
+html.dark #theme_toggle_btn,
+html.dark #language_toggle_btn {
+  background-color: #141c2f;
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+html.dark #theme_toggle_btn:hover,
+html.dark #language_toggle_btn:hover {
+  background-color: #1e293b;
+  color: #ffffff;
+  border-color: #475569;
+}
+
+/* Hero Section */
+html.dark #hero_section {
+  background-image: linear-gradient(to bottom, #0d1423, #090d16);
+  border-color: #141c2f;
+}
+
+html.dark #hero_section h1 {
+  color: #ffffff;
+}
+
+/* Card surfaces */
+html.dark .bg-white {
+  background-color: #111827 !important;
+  color: #f1f5f9 !important;
+  border-color: #1e293b !important;
+}
+
+/* Accordion sections etc */
+html.dark .bg-gray-50,
+html.dark .bg-slate-50,
+html.dark .bg-slate-50\/40,
+html.dark .bg-slate-100 {
+  background-color: #172033 !important;
+  color: #cbd5e1 !important;
+}
+
+/* Borders */
+html.dark .border-gray-100,
+html.dark .border-slate-100,
+html.dark .border-slate-200,
+html.dark .border-gray-200,
+html.dark .divide-slate-100 {
+  border-color: #1e293b !important;
+}
+
+/* Texts values fallback for dark style */
+html.dark .text-slate-900,
+html.dark .text-gray-900,
+html.dark .text-slate-800,
+html.dark .text-gray-800,
+html.dark .text-slate-700,
+html.dark .text-gray-700 {
+  color: #f8fafc !important;
+}
+
+html.dark .text-slate-600,
+html.dark .text-slate-500,
+html.dark .text-slate-400,
+html.dark .text-gray-650,
+html.dark .text-gray-600,
+html.dark .text-gray-500 {
+  color: #94a3b8 !important;
+}
+
+/* Forms controls: inputs, textareas & options */
+html.dark input, 
+html.dark textarea, 
+html.dark select {
+  background-color: #111827 !important;
+  color: #ffffff !important;
+  border-color: #334155 !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #475569 !important;
+}
+
+html.dark input:focus, 
+html.dark textarea:focus, 
+html.dark select:focus {
+  border-color: #dc2626 !important;
+  --tw-ring-color: #dc2626 !important;
+}
+
+/* Box Shadows */
+html.dark .shadow-xs,
+html.dark .shadow-sm,
+html.dark .shadow-md,
+html.dark .shadow-xl {
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* Fix specific canvas preview containers background to prevent white glare on canvas borders */
+html.dark #direct_canvas_container {
+  background-color: #172033 !important;
+  border-color: #1e293b !important;
+}
+
+/* When the canvas itself is white-bg-frame-based, we keep it readable */
+html.dark #canvas_square_box {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+/* Tab borders active/unactive states */
+html.dark .border-b-2 {
+  border-color: #334155 !important;
+}
+
+/* Badges and tags */
+html.dark .bg-slate-100\/80,
+html.dark .bg-slate-100 {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+/* Skeletons */
+html.dark .bg-slate-200 {
+  background-color: #1e293b !important;
+}
+html.dark .bg-slate-105,
+html.dark .bg-slate-50\/50 {
+  background-color: #141c2f !important;
+  border-color: #1e293b !important;
+}
+
+/* Footer elements */
+html.dark footer {
+  background-color: #0b0f19 !important;
+  border-color: #1e293b !important;
+}
+
+html.dark footer p,
+html.dark footer span,
+html.dark footer h3 {
+  color: #94a3b8 !important;
+}
+
+html.dark footer a {
+  color: #cbd5e1 !important;
+}
+
+html.dark footer a:hover {
+  color: #ffffff !important;
+}
+

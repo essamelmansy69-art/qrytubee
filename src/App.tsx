@@ -29,7 +29,9 @@ import {
   Banknote,
   Play,
   ArrowRight,
-  Cloud
+  Cloud,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { translations } from './translations';
@@ -43,6 +45,27 @@ const LegalView = React.lazy(() => import('./components/LegalView'));
 const FAQView = React.lazy(() => import('./components/FAQView'));
 
 export default function App() {
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    try {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark' || saved === 'light') return saved;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    } catch (_) {
+      return 'light';
+    }
+  });
+
+  useEffect(() => {
+    try {
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      localStorage.setItem('theme', theme);
+    } catch (_) {}
+  }, [theme]);
+
   const [lang, setLang] = useState<'ar' | 'en'>(() => {
     // Check URL Parameter first (highest priority)
     try {
@@ -653,8 +676,19 @@ export default function App() {
             </div>
           </button>
           
-          {/* Right badge / Action badge & Language Toggle */}
-          <div className="flex items-center gap-3">
+          {/* Right badge / Action badge, Theme & Language Toggles */}
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            {/* Dark/Light Mode Toggle Button */}
+            <button
+              onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-xs font-semibold rounded-xl font-arabic transition-all cursor-pointer border border-slate-200"
+              title={lang === 'ar' ? (theme === 'dark' ? 'تفعيل الوضع المضيء' : 'تفعيل الوضع المظلم') : (theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode')}
+              id="theme_toggle_btn"
+            >
+              {theme === 'dark' ? <Sun size={14} className="text-yellow-500 animate-[spin_12s_linear_infinite]" /> : <Moon size={14} className="text-slate-600" />}
+              <span>{lang === 'ar' ? (theme === 'dark' ? 'الوضع المضيء' : 'الوضع الداكن') : (theme === 'dark' ? 'Light Mode' : 'Dark Mode')}</span>
+            </button>
+
             {/* Language Toggle Button */}
             <button
               onClick={() => setLang(l => l === 'ar' ? 'en' : 'ar')}
