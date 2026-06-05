@@ -1,7 +1,0 @@
-name = "qrytubee"
-main = "worker.js"
-compatibility_date = "2026-06-05"
-
-[[kv_namespaces]]
-binding = "QRYTUBE_DATA"
-id = "09edb48a753446c09d41c63babe2e3d4"
