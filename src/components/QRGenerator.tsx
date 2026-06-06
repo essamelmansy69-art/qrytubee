@@ -33,7 +33,11 @@ import {
   UploadCloud,
   Trash2,
   FileText,
-  BarChart3
+  BarChart3,
+  Globe,
+  Activity,
+  Clock,
+  Monitor
 } from 'lucide-react';
 import { QRConfig, QRStyle } from '../types';
 import { parseYoutubeUrl, buildDeepLink, convertUrlToDeepLink } from '../utils';
@@ -259,6 +263,89 @@ const QRVisualPreview: React.FC<QRVisualPreviewProps> = ({
   );
 };
 
+const COUNTRY_MAP: { [key: string]: string } = {
+  SA: "السعودية / Saudi Arabia",
+  EG: "مصر / Egypt",
+  AE: "الإمارات / UAE",
+  US: "أمريكا / USA",
+  GB: "بريطانيا / UK",
+  DZ: "الجزائر / Algeria",
+  MA: "المغرب / Morocco",
+  IQ: "العراق / Iraq",
+  JO: "الأردن / Jordan",
+  YE: "اليمن / Yemen",
+  SY: "سوريا / Syria",
+  LY: "ليبيا / Libya",
+  SD: "السودان / Sudan",
+  OM: "عمان / Oman",
+  QA: "قطر / Qatar",
+  KW: "الكويت / Kuwait",
+  BH: "البحرين / Bahrain",
+  LB: "لبنان / Lebanon",
+  PS: "فلسطين / Palestine",
+  TN: "تونس / Tunisia",
+  FR: "فرنسا / France",
+  TR: "تركيا / Turkey",
+  DE: "ألمانيا / Germany",
+  CA: "كندا / Canada",
+  IN: "الهند / India",
+  UNKNOWN: "غير معروف / Unknown",
+};
+
+const COUNTRY_FLAGS: { [key: string]: string } = {
+  SA: "🇸🇦",
+  EG: "🇪🇬",
+  AE: "🇦🇪",
+  US: "🇺🇸",
+  GB: "🇬🇧",
+  DZ: "🇩🇿",
+  MA: "🇲🇦",
+  IQ: "🇮🇶",
+  JO: "🇯🇴",
+  YE: "🇾🇪",
+  SY: "🇸🇾",
+  LY: "🇱🇾",
+  SD: "🇸🇩",
+  OM: "🇴🇲",
+  QA: "🇶🇦",
+  KW: "🇰🇼",
+  BH: "🇧🇭",
+  LB: "🇱🇧",
+  PS: "🇵🇸",
+  TN: "🇹🇳",
+  FR: "🇫🇷",
+  TR: "🇹🇷",
+  DE: "🇩🇪",
+  CA: "🇨🇦",
+  IN: "🇮🇳",
+  UNKNOWN: "🌐",
+};
+
+const formatElapsedTime = (isoStr?: string, currentLang?: 'ar' | 'en') => {
+  if (!isoStr) return '';
+  const now = new Date();
+  const date = new Date(isoStr);
+  const diffMs = now.getTime() - date.getTime();
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHr = Math.floor(diffMin / 60);
+
+  const isAr = currentLang === 'ar';
+  if (diffSec < 15) return isAr ? 'الآن' : 'Just now';
+  if (diffSec < 60) return isAr ? `منذ ${diffSec} ثانية` : `${diffSec}s ago`;
+  if (diffMin < 60) {
+    if (diffMin === 1) return isAr ? 'منذ دقيقة' : '1m ago';
+    if (diffMin === 2) return isAr ? 'منذ دقيقتين' : '2m ago';
+    return isAr ? `منذ ${diffMin} دقائق` : `${diffMin}m ago`;
+  }
+  if (diffHr < 24) {
+    if (diffHr === 1) return isAr ? 'منذ ساعة' : '1h ago';
+    if (diffHr === 2) return isAr ? 'منذ ساعتين' : '2h ago';
+    return isAr ? `منذ ${diffHr} ساعات` : `${diffHr}h ago`;
+  }
+  return date.toLocaleDateString(isAr ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric' });
+};
+
 export default function QRGenerator({ 
   lang = 'ar'
 }: { 
@@ -316,8 +403,10 @@ export default function QRGenerator({
 
   // Analytics tracking state
   const [scanCount, setScanCount] = useState<number>(0);
-  const [scanHistory, setScanHistory] = useState<Array<{ date: string; device: string }>>([]);
+  const [scanHistory, setScanHistory] = useState<Array<{ date: string; device: string; os?: string; country?: string; timestamp?: string }>>([]);
   const [isRefreshingStats, setIsRefreshingStats] = useState<boolean>(false);
+  const [analyticsResponse, setAnalyticsResponse] = useState<any>(null);
+  const [simulateSuccess, setSimulateSuccess] = useState<boolean>(false);
 
   const fetchScanStats = async (silent = false) => {
     if (!urlInput.trim() || !urlInfo.isValid) return;
@@ -326,6 +415,7 @@ export default function QRGenerator({
       const response = await fetch(`/api/analytics?tid=${trackingId}`);
       if (response.ok) {
         const data = await response.json();
+        setAnalyticsResponse(data);
         if (data.specificCode) {
           setScanCount(data.specificCode.total || 0);
           setScanHistory(data.specificCode.scans || []);
@@ -345,16 +435,27 @@ export default function QRGenerator({
     if (!urlInput.trim() || !urlInfo.isValid) return;
     try {
       setIsRefreshingStats(true);
-      const res = await fetch(`/api/track-scan`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tid: trackingId,
-          r: urlInput.trim(),
-          platform: urlInfo.platform || 'youtube'
-        })
+      
+      // Randomize country and device parameters to make the live demo dashboard interesting!
+      const countries = ['EG', 'SA', 'AE', 'DZ', 'MA', 'IQ', 'JO', 'US', 'GB', 'FR', 'TR', 'DE', 'CA', 'IN'];
+      const randomCountry = countries[Math.floor(Math.random() * countries.length)];
+      
+      const mockedUAs = [
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1', // iOS Mobile
+        'Mozilla/5.0 (Linux; Android 13; SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36', // Android Mobile
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36', // Windows Desktop
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36', // macOS Desktop
+        'Mozilla/5.0 (iPad; CPU OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1', // iPad Tablet
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36' // Linux Desktop
+      ];
+      const randomUA = mockedUAs[Math.floor(Math.random() * mockedUAs.length)];
+
+      const res = await fetch(`/api/track-scan?tid=${encodeURIComponent(trackingId)}&r=${encodeURIComponent(urlInput.trim())}&platform=${encodeURIComponent(urlInfo.platform || 'youtube')}&ua=${encodeURIComponent(randomUA)}&country=${encodeURIComponent(randomCountry)}`, {
+        method: 'POST'
       });
       if (res.ok) {
+        setSimulateSuccess(true);
+        setTimeout(() => setSimulateSuccess(false), 3500);
         await fetchScanStats(true);
       }
     } catch (err) {
@@ -374,6 +475,7 @@ export default function QRGenerator({
     } else {
       setScanCount(0);
       setScanHistory([]);
+      setAnalyticsResponse(null);
     }
     return () => {
       if (statInterval) clearInterval(statInterval);
@@ -1280,6 +1382,303 @@ export default function QRGenerator({
         </div>
 
 
+
+
+        {/* Module 5: Smart Scan Analytics Dashboard & Tracking */}
+        <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-100 space-y-6" id="module_smart_analytics">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2.5">
+              <span className="p-2 bg-blue-50 text-blue-600 rounded-xl relative">
+                <BarChart3 size={20} />
+                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" />
+                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full" />
+              </span>
+              <div>
+                <h2 className="text-xl font-bold font-arabic text-gray-800 flex items-center gap-1.5">
+                  {t.analyticsTitle}
+                </h2>
+                <p className="text-[11px] text-slate-600 font-arabic">
+                  {t.analyticsSub}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => fetchScanStats(false)}
+                disabled={isRefreshingStats || !urlInput.trim() || !urlInfo.isValid}
+                className="p-2 hover:bg-gray-100 rounded-xl border border-gray-150 text-gray-650 transition-all flex items-center gap-1.5 text-xs font-arabic font-semibold disabled:opacity-50 cursor-pointer"
+                type="button"
+                title={t.refreshStats}
+              >
+                <RotateCcw size={14} className={isRefreshingStats ? "animate-spin" : ""} />
+                <span>{lang === 'ar' ? 'تحديث' : 'Refresh'}</span>
+              </button>
+            </div>
+          </div>
+
+          {!urlInput.trim() || !urlInfo.isValid ? (
+            <div className="text-center py-8 px-4 border border-dashed border-gray-200 rounded-2xl bg-slate-50/50">
+              <BarChart3 className="mx-auto text-slate-300 mb-2" size={32} />
+              <p className="text-xs font-arabic text-slate-650 font-bold">
+                {lang === 'ar' ? 'الرجاء إدخال رابط صالح في الخطوة الأولى لتنشيط تتبع التحليلات!' : 'Please enter a valid link in Step 1 to activate live tracking analytics!'}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* Simulator Action Block */}
+              <div className="p-4 bg-blue-50/40 border border-blue-100 rounded-2xl space-y-3">
+                <div className="flex items-start gap-2.5">
+                  <span className="p-1.5 bg-blue-100 text-blue-700 rounded-lg mt-0.5 shrink-0">
+                    <Activity size={14} />
+                  </span>
+                  <div>
+                    <h4 className="text-xs font-extrabold text-blue-950 font-arabic">
+                      {lang === 'ar' ? 'تفاعل فوري عالي الدقة ورصد للمنصات' : 'High Fidelity Real-Time Redirections & Tracking'}
+                    </h4>
+                    <p className="text-[11px] text-blue-850 font-arabic leading-relaxed mt-0.5">
+                      {lang === 'ar'
+                        ? 'تتبع دول وموقع وقنوات الزوار للأندرويد والآيفون تلقائياً لكل رابط. يمكنك محاكاة عملية مسح سريعة بنقرة واحدة لتجربة لوحة التحكم الحية وفلترة الإحصاءات بالأسفل!'
+                        : 'Track viewer geolocations, devices, and OS statistics automatically. Generate simulated test scans here to trial the real-time panel dynamics!'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-center gap-2.5 pt-1">
+                  <button
+                    onClick={handleSimulateScan}
+                    disabled={isRefreshingStats}
+                    className="w-full sm:w-auto px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold font-arabic rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs border border-blue-700 font-arabic font-semibold"
+                    type="button"
+                  >
+                    <Sparkles size={14} />
+                    <span>{t.btnSimulateScan}</span>
+                  </button>
+                  <div className="text-[10px] text-slate-600 font-mono flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full inline-block animate-pulse" />
+                    <span>TID: {trackingId}</span>
+                  </div>
+                </div>
+
+                {simulateSuccess && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold rounded-xl text-[11px] font-arabic leading-relaxed flex items-center gap-1.5 animate-pulse"
+                  >
+                    <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
+                    <span>{t.simulatedScanSuccess}</span>
+                  </motion.div>
+                )}
+              </div>
+
+              {/* Main Total Metric Card */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="p-4 bg-slate-50 border border-gray-150 rounded-2xl text-center space-y-1">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block font-arabic font-semibold">
+                    {t.scansCount} {lang === 'ar' ? 'الكلّي' : 'Total'}
+                  </span>
+                  <div className="text-3xl font-extrabold text-gray-900 font-mono tracking-tight flex items-center justify-center gap-1.5">
+                    {scanCount}
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block animate-ping" />
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-50 border border-gray-150 rounded-2xl text-center space-y-1">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block font-arabic font-semibold">
+                    {lang === 'ar' ? 'الموقع الأبرز' : 'Primary Geolocation'}
+                  </span>
+                  <div className="text-sm font-extrabold text-gray-900 font-arabic truncate pt-1">
+                    {(() => {
+                      const specificData = analyticsResponse?.specificCode;
+                      if (!specificData || !specificData.countries || Object.keys(specificData.countries).length === 0) {
+                        return '—';
+                      }
+                      const sortedCountries = Object.entries(specificData.countries).sort((a: any, b: any) => b[1] - a[1]);
+                      const topCode = sortedCountries[0][0];
+                      const flag = COUNTRY_FLAGS[topCode] || '🌐';
+                      const desc = COUNTRY_MAP[topCode] || topCode;
+                      return `${flag} ${desc.split(' / ')[0]}`;
+                    })()}
+                  </div>
+                </div>
+
+                <div className="p-4 bg-slate-50 border border-gray-150 rounded-2xl text-center space-y-1">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block font-arabic font-semibold">
+                    {lang === 'ar' ? 'الجهاز الرئيسي' : 'Primary Device'}
+                  </span>
+                  <div className="text-sm font-extrabold text-gray-900 font-arabic truncate pt-1">
+                    {(() => {
+                      const specificData = analyticsResponse?.specificCode;
+                      if (!specificData || !specificData.devices || Object.keys(specificData.devices).length === 0) {
+                        return '—';
+                      }
+                      const sortedDevices = Object.entries(specificData.devices).sort((a: any, b: any) => b[1] - a[1]);
+                      const topDevice = sortedDevices[0][0];
+                      return topDevice;
+                    })()}
+                  </div>
+                </div>
+              </div>
+
+              {scanCount === 0 ? (
+                <div className="text-center py-10 px-4 border border-dashed border-gray-150 rounded-2xl bg-slate-50/30">
+                  <Activity className="mx-auto text-slate-350 mb-3 animate-pulse text-slate-400" size={32} />
+                  <p className="text-xs font-arabic font-extrabold text-gray-700 leading-relaxed max-w-sm mx-auto">
+                    {t.scansZero}
+                  </p>
+                  <p className="text-[10px] text-slate-650 font-arabic mt-1">
+                    {lang === 'ar' ? 'امسح الرمز بكاميرا هاتفك أو انقر محاكاة المسح لتجربة لوحة التحكم تزامناً وحياً!' : 'Try scanning the code with your phone camera or hit click simulate scanning to test live calculations!'}
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5" id="analytics_metrics_grid">
+                  
+                  {/* Top Countries Card */}
+                  <div className="p-5 border border-gray-150 bg-slate-50/50 rounded-2xl space-y-3">
+                    <h3 className="text-xs font-extrabold text-gray-800 font-arabic flex items-center gap-1.5 border-b border-gray-100 pb-2">
+                      <Globe size={14} className="text-blue-600" />
+                      <span>{t.scansByCountry}</span>
+                    </h3>
+                    <div className="space-y-2.5 max-h-[160px] overflow-y-auto pr-1">
+                      {(() => {
+                        const specificData = analyticsResponse?.specificCode;
+                        if (!specificData || !specificData.countries) return null;
+                        const sorted = Object.entries(specificData.countries).sort((a: any, b: any) => b[1] - a[1]);
+                        return sorted.map(([cCode, count]: [string, any]) => {
+                          const pct = Math.round((count / scanCount) * 100);
+                          const cleanName = COUNTRY_MAP[cCode] || cCode;
+                          const flag = COUNTRY_FLAGS[cCode] || '🌐';
+                          return (
+                            <div key={cCode} className="space-y-1">
+                              <div className="flex items-center justify-between text-[11px] font-arabic font-bold text-gray-750">
+                                <span className="flex items-center gap-1.5">
+                                  <span>{flag}</span>
+                                  <span>{cleanName.split(' / ')[lang === 'ar' ? 0 : 1]}</span>
+                                </span>
+                                <span className="font-mono text-gray-900">{count} ({pct}%)</span>
+                              </div>
+                              <div className="w-full h-1.5 bg-gray-200/60 rounded-full overflow-hidden">
+                                <div className="h-full bg-blue-600 rounded-full" style={{ width: `${pct}%` }} />
+                              </div>
+                            </div>
+                          );
+                        });
+                      })()}
+                    </div>
+                  </div>
+
+                  {/* Systems and Devices Card */}
+                  <div className="p-5 border border-gray-150 bg-slate-50/50 rounded-2xl space-y-4">
+                    
+                    {/* Device distributions */}
+                    <div className="space-y-2">
+                      <h3 className="text-xs font-extrabold text-gray-800 font-arabic flex items-center gap-1.5 border-b border-gray-100 pb-2">
+                        <Smartphone size={14} className="text-indigo-600" />
+                        <span>{t.scansByDevice}</span>
+                      </h3>
+                      <div className="space-y-2 max-h-[70px] overflow-y-auto">
+                        {(() => {
+                          const specificData = analyticsResponse?.specificCode;
+                          if (!specificData || !specificData.devices) return null;
+                          const sorted = Object.entries(specificData.devices).sort((a: any, b: any) => b[1] - a[1]);
+                          return sorted.map(([device, count]: [string, any]) => {
+                            const pct = Math.round((count / scanCount) * 100);
+                            return (
+                              <div key={device} className="space-y-1">
+                                <div className="flex items-center justify-between text-[10px] font-arabic font-semibold text-gray-750">
+                                  <span>📱 {device}</span>
+                                  <span className="font-mono text-gray-900">{count} ({pct}%)</span>
+                                </div>
+                                <div className="w-full h-1 bg-gray-200/60 rounded-full overflow-hidden">
+                                  <div className="h-full bg-indigo-600 rounded-full" style={{ width: `${pct}%` }} />
+                                </div>
+                              </div>
+                            );
+                          });
+                        })()}
+                      </div>
+                    </div>
+
+                    {/* Operating Systems */}
+                    <div className="space-y-2">
+                      <h3 className="text-xs font-extrabold text-gray-800 font-arabic flex items-center gap-1.5 border-b border-gray-100 pb-2">
+                        <Monitor size={14} className="text-rose-600" />
+                        <span>{t.scansByOS}</span>
+                      </h3>
+                      <div className="space-y-2 max-h-[70px] overflow-y-auto">
+                        {(() => {
+                          const specificData = analyticsResponse?.specificCode;
+                          if (!specificData || !specificData.osList) return null;
+                          const sorted = Object.entries(specificData.osList).sort((a: any, b: any) => b[1] - a[1]);
+                          return sorted.map(([osName, count]: [string, any]) => {
+                            const pct = Math.round((count / scanCount) * 100);
+                            return (
+                              <div key={osName} className="space-y-1">
+                                <div className="flex items-center justify-between text-[10px] font-arabic font-semibold text-gray-750">
+                                  <span>💻 {osName}</span>
+                                  <span className="font-mono text-gray-900">{count} ({pct}%)</span>
+                                </div>
+                                <div className="w-full h-1 bg-gray-200/60 rounded-full overflow-hidden">
+                                  <div className="h-full bg-rose-600 rounded-full" style={{ width: `${pct}%` }} />
+                                </div>
+                              </div>
+                            );
+                          });
+                        })()}
+                      </div>
+                    </div>
+
+                  </div>
+
+                </div>
+              )}
+
+              {/* Recent Scans Activity Log Table */}
+              {scanCount > 0 && scanHistory.length > 0 && (
+                <div className="p-5 border border-gray-150 bg-slate-50/50 rounded-2xl space-y-3">
+                  <h3 className="text-xs font-extrabold text-gray-800 font-arabic flex items-center gap-1.5">
+                    <Clock size={14} className="text-slate-650 animate-pulse" />
+                    <span>{lang === 'ar' ? 'سجل العمليات الأحدث (تحديث تلقائي مفعّل)' : 'Recent Scan Stream Log (Live Updates)'}</span>
+                  </h3>
+                  <div className="border border-gray-100 rounded-xl overflow-hidden bg-white">
+                    <table className="w-full text-right font-arabic text-[11px] leading-normal" id="scans_stream_log_table">
+                      <thead>
+                        <tr className="bg-slate-50 text-slate-650 border-b border-gray-100 text-[10px] font-bold">
+                          <th className="py-2.5 px-3">{lang === 'ar' ? 'البلد' : 'Country'}</th>
+                          <th className="py-2.5 px-3">{lang === 'ar' ? 'الجهاز' : 'Device'}</th>
+                          <th className="py-2.5 px-3">{lang === 'ar' ? 'نظام التشغيل' : 'OS'}</th>
+                          <th className="py-2.5 px-3 text-left pl-4">{lang === 'ar' ? 'الوقت' : 'Time'}</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 font-medium">
+                        {scanHistory.slice(0, 10).map((scan, sIdx) => {
+                          const flag = COUNTRY_FLAGS[scan.country || ''] || '🌐';
+                          const countryName = COUNTRY_MAP[scan.country || ''] || scan.country || 'UNKNOWN';
+                          return (
+                            <tr key={sIdx} className="hover:bg-slate-50/60 transition-colors">
+                              <td className="py-2.5 px-3 text-gray-800">
+                                <span className="flex items-center gap-1">
+                                  <span>{flag}</span>
+                                  <span>{countryName.split(' / ')[lang === 'ar' ? 0 : 1]}</span>
+                                </span>
+                              </td>
+                              <td className="py-2.5 px-3 text-slate-800 font-mono text-[10px]">{scan.device || 'Desktop'}</td>
+                              <td className="py-2.5 px-3 text-slate-800 font-mono text-[10px]">{scan.os || 'Other'}</td>
+                              <td className="py-2.5 px-3 text-left pl-4 text-slate-600 font-semibold">
+                                {formatElapsedTime(scan.timestamp || scan.date, lang)}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+            </div>
+          )}
+        </div>
 
 
       </div>

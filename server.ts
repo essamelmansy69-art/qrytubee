@@ -15,14 +15,51 @@ async function startServer() {
   // API MIDDLEWARE / ROUTES
   // Simple in-memory storage for analytics, flushed to analytics.json asynchronously
   const ANALYTICS_FILE = path.join(process.cwd(), "analytics.json");
+  
+  const COUNTRY_MAP = {
+    "EG": { ar: "مصر", en: "Egypt", flag: "🇪🇬" },
+    "SA": { ar: "المملكة العربية السعودية", en: "Saudi Arabia", flag: "🇸🇦" },
+    "AE": { ar: "الإمارات العربية المتحدة", en: "United Arab Emirates", flag: "🇦🇪" },
+    "DZ": { ar: "الجزائر", en: "Algeria", flag: "🇩🇿" },
+    "MA": { ar: "المغرب", en: "Morocco", flag: "🇲🇦" },
+    "IQ": { ar: "العراق", en: "Iraq", flag: "🇮🇶" },
+    "SD": { ar: "السودان", en: "Sudan", flag: "🇸🇩" },
+    "YE": { ar: "اليمن", en: "Yemen", flag: "🇾🇪" },
+    "SY": { ar: "سوريا", en: "Syria", flag: "🇸🇾" },
+    "JO": { ar: "الأردن", en: "Jordan", flag: "🇯🇴" },
+    "TN": { ar: "تونس", en: "Tunisia", flag: "🇹🇳" },
+    "LY": { ar: "ليبيا", en: "Libya", flag: "🇱🇾" },
+    "PS": { ar: "فلسطين", en: "Palestine", flag: "🇵🇸" },
+    "LB": { ar: "لبنان", en: "Lebanon", flag: "🇱🇧" },
+    "OM": { ar: "عمان", en: "Oman", flag: "🇴🇲" },
+    "KW": { ar: "الكويت", en: "Kuwait", flag: "🇰🇼" },
+    "QA": { ar: "قطر", en: "Qatar", flag: "🇶🇦" },
+    "BH": { ar: "البحرين", en: "Bahrain", flag: "🇧🇭" },
+    "US": { ar: "الولايات المتحدة", en: "United States", flag: "🇺🇸" },
+    "GB": { ar: "المملكة المتحدة", en: "United Kingdom", flag: "🇬🇧" },
+    "DE": { ar: "ألمانيا", en: "Germany", flag: "🇩🇪" },
+    "FR": { ar: "فرنسا", en: "France", flag: "🇫🇷" },
+    "TR": { ar: "تركيا", en: "Turkey", flag: "🇹🇷" },
+    "CA": { ar: "كندا", en: "Canada", flag: "🇨🇦" },
+    "AU": { ar: "أستراليا", en: "Australia", flag: "🇦🇺" },
+    "IN": { ar: "الهند", en: "India", flag: "🇮🇳" },
+    "UNKNOWN": { ar: "غير معروف", en: "Unknown", flag: "🌐" }
+  };
+
   interface ScanSample {
     date: string;
     device: string;
+    os?: string;
+    country?: string;
+    timestamp?: string;
   }
   interface CodeAnalytics {
     total: number;
     target: string;
     platform: string;
+    countries?: Record<string, number>;
+    devices?: Record<string, number>;
+    osList?: Record<string, number>;
     scans: ScanSample[];
   }
   interface RecentScan {
@@ -31,19 +68,93 @@ async function startServer() {
     target: string;
     platform: string;
     device: string;
+    os?: string;
+    country?: string;
   }
   interface AnalyticsStore {
     totalScans: number;
     scansByPlatform: Record<string, number>;
     scansByDevice: Record<string, number>;
+    scansByOS?: Record<string, number>;
+    scansByCountry?: Record<string, number>;
     scansByCode: Record<string, CodeAnalytics>;
     recentScans: RecentScan[];
+  }
+
+  function parseUserAgent(ua: string): { device: string; os: string } {
+    const lowercaseUa = (ua || "").toLowerCase();
+    
+    // 1. Detect Operating System (OS)
+    let os = "Other";
+    if (lowercaseUa.includes("windows")) {
+      os = "Windows";
+    } else if (lowercaseUa.includes("android")) {
+      os = "Android";
+    } else if (lowercaseUa.includes("iphone") || lowercaseUa.includes("ipad") || lowercaseUa.includes("ipod")) {
+      os = "iOS";
+    } else if (lowercaseUa.includes("macintosh") || lowercaseUa.includes("mac os x")) {
+      os = "macOS";
+    } else if (lowercaseUa.includes("linux")) {
+      os = "Linux";
+    }
+    
+    // 2. Detect Device Type Compat
+    let device = "Desktop";
+    if (lowercaseUa.includes("iphone") || lowercaseUa.includes("ipad") || lowercaseUa.includes("ipod")) {
+      device = "iOS";
+    } else if (lowercaseUa.includes("android")) {
+      device = "Android";
+    }
+    
+    return { device, os };
+  }
+
+  function getCountryCode(req: any): string {
+    // Enable simulation overrides for testing
+    const overrideCountry = req.query?.country || req.body?.country;
+    if (overrideCountry) {
+      const code = overrideCountry.toString().toUpperCase().trim();
+      if (COUNTRY_MAP.hasOwnProperty(code)) return code;
+    }
+
+    // Check standard GCP / Cloud Run and Cloudflare geo headers
+    const rawCountry = req.headers["x-appengine-country"] || 
+                       req.headers["cf-ipcountry"] || 
+                       req.headers["x-country-code"] || 
+                       req.headers["x-visitor-country"];
+                       
+    if (rawCountry) {
+      const code = rawCountry.toString().toUpperCase().trim();
+      return COUNTRY_MAP.hasOwnProperty(code) ? code : "UNKNOWN";
+    }
+    
+    // Fallback to parsing Accept-Language header (e.g. ar-EG, en-SA)
+    const acceptLang = req.headers["accept-language"] || "";
+    const match = acceptLang.match(/([a-z]{2})-([a-z]{2})/i);
+    if (match && match[2]) {
+      const parsedCode = match[2].toUpperCase();
+      if (COUNTRY_MAP.hasOwnProperty(parsedCode)) {
+        return parsedCode;
+      }
+    }
+    
+    // Generic system fallback by primary language prefix
+    const primaryLang = acceptLang.split(",")[0].split("-")[0].toLowerCase().trim();
+    if (primaryLang === "ar") {
+      return "EG"; // Largest Arabic userbase fallback
+    } else if (primaryLang === "en") {
+      return "US";
+    }
+    
+    return "UNKNOWN";
   }
 
   let analyticsData: AnalyticsStore = {
     totalScans: 0,
     scansByPlatform: {},
     scansByDevice: {},
+    scansByOS: {},
+    scansByCountry: {},
     scansByCode: {},
     recentScans: []
   };
@@ -82,14 +193,10 @@ async function startServer() {
     const target = (req.query.r || req.body?.r || "").toString() || "https://youtube.com";
     const platform = (req.query.platform || req.body?.platform || "youtube").toString();
     
-    // Parse user agent for device categorisation
-    const userAgent = (req.headers["user-agent"] || "").toLowerCase();
-    let device = "Desktop";
-    if (userAgent.includes("iphone") || userAgent.includes("ipad") || userAgent.includes("ipod")) {
-      device = "iOS";
-    } else if (userAgent.includes("android")) {
-      device = "Android";
-    }
+    // Parse user agent for device and OS categorisation
+    const userAgent = (req.query.ua || req.body?.ua || req.headers["user-agent"] || "").toString().toLowerCase();
+    const { device, os } = parseUserAgent(userAgent);
+    const country = getCountryCode(req);
 
     const timestamp = new Date().toISOString();
     const dateStr = timestamp.split("T")[0]; // YYYY-MM-DD
@@ -97,6 +204,8 @@ async function startServer() {
     // Ensure state collections are ready
     if (!analyticsData.scansByPlatform) analyticsData.scansByPlatform = {};
     if (!analyticsData.scansByDevice) analyticsData.scansByDevice = {};
+    if (!analyticsData.scansByOS) analyticsData.scansByOS = {};
+    if (!analyticsData.scansByCountry) analyticsData.scansByCountry = {};
     if (!analyticsData.scansByCode) analyticsData.scansByCode = {};
     if (!analyticsData.recentScans) analyticsData.recentScans = [];
 
@@ -104,6 +213,8 @@ async function startServer() {
     analyticsData.totalScans = (analyticsData.totalScans || 0) + 1;
     analyticsData.scansByPlatform[platform] = (analyticsData.scansByPlatform[platform] || 0) + 1;
     analyticsData.scansByDevice[device] = (analyticsData.scansByDevice[device] || 0) + 1;
+    analyticsData.scansByOS[os] = (analyticsData.scansByOS[os] || 0) + 1;
+    analyticsData.scansByCountry[country] = (analyticsData.scansByCountry[country] || 0) + 1;
 
     // Update code-specific analytics
     if (!analyticsData.scansByCode[tid]) {
@@ -111,6 +222,9 @@ async function startServer() {
         total: 0,
         target: target,
         platform: platform,
+        countries: {},
+        devices: {},
+        osList: {},
         scans: []
       };
     }
@@ -120,10 +234,20 @@ async function startServer() {
     codeObj.target = target;
     codeObj.platform = platform;
     if (!codeObj.scans) codeObj.scans = [];
+    if (!codeObj.countries) codeObj.countries = {};
+    if (!codeObj.devices) codeObj.devices = {};
+    if (!codeObj.osList) codeObj.osList = {};
+    
+    codeObj.countries[country] = (codeObj.countries[country] || 0) + 1;
+    codeObj.devices[device] = (codeObj.devices[device] || 0) + 1;
+    codeObj.osList[os] = (codeObj.osList[os] || 0) + 1;
     
     codeObj.scans.push({
       date: dateStr,
-      device: device
+      device: device,
+      os: os,
+      country: country,
+      timestamp: timestamp
     });
     if (codeObj.scans.length > 50) {
       codeObj.scans.shift();
@@ -135,7 +259,9 @@ async function startServer() {
       tid,
       target,
       platform,
-      device
+      device,
+      os,
+      country
     });
     if (analyticsData.recentScans.length > 30) {
       analyticsData.recentScans.pop();
@@ -156,7 +282,10 @@ async function startServer() {
         id,
         total: info.total,
         target: info.target,
-        platform: info.platform
+        platform: info.platform,
+        countries: info.countries || {},
+        devices: info.devices || {},
+        osList: info.osList || {}
       }))
       .sort((a, b) => b.total - a.total)
       .slice(0, limit);
@@ -165,16 +294,34 @@ async function startServer() {
     const specificCodeId = req.query.tid as string;
     let specificCodeData = null;
     if (specificCodeId && analyticsData.scansByCode && analyticsData.scansByCode[specificCodeId]) {
-      specificCodeData = analyticsData.scansByCode[specificCodeId];
+      const info = analyticsData.scansByCode[specificCodeId];
+      specificCodeData = {
+        ...info,
+        countries: info.countries || {},
+        devices: info.devices || {},
+        osList: info.osList || {},
+        scans: (info.scans || []).map(sc => ({
+          ...sc,
+          os: sc.os || "Other",
+          country: sc.country || "UNKNOWN"
+        }))
+      };
     }
 
     res.json({
       totalScans: analyticsData.totalScans || 0,
       scansByPlatform: analyticsData.scansByPlatform || {},
       scansByDevice: analyticsData.scansByDevice || {},
-      recentScans: (analyticsData.recentScans || []).slice(0, 12),
+      scansByOS: analyticsData.scansByOS || {},
+      scansByCountry: analyticsData.scansByCountry || {},
+      recentScans: (analyticsData.recentScans || []).slice(0, 12).map(scan => ({
+        ...scan,
+        os: scan.os || "Other",
+        country: scan.country || "UNKNOWN"
+      })),
       topCodes,
-      specificCode: specificCodeData
+      specificCode: specificCodeData,
+      countryMap: COUNTRY_MAP
     });
   });
 
