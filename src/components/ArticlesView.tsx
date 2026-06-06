@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { articlesData, Article } from '../data/seoContent';
 import { translations } from '../translations';
 import { ArrowLeft, ArrowRight, Calendar, Clock, BookOpen, Share2 } from 'lucide-react';
@@ -15,6 +15,104 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
   const articles = articlesData[lang];
 
   const selectedArticle = articles.find(a => a.id.toLowerCase() === selectedArticleId?.toLowerCase());
+
+  // Dynamic SEO 2026 Schema JSON-LD injection
+  useEffect(() => {
+    if (!selectedArticle) {
+      const existing = document.getElementById('seo-article-schema');
+      if (existing) existing.remove();
+      return;
+    }
+
+    const articleUrl = `${window.location.origin}/articles/${selectedArticle.id}`;
+    const schemaMarkup: any = {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": articleUrl
+      },
+      "headline": selectedArticle.title,
+      "description": selectedArticle.excerpt,
+      "datePublished": selectedArticle.date,
+      "dateModified": selectedArticle.date,
+      "author": {
+        "@type": "Organization",
+        "name": "Qrytube",
+        "url": window.location.origin
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Qrytube",
+        "logo": {
+          "@type": "ImageObject",
+          "url": `${window.location.origin}/logo.png`
+        }
+      }
+    };
+
+    if (selectedArticle.image) {
+      schemaMarkup.image = [selectedArticle.image];
+    }
+
+    // Enhance structured schema markup specifically for our target 2026 Instagram Followers SEO article
+    if (selectedArticle.id === 'instagram-followers-qr') {
+      const faqSchema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "كيف يمكنني عمل كود QR لحساب انستقرام يفتح بالتطبيق مباشرة؟",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "يمكنك القيام بذلك عبر استخدام منصة Qrytube المجانية عن طريق لصق رابط حسابك التقليدي، ليتكفل الموقع بتحويل الرابط مباشرة إلى رابط ذكي عميق (Deep Link) وتوليد كود كيو أر متناسق وجاهز للتصميم والطباعة يفتح تطبيق انستجرام الرسمي فوراً."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "لماذا لا تنجح أكواد الـ QR العادية في زيادة المتابعين على انستجرام؟",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "لأنها تفتح الحساب في متصفحات الطرف الثالث الداخلية للشبكات الاجتماعية، والتي تطلب من المستخدمين كتابة بريدهم وكلمات المرور الخاصة بهم للتفاعل ومتابعة الحساب، مما يتسبب في مغادرة 90% من الزوار بدون إجراء أي متابعة."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "هل تدعم منصة Qrytube تحميل كود الـ QR بصيغ جاهزة للطباعة؟",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "نعم، تتيح لك المنصة تحميل الكود بصيغ ناقلية متطورة مثل SVG وجودة عالية وضوح PNG لضمان الحفاظ على الجمالية والوضوح دون أي فقدان بكسلي أثناء طباعته على اللافتات والمنتجات."
+            }
+          }
+        ]
+      };
+
+      const schemaArray = [schemaMarkup, faqSchema];
+      let script = document.getElementById('seo-article-schema') as HTMLScriptElement;
+      if (!script) {
+        script = document.createElement('script');
+        script.id = 'seo-article-schema';
+        script.type = 'application/ld+json';
+        document.head.appendChild(script);
+      }
+      script.text = JSON.stringify(schemaArray);
+    } else {
+      let script = document.getElementById('seo-article-schema') as HTMLScriptElement;
+      if (!script) {
+        script = document.createElement('script');
+        script.id = 'seo-article-schema';
+        script.type = 'application/ld+json';
+        document.head.appendChild(script);
+      }
+      script.text = JSON.stringify(schemaMarkup);
+    }
+
+    return () => {
+      const existing = document.getElementById('seo-article-schema');
+      if (existing) existing.remove();
+    };
+  }, [selectedArticle]);
 
   // Simple Markdown content renderer for articles to avoid external parser bugs
   const renderMarkdown = (text: string) => {
@@ -161,6 +259,18 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
         {/* Decorative banner */}
         <div className="h-1 bg-gradient-to-r from-red-500 via-amber-400 to-blue-500 mb-8 rounded-full" />
 
+        {/* Dynamic Image Banner */}
+        {selectedArticle.image && (
+          <div className="mb-8 rounded-3xl overflow-hidden aspect-video border border-slate-100 shadow-xs max-h-[360px] flex items-center justify-center bg-slate-50 relative">
+            <img
+              src={selectedArticle.image}
+              alt={selectedArticle.title}
+              className="object-cover w-full h-full"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+        )}
+
         {/* Dynamic content rendering */}
         <div className="space-y-1 mb-10 prose prose-slate max-w-none">
           {renderMarkdown(selectedArticle.content)}
@@ -221,6 +331,18 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
               }`}
             >
               <div className="space-y-3">
+                {/* Optional Card Image cover */}
+                {article.image && (
+                  <div className="mb-4 rounded-2xl overflow-hidden aspect-video border border-slate-100 bg-slate-50 relative">
+                    <img
+                      src={article.image}
+                      alt={article.title}
+                      className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-350"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                )}
+                
                 {/* Meta details */}
                 <div className="flex items-center justify-between">
                   <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded ${
