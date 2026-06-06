@@ -4,121 +4,47 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { supabase, testSupabaseConnection } from './supabaseClient';
-import QRCode from 'qrcode';
+import { buildDeepLink, parseYoutubeUrl, extractInstagramUsername, extractTiktokUsername, convertUrlToDeepLink } from './utils';
 import { 
-  Link2, 
+  Youtube, 
   Sparkles, 
-  Copy, 
-  Download, 
-  Check, 
-  AlertTriangle, 
-  ExternalLink, 
-  Globe, 
-  Moon, 
-  Sun, 
-  Database, 
-  Loader2, 
-  QrCode,
-  Share2,
-  Trash2,
-  ArrowRight
+  Smartphone, 
+  Tv, 
+  Flame, 
+  TrendingUp, 
+  HelpCircle, 
+  Github, 
+  CheckCircle2, 
+  Share2, 
+  ShieldCheck, 
+  Layers,
+  Languages,
+  BookOpen,
+  FileText,
+  ShieldAlert,
+  Facebook,
+  Instagram,
+  Music,
+  Coins,
+  Banknote,
+  Play,
+  ArrowRight,
+  Cloud,
+  Sun,
+  Moon
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
+import { translations } from './translations';
+import FooterView from './components/FooterView';
+import QrytubeLogo from './components/QrytubeLogo';
+import { articlesData } from './data/seoContent';
 
-// Multilingual support - Arabic & English
-const localTranslations = {
-  ar: {
-    title: "Qrytube - مولد الروابط وأكواد QR الديناميكية",
-    subtitle: "نظام ذكي متكامل لتقصير الروابط ومزامنتها لحظياً مع Supabase",
-    inputLabel: "أدخل الرابط الطويل المراد تقصيره",
-    inputPlaceholder: "مثال: https://youtube.com/watch?v=...",
-    btnGenerate: "توليد الرابط القصير والـ QR كود",
-    btnGenerating: "جاري المعالجة والأرشفة...",
-    customSlugLabel: "خصّص اسم الرابط القصير (اختياري)",
-    customSlugPlaceholder: "مثال: my-video",
-    resultTitle: "الرمز والرابط الذكي جاهزان!",
-    shortLink: "الرابط المختصر الفعال:",
-    originalLink: "الرابط الأصلي:",
-    copyBtn: "نسخ الرابط",
-    copied: "تم النسخ!",
-    downloadBtn: "تحميل الـ QR كود (PNG)",
-    openBtn: "زيارة الرابط المختصر",
-    errorTitle: "حدث خطأ أثناء العمل:",
-    successSave: "✓ تم الحفظ والمزامنة بنجاح مع Supabase!",
-    dbStatus: "حالة قاعدة البيانات:",
-    dbConnected: "متصل بـ Supabase",
-    dbUnconfigured: "غير مهيأ - استخدم المكونات الافتراضية",
-    dbError: "فشل الاتصال بـ Supabase",
-    invalidUrl: "يرجى إدخال رابط مغذى ببروتوكول صحيح (http:// أو https://)",
-    redirecting: "جاري تحويلك الآن...",
-    redirectDesc: "برمجيات التوجيه الذكية تقوم بفتح الرابط الأصلي، انتظر لحظة واحدة...",
-    slugNotFound: "العنوان القصير غير موجود!",
-    slugNotFoundDesc: "نأسف، لم نجد أي رابط مخزن يطابق الرمز الذي تبحث عنه في قاعدة البيانات.",
-    backHomeBtn: "العودة للرئيسية",
-    recentHeading: "الروابط الأخيرة التي قمت بتقصيرها",
-    noRecent: "لا توجد روابط منشأة حديثاً في هذه الجلسة.",
-    clearHistory: "مسح السجل المؤقت",
-    copiedShortLink: "تم نسخ الرابط القصير للمحافظة!",
-    copiedOriginalLink: "تم نسخ الرابط الأصلي للمحافظة!"
-  },
-  en: {
-    title: "Qrytube - Dynamic QR & Short Link Generator",
-    subtitle: "A smart system to shorten URLs and sync them in real-time with Supabase",
-    inputLabel: "Enter the long URL to shorten",
-    inputPlaceholder: "Example: https://youtube.com/watch?v=...",
-    btnGenerate: "Generate Short Link & QR Code",
-    btnGenerating: "Processing and Archiving...",
-    customSlugLabel: "Customize short slug (Optional)",
-    customSlugPlaceholder: "Example: my-video",
-    resultTitle: "Smart Link & QR Ready!",
-    shortLink: "Shortened Smart Link:",
-    originalLink: "Original URL:",
-    copyBtn: "Copy Link",
-    copied: "Copied!",
-    downloadBtn: "Download QR Code (PNG)",
-    openBtn: "Visit Short Link",
-    errorTitle: "An error occurred:",
-    successSave: "✓ Saved and synced successfully with Supabase!",
-    dbStatus: "Database Status:",
-    dbConnected: "Connected to Supabase",
-    dbUnconfigured: "Unconfigured - Using stand-alone placeholders",
-    dbError: "Supabase connection failed",
-    invalidUrl: "Please enter a valid URL starting with http:// or https://",
-    redirecting: "Redirecting you now...",
-    redirectDesc: "Smart routing software is opening the target URL, please wait...",
-    slugNotFound: "Short Link Not Found!",
-    slugNotFoundDesc: "Sorry, we could not find any URL matching this short code in our database.",
-    backHomeBtn: "Back to Home",
-    recentHeading: "Recently Shortened Links",
-    noRecent: "No recently generated links in this session.",
-    clearHistory: "Clear session history",
-    copiedShortLink: "Short link copied to clipboard!",
-    copiedOriginalLink: "Original link copied to clipboard!"
-  }
-};
-
-interface LocalizedItem {
-  id: string;
-  originalUrl: string;
-  slug: string;
-  shortUrl: string;
-  qrDataUrl: string;
-  createdAt: string;
-}
+const QRGenerator = React.lazy(() => import('./components/QRGenerator'));
+const ArticlesView = React.lazy(() => import('./components/ArticlesView'));
+const LegalView = React.lazy(() => import('./components/LegalView'));
+const FAQView = React.lazy(() => import('./components/FAQView'));
 
 export default function App() {
-  const [lang, setLang] = useState<'ar' | 'en'>(() => {
-    try {
-      const saved = localStorage.getItem('qr_language');
-      if (saved === 'en' || saved === 'ar') return saved;
-      const sysLang = navigator.language || '';
-      return sysLang.toLowerCase().startsWith('ar') ? 'ar' : 'en';
-    } catch (_) {
-      return 'ar';
-    }
-  });
-
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     try {
       const saved = localStorage.getItem('theme');
@@ -129,45 +55,6 @@ export default function App() {
     }
   });
 
-  // URL routing states
-  const [isRedirecting, setIsRedirecting] = useState(false);
-  const [redirectError, setRedirectError] = useState<string | null>(null);
-
-  // Database Connection Status
-  const [dbStatus, setDbStatus] = useState<'connected' | 'unconfigured' | 'error'>('unconfigured');
-  const [dbDetails, setDbDetails] = useState<string>('');
-
-  // Main Generator States
-  const [urlInput, setUrlInput] = useState('');
-  const [customSlug, setCustomSlug] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [errorText, setErrorText] = useState<string | null>(null);
-  const [successText, setSuccessText] = useState<string | null>(null);
-
-  // Output QR Code & Shortlink Status
-  const [activeResult, setActiveResult] = useState<{
-    originalUrl: string;
-    slug: string;
-    shortUrl: string;
-    qrDataUrl: string;
-  } | null>(null);
-
-  // Session History for instant user satisfaction
-  const [recentLinks, setRecentLinks] = useState<LocalizedItem[]>(() => {
-    try {
-      const saved = localStorage.getItem('qrytube_recent');
-      return saved ? JSON.parse(saved) : [];
-    } catch (_) {
-      return [];
-    }
-  });
-
-  // Track copy feedback state
-  const [copiedField, setCopiedField] = useState<'short' | 'original' | null>(null);
-
-  const t = localTranslations[lang];
-
-  // Apply Theme class
   useEffect(() => {
     try {
       if (theme === 'dark') {
@@ -179,720 +66,888 @@ export default function App() {
     } catch (_) {}
   }, [theme]);
 
-  // Adjust Document direction on Language Change
+  const [lang, setLang] = useState<'ar' | 'en'>(() => {
+    // Check URL Parameter first (highest priority)
+    try {
+      const queryParams = new URL(window.location.href).searchParams;
+      const urlLang = queryParams.get('lang');
+      if (urlLang === 'en') return 'en';
+      if (urlLang === 'ar') return 'ar';
+    } catch (_) {}
+
+    const saved = localStorage.getItem('qr_language');
+    if (saved === 'en' || saved === 'ar') return saved;
+
+    // Detect visitor's language
+    try {
+      const systemLanguages = navigator.languages || [];
+      const hasArabicPreference = systemLanguages.some(l => l.toLowerCase().startsWith('ar'));
+      const mainBrowserLang = (navigator.language || (navigator as any).userLanguage || '').toLowerCase();
+      
+      if (hasArabicPreference || mainBrowserLang.startsWith('ar')) {
+        return 'ar';
+      } else {
+        // Default to English for foreigners (any non-Arabic language)
+        return 'en';
+      }
+    } catch (e) {
+      // safe fallback
+    }
+    return 'ar';
+  });
+
+  const [activeTab, setActiveTab] = useState<'generator' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact'>(() => {
+    try {
+      const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
+      if (path === 'terms') return 'terms';
+      if (path === 'privacy') return 'privacy';
+      if (path === 'about') return 'about';
+      if (path === 'contact') return 'contact';
+      if (path === 'articles' || path.startsWith('articles/')) return 'articles';
+    } catch (_) {}
+    return 'generator';
+  });
+
+  const [selectedArticleId, setSelectedArticleId] = useState<string | null>(() => {
+    try {
+      const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
+      if (path.startsWith('articles/')) {
+        return path.replace('articles/', '');
+      }
+    } catch (_) {}
+    return null;
+  });
+
   useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     localStorage.setItem('qr_language', lang);
-  }, [lang]);
 
-  // Handle URL Redirection Router
-  useEffect(() => {
-    const handleNavigation = async () => {
-      const path = window.location.pathname;
-      // Capture anything after /r/ or /s/ or direct /[slug]
-      const match = path.match(/^\/(?:r|s)?\/?([a-zA-Z0-9_-]{3,20})$/);
-      
-      if (match) {
-        const slug = match[1];
-        console.log('[Router] Detected short slug route:', slug);
-        setIsRedirecting(true);
+    // Calculate page-specific Title and Description
+    let title = "";
+    let desc = "";
 
-        try {
-          // Attempt self-healing fetch from Supabase
-          const fetchResult = (await safeFetchFromSupabase(slug)) as any;
-          if (fetchResult.success && fetchResult.originalUrl) {
-            console.log('[Router] Redirecting to original URL:', fetchResult.originalUrl);
-            window.location.replace(fetchResult.originalUrl);
-          } else {
-            console.warn('[Router] Short slug not found in database:', slug);
-            setRedirectError(slug);
-          }
-        } catch (err: any) {
-          console.error('[Router] Redirect routing crashed:', err);
-          setRedirectError(slug);
-        }
-      }
-    };
-
-    handleNavigation();
-  }, []);
-
-  // Check Database on initial render
-  useEffect(() => {
-    const checkConn = async () => {
-      try {
-        const { success, error } = await testSupabaseConnection();
-        if (success) {
-          setDbStatus('connected');
-          setDbDetails('Successfully authenticated and table "links" is queryable.');
+    if (activeTab === 'generator') {
+      title = lang === 'ar' 
+        ? "Qrytube | أداة إنشاء رموز QR ذكية لقنوات اليوتيوب" 
+        : "Viral QR Code Generator | Open Social Links Directly in Apps";
+      desc = lang === 'ar'
+        ? "اصنع رموز QR ذكية (Deep Links) لـقناتك على اليوتيوب مجاناً. تتيح للمتابعين فتح قناتك أو فيديوهاتك داخل تطبيق اليوتيوب مباشرة لزيادة المشاهدات والاشتراكات."
+        : "Create smart deep-link QR codes for social media influencers. Force links to open directly inside YouTube, Facebook, Instagram, and TikTok apps.";
+    } else if (activeTab === 'faq') {
+      title = lang === 'ar'
+        ? "الأسئلة الشائعة | Qrytube"
+        : "Frequently Asked Questions | Qrytube";
+      desc = lang === 'ar'
+        ? "أجوبة شاملة على جميع استفساراتك حول الروابط العميقة (Deep Links)، كيفية توليد رموز الـ QR كود الذكية، وتخصيص الألوان وإدراج الشعار بدون تعطل المسح."
+        : "Find answers about dynamic deep links, custom brand styling, high-resolution QR scanning, and secure browser-to-app routing on Qrytube.";
+    } else if (activeTab === 'articles') {
+      if (selectedArticleId) {
+        const article = articlesData[lang]?.find(a => a.id.toLowerCase() === selectedArticleId.toLowerCase());
+        if (article) {
+          title = `${article.title} | Qrytube`;
+          desc = article.excerpt;
         } else {
-          if (error && error.message && error.message.includes('credentials')) {
-            setDbStatus('unconfigured');
-            setDbDetails('Defaulting to standalone local preview. Configure SUPABASE_URL & SUPABASE_ANON_KEY to persist.');
-          } else {
-            setDbStatus('error');
-            setDbDetails(error?.message || 'Failed connecting to real database. Double check table settings and keys.');
-          }
-        }
-      } catch (err: any) {
-        setDbStatus('error');
-        setDbDetails(err.message || 'Error executing connection check.');
-      }
-    };
-
-    checkConn();
-  }, []);
-
-  // Safe Insertion logic with robust multi-column matching
-  const safeInsertToSupabase = async (originalUrl: string, slug: string) => {
-    try {
-      // Combination 1 (Primary standard): { original_url, slug }
-      console.log('[Supabase] Attempting Combination 1: original_url & slug');
-      const { error: err1 } = await supabase
-        .from('links')
-        .insert({ original_url: originalUrl, slug: slug });
-      
-      if (!err1) return { success: true };
-      console.warn('[Supabase] Combination 1 failed:', err1.message);
-
-      // Combination 2: { url, slug }
-      console.log('[Supabase] Attempting Combination 2: url & slug');
-      const { error: err2 } = await supabase
-        .from('links')
-        .insert({ url: originalUrl, slug: slug });
-      
-      if (!err2) return { success: true };
-      console.warn('[Supabase] Combination 2 failed:', err2.message);
-
-      // Combination 3: { url, code }
-      console.log('[Supabase] Attempting Combination 3: url & code');
-      const { error: err3 } = await supabase
-        .from('links')
-        .insert({ url: originalUrl, code: slug });
-      
-      if (!err3) return { success: true };
-      console.warn('[Supabase] Combination 3 failed:', err3.message);
-
-      // Combination 4: { original_url, code }
-      console.log('[Supabase] Attempting Combination 4: original_url & code');
-      const { error: err4 } = await supabase
-        .from('links')
-        .insert({ original_url: originalUrl, code: slug });
-      
-      if (!err4) return { success: true };
-      console.warn('[Supabase] Combination 4 failed:', err4.message);
-
-      // Combination 5: { long_url, short_slug }
-      console.log('[Supabase] Attempting Combination 5: long_url & short_slug');
-      const { error: err5 } = await supabase
-        .from('links')
-        .insert({ long_url: originalUrl, short_slug: slug });
-      
-      if (!err5) return { success: true };
-
-      // Return ultimate fail back
-      return { success: false, error: err5 || err4 || err3 || err2 || err1 };
-    } catch (err: any) {
-      return { success: false, error: err };
-    }
-  };
-
-  // Safe Retrieval logic with fallback schema matches
-  const safeFetchFromSupabase = async (slug: string) => {
-    try {
-      // First try to select * to auto-discover column structures
-      const { data, error } = await supabase
-        .from('links')
-        .select('*')
-        .limit(1);
-
-      if (error) {
-        console.warn('[Supabase] Select * failed, trying direct queries:', error.message);
-        // Fallback directly to querying default combinations
-        return await safeDirectFetchFallback(slug);
-      }
-
-      if (data && data.length > 0) {
-        const firstRow = data[0];
-        const keys = Object.keys(firstRow);
-        
-        const urlKey = keys.find(k => ['original_url', 'long_url', 'url', 'long_link', 'original_link'].includes(k));
-        const slugKey = keys.find(k => ['slug', 'code', 'short_slug', 'short_code', 'short_url', 'short_link'].includes(k));
-
-        if (urlKey && slugKey) {
-          console.log(`[Supabase] Auto-detected column mappings: url => ${urlKey}, slug => ${slugKey}`);
-          const { data: matchedRows, error: eqError } = await supabase
-            .from('links')
-            .select('*')
-            .eq(slugKey, slug)
-            .limit(1);
-
-          if (!eqError && matchedRows && matchedRows.length > 0) {
-            return { success: true, originalUrl: matchedRows[0][urlKey] };
-          }
-        }
-      }
-
-      // If database is empty or auto-detection yields nothing, fall back to sequential checks
-      return await safeDirectFetchFallback(slug);
-    } catch (err: any) {
-      return { success: false, error: err };
-    }
-  };
-
-  // Safe manual query fallback
-  const safeDirectFetchFallback = async (slug: string) => {
-    // 1. Check original_url & slug
-    try {
-      const { data } = await supabase.from('links').select('original_url').eq('slug', slug).limit(1);
-      if (data && data.length > 0 && data[0].original_url) return { success: true, originalUrl: data[0].original_url };
-    } catch (_) {}
-
-    // 2. Check url & slug
-    try {
-      const { data } = await supabase.from('links').select('url').eq('slug', slug).limit(1);
-      if (data && data.length > 0 && data[0].url) return { success: true, originalUrl: data[0].url };
-    } catch (_) {}
-
-    // 3. Check original_url & code
-    try {
-      const { data } = await supabase.from('links').select('original_url').eq('code', slug).limit(1);
-      if (data && data.length > 0 && data[0].original_url) return { success: true, originalUrl: data[0].original_url };
-    } catch (_) {}
-
-    // 4. Check long_url & short_slug
-    try {
-      const { data } = await supabase.from('links').select('long_url').eq('short_slug', slug).limit(1);
-      if (data && data.length > 0 && data[0].long_url) return { success: true, originalUrl: data[0].long_url };
-    } catch (_) {}
-
-    return { success: true, originalUrl: null };
-  };
-
-  // Trigger link shortened creation
-  const handleGenerateLink = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorText(null);
-    setSuccessText(null);
-
-    // Basic Validation
-    let formattedUrl = urlInput.trim();
-    if (!formattedUrl) return;
-
-    if (!/^https?:\/\//i.test(formattedUrl)) {
-      setErrorText(t.invalidUrl);
-      return;
-    }
-
-    setIsGenerating(true);
-
-    // 1. Generate local short code (alphanumeric random 6 chars if custom not chosen)
-    let finalSlug = customSlug.trim().replace(/[^a-zA-Z0-9_-]/g, '');
-    if (!finalSlug) {
-      const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-      let rand = '';
-      for (let i = 0; i < 6; i++) {
-        rand += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      finalSlug = rand;
-    }
-
-    // 2. Formulate shortened target Link
-    const currentOrigin = window.location.origin;
-    const shortenedUrl = `${currentOrigin}/r/${finalSlug}`;
-
-    try {
-      // 3. Render QR Code as DataURL
-      const qrDataUrl = await QRCode.toDataURL(shortenedUrl, {
-        width: 600,
-        margin: 2,
-        color: {
-          dark: theme === 'dark' ? '#0f172a' : '#1e293b', // Rich dark slate
-          light: '#ffffff'
-        }
-      });
-
-      // 4. Save to Supabase (Only if configured)
-      if (dbStatus === 'connected') {
-        const { success, error } = await safeInsertToSupabase(formattedUrl, finalSlug);
-        if (success) {
-          setSuccessText(t.successSave);
-        } else {
-          console.error('[Supabase] Failed to write link safely:', error);
-          setErrorText(`${t.errorTitle} ${error?.message || 'Postgres validation error'}`);
-          setIsGenerating(false);
-          return;
+          title = lang === 'ar' ? "المقال غير موجود | Qrytube" : "Article Not Found | Qrytube";
+          desc = lang === 'ar' ? "المقال المطلوب غير موجود أو تم نقله." : "The requested article was not found or has been moved.";
         }
       } else {
-        // standalone mode
-        setSuccessText(lang === 'ar' ? '✓ تم التوليد بنجاح! الرابط والـ QR يعملان محلياً (وضع محاكي بدون اتصال)' : '✓ Generated successfully! Running in local simulation mode.');
+        title = lang === 'ar'
+          ? "المقالات وأدلة السيو | Qrytube"
+          : "Articles & SEO Guides | Qrytube";
+        desc = lang === 'ar'
+          ? "مقالات وأدلة سيو متخصصة وحصرية لمساعدتك في تصدر نتائج البحث، وزيادة المشاهدات والاشتراكات الحقيقية على يوتيوب ومنصات التواصل الاجتماعي لعام 2026."
+          : "Explore expert search engine optimization guides, video ranking algorithms, and smart link growth strategies for social media marketers.";
       }
-
-      const newResult = {
-        originalUrl: formattedUrl,
-        slug: finalSlug,
-        shortUrl: shortenedUrl,
-        qrDataUrl
-      };
-
-      // Set active display
-      setActiveResult(newResult);
-
-      // Save to local session history
-      const updatedHistory = [
-        { id: Math.random().toString(), ...newResult, createdAt: new Date().toLocaleTimeString() },
-        ...recentLinks.slice(0, 9) // Limit to last 10
-      ];
-      setRecentLinks(updatedHistory);
-      localStorage.setItem('qrytube_recent', JSON.stringify(updatedHistory));
-
-      // Reset fields
-      setUrlInput('');
-      setCustomSlug('');
-    } catch (err: any) {
-      console.error('Failed to process shortlink sequence:', err);
-      setErrorText(err.message || 'Fatal error generating QR code or writing link data.');
-    } finally {
-      setIsGenerating(false);
+    } else if (activeTab === 'terms') {
+      title = lang === 'ar' ? "شروط الخدمة | Qrytube" : "Terms of Service | Qrytube";
+      desc = lang === 'ar'
+        ? "شروط الخدمة والسياسات المنظمة لاستخدام أداة كاشف الروابط وتوليد رموز الـ QR كيو آر الرسمية من Qrytube."
+        : "Terms and conditions of use for Qrytube QR generator tool and professional smart deep links services.";
+    } else if (activeTab === 'privacy') {
+      title = lang === 'ar' ? "سياسة الخصوصية | Qrytube" : "Privacy Policy | Qrytube";
+      desc = lang === 'ar'
+        ? "سياسة الخصوصية والأمان لزائري موقع Qrytube. نحن ملتزمون بالكامل بحماية بياناتك وخصوصيتك حيث تتم كافة عمليات توليد الرموز محلياً في متصفحك."
+        : "Privacy policy and client data protection pledge for Qrytube QR code generator visitors. Zero tracking cookies, fully secure local creation.";
+    } else if (activeTab === 'about') {
+      title = lang === 'ar' ? "من نحن | Qrytube" : "About Us | Qrytube";
+      desc = lang === 'ar'
+        ? "تعرف على قصة Qrytube ورؤيتنا في مساعدة صناع المحتوى والمؤثرين العرب على النمو وزيادة الاشتراكات بنسب تصل إلى 200% باستخدام الروابط العميقة والـ QR الذكي."
+        : "Learn about Qrytube’s mission to help creators, influencers, and brands boost engagement and drive mobile app traffic seamlessly.";
+    } else if (activeTab === 'contact') {
+      title = lang === 'ar' ? "اتصل بنا | Qrytube" : "Contact Us | Qrytube";
+      desc = lang === 'ar'
+        ? "تواصل مع فريق الدعم الفني لموقع Qrytube للإبلاغ عن أي مشاكل أو المساعدة في تصميم وطباعة أكواد الـ QR كود والشعارات المخصصة لقنواتك."
+        : "Get in touch with the Qrytube professional team for support, feature feedback, partnership proposals, or customized enterprise integration solutions.";
+    } else {
+      title = lang === 'ar' 
+        ? "Qrytube | أداة إنشاء رموز QR ذكية لقنوات اليوتيوب" 
+        : "Viral QR Code Generator | Open Social Links Directly in Apps";
+      desc = lang === 'ar'
+        ? "اصنع رموز QR ذكية (Deep Links) لـقناتك على اليوتيوب مجاناً. تتيح للمتابعين فتح قناتك أو فيديوهاتك داخل تطبيق اليوتيوب مباشرة لزيادة المشاهدات والاشتراكات."
+        : "Create smart deep-link QR codes for social media influencers. Force links to open directly inside YouTube, Facebook, Instagram, and TikTok apps.";
     }
-  };
 
-  const copyToClipboard = async (text: string, field: 'short' | 'original') => {
+    // Update document title
+    document.title = title;
+
+    // Helper to safely upsert meta elements
+    const setMetaTag = (attrName: 'name' | 'property', attrValue: string, contentValue: string) => {
+      try {
+        let el = document.querySelector(`meta[${attrName}="${attrValue}"]`);
+        if (!el) {
+          el = document.createElement('meta');
+          el.setAttribute(attrName, attrValue);
+          document.head.appendChild(el);
+        }
+        el.setAttribute('content', contentValue);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    // Update core description, Open Graph and Twitter tags
+    setMetaTag('name', 'description', desc);
+
+    const currentOrigin = window.location.origin;
+
+    setMetaTag('property', 'og:type', 'website');
+    setMetaTag('property', 'og:title', title);
+    setMetaTag('property', 'og:description', desc);
+    setMetaTag('property', 'og:url', currentOrigin + '/');
+    setMetaTag('property', 'og:image', currentOrigin + '/og-image.png');
+    setMetaTag('property', 'og:site_name', 'QR Code Best');
+
+    setMetaTag('name', 'twitter:card', 'summary_large_image');
+    setMetaTag('name', 'twitter:title', title);
+    setMetaTag('name', 'twitter:description', desc);
+    setMetaTag('name', 'twitter:image', currentOrigin + '/og-image.png');
+
+    // Programmatically render hreflang tags and canonical tag in <head> for search engines
     try {
-      await navigator.clipboard.writeText(text);
-      setCopiedField(field);
-      setTimeout(() => setCopiedField(null), 2000);
+      document.querySelectorAll('link[hreflang]').forEach(el => el.remove());
+      const baseDomain = 'https://qrytube.com';
+      let pathSuffix = activeTab === 'generator' ? '' : `/${activeTab}`;
+      if (activeTab === 'articles' && selectedArticleId) {
+        pathSuffix = `/articles/${selectedArticleId}`;
+      }
+      const canonicalPath = pathSuffix === '' ? `${baseDomain}/` : `${baseDomain}${pathSuffix}`;
+      const arPath = pathSuffix === '' ? `${baseDomain}/?lang=ar` : `${baseDomain}${pathSuffix}?lang=ar`;
+      const enPath = pathSuffix === '' ? `${baseDomain}/?lang=en` : `${baseDomain}${pathSuffix}?lang=en`;
+      const defPath = canonicalPath;
+
+      // 1. Alternate Arabic
+      const arLink = document.createElement('link');
+      arLink.rel = 'alternate';
+      arLink.setAttribute('hreflang', 'ar');
+      arLink.href = arPath;
+      document.head.appendChild(arLink);
+
+      // 2. Alternate English
+      const enLink = document.createElement('link');
+      enLink.rel = 'alternate';
+      enLink.setAttribute('hreflang', 'en');
+      enLink.href = enPath;
+      document.head.appendChild(enLink);
+
+      // 3. Alternate x-default
+      const defLink = document.createElement('link');
+      defLink.rel = 'alternate';
+      defLink.setAttribute('hreflang', 'x-default');
+      defLink.href = defPath;
+      document.head.appendChild(defLink);
+
+      // 4. Update Canonical
+      let canonicalEl = document.querySelector('link[rel="canonical"]');
+      if (!canonicalEl) {
+        canonicalEl = document.createElement('link');
+        canonicalEl.setAttribute('rel', 'canonical');
+        document.head.appendChild(canonicalEl);
+      }
+      canonicalEl.setAttribute('href', defPath);
     } catch (_) {}
+
+    // Update URL query parameters based on language without page reload
+    try {
+      const url = new URL(window.location.href);
+      if (lang === 'en') {
+        url.searchParams.set('lang', 'en');
+      } else {
+        url.searchParams.set('lang', 'ar');
+      }
+      
+      // Keep state clean and safe
+      if (window.location.search !== url.search) {
+        window.history.pushState(null, '', url.pathname + url.search + url.hash);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, [lang, activeTab]);
+
+  const t = translations[lang];
+
+  useEffect(() => {
+    try {
+      const currentPath = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
+      // Include the language parameter in the target path during transitions so it persists if active
+      const langParam = lang === 'en' ? '?lang=en' : '?lang=ar';
+      
+      let targetBase = activeTab === 'generator' ? '/' : `/${activeTab}`;
+      if (activeTab === 'articles' && selectedArticleId) {
+        targetBase = `/articles/${selectedArticleId}`;
+      }
+      const targetPath = targetBase + langParam;
+      
+      if (currentPath !== targetBase.replace(/^\/|\/$/g, '')) {
+        window.history.pushState({ tab: activeTab, articleId: selectedArticleId }, '', targetPath);
+      }
+    } catch (_) {}
+  }, [activeTab, lang, selectedArticleId]);
+
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      if (e.state && e.state.tab) {
+        setActiveTab(e.state.tab);
+        setSelectedArticleId(e.state.articleId || null);
+      } else {
+        const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
+        if (['terms', 'privacy', 'about', 'contact'].includes(path)) {
+          setActiveTab(path as any);
+          setSelectedArticleId(null);
+        } else if (path === 'articles') {
+          setActiveTab('articles');
+          setSelectedArticleId(null);
+        } else if (path.startsWith('articles/')) {
+          setActiveTab('articles');
+          setSelectedArticleId(path.replace('articles/', ''));
+        } else {
+          setActiveTab('generator');
+          setSelectedArticleId(null);
+        }
+      }
+      
+      // Sync language from URL search parameter on back/forward navigation
+      try {
+        const queryParams = new URL(window.location.href).searchParams;
+        const urlLang = queryParams.get('lang');
+        if (urlLang === 'en') {
+          setLang('en');
+        } else if (urlLang === 'ar') {
+          setLang('ar');
+        }
+      } catch (_) {}
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Performance-optimized lazy loading for Google Analytics (GA4) G-QWM83Z109Z
+  useEffect(() => {
+    let initialized = false;
+
+    const initGA = () => {
+      if (initialized) return;
+      initialized = true;
+
+      // Create tracking script element with async attribute
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = 'https://www.googletagmanager.com/gtag/js?id=G-QWM83Z109Z';
+      document.head.appendChild(script);
+
+      // Create/Initialize dataLayer and gtag function
+      (window as any).dataLayer = (window as any).dataLayer || [];
+      function gtag(..._args: any[]) {
+        (window as any).dataLayer.push(arguments);
+      }
+      (window as any).gtag = gtag;
+
+      gtag('js', new Date());
+      gtag('config', 'G-QWM83Z109Z');
+    };
+
+    const handleLoad = () => {
+      // Defer execution slightly to not block the current rendering cycle
+      setTimeout(initGA, 0);
+    };
+
+    // Lazy load approach: load after window has fully loaded, or after a 3-second fallback delay
+    const timeoutId = setTimeout(initGA, 3000);
+
+    if (document.readyState === 'complete') {
+      handleLoad();
+    } else {
+      window.addEventListener('load', handleLoad);
+    }
+
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('load', handleLoad);
+    };
+  }, []);
+
+  const handleNavClick = (tab: 'generator' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact', event: React.MouseEvent) => {
+    event.preventDefault();
+    setActiveTab(tab);
+    if (tab === 'articles') {
+      setSelectedArticleId(null);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDownloadQR = () => {
-    if (!activeResult) return;
-    const link = document.createElement('a');
-    link.href = activeResult.qrDataUrl;
-    link.download = `qrytube-qr-${activeResult.slug}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  // Detect and handle deep-link redirected scans
+  const getRedirectionTypeForDevice = (): 'ios' | 'android' | 'standard' => {
+    if (typeof window === 'undefined') return 'standard';
+    const userAgent = window.navigator.userAgent || window.navigator.vendor || (window as any).opera || '';
+    
+    // Android detection
+    if (/android/i.test(userAgent)) {
+      return 'android';
+    }
+    
+    // iOS detection (iPhone, iPad, iPod)
+    if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
+      return 'ios';
+    }
+    
+    // iPadOS on newer Safari
+    if (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) {
+      return 'ios';
+    }
+    
+    return 'standard';
   };
 
-  const handleClearHistory = () => {
-    setRecentLinks([]);
-    localStorage.removeItem('qrytube_recent');
-  };
+  const fallbackTimerRef = React.useRef<any>(null);
+  const t2Ref = React.useRef<any>(null);
+  const t3Ref = React.useRef<any>(null);
 
-  // Rendering the Redirect Screen
-  if (isRedirecting) {
+  const queryParams = new URL(window.location.href).searchParams;
+  const redirectUrl = queryParams.get('url') || queryParams.get('r');
+  const redirectType = queryParams.get('type') || 'vnd';
+  const isRedirectRoute = window.location.pathname.startsWith('/redirect') || !!redirectUrl;
+
+  useEffect(() => {
+    if (isRedirectRoute && redirectUrl) {
+      try {
+        const decodedUrl = decodeURIComponent(redirectUrl);
+        const platformInfo = parseYoutubeUrl(decodedUrl);
+        const scanId = queryParams.get('tid') || queryParams.get('id');
+        
+        if (scanId) {
+          const platformParam = platformInfo.platform || 'youtube';
+          const fetchUrl = `/api/track-scan?tid=${encodeURIComponent(scanId)}&r=${encodeURIComponent(redirectUrl)}&platform=${encodeURIComponent(platformParam)}&type=${encodeURIComponent(redirectType)}`;
+          fetch(fetchUrl, { method: 'POST', keepalive: true }).catch(() => {});
+        }
+
+        // Generate the native App Scheme using the professional unified helper with active device sensing
+        const deviceType = getRedirectionTypeForDevice();
+        const deepLink = convertUrlToDeepLink(decodedUrl, deviceType);
+        const fallbackUrl = platformInfo.cleanUrl || decodedUrl;
+
+        // Fallback timing parameters: 3000ms (3 seconds) limit before routing browser fallback
+        const timeoutDuration = 3000;
+        const startTime = Date.now();
+        let isRedirected = false;
+
+        const handleBlurOrHide = () => {
+          isRedirected = true;
+          if (t2Ref.current) clearTimeout(t2Ref.current);
+          if (t3Ref.current) clearTimeout(t3Ref.current);
+          if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
+        };
+
+        window.addEventListener('blur', handleBlurOrHide, { once: true });
+        window.addEventListener('pagehide', handleBlurOrHide, { once: true });
+        
+        const handleVisibilityChange = () => {
+          if (document.hidden) {
+            handleBlurOrHide();
+          }
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        
+        // 1. First trigger instantly
+        window.location.href = deepLink;
+
+        // 2. Second trigger fallback after 150ms to force launch under low responsive environments
+        t2Ref.current = setTimeout(() => {
+          if (!isRedirected && !document.hidden) {
+            window.location.href = deepLink;
+          }
+        }, 150);
+
+        // 3. Third trigger fallback after 450ms for slow webviews
+        t3Ref.current = setTimeout(() => {
+          if (!isRedirected && !document.hidden) {
+            window.location.href = deepLink;
+          }
+        }, 450);
+
+        // 4. Absolute failsafe fallback: standard web page replace redirection after 3 seconds
+        fallbackTimerRef.current = setTimeout(() => {
+          const elapsed = Date.now() - startTime;
+          // Verify that user hasn't successfully switched apps
+          if (!isRedirected && elapsed < 4500 && !document.hidden) {
+            window.location.replace(fallbackUrl);
+          }
+        }, timeoutDuration);
+
+        return () => {
+          if (t2Ref.current) clearTimeout(t2Ref.current);
+          if (t3Ref.current) clearTimeout(t3Ref.current);
+          if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
+          window.removeEventListener('blur', handleBlurOrHide);
+          window.removeEventListener('pagehide', handleBlurOrHide);
+          document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+      } catch (err) {
+        console.error("Redirection failure", err);
+      }
+    }
+  }, [isRedirectRoute, redirectUrl, redirectType]);
+
+  // If redirect parameter is active, render a loading screen instead of the full landing page
+  if (isRedirectRoute && redirectUrl) {
+    let decodedUrl = '';
+    let deepLink = '';
+    let platform = 'youtube';
+    try {
+      decodedUrl = decodeURIComponent(redirectUrl);
+      const platformInfo = parseYoutubeUrl(decodedUrl);
+      platform = platformInfo.platform;
+      const deviceType = getRedirectionTypeForDevice();
+      deepLink = convertUrlToDeepLink(decodedUrl, deviceType);
+    } catch (_) {}
+
+    const handleForceOpenClick = () => {
+      if (t2Ref.current) clearTimeout(t2Ref.current);
+      if (t3Ref.current) clearTimeout(t3Ref.current);
+      if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
+      if (deepLink) {
+        window.location.href = deepLink;
+      }
+    };
+
+    const getLoadingIconStyles = () => {
+      switch(platform) {
+        case 'facebook':
+          return {
+            bgClass: 'bg-[#1877F2] shadow-blue-500/40',
+            buttonClass: 'bg-[#1877F2] hover:bg-[#1565C0]',
+            icon: <Facebook size={48} />
+          };
+        case 'instagram':
+          return {
+            bgClass: 'bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] shadow-pink-500/40',
+            buttonClass: 'bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] hover:opacity-90',
+            icon: <Instagram size={48} />
+          };
+        case 'tiktok':
+          return {
+            bgClass: 'bg-black border border-slate-800 shadow-slate-950/40',
+            buttonClass: 'bg-slate-950 hover:bg-black border border-slate-850',
+            icon: <Music size={48} />
+          };
+        case 'youtube':
+        default:
+          return {
+            bgClass: 'bg-red-600 shadow-red-500/40',
+            buttonClass: 'bg-red-600 hover:bg-red-700',
+            icon: <Youtube size={48} />
+          };
+      }
+    };
+    const loadingStyle = getLoadingIconStyles();
+
+    const getDynamicRedirectionContent = () => {
+      const isAr = lang === 'ar';
+      switch (platform) {
+        case 'facebook':
+          return {
+            title: isAr ? "جاري فتح تطبيق فيسبوك..." : "Opening Facebook App...",
+            desc: isAr ? "نقوم بفتح الصفحة مباشرة في تطبيق Facebook الرسمي لضمان أفضل تفاعل وتصفح." : "Opening the page directly inside the official Facebook App for the best interaction and browsing."
+          };
+        case 'instagram':
+          return {
+            title: isAr ? "جاري فتح تطبيق إنستغرام..." : "Opening Instagram App...",
+            desc: isAr ? "نقوم بفتح الحساب مباشرة في تطبيق Instagram الرسمي لمتابعة الحساب والمنشورات فوراً." : "Opening the account directly inside the official Instagram App to follow and view posts instantly."
+          };
+        case 'tiktok':
+          return {
+            title: isAr ? "جاري فتح تطبيق تيك توك..." : "Opening TikTok App...",
+            desc: isAr ? "نقوم بفتح الحساب أو الفيديو في تطبيق TikTok الرسمي لتتمكن من التفاعل والمتابعة بسهولة." : "Opening the account or video directly inside the official TikTok App to let you interact and follow smoothly."
+          };
+        case 'youtube':
+        default:
+          return {
+            title: isAr ? "جاري فتح تطبيق يوتيوب..." : "Opening YouTube App...",
+            desc: isAr ? "نقوم بفتح الرابط بشكل مباشر في تطبيق YouTube الرسمي بخصائص الـ Deep Link لتجربة تفاعل فورية." : "We are opening the link directly inside the official YouTube App for an instant, engaging experience."
+          };
+      }
+    };
+    const dynamicContent = getDynamicRedirectionContent();
+
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 p-6 transition-colors duration-350">
-        <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-8 border border-slate-100 dark:border-slate-800 shadow-xl text-center flex flex-col items-center">
-          <AnimatePresence mode="wait">
-            {!redirectError ? (
-              <motion.div 
-                key="redirecting"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex flex-col items-center"
-              >
-                <div className="relative mb-6">
-                  <div className="h-16 w-16 rounded-full border-4 border-indigo-100 dark:border-indigo-950 border-t-indigo-600 animate-spin"></div>
-                  <QrCode className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-indigo-600" />
-                </div>
-                
-                <h1 className="text-xl font-bold text-slate-850 dark:text-slate-100 font-sans tracking-tight mb-2">
-                  {t.redirecting}
-                </h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs">
-                  {t.redirectDesc}
-                </p>
-              </motion.div>
-            ) : (
-              <motion.div 
-                key="error"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex flex-col items-center"
-              >
-                <div className="bg-red-50 dark:bg-red-950 p-4 rounded-full mb-5">
-                  <AlertTriangle className="h-10 w-10 text-red-500 dark:text-red-400" />
-                </div>
-                
-                <h1 className="text-2xl font-black text-red-600 dark:text-red-400 font-sans tracking-tight mb-2">
-                  {t.slugNotFound}
-                </h1>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 max-w-sm">
-                  {t.slugNotFoundDesc}
-                  <span className="block mt-2 font-mono text-xs font-bold text-slate-400 bg-slate-50 dark:bg-slate-950 py-1.5 px-3 rounded-lg border border-slate-100 dark:border-slate-850">
-                    SLUG: {redirectError}
-                  </span>
-                </p>
+      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 text-center" id="redirect_fallback_screen" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+        <div className="max-w-md w-full space-y-8">
+          
+          {/* Elegant Circular Spinner with Icon Overlay */}
+          <div className="flex flex-col items-center justify-center">
+            <div className="relative w-32 h-32 flex items-center justify-center">
+              {/* Spinning loading concentric ring */}
+              <div className="absolute inset-0 rounded-full border-4 border-slate-800/60 border-t-red-650 animate-spin" style={{ animationDuration: '0.8s' }} />
+              
+              {/* Pulsing social media icon container */}
+              <span className={`p-5 text-white rounded-3xl shadow-2xl z-10 ${loadingStyle.bgClass} flex items-center justify-center`}>
+                {loadingStyle.icon}
+              </span>
+            </div>
+          </div>
 
-                <button
-                  onClick={() => {
-                    setIsRedirecting(false);
-                    setRedirectError(null);
-                    window.history.pushState({}, '', '/');
-                  }}
-                  className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-slate-200 dark:text-slate-950 text-white font-medium text-sm py-3 px-6 rounded-2xl transition-all cursor-pointer shadow-md shadow-slate-900/10 active:scale-98"
-                >
-                  <ArrowRight className="h-4 w-4 rotate-180" />
-                  <span>{t.backHomeBtn}</span>
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <div className="space-y-3">
+            <h2 className="text-2xl font-black font-arabic text-white leading-normal">
+              {dynamicContent.title}
+            </h2>
+            <p className="text-xs text-slate-400 font-arabic leading-relaxed">
+              {dynamicContent.desc}
+            </p>
+          </div>
+
+          {/* Quick spinner fallback button card */}
+          <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4" id="fallback_actions_card">
+            <span className="text-xs text-slate-300 font-arabic block font-semibold leading-relaxed">
+              {t.redirectFallback}
+            </span>
+
+            <div className="flex flex-col gap-2.5">
+              {/* Force App link */}
+              <button
+                onClick={handleForceOpenClick}
+                className={`w-full py-3.5 px-4 text-white rounded-xl font-bold font-arabic text-sm transition-all shadow-md active:scale-98 cursor-pointer ${loadingStyle.buttonClass}`}
+                type="button"
+                id="force_open_app_btn"
+              >
+                {t.btnForceOpen}
+              </button>
+
+              {/* standard web fallback */}
+              <button
+                onClick={() => { if (decodedUrl) window.location.href = decodedUrl; }}
+                className="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl font-medium font-arabic text-xs transition-all cursor-pointer"
+                type="button"
+                id="open_via_browser_btn"
+              >
+                {t.btnWebBrowser}
+              </button>
+            </div>
+          </div>
+
+          <div className="text-[10px] text-slate-600 font-arabic">
+            {t.managedBy}
+          </div>
+
         </div>
       </div>
     );
   }
 
-  // Regular dashboard screen representation
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 transition-colors duration-300 flex flex-col justify-between">
+    <div className="min-h-screen bg-slate-50 text-slate-800 selection:bg-red-100 selection:text-red-700" id="main_app_wrapper" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
       
-      {/* Dynamic Navigation Header */}
-      <header className="sticky top-0 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-slate-100 dark:border-slate-850 z-50 py-4 px-6 md:px-12 flex justify-between items-center transition-all">
-        <div className="flex items-center gap-3">
-          <div className="bg-indigo-600 text-white p-2.5 rounded-xl shadow-md shadow-indigo-600/10">
-            <QrCode className="h-5 w-5" />
-          </div>
-          <div>
-            <h1 className="text-md md:text-lg font-black tracking-tight bg-gradient-to-r from-slate-900 to-indigo-600 dark:from-white dark:to-indigo-400 bg-clip-text text-transparent">
-              Qrytube
-            </h1>
-            <p className="text-[10px] text-slate-400 -mt-0.5 block font-medium">Link & QR Portal v2.0</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 md:gap-3">
-          {/* Supabase Connection Status Badge - Show only when connected */}
-          {dbStatus === 'connected' && (
-            <div className="hidden sm:flex items-center gap-2 py-1.5 px-3 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/25 text-xs">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-xs" />
-              <span className="font-medium text-emerald-700 dark:text-emerald-400">
-                {t.dbConnected}
+      {/* 1. STUNNING HEADER NAVIGATION BAR */}
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100" id="app_header">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+          
+          <button 
+            onClick={() => setActiveTab('generator')}
+            className="flex items-center gap-2.5 cursor-pointer hover:opacity-90 transition-opacity text-left outline-none border-none bg-transparent p-0"
+            id="header_logo_home_btn"
+          >
+            <QrytubeLogo size={42} />
+            <div className={`flex flex-col ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
+              <h1 className="text-md sm:text-lg font-extrabold font-arabic text-gray-900 tracking-tight leading-none">
+                {t.appTitle}
+              </h1>
+              <span className="text-[10px] font-medium font-arabic text-slate-500 mt-0.5">
+                {t.appSubTitle}
               </span>
             </div>
-          )}
-
-          {/* Toggle Language */}
-          <button
-            onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
-            className="p-2 w-10 h-10 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-850 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer text-slate-600 dark:text-slate-350"
-            title="Switch Language"
-          >
-            <Globe className="h-4 w-4" />
           </button>
+          
+          {/* Right badge / Action badge, Theme & Language Toggles */}
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            {/* Dark/Light Mode Toggle Button */}
+            <button
+              onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-xs font-semibold rounded-xl font-arabic transition-all cursor-pointer border border-slate-200"
+              title={lang === 'ar' ? (theme === 'dark' ? 'تفعيل الوضع المضيء' : 'تفعيل الوضع المظلم') : (theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode')}
+              id="theme_toggle_btn"
+            >
+              {theme === 'dark' ? <Sun size={14} className="text-yellow-500 animate-[spin_12s_linear_infinite]" /> : <Moon size={14} className="text-slate-600" />}
+              <span>{lang === 'ar' ? (theme === 'dark' ? 'الوضع المضيء' : 'الوضع الداكن') : (theme === 'dark' ? 'Light Mode' : 'Dark Mode')}</span>
+            </button>
 
-          {/* Toggle Theme */}
-          <button
-            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-            className="p-2 w-10 h-10 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-850 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer text-slate-600 dark:text-slate-350"
-            title="Toggle Light/Dark Theme"
-          >
-            {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-          </button>
+            {/* Language Toggle Button */}
+            <button
+              onClick={() => setLang(l => l === 'ar' ? 'en' : 'ar')}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-xs font-semibold rounded-xl font-arabic transition-all cursor-pointer border border-slate-200"
+              title={lang === 'ar' ? 'Switch to English' : 'تحويل للغة العربية'}
+              id="language_toggle_btn"
+            >
+              <Languages size={14} />
+              <span>{lang === 'ar' ? 'English' : 'العربية'}</span>
+            </button>
+
+            <span className="hidden sm:inline-flex items-center gap-1 py-1 px-3 bg-red-50 text-red-600 text-xs font-semibold rounded-full font-arabic">
+              <Flame size={12} />
+              {t.navFreeBadge}
+            </span>
+          </div>
+
         </div>
       </header>
 
-      {/* Main Container Dashboard */}
-      <main className="w-full max-w-4xl mx-auto px-6 py-8 md:py-12 flex-1">
-        
-        {/* Upper Slogan Grid */}
-        <section className="text-center mb-8 md:mb-12">
-          <div className="inline-flex items-center justify-center gap-2 py-1.5 px-3 mb-4 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-[11px] font-bold tracking-wide leading-none border border-indigo-150 dark:border-indigo-900/60 font-mono uppercase">
-            <Sparkles className="h-3 w-3 animate-pulse" />
-            <span>Supabase Stable-Before-Dynamic-QR Integration ready</span>
-          </div>
-          <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white font-sans max-w-2xl mx-auto leading-tight mb-3">
-            {t.title}
-          </h2>
-          <p className="text-slate-500 dark:text-slate-300 text-sm md:text-base max-w-lg mx-auto">
-            {t.subtitle}
-          </p>
-        </section>
-
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-          
-          {/* Left panel Form Box (Holds 7 columns) */}
-          <div className="md:col-span-12 lg:col-span-7 space-y-6">
-            <form onSubmit={handleGenerateLink} className="bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 border border-slate-100 dark:border-slate-850 shadow-md">
-              <div className="space-y-5">
-                
-                {/* Long URL Source input field */}
-                <div>
-                  <label htmlFor="url-input" className="block text-xs font-bold font-arabic text-slate-700 dark:text-slate-300 mb-2 mr-1">
-                    {t.inputLabel}
-                  </label>
-                  <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                      <Link2 className="h-5 w-5 group-focus-within:text-indigo-500 transition-colors" />
-                    </div>
-                    <input
-                      id="url-input"
-                      type="url"
-                      required
-                      value={urlInput}
-                      onChange={(e) => setUrlInput(e.target.value)}
-                      placeholder={t.inputPlaceholder}
-                      className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-950 focus:bg-white dark:focus:bg-slate-900 hover:bg-slate-100/50 dark:hover:bg-slate-950 border border-slate-200 focus:border-indigo-500 dark:border-slate-800 dark:focus:border-indigo-500 rounded-2xl outline-hidden text-sm transition-all text-slate-900 dark:text-slate-100"
-                    />
-                  </div>
-                </div>
-
-                {/* Slug customized identifier placeholder */}
-                <div>
-                  <label htmlFor="slug-input" className="block text-xs font-bold font-arabic text-slate-700 dark:text-slate-300 mb-2 mr-1">
-                    {t.customSlugLabel}
-                  </label>
-                  <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 font-mono text-xs font-bold">
-                      /r/
-                    </div>
-                    <input
-                      id="slug-input"
-                      type="text"
-                      value={customSlug}
-                      onChange={(e) => setCustomSlug(e.target.value)}
-                      placeholder={t.customSlugPlaceholder}
-                      maxLength={20}
-                      className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-950 focus:bg-white dark:focus:bg-slate-900 hover:bg-slate-100/50 dark:hover:bg-slate-950 border border-slate-200 focus:border-indigo-500 dark:border-slate-800 dark:focus:border-indigo-500 rounded-2xl outline-hidden text-sm transition-all text-slate-900 dark:text-slate-100 font-mono"
-                    />
-                  </div>
-                </div>
-
-                {/* Submitting Button */}
-                <button
-                  type="submit"
-                  disabled={isGenerating || !urlInput}
-                  className={`w-full flex items-center justify-center gap-2 font-bold py-3.5 px-6 rounded-2xl cursor-pointer transition shadow-md ${
-                    isGenerating || !urlInput
-                      ? 'bg-slate-100 dark:bg-slate-850 text-slate-400 dark:text-slate-650 cursor-not-allowed border border-slate-200/50 dark:border-slate-800'
-                      : 'bg-indigo-600 hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400 text-white shadow-indigo-600/10 active:scale-98'
-                  }`}
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      <span>{t.btnGenerating}</span>
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4.5 w-4.5" />
-                      <span>{t.btnGenerate}</span>
-                    </>
-                  )}
-                </button>
-
-              </div>
-            </form>
-
-            {/* Error & Success Toasting Notices */}
-            <AnimatePresence>
-              {errorText && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-700 dark:text-red-400 text-xs md:text-sm flex gap-2.5 shadow-sm"
-                >
-                  <AlertTriangle className="h-5 w-5 shrink-0" />
-                  <div>
-                    <h4 className="font-bold">{t.errorTitle}</h4>
-                    <p className="mt-0.5 opacity-90">{errorText}</p>
-                  </div>
-                </motion.div>
-              )}
-
-              {successText && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-450 text-xs md:text-sm flex gap-2.5 shadow-sm"
-                >
-                  <Check className="h-5 w-5 shrink-0" />
-                  <p className="font-medium">{successText}</p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Right panel Output layout (Holds 5 columns) */}
-          <div className="md:col-span-12 lg:col-span-5 space-y-6">
-            <AnimatePresence mode="wait">
-              {activeResult ? (
-                <motion.div
-                  key="results"
-                  initial={{ opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.96 }}
-                  className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-100 dark:border-slate-850 shadow-md text-center flex flex-col items-center"
-                >
-                  <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-200 tracking-tight font-sans mb-4">
-                    {t.resultTitle}
-                  </h3>
-
-                  {/* High Quality Rendered QR Image Box */}
-                  <div className="p-3 bg-white border border-slate-100 dark:border-slate-200 rounded-2xl shadow-sm mb-6 max-w-[210px] aspect-square flex items-center justify-center">
-                    <img
-                      src={activeResult.qrDataUrl}
-                      alt="Generated Dynamic QR Code"
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-contain select-none"
-                    />
-                  </div>
-
-                  {/* Actions Details */}
-                  <div className="w-full space-y-4 text-left">
-                    {/* Short link row */}
-                    <div>
-                      <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                        {t.shortLink}
-                      </span>
-                      <div className="flex bg-slate-50 dark:bg-slate-950 px-3.5 py-2.5 rounded-xl border border-slate-200/60 dark:border-slate-850 items-center justify-between gap-2 overflow-hidden">
-                        <span className="font-mono text-xs text-indigo-600 dark:text-indigo-400 font-bold truncate">
-                          {activeResult.shortUrl}
-                        </span>
-                        <button
-                          onClick={() => copyToClipboard(activeResult.shortUrl, 'short')}
-                          className="p-1 px-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-850 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 transition text-[10px] font-bold flex items-center gap-1 cursor-pointer active:scale-95 shrink-0"
-                        >
-                          {copiedField === 'short' ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
-                          <span>{copiedField === 'short' ? t.copied : t.copyBtn}</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Original link row */}
-                    <div>
-                      <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
-                        {t.originalLink}
-                      </span>
-                      <div className="flex bg-slate-50 dark:bg-slate-950 px-3.5 py-2 rounded-xl border border-slate-200/65 dark:border-slate-850 items-center justify-between gap-2 overflow-hidden">
-                        <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[150px]">
-                          {activeResult.originalUrl}
-                        </span>
-                        <button
-                          onClick={() => copyToClipboard(activeResult.originalUrl, 'original')}
-                          className="p-1 px-2 hover:bg-slate-100 dark:hover:bg-slate-850 rounded-lg text-slate-400 hover:text-slate-600 transition shrink-0 cursor-pointer"
-                          title="Copy Original Link"
-                        >
-                          {copiedField === 'original' ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Download & Check button actions */}
-                    <div className="grid grid-cols-2 gap-3 pt-2">
-                      <button
-                        onClick={handleDownloadQR}
-                        className="flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300 font-bold text-xs py-2.5 px-3 rounded-xl transition cursor-pointer active:scale-95"
-                      >
-                        <Download className="h-4 w-4" />
-                        <span>{lang === 'ar' ? 'الـ QR كود' : 'QR Code'}</span>
-                      </button>
-
-                      <a
-                        href={activeResult.shortUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 dark:bg-indigo-500 dark:hover:bg-indigo-400 text-white font-bold text-xs py-2.5 px-3 rounded-xl transition active:scale-95 text-center shadow-md shadow-indigo-600/10"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                        <span>{lang === 'ar' ? 'زيارة الرابط' : 'Visit Link'}</span>
-                      </a>
-                    </div>
-
-                  </div>
-                </motion.div>
-              ) : (
-                <div className="bg-slate-100/50 dark:bg-slate-900/50 rounded-3xl p-8 border border-dashed border-slate-200 dark:border-slate-800 text-center text-slate-400 min-h-[350px] flex flex-col items-center justify-center">
-                  <QrCode className="h-12 w-12 text-slate-300 dark:text-slate-700 stroke-1 mb-3" />
-                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                    {lang === 'ar' ? 'سيتم عرض كود QR والروابط الذكية المنتجة هنا فور توليدها.' : 'Generated dynamic QR codes & deep-links will render here immediately.'}
-                  </p>
-                </div>
-              )}
-            </AnimatePresence>
-          </div>
-
+      {/* 2. HERO CONTENT SECTION */}
+      <section className="bg-gradient-to-b from-white to-slate-50 py-12 border-b border-slate-100 text-center relative overflow-hidden" id="hero_section">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none">
+          <div className="absolute top-10 left-10 w-72 h-72 bg-red-400/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-5 right-20 w-80 h-80 bg-blue-400/5 rounded-full blur-3xl" />
         </div>
 
-        {/* History Area in session */}
-        {recentLinks.length > 0 && (
-          <section className="mt-12 bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 border border-slate-100 dark:border-slate-850 shadow-md">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-sm md:text-base font-extrabold text-slate-800 dark:text-slate-200">
-                {t.recentHeading}
-              </h3>
-              <button
-                onClick={handleClearHistory}
-                className="text-[10px] md:text-xs font-bold text-red-500 hover:text-red-600 dark:hover:text-red-400 flex items-center gap-1 transition-all cursor-pointer"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                <span>{t.clearHistory}</span>
-              </button>
-            </div>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 relative text-center flex flex-col items-center">
+          
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-500/10 text-yellow-700 text-xs font-bold rounded-lg font-arabic mb-4">
+            <Sparkles size={13} className="text-yellow-600" />
+            {t.heroBadge}
+          </span>
 
-            <div className="divide-y divide-slate-100 dark:divide-slate-850">
-              {recentLinks.map((item) => (
-                <div key={item.id} className="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between gap-4">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400 truncate">
-                        {item.shortUrl}
-                      </span>
-                      <span className="text-[9px] text-slate-400 dark:text-slate-500 font-mono">
-                        ({item.createdAt})
-                      </span>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black font-arabic text-slate-900 leading-tight tracking-tight lg:leading-normal">
+            {t.heroTitlePart1}<span className="text-red-600 block sm:inline-block">{t.heroTitlePart2}</span>
+          </h1>
+
+        </div>
+      </section>
+
+      {/* 3. MAIN WORKSPACE / INTERACTIVE PLATFORM */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" id="main_workspace">
+        
+        {/* Mobile quick tab list removed */}
+
+        {/* Dynamic Navigation Tabs Content render */}
+        {activeTab === 'generator' && (
+          <div className="transition-opacity duration-300 animate-fade-in">
+            <React.Suspense fallback={
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full max-w-7xl mx-auto animate-pulse" id="qr_skeleton_loader">
+                {/* Simulated Left Panel (8 cols) */}
+                <div className="lg:col-span-8 space-y-6">
+                  {/* Module 1 Skeleton */}
+                  <div className="bg-white rounded-3xl p-6 border border-gray-100 flex flex-col h-[320px] justify-between">
+                    <div className="space-y-4">
+                      <div className="h-6 w-1/3 bg-slate-200 rounded-lg"></div>
+                      <div className="grid grid-cols-4 gap-2">
+                        <div className="h-14 bg-slate-100 rounded-2xl"></div>
+                        <div className="h-14 bg-slate-100 rounded-2xl"></div>
+                        <div className="h-14 bg-slate-100 rounded-2xl"></div>
+                        <div className="h-14 bg-slate-100 rounded-2xl"></div>
+                      </div>
+                      <div className="h-4 w-1/4 bg-slate-200 rounded-md"></div>
+                      <div className="h-12 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200"></div>
                     </div>
-                    <p className="font-mono text-[10px] text-slate-400 dark:text-slate-500 truncate max-w-lg">
-                      {item.originalUrl}
-                    </p>
                   </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      onClick={() => {
-                        copyToClipboard(item.shortUrl, 'short');
-                        alert(t.copiedShortLink);
-                      }}
-                      className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition cursor-pointer"
-                      title="Copy Short URL"
-                    >
-                      <Copy className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      onClick={() => {
-                        setActiveResult(item);
-                        // scroll up smoothly on mobile
-                        window.scrollTo({ top: 320, behavior: 'smooth' });
-                      }}
-                      className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition cursor-pointer"
-                      title="View QR Code"
-                    >
-                      <QrCode className="h-3.5 w-3.5" />
-                    </button>
+                  {/* Module 2 Skeleton */}
+                  <div className="bg-white rounded-3xl p-6 border border-gray-100 h-[240px]">
+                    <div className="h-6 w-1/4 bg-slate-200 rounded-lg mb-4"></div>
+                    <div className="space-y-3">
+                      <div className="h-10 bg-slate-100 rounded-xl"></div>
+                      <div className="h-10 bg-slate-100 rounded-xl w-5/6"></div>
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </section>
+                {/* Simulated Right Panel (4 cols) */}
+                <div className="lg:col-span-4 space-y-6">
+                  <div className="bg-white rounded-3xl p-6 border border-gray-100 h-[500px] flex flex-col justify-between">
+                    <div className="space-y-4">
+                      <div className="h-6 w-2/3 bg-slate-200 rounded-lg"></div>
+                      <div className="h-32 bg-slate-100 rounded-2xl"></div>
+                      <div className="h-4 w-1/2 bg-slate-200 rounded-md"></div>
+                    </div>
+                    <div className="h-12 bg-slate-200 rounded-2xl"></div>
+                  </div>
+                </div>
+              </div>
+            }>
+              <QRGenerator lang={lang} />
+            </React.Suspense>
+          </div>
         )}
+
+        {activeTab === 'faq' && (
+          <div className="transition-opacity duration-300">
+            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
+              <FAQView lang={lang} onReturn={() => setActiveTab('generator')} />
+            </React.Suspense>
+          </div>
+        )}
+
+        {activeTab === 'articles' && (
+          <div className="transition-opacity duration-300">
+            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
+              <ArticlesView 
+                lang={lang} 
+                selectedArticleId={selectedArticleId}
+                onSelectArticle={(id) => setSelectedArticleId(id)}
+              />
+            </React.Suspense>
+          </div>
+        )}
+
+        {activeTab === 'terms' && (
+          <div className="transition-opacity duration-300">
+            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
+              <LegalView lang={lang} docType="terms" />
+            </React.Suspense>
+          </div>
+        )}
+
+        {activeTab === 'privacy' && (
+          <div className="transition-opacity duration-300">
+            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
+              <LegalView lang={lang} docType="privacy" />
+            </React.Suspense>
+          </div>
+        )}
+
+        {activeTab === 'about' && (
+          <div className="transition-opacity duration-300">
+            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
+              <LegalView lang={lang} docType="about" />
+            </React.Suspense>
+          </div>
+        )}
+
+        {activeTab === 'contact' && (
+          <div className="transition-opacity duration-300">
+            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
+              <LegalView lang={lang} docType="contact" />
+            </React.Suspense>
+          </div>
+        )}
+
+        {['terms', 'privacy', 'about', 'contact', 'articles'].includes(activeTab) && (
+          <div className="text-center pt-8">
+            <button
+              onClick={() => setActiveTab('generator')}
+              className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold font-arabic transition-all cursor-pointer shadow-md inline-flex items-center gap-2 hover:scale-102 transition-transform duration-200"
+              type="button"
+            >
+              <span>{t.btnReturn}</span>
+            </button>
+          </div>
+        )}
+
+        {/* TeraBox Responsive Affiliate Banner - Standard Leaderboard 728x90 */}
+        <div className="mt-12 pt-6 border-t border-gray-200 flex justify-center" id="terabox_promotion_container">
+          <a
+            href="https://www.terabox.com/referral/4401985151231"
+            target="_blank"
+            rel="sponsored nofollow noopener noreferrer"
+            className="group relative block overflow-hidden rounded-lg bg-gradient-to-r from-slate-950 via-blue-950 to-slate-900 border border-blue-900/50 shadow-xs hover:shadow-md transition-all duration-300 w-full max-w-[728px] md:h-[90px] min-h-[90px]"
+            id="terabox_affiliate_banner"
+          >
+            {/* Outer absolute visual sparks and background glow overlay */}
+            <div className="absolute -top-12 -right-12 w-36 h-36 bg-blue-600/10 rounded-full blur-2xl group-hover:bg-blue-600/20 transition-all duration-500" />
+            <div className="absolute -bottom-12 -left-12 w-36 h-36 bg-amber-500/10 rounded-full blur-2xl group-hover:bg-amber-500/15 transition-all duration-500" />
+            
+            {/* Action speed lines background overlay to represent the "fast monetization / speed" visual */}
+            <div className="absolute inset-0 opacity-15 group-hover:opacity-25 transition-opacity duration-300 pointer-events-none overflow-hidden">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.1)_0%,transparent_75%)]" />
+              <div className="absolute top-0 left-0 right-0 h-full w-full bg-[linear-gradient(45deg,transparent_45%,rgba(255,255,255,0.03)_50%,transparent_55%)] bg-[length:20px_20px] animate-[pulse_3s_infinite_ease-in-out]" />
+            </div>
+
+            {/* Flex orientation respects language dir - optimized to look strictly horizontal and rectangular */}
+            <div className={`flex flex-col sm:flex-row items-center justify-between gap-3 ${lang === 'ar' ? 'sm:flex-row-reverse text-right' : 'text-left'} relative z-10 w-full h-full p-3 md:py-0 md:px-5 md:flex`}>
+              
+              <div className={`flex flex-col sm:flex-row items-center gap-3 ${lang === 'ar' ? 'sm:flex-row-reverse' : ''} w-full sm:w-auto`}>
+                {/* 3D-styled visual folder/box illustration (Overflowing with coins & money) */}
+                <div className="relative shrink-0 flex items-center justify-center w-10 h-10 bg-gradient-to-br from-blue-900 to-indigo-950 border border-blue-500/35 rounded-md shadow-inner group-hover:scale-105 duration-300 transition-all">
+                  {/* Glowing coins */}
+                  <div className="absolute -top-1 -right-1 bg-gradient-to-r from-amber-400 to-yellow-500 text-amber-955 p-0.5 rounded-full text-[8px] font-extrabold flex items-center justify-center animate-bounce shadow-md border border-amber-300">
+                    <Coins size={9} className="text-amber-955" />
+                  </div>
+                  {/* Floating dollar bill */}
+                  <div className="absolute -bottom-1 -left-1 bg-gradient-to-r from-emerald-400 to-teal-500 text-white p-0.5 rounded-md text-[7px] font-extrabold flex items-center justify-center shadow-md animate-pulse border border-emerald-300">
+                    <Banknote size={9} />
+                  </div>
+
+                  {/* Video Player Card */}
+                  <div className="w-7 h-7 bg-white/10 rounded-md border border-white/20 flex items-center justify-center relative overflow-hidden backdrop-blur-xs">
+                    <div className="absolute inset-0 bg-radial-gradient from-transparent to-blue-950/40" />
+                    <Play size={12} className="text-blue-400 fill-blue-400/80 animate-pulse" />
+                  </div>
+                </div>
+
+                {/* Main banner body */}
+                <div className={`space-y-0.5 ${lang === 'ar' ? 'text-center sm:text-right' : 'text-center sm:text-left'}`}>
+                  {lang === 'ar' ? (
+                    <div className="flex items-center justify-center sm:justify-start sm:flex-row-reverse gap-1 mb-0.5">
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/20">
+                        <Sparkles size={9} className="animate-pulse text-amber-300" />
+                        رعاية تيرابوكس الرسمية
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center sm:justify-start gap-1 mb-0.5">
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/20">
+                        <Sparkles size={9} className="animate-pulse text-amber-300" />
+                        Official TeraBox Sponsor
+                      </span>
+                    </div>
+                  )}
+
+                  {lang === 'ar' ? (
+                    <div className="space-y-0.5">
+                      <h3 className="text-sm font-black font-arabic leading-tight text-amber-400 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] group-hover:text-amber-300 transition-colors">
+                        فيديوهاتك بتجيب فلوس! 💥
+                      </h3>
+                      <p className="text-[10.5px] font-arabic text-slate-100 leading-normal font-semibold">
+                        ابدأ رحلتك في الربح من المحتوى مع تيرابوكس الآن.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-0.5">
+                      <h3 className="text-sm font-black tracking-tight leading-tight text-amber-400 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] group-hover:text-amber-300 transition-colors">
+                        MONETIZE YOUR VIDEOS! 💥
+                      </h3>
+                      <p className="text-[10.5px] font-sans text-slate-100 leading-normal font-semibold">
+                        Start earning from your content with TeraBox now.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Call-to-action button & branding info */}
+              <div className={`shrink-0 flex flex-col items-center gap-0.5 w-full sm:w-auto ${lang === 'ar' ? 'sm:items-end' : 'sm:items-start'}`}>
+                <div className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-center text-[10.5px] tracking-wide transition-all duration-300 group-hover:scale-102 shadow-xs hover:shadow-md border border-amber-400 select-none flex items-center justify-center gap-1">
+                  <span>{lang === 'ar' ? 'ابدأ الآن مجاناً!' : 'START NOW FOR FREE!'}</span>
+                  <ArrowRight size={11} className={`shrink-0 transition-transform ${lang === 'ar' ? 'rotate-180 group-hover:-translate-x-1' : 'group-hover:translate-x-1'}`} />
+                </div>
+                <div className="flex items-center gap-1 text-[7.5px] text-gray-400 font-bold tracking-tight">
+                  <Cloud size={8} className="text-blue-400 shrink-0" />
+                  <span>TERABOX 728x90 LEADERBOARD</span>
+                </div>
+              </div>
+
+            </div>
+          </a>
+        </div>
 
       </main>
 
-      {/* Footer copyright space */}
-      <footer className="py-6 border-t border-slate-100 dark:border-slate-850 text-center text-[10px] md:text-xs text-slate-400 dark:text-slate-500 transition-colors bg-white/50 dark:bg-slate-900/50">
-        <p className="font-medium">
-          {lang === 'ar' ? 'البوابة الذكية لتقصير الروابط وإنشاء رموز الاستجابة السريعة © Qrytube 2026' : 'Qrytube Smart URL Shortener & Dynamic QR Code Portal © 2026'}
-        </p>
-        <p className="mt-1 opacity-75 font-mono">
-          {dbStatus === 'connected' ? '⚡ CLOUD ACTIVE: POSTGRESQL' : '🛡️ ISOLATED ENVIRONMENT LOCAL ENGINE'}
-        </p>
-      </footer>
+      {/* 4. PROFESSIONAL BEAUTIFUL FOOTER */}
+      <FooterView lang={lang} onNavigate={handleNavClick} />
 
     </div>
   );

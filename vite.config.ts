@@ -3,32 +3,6 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import {defineConfig} from 'vite';
 import { Buffer } from 'buffer';
-import dotenv from 'dotenv';
-import fs from 'fs';
-
-// Force load existing environment variables
-dotenv.config();
-
-// Auto-generate .env file from process.env if present
-try {
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
-  
-  if (supabaseUrl && supabaseAnonKey) {
-    const envPath = path.resolve(process.cwd(), '.env');
-    const content = `VITE_SUPABASE_URL="${supabaseUrl}"
-VITE_SUPABASE_ANON_KEY="${supabaseAnonKey}"
-SUPABASE_URL="${supabaseUrl}"
-SUPABASE_ANON_KEY="${supabaseAnonKey}"
-`;
-    fs.writeFileSync(envPath, content, 'utf8');
-    console.log('[Supabase Sync] Successfully auto-generated .env file with active credentials from system environment.');
-  } else {
-    console.warn('[Supabase Sync] Warning: SUPABASE_URL and/or SUPABASE_ANON_KEY not found in system variables. Skipping auto-generation.');
-  }
-} catch (e) {
-  console.error('[Supabase Sync] Error during .env auto-generation:', e);
-}
 
 // Helper to resolve the avatar from a YouTube channel/video URL
 async function resolveAvatarUrl(targetUrl: string): Promise<string | null> {
