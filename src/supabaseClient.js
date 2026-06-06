@@ -1,17 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Support both server-side process.env and client-side Vite import.meta.env
-const supabaseUrl = 
-  (typeof process !== 'undefined' && process?.env?.SUPABASE_URL) || 
-  (typeof import.meta !== 'undefined' && import.meta?.env?.VITE_SUPABASE_URL) || 
-  (typeof import.meta !== 'undefined' && import.meta?.env?.SUPABASE_URL) || 
-  'https://your-project.supabase.co';
-
-const supabaseAnonKey = 
-  (typeof process !== 'undefined' && process?.env?.SUPABASE_ANON_KEY) || 
-  (typeof import.meta !== 'undefined' && import.meta?.env?.VITE_SUPABASE_ANON_KEY) || 
-  (typeof import.meta !== 'undefined' && import.meta?.env?.SUPABASE_ANON_KEY) || 
-  'placeholder-anon-key';
+// Retrieve values strictly from client-side imports
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 const isConfigured = 
   supabaseUrl && 
@@ -19,11 +10,33 @@ const isConfigured =
   supabaseAnonKey && 
   supabaseAnonKey !== 'placeholder-anon-key';
 
-if (!isConfigured) {
-  console.warn('[Supabase] Warning: Supabase client is running with placeholder/missing credentials. Please configure SUPABASE_URL and SUPABASE_ANON_KEY in your environment/settings.');
-}
+// Safely mask credentials for logging
+const maskValue = (val) => {
+  if (!val) return 'empty';
+  if (val.startsWith('https://your-project') || val === 'placeholder-anon-key') return 'placeholder (not set)';
+  return `${val.substring(0, 8)}...${val.substring(val.length - 4)}`;
+};
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+console.log('[Supabase Client Initialization]');
+console.log(' - URL:', maskValue(supabaseUrl));
+console.log(' - Anon Key:', maskValue(supabaseAnonKey));
+console.log(' - Is properly configured:', !!isConfigured);
+
+export const supabase = createClient(supabaseUrl || 'https://your-project.supabase.co', supabaseAnonKey || 'placeholder-anon-key');
+
+// Trigger a direct runtime sanity query test and display outcome in the console immediately
+if (isConfigured) {
+  console.log('[Supabase Setup] Triggering database connection handshake...');
+  supabase.from('links').select('*').limit(1).then(({ data, error }) => {
+    if (error) {
+      console.error('[Supabase Handshake] Connection failed:', error.message, error);
+    } else {
+      console.log('[Supabase Handshake] Connection verified successfully! Retrieved rows count:', data?.length);
+    }
+  }).catch(e => {
+    console.error('[Supabase Handshake] Connection exception:', e);
+  });
+}
 
 /**
  * Simple test function to verify Connection with Supabase.
@@ -31,7 +44,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
  */
 export async function testSupabaseConnection() {
   if (!isConfigured) {
-    const msg = '[Supabase] Setup needed: Connection test skipped because SUPABASE_URL and/or SUPABASE_ANON_KEY are not configured yet.';
+    const msg = '[Supabase] Connection test skipped because SUPABASE_URL and/or SUPABASE_ANON_KEY are not configured yet.';
     console.log(msg);
     return { 
       success: false, 
@@ -58,5 +71,6 @@ export async function testSupabaseConnection() {
     return { success: false, error: err };
   }
 }
+
 
 

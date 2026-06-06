@@ -566,16 +566,15 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-2 md:gap-3">
-          {/* Supabase Connection Status Badge */}
-          <div className="hidden sm:flex items-center gap-2 py-1.5 px-3 rounded-full bg-slate-100/80 dark:bg-slate-850 border border-slate-200/55 dark:border-slate-800 text-xs">
-            <span className={`h-2 w-2 rounded-full ${
-              dbStatus === 'connected' ? 'bg-emerald-500 shadow-xs' : 
-              dbStatus === 'unconfigured' ? 'bg-amber-400 shadow-xs' : 'bg-red-500 shadow-xs'
-            }`} />
-            <span className="font-medium text-slate-500 dark:text-slate-400">
-              {dbStatus === 'connected' ? t.dbConnected : t.dbUnconfigured}
-            </span>
-          </div>
+          {/* Supabase Connection Status Badge - Show only when connected */}
+          {dbStatus === 'connected' && (
+            <div className="hidden sm:flex items-center gap-2 py-1.5 px-3 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 border border-emerald-500/25 text-xs">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-xs" />
+              <span className="font-medium text-emerald-700 dark:text-emerald-400">
+                {t.dbConnected}
+              </span>
+            </div>
+          )}
 
           {/* Toggle Language */}
           <button
@@ -613,23 +612,6 @@ export default function App() {
             {t.subtitle}
           </p>
         </section>
-
-        {/* Database Warning/Notice inline notification */}
-        {dbStatus !== 'connected' && (
-          <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-350 flex gap-3 text-xs md:text-sm shadow-xs transition-all duration-300">
-            <Database className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
-            <div>
-              <p className="font-bold flex items-center gap-1.5">
-                <span>{lang === 'ar' ? 'تنبيه الاتصال بـ Supabase (مستحب للتخزين الدائم):' : 'Supabase Integration Alert (Needed for Permanent Storage):'}</span>
-              </p>
-              <p className="mt-1 opacity-90 leading-relaxed">
-                {lang === 'ar' 
-                  ? 'لم يتم تهيئة متغيرات الاتصال بـ Supabase في هذا النظام بعد. يمكنك إضافة SUPABASE_URL و SUPABASE_ANON_KEY في بيئة العمل للحفاظ على بياناتك. يمكنك تشغيل الخدمة حالياً بوضع المحاكي.' 
-                  : 'Supabase credentials are not found in .env yet. The system is operating in safe standalone simulator mode (saving links inside local React state). Set your credentials in Settings for cloud database sync.'}
-              </p>
-            </div>
-          </div>
-        )}
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
           
