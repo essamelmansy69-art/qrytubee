@@ -347,9 +347,11 @@ const formatElapsedTime = (isoStr?: string, currentLang?: 'ar' | 'en') => {
 };
 
 export default function QRGenerator({ 
-  lang = 'ar'
+  lang = 'ar',
+  onNavigateToSvg
 }: { 
   lang?: 'ar' | 'en';
+  onNavigateToSvg?: () => void;
 }) {
   const t = translations[lang];
 
@@ -407,6 +409,7 @@ export default function QRGenerator({
   const [isRefreshingStats, setIsRefreshingStats] = useState<boolean>(false);
   const [analyticsResponse, setAnalyticsResponse] = useState<any>(null);
   const [simulateSuccess, setSimulateSuccess] = useState<boolean>(false);
+  const [analyticsTab, setAnalyticsTab] = useState<'overview' | 'demographics' | 'logs'>('overview');
 
   const fetchScanStats = async (silent = false) => {
     if (!urlInput.trim() || !urlInfo.isValid) return;
@@ -918,10 +921,11 @@ export default function QRGenerator({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full max-w-7xl mx-auto" id="qr_main_layout">
+    <div className="space-y-8 w-full" id="qr_parent_container">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full max-w-7xl mx-auto" id="qr_main_layout">
 
-      {/* LEFT PANEL: INPUTS & PREVIEW (8 COLS) */}
-      <div className="lg:col-span-8 space-y-6" id="qr_left_panel">
+        {/* LEFT PANEL: INPUTS & PREVIEW (8 COLS) */}
+        <div className="lg:col-span-8 space-y-6" id="qr_left_panel">
         
         {/* Module 1: The Link Input */}
         <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-100 flex flex-col justify-start" id="module_link_input">
@@ -1317,6 +1321,22 @@ export default function QRGenerator({
             )}
           </div>
 
+          {onNavigateToSvg && (
+            <div className="mt-3 text-center sm:text-right" id="svg_help_navigation_container">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onNavigateToSvg();
+                }}
+                className="text-xs text-red-650 hover:text-red-700 font-bold font-arabic inline-flex items-center gap-1 bg-red-50/50 hover:bg-red-50 px-3 py-1.5 rounded-xl border border-red-100 transition-all cursor-pointer"
+              >
+                <Sparkles size={11} className="text-red-655 animate-pulse" />
+                <span>{lang === 'ar' ? 'هل تريد تحويل شعارك الملون لملف SVG ناقل؟ اضغط هنا مجاناً' : 'Want to convert your logo image to vector SVG? Click here'}</span>
+              </button>
+            </div>
+          )}
+
           {/* Logo visual adjustments controls (appears only when custom logo is set) */}
           {customLogo && (
             <motion.div
@@ -1381,306 +1401,6 @@ export default function QRGenerator({
           )}
         </div>
 
-
-
-
-        {/* Module 5: Smart Scan Analytics Dashboard & Tracking */}
-        <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-100 space-y-6" id="module_smart_analytics">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <div className="flex items-center gap-2.5">
-              <span className="p-2 bg-blue-50 text-blue-600 rounded-xl relative">
-                <BarChart3 size={20} />
-                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" />
-                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full" />
-              </span>
-              <div>
-                <h2 className="text-xl font-bold font-arabic text-gray-800 flex items-center gap-1.5">
-                  {t.analyticsTitle}
-                </h2>
-                <p className="text-[11px] text-slate-600 font-arabic">
-                  {t.analyticsSub}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => fetchScanStats(false)}
-                disabled={isRefreshingStats || !urlInput.trim() || !urlInfo.isValid}
-                className="p-2 hover:bg-gray-100 rounded-xl border border-gray-150 text-gray-650 transition-all flex items-center gap-1.5 text-xs font-arabic font-semibold disabled:opacity-50 cursor-pointer"
-                type="button"
-                title={t.refreshStats}
-              >
-                <RotateCcw size={14} className={isRefreshingStats ? "animate-spin" : ""} />
-                <span>{lang === 'ar' ? 'تحديث' : 'Refresh'}</span>
-              </button>
-            </div>
-          </div>
-
-          {!urlInput.trim() || !urlInfo.isValid ? (
-            <div className="text-center py-8 px-4 border border-dashed border-gray-200 rounded-2xl bg-slate-50/50">
-              <BarChart3 className="mx-auto text-slate-300 mb-2" size={32} />
-              <p className="text-xs font-arabic text-slate-650 font-bold">
-                {lang === 'ar' ? 'الرجاء إدخال رابط صالح في الخطوة الأولى لتنشيط تتبع التحليلات!' : 'Please enter a valid link in Step 1 to activate live tracking analytics!'}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {/* Simulator Action Block */}
-              <div className="p-4 bg-blue-50/40 border border-blue-100 rounded-2xl space-y-3">
-                <div className="flex items-start gap-2.5">
-                  <span className="p-1.5 bg-blue-100 text-blue-700 rounded-lg mt-0.5 shrink-0">
-                    <Activity size={14} />
-                  </span>
-                  <div>
-                    <h4 className="text-xs font-extrabold text-blue-950 font-arabic">
-                      {lang === 'ar' ? 'تفاعل فوري عالي الدقة ورصد للمنصات' : 'High Fidelity Real-Time Redirections & Tracking'}
-                    </h4>
-                    <p className="text-[11px] text-blue-850 font-arabic leading-relaxed mt-0.5">
-                      {lang === 'ar'
-                        ? 'تتبع دول وموقع وقنوات الزوار للأندرويد والآيفون تلقائياً لكل رابط. يمكنك محاكاة عملية مسح سريعة بنقرة واحدة لتجربة لوحة التحكم الحية وفلترة الإحصاءات بالأسفل!'
-                        : 'Track viewer geolocations, devices, and OS statistics automatically. Generate simulated test scans here to trial the real-time panel dynamics!'}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row items-center gap-2.5 pt-1">
-                  <button
-                    onClick={handleSimulateScan}
-                    disabled={isRefreshingStats}
-                    className="w-full sm:w-auto px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold font-arabic rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs border border-blue-700 font-arabic font-semibold"
-                    type="button"
-                  >
-                    <Sparkles size={14} />
-                    <span>{t.btnSimulateScan}</span>
-                  </button>
-                  <div className="text-[10px] text-slate-600 font-mono flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full inline-block animate-pulse" />
-                    <span>TID: {trackingId}</span>
-                  </div>
-                </div>
-
-                {simulateSuccess && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold rounded-xl text-[11px] font-arabic leading-relaxed flex items-center gap-1.5 animate-pulse"
-                  >
-                    <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
-                    <span>{t.simulatedScanSuccess}</span>
-                  </motion.div>
-                )}
-              </div>
-
-              {/* Main Total Metric Card */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-4 bg-slate-50 border border-gray-150 rounded-2xl text-center space-y-1">
-                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block font-arabic font-semibold">
-                    {t.scansCount} {lang === 'ar' ? 'الكلّي' : 'Total'}
-                  </span>
-                  <div className="text-3xl font-extrabold text-gray-900 font-mono tracking-tight flex items-center justify-center gap-1.5">
-                    {scanCount}
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block animate-ping" />
-                  </div>
-                </div>
-
-                <div className="p-4 bg-slate-50 border border-gray-150 rounded-2xl text-center space-y-1">
-                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block font-arabic font-semibold">
-                    {lang === 'ar' ? 'الموقع الأبرز' : 'Primary Geolocation'}
-                  </span>
-                  <div className="text-sm font-extrabold text-gray-900 font-arabic truncate pt-1">
-                    {(() => {
-                      const specificData = analyticsResponse?.specificCode;
-                      if (!specificData || !specificData.countries || Object.keys(specificData.countries).length === 0) {
-                        return '—';
-                      }
-                      const sortedCountries = Object.entries(specificData.countries).sort((a: any, b: any) => b[1] - a[1]);
-                      const topCode = sortedCountries[0][0];
-                      const flag = COUNTRY_FLAGS[topCode] || '🌐';
-                      const desc = COUNTRY_MAP[topCode] || topCode;
-                      return `${flag} ${desc.split(' / ')[0]}`;
-                    })()}
-                  </div>
-                </div>
-
-                <div className="p-4 bg-slate-50 border border-gray-150 rounded-2xl text-center space-y-1">
-                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block font-arabic font-semibold">
-                    {lang === 'ar' ? 'الجهاز الرئيسي' : 'Primary Device'}
-                  </span>
-                  <div className="text-sm font-extrabold text-gray-900 font-arabic truncate pt-1">
-                    {(() => {
-                      const specificData = analyticsResponse?.specificCode;
-                      if (!specificData || !specificData.devices || Object.keys(specificData.devices).length === 0) {
-                        return '—';
-                      }
-                      const sortedDevices = Object.entries(specificData.devices).sort((a: any, b: any) => b[1] - a[1]);
-                      const topDevice = sortedDevices[0][0];
-                      return topDevice;
-                    })()}
-                  </div>
-                </div>
-              </div>
-
-              {scanCount === 0 ? (
-                <div className="text-center py-10 px-4 border border-dashed border-gray-150 rounded-2xl bg-slate-50/30">
-                  <Activity className="mx-auto text-slate-350 mb-3 animate-pulse text-slate-400" size={32} />
-                  <p className="text-xs font-arabic font-extrabold text-gray-700 leading-relaxed max-w-sm mx-auto">
-                    {t.scansZero}
-                  </p>
-                  <p className="text-[10px] text-slate-650 font-arabic mt-1">
-                    {lang === 'ar' ? 'امسح الرمز بكاميرا هاتفك أو انقر محاكاة المسح لتجربة لوحة التحكم تزامناً وحياً!' : 'Try scanning the code with your phone camera or hit click simulate scanning to test live calculations!'}
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5" id="analytics_metrics_grid">
-                  
-                  {/* Top Countries Card */}
-                  <div className="p-5 border border-gray-150 bg-slate-50/50 rounded-2xl space-y-3">
-                    <h3 className="text-xs font-extrabold text-gray-800 font-arabic flex items-center gap-1.5 border-b border-gray-100 pb-2">
-                      <Globe size={14} className="text-blue-600" />
-                      <span>{t.scansByCountry}</span>
-                    </h3>
-                    <div className="space-y-2.5 max-h-[160px] overflow-y-auto pr-1">
-                      {(() => {
-                        const specificData = analyticsResponse?.specificCode;
-                        if (!specificData || !specificData.countries) return null;
-                        const sorted = Object.entries(specificData.countries).sort((a: any, b: any) => b[1] - a[1]);
-                        return sorted.map(([cCode, count]: [string, any]) => {
-                          const pct = Math.round((count / scanCount) * 100);
-                          const cleanName = COUNTRY_MAP[cCode] || cCode;
-                          const flag = COUNTRY_FLAGS[cCode] || '🌐';
-                          return (
-                            <div key={cCode} className="space-y-1">
-                              <div className="flex items-center justify-between text-[11px] font-arabic font-bold text-gray-750">
-                                <span className="flex items-center gap-1.5">
-                                  <span>{flag}</span>
-                                  <span>{cleanName.split(' / ')[lang === 'ar' ? 0 : 1]}</span>
-                                </span>
-                                <span className="font-mono text-gray-900">{count} ({pct}%)</span>
-                              </div>
-                              <div className="w-full h-1.5 bg-gray-200/60 rounded-full overflow-hidden">
-                                <div className="h-full bg-blue-600 rounded-full" style={{ width: `${pct}%` }} />
-                              </div>
-                            </div>
-                          );
-                        });
-                      })()}
-                    </div>
-                  </div>
-
-                  {/* Systems and Devices Card */}
-                  <div className="p-5 border border-gray-150 bg-slate-50/50 rounded-2xl space-y-4">
-                    
-                    {/* Device distributions */}
-                    <div className="space-y-2">
-                      <h3 className="text-xs font-extrabold text-gray-800 font-arabic flex items-center gap-1.5 border-b border-gray-100 pb-2">
-                        <Smartphone size={14} className="text-indigo-600" />
-                        <span>{t.scansByDevice}</span>
-                      </h3>
-                      <div className="space-y-2 max-h-[70px] overflow-y-auto">
-                        {(() => {
-                          const specificData = analyticsResponse?.specificCode;
-                          if (!specificData || !specificData.devices) return null;
-                          const sorted = Object.entries(specificData.devices).sort((a: any, b: any) => b[1] - a[1]);
-                          return sorted.map(([device, count]: [string, any]) => {
-                            const pct = Math.round((count / scanCount) * 100);
-                            return (
-                              <div key={device} className="space-y-1">
-                                <div className="flex items-center justify-between text-[10px] font-arabic font-semibold text-gray-750">
-                                  <span>📱 {device}</span>
-                                  <span className="font-mono text-gray-900">{count} ({pct}%)</span>
-                                </div>
-                                <div className="w-full h-1 bg-gray-200/60 rounded-full overflow-hidden">
-                                  <div className="h-full bg-indigo-600 rounded-full" style={{ width: `${pct}%` }} />
-                                </div>
-                              </div>
-                            );
-                          });
-                        })()}
-                      </div>
-                    </div>
-
-                    {/* Operating Systems */}
-                    <div className="space-y-2">
-                      <h3 className="text-xs font-extrabold text-gray-800 font-arabic flex items-center gap-1.5 border-b border-gray-100 pb-2">
-                        <Monitor size={14} className="text-rose-600" />
-                        <span>{t.scansByOS}</span>
-                      </h3>
-                      <div className="space-y-2 max-h-[70px] overflow-y-auto">
-                        {(() => {
-                          const specificData = analyticsResponse?.specificCode;
-                          if (!specificData || !specificData.osList) return null;
-                          const sorted = Object.entries(specificData.osList).sort((a: any, b: any) => b[1] - a[1]);
-                          return sorted.map(([osName, count]: [string, any]) => {
-                            const pct = Math.round((count / scanCount) * 100);
-                            return (
-                              <div key={osName} className="space-y-1">
-                                <div className="flex items-center justify-between text-[10px] font-arabic font-semibold text-gray-750">
-                                  <span>💻 {osName}</span>
-                                  <span className="font-mono text-gray-900">{count} ({pct}%)</span>
-                                </div>
-                                <div className="w-full h-1 bg-gray-200/60 rounded-full overflow-hidden">
-                                  <div className="h-full bg-rose-600 rounded-full" style={{ width: `${pct}%` }} />
-                                </div>
-                              </div>
-                            );
-                          });
-                        })()}
-                      </div>
-                    </div>
-
-                  </div>
-
-                </div>
-              )}
-
-              {/* Recent Scans Activity Log Table */}
-              {scanCount > 0 && scanHistory.length > 0 && (
-                <div className="p-5 border border-gray-150 bg-slate-50/50 rounded-2xl space-y-3">
-                  <h3 className="text-xs font-extrabold text-gray-800 font-arabic flex items-center gap-1.5">
-                    <Clock size={14} className="text-slate-650 animate-pulse" />
-                    <span>{lang === 'ar' ? 'سجل العمليات الأحدث (تحديث تلقائي مفعّل)' : 'Recent Scan Stream Log (Live Updates)'}</span>
-                  </h3>
-                  <div className="border border-gray-100 rounded-xl overflow-hidden bg-white">
-                    <table className="w-full text-right font-arabic text-[11px] leading-normal" id="scans_stream_log_table">
-                      <thead>
-                        <tr className="bg-slate-50 text-slate-650 border-b border-gray-100 text-[10px] font-bold">
-                          <th className="py-2.5 px-3">{lang === 'ar' ? 'البلد' : 'Country'}</th>
-                          <th className="py-2.5 px-3">{lang === 'ar' ? 'الجهاز' : 'Device'}</th>
-                          <th className="py-2.5 px-3">{lang === 'ar' ? 'نظام التشغيل' : 'OS'}</th>
-                          <th className="py-2.5 px-3 text-left pl-4">{lang === 'ar' ? 'الوقت' : 'Time'}</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-100 font-medium">
-                        {scanHistory.slice(0, 10).map((scan, sIdx) => {
-                          const flag = COUNTRY_FLAGS[scan.country || ''] || '🌐';
-                          const countryName = COUNTRY_MAP[scan.country || ''] || scan.country || 'UNKNOWN';
-                          return (
-                            <tr key={sIdx} className="hover:bg-slate-50/60 transition-colors">
-                              <td className="py-2.5 px-3 text-gray-800">
-                                <span className="flex items-center gap-1">
-                                  <span>{flag}</span>
-                                  <span>{countryName.split(' / ')[lang === 'ar' ? 0 : 1]}</span>
-                                </span>
-                              </td>
-                              <td className="py-2.5 px-3 text-slate-800 font-mono text-[10px]">{scan.device || 'Desktop'}</td>
-                              <td className="py-2.5 px-3 text-slate-800 font-mono text-[10px]">{scan.os || 'Other'}</td>
-                              <td className="py-2.5 px-3 text-left pl-4 text-slate-600 font-semibold">
-                                {formatElapsedTime(scan.timestamp || scan.date, lang)}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-
-            </div>
-          )}
-        </div>
-
-
       </div>
 
       {/* RIGHT PANEL: DESKTOP-ONLY STICKY DESIGN PREVIEW (4 COLS ON DESKTOP, HIDDEN ON MOBILE) */}
@@ -1724,5 +1444,7 @@ export default function QRGenerator({
       </div>
 
     </div>
+
+  </div>
   );
 }

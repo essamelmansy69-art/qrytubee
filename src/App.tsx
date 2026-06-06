@@ -43,6 +43,7 @@ const QRGenerator = React.lazy(() => import('./components/QRGenerator'));
 const ArticlesView = React.lazy(() => import('./components/ArticlesView'));
 const LegalView = React.lazy(() => import('./components/LegalView'));
 const FAQView = React.lazy(() => import('./components/FAQView'));
+const ImageToSVG = React.lazy(() => import('./components/ImageToSVG'));
 
 export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -96,13 +97,14 @@ export default function App() {
     return 'ar';
   });
 
-  const [activeTab, setActiveTab] = useState<'generator' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact'>(() => {
+  const [activeTab, setActiveTab] = useState<'generator' | 'svg' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact'>(() => {
     try {
       const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
       if (path === 'terms') return 'terms';
       if (path === 'privacy') return 'privacy';
       if (path === 'about') return 'about';
       if (path === 'contact') return 'contact';
+      if (path === 'svg' || path === 'image-to-svg' || path === 'svg-converter') return 'svg';
       if (path === 'articles' || path.startsWith('articles/')) return 'articles';
     } catch (_) {}
     return 'generator';
@@ -134,6 +136,13 @@ export default function App() {
       desc = lang === 'ar'
         ? "اصنع رموز QR ذكية (Deep Links) لـقناتك على اليوتيوب مجاناً. تتيح للمتابعين فتح قناتك أو فيديوهاتك داخل تطبيق اليوتيوب مباشرة لزيادة المشاهدات والاشتراكات."
         : "Create smart deep-link QR codes for social media influencers. Force links to open directly inside YouTube, Facebook, Instagram, and TikTok apps.";
+    } else if (activeTab === 'svg') {
+      title = lang === 'ar'
+        ? "محول الصور إلى SVG مجاني | qrytube"
+        : "Image to SVG Vector Converter Free | qrytube";
+      desc = lang === 'ar'
+        ? "أداة مجانية لتحويل الصور (PNG, JPG, WebP) إلى رسومات ناقلة SVG ذكية بدقة فائقة وبشكل فني متكامل ومحلي بالكامل لحماية خصوصيتك."
+        : "Convert PNG, JPG, or WebP images to responsive scaleable SVG vector path shapes locally inside your browser for free.";
     } else if (activeTab === 'faq') {
       title = lang === 'ar'
         ? "الأسئلة الشائعة | Qrytube"
@@ -315,6 +324,9 @@ export default function App() {
         if (['terms', 'privacy', 'about', 'contact'].includes(path)) {
           setActiveTab(path as any);
           setSelectedArticleId(null);
+        } else if (path === 'svg' || path === 'image-to-svg' || path === 'svg-converter') {
+          setActiveTab('svg');
+          setSelectedArticleId(null);
         } else if (path === 'articles') {
           setActiveTab('articles');
           setSelectedArticleId(null);
@@ -387,7 +399,7 @@ export default function App() {
     };
   }, []);
 
-  const handleNavClick = (tab: 'generator' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact', event: React.MouseEvent) => {
+  const handleNavClick = (tab: 'generator' | 'svg' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact', event: React.MouseEvent) => {
     event.preventDefault();
     setActiveTab(tab);
     if (tab === 'articles') {
@@ -658,50 +670,52 @@ export default function App() {
       
       {/* 1. STUNNING HEADER NAVIGATION BAR */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100" id="app_header">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between gap-4">
           
-          <button 
-            onClick={() => setActiveTab('generator')}
-            className="flex items-center gap-2.5 cursor-pointer hover:opacity-90 transition-opacity text-left outline-none border-none bg-transparent p-0"
-            id="header_logo_home_btn"
-          >
-            <QrytubeLogo size={42} />
-            <div className={`flex flex-col ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
-              <h1 className="text-md sm:text-lg font-extrabold font-arabic text-gray-900 tracking-tight leading-none">
-                {t.appTitle}
-              </h1>
-              <span className="text-[10px] font-medium font-arabic text-slate-500 mt-0.5">
-                {t.appSubTitle}
-              </span>
-            </div>
-          </button>
+          <div className="flex items-center gap-4 sm:gap-6 min-w-0">
+            <button 
+              onClick={() => setActiveTab('generator')}
+              className="flex items-center gap-2.5 cursor-pointer hover:opacity-90 transition-opacity text-left outline-none border-none bg-transparent p-0 shrink-0"
+              id="header_logo_home_btn"
+            >
+              <QrytubeLogo size={40} />
+              <div className={`flex flex-col ${lang === 'ar' ? 'text-right' : 'text-left'}`}>
+                <h1 className="text-md sm:text-base font-black font-arabic text-gray-900 tracking-tight leading-none">
+                  {t.appTitle}
+                </h1>
+                <span className="text-[10px] sm:text-[11px] font-medium font-arabic text-slate-500 mt-0.5">
+                  {t.appSubTitle}
+                </span>
+              </div>
+            </button>
+          </div>
           
           {/* Right badge / Action badge, Theme & Language Toggles */}
-          <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {/* Dark/Light Mode Toggle Button */}
             <button
               onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-xs font-semibold rounded-xl font-arabic transition-all cursor-pointer border border-slate-200"
+              className="flex items-center gap-1 px-2.5 py-1.25 bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 text-[11px] font-bold rounded-xl font-arabic transition-all cursor-pointer border border-slate-200 shadow-2xs"
               title={lang === 'ar' ? (theme === 'dark' ? 'تفعيل الوضع المضيء' : 'تفعيل الوضع المظلم') : (theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode')}
               id="theme_toggle_btn"
             >
-              {theme === 'dark' ? <Sun size={14} className="text-yellow-500 animate-[spin_12s_linear_infinite]" /> : <Moon size={14} className="text-slate-600" />}
-              <span>{lang === 'ar' ? (theme === 'dark' ? 'الوضع المضيء' : 'الوضع الداكن') : (theme === 'dark' ? 'Light Mode' : 'Dark Mode')}</span>
+              {theme === 'dark' ? <Sun size={12} className="text-yellow-500 animate-[spin_12s_linear_infinite]" /> : <Moon size={12} className="text-slate-600" />}
+              <span>{lang === 'ar' ? (theme === 'dark' ? 'مضيء' : 'داكن') : (theme === 'dark' ? 'Light' : 'Dark')}</span>
             </button>
 
             {/* Language Toggle Button */}
             <button
               onClick={() => setLang(l => l === 'ar' ? 'en' : 'ar')}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-xs font-semibold rounded-xl font-arabic transition-all cursor-pointer border border-slate-200"
+              className="flex items-center gap-1 px-2.5 py-1.25 bg-slate-50 hover:bg-slate-100 text-slate-700 hover:text-slate-900 text-[11px] font-bold rounded-xl font-arabic transition-all cursor-pointer border border-slate-200 shadow-2xs"
               title={lang === 'ar' ? 'Switch to English' : 'تحويل للغة العربية'}
               id="language_toggle_btn"
             >
-              <Languages size={14} />
+              <Languages size={12} />
               <span>{lang === 'ar' ? 'English' : 'العربية'}</span>
             </button>
 
-            <span className="hidden sm:inline-flex items-center gap-1 py-1 px-3 bg-red-50 text-red-600 text-xs font-semibold rounded-full font-arabic">
-              <Flame size={12} />
+            <span className="hidden md:inline-flex items-center gap-1 py-1 px-2.5 bg-red-50 text-red-600 text-[10px] font-semibold rounded-full font-arabic">
+              <Flame size={11} />
               {t.navFreeBadge}
             </span>
           </div>
@@ -733,8 +747,6 @@ export default function App() {
       {/* 3. MAIN WORKSPACE / INTERACTIVE PLATFORM */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" id="main_workspace">
         
-        {/* Mobile quick tab list removed */}
-
         {/* Dynamic Navigation Tabs Content render */}
         {activeTab === 'generator' && (
           <div className="transition-opacity duration-300 animate-fade-in">
@@ -778,7 +790,15 @@ export default function App() {
                 </div>
               </div>
             }>
-              <QRGenerator lang={lang} />
+              <QRGenerator lang={lang} onNavigateToSvg={() => setActiveTab('svg')} />
+            </React.Suspense>
+          </div>
+        )}
+
+        {activeTab === 'svg' && (
+          <div className="transition-opacity duration-300 animate-fade-in">
+            <React.Suspense fallback={<div className="text-center py-20 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
+              <ImageToSVG lang={lang} onReturn={() => setActiveTab('generator')} />
             </React.Suspense>
           </div>
         )}
