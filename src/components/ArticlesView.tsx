@@ -97,6 +97,39 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
         document.head.appendChild(script);
       }
       script.text = JSON.stringify(schemaArray);
+    } else if (selectedArticle.id === 'seo-2026-deep-link-trends') {
+      const faqSchema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "كيف تؤثر الروابط العميقة على سيو موقعك وقناتك لعام 2026؟",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "تعمل الروابط العميقة على نقل الزوار فوراً وبسلاسة تامة إلى داخل التطبيقات الرسمية المثبتة على هواتفهم، مما يخفض معدل ارتداد الزوار من الصفحة ويزيد من وقت التفاعل ومعدل الاشتراكات بنسب قياسية مما يمنح خوارزميات جوجل دليلاً ومؤشراً إيجابياً للغاية على جودة وأهمية قناتك أو موقعك."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "ما دور منصة Qrytube في تحسين أمان وجودة حملات QR الذكية؟",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "توفر منصة Qrytube حلاً محلياً فريداً من نوعه لتحويل الروابط التقليدية لروابط ذكية وتوليد كود QR لليوتيوب يضمن الانتقال الفوري بالهواتف بجانب حماية تامة من تتبع البيانات، ومع نقاء مخرجات SVG التي لا تفقد دقتها بالطباعة."
+            }
+          }
+        ]
+      };
+
+      const schemaArray = [schemaMarkup, faqSchema];
+      let script = document.getElementById('seo-article-schema') as HTMLScriptElement;
+      if (!script) {
+        script = document.createElement('script');
+        script.id = 'seo-article-schema';
+        script.type = 'application/ld+json';
+        document.head.appendChild(script);
+      }
+      script.text = JSON.stringify(schemaArray);
     } else {
       let script = document.getElementById('seo-article-schema') as HTMLScriptElement;
       if (!script) {
