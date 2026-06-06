@@ -17,6 +17,7 @@ import {
   Sparkles, 
   Download, 
   Copy, 
+  Share2,
   RotateCcw, 
   Settings, 
   ExternalLink, 
@@ -78,6 +79,7 @@ const QRVisualPreview: React.FC<QRVisualPreviewProps> = ({
   activePayload,
 }) => {
   const [copied, setCopied] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
 
   const handleCopyLink = async () => {
     try {
@@ -217,7 +219,7 @@ const QRVisualPreview: React.FC<QRVisualPreviewProps> = ({
         </span>
       ) : null}
 
-      {/* Deep Link URL Copy Section */}
+      {/* Deep Link URL Copy & Share Section */}
       {urlInput.trim() && urlInfo.isValid && (
         <div className="mt-4 w-full px-1 space-y-1.5 animate-fadeIn" id="deep_link_copy_section">
           <label className="text-[10px] font-bold text-gray-500 font-arabic text-center block w-full">
@@ -228,31 +230,111 @@ const QRVisualPreview: React.FC<QRVisualPreviewProps> = ({
               type="text" 
               readOnly 
               value={activePayload} 
-              className="flex-1 bg-transparent border-none text-[10px] font-mono text-slate-700 outline-none px-1 text-center truncate" 
+              className="flex-1 bg-transparent border-none text-[10px] font-mono text-slate-705 outline-none px-1 text-center truncate" 
               dir="ltr"
               onClick={(e) => (e.target as HTMLInputElement).select()}
             />
             <button
               onClick={handleCopyLink}
-              className={`px-1.5 py-1 rounded-lg text-[9px] font-extrabold font-arabic transition-all whitespace-nowrap shrink-0 flex items-center gap-1 ${
+              title={lang === 'ar' ? 'نسخ الرابط' : 'Copy Link'}
+              className={`p-1.5 rounded-lg text-[9px] font-extrabold font-arabic transition-all whitespace-nowrap shrink-0 flex items-center justify-center ${
                 copied 
                   ? 'bg-emerald-500 text-white shadow-sm' 
-                  : 'bg-slate-900 text-white hover:bg-slate-800 shadow-xs'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-800 shadow-3xs'
               }`}
             >
               {copied ? (
-                <>
-                  <Check size={8} />
-                  <span>{lang === 'ar' ? 'تم النسخ!' : 'Copied!'}</span>
-                </>
+                <Check size={11} className="text-white" />
               ) : (
-                <>
-                  <Copy size={8} />
-                  <span>{lang === 'ar' ? 'نسخ الرابط' : 'Copy Link'}</span>
-                </>
+                <Copy size={11} />
               )}
             </button>
+            <button
+              onClick={() => setShowShareMenu(!showShareMenu)}
+              title={lang === 'ar' ? 'مشاركة الرابط' : 'Share Link'}
+              className={`p-1.5 rounded-lg text-[9px] font-extrabold font-arabic transition-all whitespace-nowrap shrink-0 flex items-center justify-center ${
+                showShareMenu 
+                  ? 'bg-red-650 text-white shadow-sm' 
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-800 shadow-3xs'
+              }`}
+            >
+              <Share2 size={11} />
+            </button>
           </div>
+
+          {/* Social Share grid dropdown */}
+          {showShareMenu && (
+            <motion.div 
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white border border-gray-150 p-2.5 rounded-2xl shadow-md w-full max-w-[240px] mx-auto mt-2 grid grid-cols-4 gap-2 text-center"
+              id="share_socials_grid"
+            >
+              {/* WhatsApp */}
+              <a 
+                href={`https://api.whatsapp.com/send?text=${encodeURIComponent((lang === 'ar' ? 'اصنع معي الروابط الذكية بلمسة واحدة: ' : 'Generate smart deep links too: ') + activePayload)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-1 p-1.5 rounded-xl hover:bg-emerald-50 text-emerald-600 transition-colors"
+                title="WhatsApp"
+              >
+                <div className="w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center text-white shadow-2xs hover:scale-105 transition-transform">
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
+                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.42 9.864-9.864c.002-2.637-1.019-5.114-2.875-6.973C16.586 1.908 14.113.883 11.48.883c-5.448 0-9.873 4.423-9.877 9.872a9.8 9.8 0 0 0 1.488 5.142l-.97 3.543 3.634-.954c1.556.85 3.111 1.258 4.302 1.21zM17.18 14.9c-.3-.15-1.785-.88-2.067-.98-.28-.1-.49-.15-.69.15t-.79.98c-.2.23-.4.25-.7.1s-1.27-.47-2.42-1.5c-.89-.8-1.5-1.78-1.67-2.08-.18-.3-.02-.46.13-.61.13-.13.3-.34.45-.51.15-.17.2-.28.3-.48.1-.2.05-.38-.02-.53-.07-.15-.69-1.66-.94-2.27-.25-.6-.5-.51-.69-.51-.18-.01-.39-.01-.59-.01s-.53.07-.81.38c-.28.31-1.07 1.05-1.07 2.56s1.09 2.97 1.24 3.18c.15.21 2.15 3.28 5.21 4.6 1.76.76 2.62.91 3.24.87.69-.04 2.26-.92 2.58-1.82.32-.89.32-1.66.23-1.81-.09-.15-.33-.23-.63-.38z"/>
+                  </svg>
+                </div>
+                <span className="text-[8px] font-bold font-arabic leading-none">{lang === 'ar' ? 'واتساب' : 'WhatsApp'}</span>
+              </a>
+
+              {/* Twitter / X */}
+              <a 
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent((lang === 'ar' ? 'اصنع الروابط الذكية مجاناً مع Qrytube ' : 'Easiest way to target your viewers with smart links: ') + activePayload)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-1 p-1.5 rounded-xl hover:bg-slate-50 text-slate-800 transition-colors"
+                title="Twitter / X"
+              >
+                <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white shadow-2xs hover:scale-105 transition-transform">
+                  <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  </svg>
+                </div>
+                <span className="text-[8px] font-bold font-arabic leading-none">{lang === 'ar' ? 'تويتر' : 'Twitter'}</span>
+              </a>
+
+              {/* Telegram */}
+              <a 
+                href={`https://t.me/share/url?url=${encodeURIComponent(activePayload)}&text=${encodeURIComponent(lang === 'ar' ? 'رابط ذكي لتوجيه المشاهدين مباشرة للتطبيق تلقائياً!' : 'Direct application deep link smart redirector!')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-1 p-1.5 rounded-xl hover:bg-sky-50 text-sky-600 transition-colors"
+                title="Telegram"
+              >
+                <div className="w-8 h-8 rounded-full bg-[#0088cc] flex items-center justify-center text-white shadow-2xs hover:scale-105 transition-transform">
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
+                    <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.56 8.61l-1.91 9c-.14.63-.51.79-1.04.49l-2.92-2.15-1.41 1.36c-.15.15-.29.28-.59.28l.21-2.97 5.41-4.89c.23-.21-.05-.32-.36-.12L10.23 13.9l-2.88-.9c-.63-.2-.64-.63.13-.93L16.63 8c.52-.19.98.11.77.94z"/>
+                  </svg>
+                </div>
+                <span className="text-[8px] font-bold font-arabic leading-none">{lang === 'ar' ? 'تليجرام' : 'Telegram'}</span>
+              </a>
+
+              {/* Facebook */}
+              <a 
+                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(activePayload)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-1 p-1.5 rounded-xl hover:bg-indigo-50 text-indigo-600 transition-colors"
+                title="Facebook"
+              >
+                <div className="w-8 h-8 rounded-full bg-[#1877F2] flex items-center justify-center text-white shadow-2xs hover:scale-105 transition-transform">
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                  </svg>
+                </div>
+                <span className="text-[8px] font-bold font-arabic leading-none">{lang === 'ar' ? 'فيسبوك' : 'Facebook'}</span>
+              </a>
+            </motion.div>
+          )}
         </div>
       )}
 
@@ -347,11 +429,9 @@ const formatElapsedTime = (isoStr?: string, currentLang?: 'ar' | 'en') => {
 };
 
 export default function QRGenerator({ 
-  lang = 'ar',
-  onNavigateToSvg
+  lang = 'ar'
 }: { 
   lang?: 'ar' | 'en';
-  onNavigateToSvg?: () => void;
 }) {
   const t = translations[lang];
 
@@ -1320,22 +1400,6 @@ export default function QRGenerator({
               </div>
             )}
           </div>
-
-          {onNavigateToSvg && (
-            <div className="mt-3 text-center sm:text-right" id="svg_help_navigation_container">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onNavigateToSvg();
-                }}
-                className="text-xs text-red-650 hover:text-red-700 font-bold font-arabic inline-flex items-center gap-1 bg-red-50/50 hover:bg-red-50 px-3 py-1.5 rounded-xl border border-red-100 transition-all cursor-pointer"
-              >
-                <Sparkles size={11} className="text-red-655 animate-pulse" />
-                <span>{lang === 'ar' ? 'هل تريد تحويل شعارك الملون لملف SVG ناقل؟ اضغط هنا مجاناً' : 'Want to convert your logo image to vector SVG? Click here'}</span>
-              </button>
-            </div>
-          )}
 
           {/* Logo visual adjustments controls (appears only when custom logo is set) */}
           {customLogo && (

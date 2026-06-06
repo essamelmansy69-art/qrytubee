@@ -17,7 +17,6 @@ import {
   CheckCircle2, 
   Share2, 
   ShieldCheck, 
-  Layers,
   Languages,
   BookOpen,
   FileText,
@@ -43,7 +42,6 @@ const QRGenerator = React.lazy(() => import('./components/QRGenerator'));
 const ArticlesView = React.lazy(() => import('./components/ArticlesView'));
 const LegalView = React.lazy(() => import('./components/LegalView'));
 const FAQView = React.lazy(() => import('./components/FAQView'));
-const ImageToSVG = React.lazy(() => import('./components/ImageToSVG'));
 
 export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -97,14 +95,13 @@ export default function App() {
     return 'ar';
   });
 
-  const [activeTab, setActiveTab] = useState<'generator' | 'svg' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact'>(() => {
+  const [activeTab, setActiveTab] = useState<'generator' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact'>(() => {
     try {
       const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
       if (path === 'terms') return 'terms';
       if (path === 'privacy') return 'privacy';
       if (path === 'about') return 'about';
       if (path === 'contact') return 'contact';
-      if (path === 'svg' || path === 'image-to-svg' || path === 'svg-converter') return 'svg';
       if (path === 'articles' || path.startsWith('articles/')) return 'articles';
     } catch (_) {}
     return 'generator';
@@ -136,13 +133,6 @@ export default function App() {
       desc = lang === 'ar'
         ? "اصنع رموز QR ذكية (Deep Links) لـقناتك على اليوتيوب مجاناً. تتيح للمتابعين فتح قناتك أو فيديوهاتك داخل تطبيق اليوتيوب مباشرة لزيادة المشاهدات والاشتراكات."
         : "Create smart deep-link QR codes for social media influencers. Force links to open directly inside YouTube, Facebook, Instagram, and TikTok apps.";
-    } else if (activeTab === 'svg') {
-      title = lang === 'ar'
-        ? "محول الصور إلى SVG مجاني | qrytube"
-        : "Image to SVG Vector Converter Free | qrytube";
-      desc = lang === 'ar'
-        ? "أداة مجانية لتحويل الصور (PNG, JPG, WebP) إلى رسومات ناقلة SVG ذكية بدقة فائقة وبشكل فني متكامل ومحلي بالكامل لحماية خصوصيتك."
-        : "Convert PNG, JPG, or WebP images to responsive scaleable SVG vector path shapes locally inside your browser for free.";
     } else if (activeTab === 'faq') {
       title = lang === 'ar'
         ? "الأسئلة الشائعة | Qrytube"
@@ -324,9 +314,6 @@ export default function App() {
         if (['terms', 'privacy', 'about', 'contact'].includes(path)) {
           setActiveTab(path as any);
           setSelectedArticleId(null);
-        } else if (path === 'svg' || path === 'image-to-svg' || path === 'svg-converter') {
-          setActiveTab('svg');
-          setSelectedArticleId(null);
         } else if (path === 'articles') {
           setActiveTab('articles');
           setSelectedArticleId(null);
@@ -399,7 +386,7 @@ export default function App() {
     };
   }, []);
 
-  const handleNavClick = (tab: 'generator' | 'svg' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact', event: React.MouseEvent) => {
+  const handleNavClick = (tab: 'generator' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact', event: React.MouseEvent) => {
     event.preventDefault();
     setActiveTab(tab);
     if (tab === 'articles') {
@@ -790,15 +777,7 @@ export default function App() {
                 </div>
               </div>
             }>
-              <QRGenerator lang={lang} onNavigateToSvg={() => setActiveTab('svg')} />
-            </React.Suspense>
-          </div>
-        )}
-
-        {activeTab === 'svg' && (
-          <div className="transition-opacity duration-300 animate-fade-in">
-            <React.Suspense fallback={<div className="text-center py-20 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
-              <ImageToSVG lang={lang} onReturn={() => setActiveTab('generator')} />
+              <QRGenerator lang={lang} />
             </React.Suspense>
           </div>
         )}
