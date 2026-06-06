@@ -156,6 +156,115 @@ export default function ImageToSVG({ lang, onReturn }: ImageToSVGProps) {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageElementRef = useRef<HTMLImageElement>(null);
+  const workerRef = useRef<Worker | null>(null);
+
+  // Terminate worker on unmount to avoid memory leaks
+  useEffect(() => {
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.terminate();
+      }
+    };
+  }, []);
+
+  // Inline Web Worker instantiation to offload heavy tracing iterations from the UI.
+  // This guarantees high responsive frame rates (60fps) during active threshold or resolution sliding.
+  const getOrCreateWorker = () => {
+    if (workerRef.current) {
+      return workerRef.current;
+    }
+
+    const workerCode = `
+      self.onmessage = function(e) {
+        var data = e.data.data;
+        var targetW = e.data.targetW;
+        var targetH = e.data.targetH;
+        var activeStyle = e.data.activeStyle;
+        var bgType = e.data.bgType;
+        var shapesScale = e.data.shapesScale;
+        var invertColor = e.data.invertColor;
+        var threshold = e.data.threshold;
+        
+        var shapesMarkup = [];
+        var elementCounter = 0;
+
+        // Set target background markup
+        var backgroundMarkup = '';
+        if (bgType === 'white') {
+          backgroundMarkup = '<rect x="0" y="0" width="' + targetW + '" height="' + targetH + '" fill="#ffffff" />';
+          elementCounter++;
+        } else if (bgType === 'black') {
+          backgroundMarkup = '<rect x="0" y="0" width="' + targetW + '" height="' + targetH + '" fill="#000000" />';
+          elementCounter++;
+        }
+
+        // Process pixel block arrays
+        for (var y = 0; y < targetH; y++) {
+          for (var x = 0; x < targetW; x++) {
+            var index = (y * targetW + x) * 4;
+            var r = data[index];
+            var g = data[index + 1];
+            var b = data[index + 2];
+            var a = data[index + 3];
+
+            // Skip completely transparent points
+            if (a < 30) continue;
+
+            // Compute average channel brightness
+            var brightness = (r + g + b) / 3;
+
+            if (activeStyle === 'pixel') {
+              var color = 'rgb(' + r + ',' + g + ',' + b + ')';
+              var strokeOffset = (1 - shapesScale) / 2;
+              var size = shapesScale;
+              shapesMarkup.push('<rect x="' + (x + strokeOffset).toFixed(2) + '" y="' + (y + strokeOffset).toFixed(2) + '" width="' + size.toFixed(2) + '" height="' + size.toFixed(2) + '" fill="' + color + '" fill-opacity="' + (a/255).toFixed(2) + '" />');
+              elementCounter++;
+
+            } else if (activeStyle === 'circles') {
+              var color = 'rgb(' + r + ',' + g + ',' + b + ')';
+              var radius = (shapesScale * 0.5).toFixed(2);
+              shapesMarkup.push('<circle cx="' + (x + 0.5).toFixed(2) + '" cy="' + (y + 0.5).toFixed(2) + '" r="' + radius + '" fill="' + color + '" fill-opacity="' + (a/255).toFixed(2) + '" />');
+              elementCounter++;
+
+            } else if (activeStyle === 'halftone') {
+              var factor = invertColor 
+                ? (brightness / 255) 
+                : (1 - (brightness / 255));
+              
+              var radius = (factor * 0.5 * shapesScale * (a/255)).toFixed(2);
+              var numRadius = Number(radius);
+              
+              if (numRadius > 0.05) {
+                var color = invertColor ? '#ffffff' : '#000000';
+                shapesMarkup.push('<circle cx="' + (x + 0.5).toFixed(2) + '" cy="' + (y + 0.5).toFixed(2) + '" r="' + radius + '" fill="' + color + '" />');
+                elementCounter++;
+              }
+
+            } else if (activeStyle === 'monochrome') {
+              var isDark = brightness < threshold;
+              var keepPixel = invertColor ? !isDark : isDark;
+
+              if (keepPixel) {
+                var color = invertColor ? '#ffffff' : '#000000';
+                var strokeOffset = (1 - shapesScale) / 2;
+                var size = shapesScale;
+                shapesMarkup.push('<rect x="' + (x + strokeOffset).toFixed(2) + '" y="' + (y + strokeOffset).toFixed(2) + '" width="' + size.toFixed(2) + '" height="' + size.toFixed(2) + '" fill="' + color + '" />');
+                elementCounter++;
+              }
+            }
+          }
+        }
+
+        var finalSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + targetW + ' ' + targetH + '" width="100%" height="100%">\\n  ' + backgroundMarkup + '\\n  ' + shapesMarkup.join('\\n  ') + '\\n</svg>';
+
+        self.postMessage({ finalSvg: finalSvg, elementCounter: elementCounter });
+      };
+    `;
+
+    const blob = new Blob([workerCode], { type: 'application/javascript' });
+    workerRef.current = new Worker(URL.createObjectURL(blob));
+    return workerRef.current;
+  };
 
   // Trigger vector calculation when parameters edit
   useEffect(() => {
@@ -273,91 +382,38 @@ export default function ImageToSVG({ lang, onReturn }: ImageToSVGProps) {
       const imgData = ctx.getImageData(0, 0, targetW, targetH);
       const data = imgData.data;
 
-      let shapesMarkup: string[] = [];
-      let elementCounter = 0;
-
-      // Set target background markup
-      let backgroundMarkup = '';
-      if (bgType === 'white') {
-        backgroundMarkup = `<rect x="0" y="0" width="${targetW}" height="${targetH}" fill="#ffffff" />`;
-        elementCounter++;
-      } else if (bgType === 'black') {
-        backgroundMarkup = `<rect x="0" y="0" width="${targetW}" height="${targetH}" fill="#000000" />`;
-        elementCounter++;
+      // To prevent race conditions or multiple workers firing together,
+      // terminate any running worker and launch a fresh one.
+      if (workerRef.current) {
+        workerRef.current.terminate();
+        workerRef.current = null;
       }
 
-      // Process pixel block arrays
-      for (let y = 0; y < targetH; y++) {
-        for (let x = 0; x < targetW; x++) {
-          const index = (y * targetW + x) * 4;
-          const r = data[index];
-          const g = data[index + 1];
-          const b = data[index + 2];
-          const a = data[index + 3];
+      const activeWorker = getOrCreateWorker();
 
-          // Skip completely transparent points
-          if (a < 30) continue;
+      activeWorker.onmessage = (e) => {
+        const { finalSvg, elementCounter } = e.data;
+        setSvgOutputCode(finalSvg);
+        setElementCount(elementCounter);
+        setIsProcessing(false);
+      };
 
-          // Compute average channel brightness
-          const brightness = (r + g + b) / 3;
+      activeWorker.onerror = (err) => {
+        console.error("Worker Error: ", err);
+        setIsProcessing(false);
+      };
 
-          if (activeStyle === 'pixel') {
-            // High fidelity scale block shapes
-            const color = `rgb(${r},${g},${b})`;
-            // Maintain layout scaling slider factor
-            const strokeOffset = (1 - shapesScale) / 2;
-            const size = shapesScale;
-            shapesMarkup.push(`<rect x="${(x + strokeOffset).toFixed(2)}" y="${(y + strokeOffset).toFixed(2)}" width="${size.toFixed(2)}" height="${size.toFixed(2)}" fill="${color}" fill-opacity="${(a/255).toFixed(2)}" />`);
-            elementCounter++;
-
-          } else if (activeStyle === 'circles') {
-            // Draw colorful circle dot mesh represent
-            const color = `rgb(${r},${g},${b})`;
-            const radius = (shapesScale * 0.5).toFixed(2);
-            shapesMarkup.push(`<circle cx="${(x + 0.5).toFixed(2)}" cy="${(y + 0.5).toFixed(2)}" r="${radius}" fill="${color}" fill-opacity="${(a/255).toFixed(2)}" />`);
-            elementCounter++;
-
-          } else if (activeStyle === 'halftone') {
-            // Traditional news halftone dots (brightness controls the radius)
-            // Lighter is smaller dots, darker is larger (unless inverted)
-            const factor = invertColor 
-              ? (brightness / 255) 
-              : (1 - (brightness / 255));
-            
-            const radius = (factor * 0.5 * shapesScale * (a/255)).toFixed(2);
-            const numRadius = Number(radius);
-            
-            if (numRadius > 0.05) {
-              const color = invertColor ? '#ffffff' : '#000000';
-              shapesMarkup.push(`<circle cx="${(x + 0.5).toFixed(2)}" cy="${(y + 0.5).toFixed(2)}" r="${radius}" fill="${color}" />`);
-              elementCounter++;
-            }
-
-          } else if (activeStyle === 'monochrome') {
-            // Solid Silhouette based on Threshold slider
-            const isDark = brightness < threshold;
-            const keepPixel = invertColor ? !isDark : isDark;
-
-            if (keepPixel) {
-              const color = invertColor ? '#ffffff' : '#000000';
-              const strokeOffset = (1 - shapesScale) / 2;
-              const size = shapesScale;
-              shapesMarkup.push(`<rect x="${(x + strokeOffset).toFixed(2)}" y="${(y + strokeOffset).toFixed(2)}" width="${size.toFixed(2)}" height="${size.toFixed(2)}" fill="${color}" />`);
-              elementCounter++;
-            }
-          }
-        }
-      }
-
-      // Generate complete valid, structured standalone XML vector
-      const finalSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${targetW} ${targetH}" width="100%" height="100%">
-  ${backgroundMarkup}
-  ${shapesMarkup.join('\n  ')}
-</svg>`;
-
-      setSvgOutputCode(finalSvg);
-      setElementCount(elementCounter);
-      setIsProcessing(false);
+      // Post raw pixels data and parameters to the Web Worker thread
+      activeWorker.postMessage({
+        data,
+        targetW,
+        targetH,
+        activeStyle,
+        bgType,
+        shapesScale,
+        invertColor,
+        threshold
+      });
     };
 
     img.onerror = () => {
