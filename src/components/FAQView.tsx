@@ -27,28 +27,28 @@ export default function FAQView({ lang, onReturn }: FAQViewProps) {
       <div className="space-y-4" id="faq_accordion">
         <div className="p-5 bg-slate-50 rounded-2xl space-y-2 border border-slate-100">
           <h3 className="font-bold text-slate-800 font-arabic text-sm">{t.faq1Q}</h3>
-          <p className="text-xs text-slate-500 font-arabic leading-relaxed">
+          <p className="text-xs text-slate-700 font-arabic leading-relaxed">
             {t.faq1A}
           </p>
         </div>
 
         <div className="p-5 bg-slate-50 rounded-2xl space-y-2 border border-slate-100">
           <h3 className="font-bold text-slate-800 font-arabic text-sm">{t.faq2Q}</h3>
-          <p className="text-xs text-slate-500 font-arabic leading-relaxed">
+          <p className="text-xs text-slate-700 font-arabic leading-relaxed">
             {t.faq2A}
           </p>
         </div>
 
         <div className="p-5 bg-slate-50 rounded-2xl space-y-2 border border-slate-100">
           <h3 className="font-bold text-slate-800 font-arabic text-sm">{t.faq3Q}</h3>
-          <p className="text-xs text-slate-500 font-arabic leading-relaxed">
+          <p className="text-xs text-slate-700 font-arabic leading-relaxed">
             {t.faq3A}
           </p>
         </div>
 
         <div className="p-5 bg-slate-50 rounded-2xl space-y-2 border border-slate-100">
           <h3 className="font-bold text-slate-800 font-arabic text-sm">{t.faq4Q}</h3>
-          <p className="text-xs text-slate-500 font-arabic leading-relaxed">
+          <p className="text-xs text-slate-700 font-arabic leading-relaxed">
             {t.faq4A}
           </p>
         </div>

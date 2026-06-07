@@ -113,7 +113,7 @@ export default function QrytubeLogo({
           <span className={`text-md sm:text-lg font-extrabold tracking-tight leading-none ${isDarkBg ? 'text-white' : textColor}`}>
             Qrytube
           </span>
-          <span className="text-[10px] font-semibold text-slate-400 mt-0.5">
+          <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 mt-0.5">
             Smart QR deep links
           </span>
         </div>

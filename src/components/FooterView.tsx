@@ -59,12 +59,12 @@ export default function FooterView({ lang, onNavigate }: FooterViewProps) {
 
         </div>
 
-        <div className={`border-t border-slate-800 mt-10 pt-6 flex flex-col ${lang === 'ar' ? 'sm:flex-row' : 'sm:flex-row-reverse'} items-center justify-between text-xs text-slate-400 font-arabic gap-4`}>
+        <div className={`border-t border-slate-800 mt-10 pt-6 flex flex-col ${lang === 'ar' ? 'sm:flex-row' : 'sm:flex-row-reverse'} items-center justify-between text-xs text-slate-200 font-arabic gap-4`}>
           <span dir="ltr">{t.copyrightText}</span>
           <span>{t.loveText}</span>
         </div>
 
-        <div className="border-t border-slate-800/60 mt-4 pt-4 text-[10px] text-slate-500 font-arabic leading-relaxed text-center font-normal">
+        <div className="border-t border-slate-800/60 mt-4 pt-4 text-[10px] text-slate-300 font-arabic leading-relaxed text-center font-normal">
           <p className="max-w-4xl mx-auto">{t.disclaimer}</p>
         </div>
       </div>

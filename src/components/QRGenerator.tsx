@@ -222,11 +222,12 @@ const QRVisualPreview: React.FC<QRVisualPreviewProps> = ({
       {/* Deep Link URL Copy & Share Section */}
       {urlInput.trim() && urlInfo.isValid && (
         <div className="mt-4 w-full px-1 space-y-1.5 animate-fadeIn" id="deep_link_copy_section">
-          <label className="text-[10px] font-bold text-gray-500 font-arabic text-center block w-full">
+          <label htmlFor="direct_deep_link_url_input" className="text-[10px] font-bold text-gray-700 font-arabic text-center block w-full">
             🔗 {lang === 'ar' ? 'رابط التوجيه الذكي المباشر:' : 'Direct Deep Link URL:'}
           </label>
           <div className="flex gap-1 items-center bg-white border border-gray-200 rounded-xl p-1 shadow-sm w-full max-w-[240px] mx-auto">
             <input 
+              id="direct_deep_link_url_input"
               type="text" 
               readOnly 
               value={activePayload} 
@@ -1039,7 +1040,22 @@ export default function QRGenerator({
         <div className="pt-2 flex flex-col gap-1.5 text-start font-arabic border-t border-slate-100/60 dark:border-slate-800/40 mt-1" id="download_feature_bullet_headings">
           <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
             <span className="shrink-0 text-[11px]">✅</span>
-            <span>{t.featFree}</span>
+            <span>
+              {t.featFree.includes("100") ? (
+                <>
+                  {t.featFree.split("100").map((part, idx, arr) => (
+                    <span key={idx}>
+                      {part}
+                      {idx < arr.length - 1 && (
+                        <span className="text-emerald-600 dark:text-emerald-400 font-black font-mono mx-0.5">100</span>
+                      )}
+                    </span>
+                  ))}
+                </>
+              ) : (
+                t.featFree
+              )}
+            </span>
           </div>
           <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
             <span className="shrink-0 text-[11px]">✅</span>
@@ -1583,7 +1599,7 @@ export default function QRGenerator({
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs font-arabic">
                   <span className="text-gray-650 font-semibold">{t.logoScaleLabel}</span>
-                  <span className="text-red-600 font-mono font-bold">{(logoScale * 100).toFixed(0)}%</span>
+                  <span className="text-emerald-600 font-mono font-bold font-arabic">{(logoScale * 100).toFixed(0)}%</span>
                 </div>
                 <input
                   id="logo_scale_slider"
@@ -1653,7 +1669,7 @@ export default function QRGenerator({
               activePayload={getActivePayload()}
             />
             <div className="w-full h-px bg-gray-100 my-1" />
-            <h3 className="text-xs font-bold font-arabic text-gray-500 text-center">
+            <h3 className="text-xs font-bold font-arabic text-gray-700 text-center">
               📥 {lang === 'ar' ? 'تحميل وحفظ كود الـ QR بدقة عالية' : 'Download High-Res QR Code'}
             </h3>
             <div className="w-full space-y-3">

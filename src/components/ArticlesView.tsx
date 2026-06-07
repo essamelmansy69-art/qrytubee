@@ -300,6 +300,8 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
               alt={selectedArticle.title}
               className="object-cover w-full h-full"
               referrerPolicy="no-referrer"
+              loading="lazy"
+              decoding="async"
             />
           </div>
         )}
@@ -372,6 +374,8 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
                       alt={article.title}
                       className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-350"
                       referrerPolicy="no-referrer"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
                 )}

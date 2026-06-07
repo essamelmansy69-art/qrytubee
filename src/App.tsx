@@ -703,7 +703,7 @@ export default function App() {
                 <h1 className="text-md sm:text-base font-black font-arabic text-gray-900 tracking-tight leading-none">
                   {t.appTitle}
                 </h1>
-                <span className="text-[10px] sm:text-[11px] font-medium font-arabic text-slate-500 mt-0.5">
+                <span className="text-[10px] sm:text-[11px] font-medium font-arabic text-slate-650 dark:text-slate-400 mt-0.5">
                   {t.appSubTitle}
                 </span>
               </div>
@@ -764,7 +764,7 @@ export default function App() {
             </span>
           </h1>
 
-          <p className="mt-5 text-sm sm:text-base md:text-md text-slate-500 dark:text-slate-400 font-medium font-arabic max-w-2xl leading-relaxed">
+          <p className="mt-5 text-sm sm:text-base md:text-md text-slate-700 dark:text-slate-300 font-semibold font-arabic max-w-2xl leading-relaxed">
             {t.heroSubtitle}
           </p>
 
