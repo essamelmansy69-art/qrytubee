@@ -57,7 +57,7 @@ export const translations = {
     faq4A: "ج: نعم، الخدمة مجانية 100% للأبد ودون عرض أي نوع من الإعلانات المزعجة لصناع المحتوى. الروابط آمنة تماماً لأن التشفير والتحويل وتضمين الصورة يتم بالكامل محلياً داخل متصفحك وبشكل سريع!",
 
     // QRGenerator Strings
-    mod1Title: "بيانات وقناة الرابط الاجتماعي",
+    mod1Title: "أضف رابط الفيديو أو القناة",
     labelYtUrl: "أدخل الرابط (يدعم المنصات الأربعة أو أي موقع إلكتروني آخر)",
     placeholderYtUrl: "سواء يوتيوب، فيسبوك، إنستجرام، تيك توك، أو أي موقع آخر...",
     validLink: "تم التعرف على الرابط وتحليله بنجاح",
@@ -252,7 +252,7 @@ export const translations = {
     faq4A: "A: Yes, this service is 100% free forever for all digital creators and does not display annoying ads. The conversion, coloring, and logo integrations are executed locally inside your browser, guaranteeing extreme speed and privacy.",
 
     // QRGenerator Strings
-    mod1Title: "Social Media Link Details",
+    mod1Title: "Add Video or Channel Link",
     labelYtUrl: "Enter Link (Supports the 4 major platforms or any website)",
     placeholderYtUrl: "e.g., YouTube video, Facebook profile, Instagram, TikTok, or any website...",
     validLink: "Valid address identified successfully",
