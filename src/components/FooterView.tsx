@@ -35,7 +35,19 @@ export default function FooterView({ lang, onNavigate }: FooterViewProps) {
           <div className="md:col-span-5 space-y-3 font-arabic">
             <span className="text-xs font-bold text-white uppercase block">{t.quickLinks}</span>
             <div className="flex flex-col gap-2 text-xs items-start">
-              <a href="/" onClick={(e) => onNavigate('generator', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.navGenerator}</a>
+              <a href="/" onClick={(e) => onNavigate('generator', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">
+                {lang === 'ar' ? '🔴 صانع كود QR يوتيوب الذكي (الرئيسية)' : '🔴 YouTube Smart QR Generator (Home)'}
+              </a>
+              <a href="/facebook" onClick={(e) => onNavigate('facebook', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">
+                {lang === 'ar' ? '🔵 صانع كود QR فيسبوك الذكي' : '🔵 Facebook Smart QR Generator'}
+              </a>
+              <a href="/instagram" onClick={(e) => onNavigate('instagram', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">
+                {lang === 'ar' ? '💖 صانع كود QR إنستجرام الذكي' : '💖 Instagram Smart QR Generator'}
+              </a>
+              <a href="/tiktok" onClick={(e) => onNavigate('tiktok', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">
+                {lang === 'ar' ? '⚫ صانع كود QR تيك توك الذكي' : '⚫ TikTok Smart QR Generator'}
+              </a>
+              <div className="w-full h-px bg-slate-800 my-1" />
               <a href="/articles" onClick={(e) => onNavigate('articles', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.navArticles}</a>
               <a href="/faq" onClick={(e) => onNavigate('faq', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.faqDetailsLabel}</a>
               <a href="/about" onClick={(e) => onNavigate('about', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.navAbout}</a>

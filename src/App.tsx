@@ -30,7 +30,8 @@ import {
   ArrowRight,
   Cloud,
   Sun,
-  Moon
+  Moon,
+  Globe
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { translations } from './translations';
@@ -95,13 +96,17 @@ export default function App() {
     return 'ar';
   });
 
-  const [activeTab, setActiveTab] = useState<'generator' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact'>(() => {
+  const [activeTab, setActiveTab] = useState<'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact'>(() => {
     try {
       const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
       if (path === 'terms') return 'terms';
       if (path === 'privacy') return 'privacy';
       if (path === 'about') return 'about';
       if (path === 'contact') return 'contact';
+      if (path === 'facebook') return 'facebook';
+      if (path === 'instagram') return 'instagram';
+      if (path === 'tiktok') return 'tiktok';
+      if (path === 'website') return 'website';
       if (path === 'articles' || path.startsWith('articles/')) return 'articles';
     } catch (_) {}
     return 'generator';
@@ -129,10 +134,38 @@ export default function App() {
     if (activeTab === 'generator') {
       title = lang === 'ar' 
         ? "Qrytube | أداة إنشاء رموز QR ذكية لقنوات اليوتيوب" 
-        : "Viral QR Code Generator | Open Social Links Directly in Apps";
+        : "YouTube Smart QR Code & Deep Link Generator | Qrytube";
       desc = lang === 'ar'
         ? "اصنع رموز QR ذكية (Deep Links) لـقناتك على اليوتيوب مجاناً. تتيح للمتابعين فتح قناتك أو فيديوهاتك داخل تطبيق اليوتيوب مباشرة لزيادة المشاهدات والاشتراكات."
-        : "Create smart deep-link QR codes for social media influencers. Force links to open directly inside YouTube, Facebook, Instagram, and TikTok apps.";
+        : "Create smart deep-link QR codes for YouTube creators. Force links to open directly inside the official YouTube mobile application.";
+    } else if (activeTab === 'facebook') {
+      title = lang === 'ar' 
+        ? "أداة توليد كود QR ذكي للفيسبوك لفتح التطبيق مباشرة | Qrytube" 
+        : "Facebook Smart QR Code & Deep Link Generator | Qrytube";
+      desc = lang === 'ar'
+        ? "اصنع كود QR ذكي وحملات مجانية لصفحتك أو مجموعتك على فيسبوك. يفتح التطبيق مباشرة دون مغادرة المتصفح الداخلي لتوفير تفاعل فوري."
+        : "Create custom deep link QR codes for Facebook. Force links to open directly inside the official Facebook app to boost likes and follows.";
+    } else if (activeTab === 'instagram') {
+      title = lang === 'ar' 
+        ? "أداة توليد كود QR ذكي للإنستغرام لزيادة المتابعين | Qrytube" 
+        : "Instagram Smart QR Code & Deep Link Generator | Qrytube";
+      desc = lang === 'ar'
+        ? "اصنع كود QR ذكي لحسابك أو ريلز إنستغرام لفتح حسابك مباشرة بداخل تطبيق إنستغرام لزيادة المتابعين والتفاعل بسهولة."
+        : "Generate custom deep link QR codes for Instagram profiles and reels. Open directly in the Instagram app for maximum followers.";
+    } else if (activeTab === 'tiktok') {
+      title = lang === 'ar' 
+        ? "أداة توليد كود QR ذكي وروابط عميقة للتيك توك | Qrytube" 
+        : "TikTok Smart QR Code & Deep Link Generator | Qrytube";
+      desc = lang === 'ar'
+        ? "أداة مجانية لتوليد كود QR ذكي وروابط عميقة لصفحتك أو مقاطع تيك توك لتوجيه المشاهدين إلى حسابك الرسمي بالتطبيق مباشرة."
+        : "Generate smart QR codes and deep links for TikTok profiles and videos. Open directly in the official TikTok app.";
+    } else if (activeTab === 'website') {
+      title = lang === 'ar' 
+        ? "أداة توليد كود QR ذكي لأي موقع إلكتروني أو رابط | Qrytube" 
+        : "Smart QR Code Generator for Any Website or URL | Qrytube";
+      desc = lang === 'ar'
+        ? "أداة مجانية واحترافية تماماً لتوليد كود QR لأي موقع إلكتروني، مدونة، متجر الكتروني أو رابط خارجي مع إمكانية التخصيص الكامل للألوان وإدراج الشعار."
+        : "Generate custom QR codes for any website, link, blog, or online store with fully adjustable brand colors and logo alignment.";
     } else if (activeTab === 'faq') {
       title = lang === 'ar'
         ? "الأسئلة الشائعة | Qrytube"
@@ -311,7 +344,7 @@ export default function App() {
         setSelectedArticleId(e.state.articleId || null);
       } else {
         const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
-        if (['terms', 'privacy', 'about', 'contact'].includes(path)) {
+        if (['terms', 'privacy', 'about', 'contact', 'facebook', 'instagram', 'tiktok', 'website'].includes(path)) {
           setActiveTab(path as any);
           setSelectedArticleId(null);
         } else if (path === 'articles') {
@@ -386,7 +419,7 @@ export default function App() {
     };
   }, []);
 
-  const handleNavClick = (tab: 'generator' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact', event: React.MouseEvent) => {
+  const handleNavClick = (tab: 'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact', event: React.MouseEvent) => {
     event.preventDefault();
     setActiveTab(tab);
     if (tab === 'articles') {
@@ -734,9 +767,74 @@ export default function App() {
       {/* 3. MAIN WORKSPACE / INTERACTIVE PLATFORM */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" id="main_workspace">
         
+        {/* Sleek Platform Sub-navigation tabs */}
+        {(activeTab === 'generator' || activeTab === 'facebook' || activeTab === 'instagram' || activeTab === 'tiktok' || activeTab === 'website') && (
+          <div className="mb-8 bg-slate-50/70 p-1.5 rounded-2xl border border-slate-100 flex items-center justify-start gap-1.5 sm:gap-2 max-w-2xl mx-auto overflow-x-auto scrollbar-none shadow-xs" id="platform_sub_navbar">
+            <button
+              onClick={() => setActiveTab('generator')}
+              className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold font-arabic cursor-pointer transition-all duration-300 whitespace-nowrap ${
+                activeTab === 'generator'
+                  ? 'bg-red-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/50'
+              }`}
+            >
+              <Youtube size={16} />
+              <span>{lang === 'ar' ? 'يوتيوب' : 'YouTube'}</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('facebook')}
+              className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold font-arabic cursor-pointer transition-all duration-300 whitespace-nowrap ${
+                activeTab === 'facebook'
+                  ? 'bg-[#1877F2] text-white shadow-xs'
+                  : 'text-slate-600 hover:text-[#1877F2] hover:bg-slate-100/50'
+              }`}
+            >
+              <Facebook size={16} />
+              <span>{lang === 'ar' ? 'فيسبوك' : 'Facebook'}</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('instagram')}
+              className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold font-arabic cursor-pointer transition-all duration-300 whitespace-nowrap ${
+                activeTab === 'instagram'
+                  ? 'bg-[#E1306C] text-white shadow-xs'
+                  : 'text-slate-600 hover:text-[#E1306C] hover:bg-slate-100/50'
+              }`}
+            >
+              <Instagram size={16} />
+              <span>{lang === 'ar' ? 'إنستغرام' : 'Instagram'}</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('tiktok')}
+              className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold font-arabic cursor-pointer transition-all duration-300 whitespace-nowrap ${
+                activeTab === 'tiktok'
+                  ? 'bg-slate-900 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/50'
+              }`}
+            >
+              <Music size={16} />
+              <span>{lang === 'ar' ? 'تيك توك' : 'TikTok'}</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('website')}
+              className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold font-arabic cursor-pointer transition-all duration-300 whitespace-nowrap ${
+                activeTab === 'website'
+                  ? 'bg-indigo-650 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-indigo-600 hover:bg-slate-100/50'
+              }`}
+            >
+              <Globe size={16} />
+              <span>{lang === 'ar' ? 'مواقع أخرى' : 'Other Websites'}</span>
+            </button>
+          </div>
+        )}
+
         {/* Dynamic Navigation Tabs Content render */}
-        {activeTab === 'generator' && (
-          <div className="transition-opacity duration-300 animate-fade-in">
+        {(activeTab === 'generator' || activeTab === 'facebook' || activeTab === 'instagram' || activeTab === 'tiktok' || activeTab === 'website') && (
+          <div className="transition-opacity duration-300 animate-fade-in" key={activeTab}>
             <React.Suspense fallback={
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full max-w-7xl mx-auto animate-pulse" id="qr_skeleton_loader">
                 {/* Simulated Left Panel (8 cols) */}
@@ -777,7 +875,7 @@ export default function App() {
                 </div>
               </div>
             }>
-              <QRGenerator lang={lang} />
+              <QRGenerator lang={lang} forcePlatform={activeTab === 'generator' ? 'youtube' : activeTab} />
             </React.Suspense>
           </div>
         )}

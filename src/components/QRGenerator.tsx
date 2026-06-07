@@ -429,9 +429,11 @@ const formatElapsedTime = (isoStr?: string, currentLang?: 'ar' | 'en') => {
 };
 
 export default function QRGenerator({ 
-  lang = 'ar'
+  lang = 'ar',
+  forcePlatform
 }: { 
   lang?: 'ar' | 'en';
+  forcePlatform?: 'youtube' | 'facebook' | 'instagram' | 'tiktok' | 'website';
 }) {
   const t = translations[lang];
 
@@ -445,13 +447,16 @@ export default function QRGenerator({
     }
   };
 
-   const [urlInput, setUrlInput] = useState('');
+   const [urlInput, setUrlInput] = useState(() => {
+     if (forcePlatform === 'youtube') return 'https://www.youtube.com/@YouTube';
+     if (forcePlatform === 'facebook') return 'https://www.facebook.com/facebook';
+     if (forcePlatform === 'instagram') return 'https://www.instagram.com/instagram';
+     if (forcePlatform === 'tiktok') return 'https://www.tiktok.com/@tiktok';
+     if (forcePlatform === 'website') return 'https://google.com';
+     return '';
+   });
+
   const [trackingId, setTrackingId] = useState<string>(() => 'qr_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36).substring(4));
-
-  useEffect(() => {
-    setTrackingId('qr_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36).substring(4));
-  }, [urlInput]);
-
   const [deepLinkType, setDeepLinkType] = useState<'vnd' | 'ios' | 'android' | 'standard'>('vnd');
   const [useSmartLink, setUseSmartLink] = useState<boolean>(false);
   const [foregroundColor, setForegroundColor] = useState('#FF0000');
@@ -467,6 +472,36 @@ export default function QRGenerator({
   const [logoScale, setLogoScale] = useState<number>(0.18);
   const [logoMargin, setLogoMargin] = useState<boolean>(true);
   const [isDragging, setIsDragging] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (forcePlatform === 'youtube') {
+      setUrlInput('https://www.youtube.com/@YouTube');
+      setForegroundColor('#FF0000');
+      setEyeColor('#FF0000');
+    } else if (forcePlatform === 'facebook') {
+      setUrlInput('https://www.facebook.com/facebook');
+      setForegroundColor('#1877F2');
+      setEyeColor('#1877F2');
+    } else if (forcePlatform === 'instagram') {
+      setUrlInput('https://www.instagram.com/instagram');
+      setForegroundColor('#E1306C');
+      setEyeColor('#E1306C');
+    } else if (forcePlatform === 'tiktok') {
+      setUrlInput('https://www.tiktok.com/@tiktok');
+      setForegroundColor('#000000');
+      setEyeColor('#000000');
+    } else if (forcePlatform === 'website') {
+      setUrlInput('https://google.com');
+      setForegroundColor('#4F46E5');
+      setEyeColor('#4F46E5');
+    } else {
+      setUrlInput('');
+    }
+  }, [forcePlatform]);
+
+  useEffect(() => {
+    setTrackingId('qr_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36).substring(4));
+  }, [urlInput]);
   const [isDesktop, setIsDesktop] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       return window.innerWidth >= 1024;
@@ -613,7 +648,10 @@ export default function QRGenerator({
   const formattedDeepLink = buildDeepLink(urlInput, deepLinkType);
 
   const isUrlEmpty = !urlInput.trim();
-  const isUrlValid = isUrlEmpty || urlInfo.isValid;
+  let isUrlValid = isUrlEmpty || urlInfo.isValid;
+  if (!isUrlEmpty && forcePlatform && forcePlatform !== 'website') {
+    isUrlValid = urlInfo.isValid && urlInfo.platform === forcePlatform;
+  }
   const isInvalid = !isUrlValid || isUrlEmpty;
 
 
@@ -1035,8 +1073,23 @@ export default function QRGenerator({
                     icon: <Music size={20} className="text-black" />,
                     badgeIcon: <Music size={20} />
                   };
+                case 'other':
+                  return {
+                    focusClass: 'focus:border-indigo-500 focus:ring-indigo-100',
+                    bgClass: 'bg-indigo-50 text-indigo-600',
+                    icon: <Globe size={20} className="text-[#4F46E5]" />,
+                    badgeIcon: <Globe size={20} />
+                  };
                 case 'youtube':
                 default:
+                  if (forcePlatform === 'website') {
+                    return {
+                      focusClass: 'focus:border-indigo-500 focus:ring-indigo-100',
+                      bgClass: 'bg-indigo-50 text-indigo-600',
+                      icon: <Globe size={20} className="text-[#4F46E5]" />,
+                      badgeIcon: <Globe size={20} />
+                    };
+                  }
                   return {
                     focusClass: 'focus:border-red-500 focus:ring-red-100',
                     bgClass: 'bg-red-50 text-red-600',
@@ -1059,132 +1112,182 @@ export default function QRGenerator({
                   <div className="text-xs text-slate-600 font-mono">STEP 1</div>
                 </div>
 
-                {/* Horizontal Quick Swappers */}
-                <div className="grid grid-cols-4 gap-2 mb-5" id="social_swappers">
-                  <button
-                    onClick={() => {
-                      setUrlInput('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
-                      setForegroundColor('#FF0000');
-                      setEyeColor('#FF0000');
-                    }}
-                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer ${
-                      urlInfo.platform === 'youtube'
-                        ? 'border-red-500 bg-red-50/40 text-red-600 shadow-xs'
-                        : 'border-gray-50 hover:border-gray-150 text-slate-600 bg-gray-50/20 font-medium'
-                    }`}
-                    type="button"
-                  >
-                    <Youtube size={20} className="mb-1 text-slate-600" />
-                    <span className="text-[10px] font-bold font-arabic">يوتيوب</span>
-                  </button>
+                 {/* Horizontal Quick Swappers - Only show if not forced to a single platform */}
+                 {!forcePlatform && (
+                   <div className="grid grid-cols-4 gap-2 mb-5" id="social_swappers">
+                     <button
+                       onClick={() => {
+                         setUrlInput('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+                         setForegroundColor('#FF0000');
+                         setEyeColor('#FF0000');
+                       }}
+                       className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer ${
+                         urlInfo.platform === 'youtube'
+                           ? 'border-red-500 bg-red-50/40 text-red-600 shadow-xs'
+                           : 'border-gray-50 hover:border-gray-150 text-slate-600 bg-gray-50/20 font-medium'
+                       }`}
+                       type="button"
+                     >
+                       <Youtube size={20} className="mb-1 text-slate-600" />
+                       <span className="text-[10px] font-bold font-arabic">يوتيوب</span>
+                     </button>
 
-                  <button
-                    onClick={() => {
-                      setUrlInput('https://www.facebook.com/facebook');
-                      setForegroundColor('#1877F2');
-                      setEyeColor('#1877F2');
-                    }}
-                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer ${
-                      urlInfo.platform === 'facebook'
-                        ? 'border-blue-500 bg-blue-50/40 text-blue-600 shadow-xs'
-                        : 'border-gray-50 hover:border-gray-150 text-slate-600 bg-gray-50/20 font-medium'
-                    }`}
-                    type="button"
-                  >
-                    <Facebook size={20} className="mb-1 text-slate-600" />
-                    <span className="text-[10px] font-bold font-arabic">فيسبوك</span>
-                  </button>
+                     <button
+                       onClick={() => {
+                         setUrlInput('https://www.facebook.com/facebook');
+                         setForegroundColor('#1877F2');
+                         setEyeColor('#1877F2');
+                       }}
+                       className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer ${
+                         urlInfo.platform === 'facebook'
+                           ? 'border-blue-500 bg-blue-50/40 text-blue-600 shadow-xs'
+                           : 'border-gray-50 hover:border-gray-150 text-slate-600 bg-gray-50/20 font-medium'
+                       }`}
+                       type="button"
+                     >
+                       <Facebook size={20} className="mb-1 text-slate-600" />
+                       <span className="text-[10px] font-bold font-arabic">فيسبوك</span>
+                     </button>
 
-                  <button
-                    onClick={() => {
-                      setUrlInput('https://www.instagram.com/instagram');
-                      setForegroundColor('#E1306C');
-                      setEyeColor('#E1306C');
-                    }}
-                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer ${
-                      urlInfo.platform === 'instagram'
-                        ? 'border-rose-500 bg-rose-50/40 text-rose-600 shadow-xs'
-                        : 'border-gray-50 hover:border-gray-150 text-slate-600 bg-gray-50/20 font-medium'
-                    }`}
-                    type="button"
-                  >
-                    <Instagram size={20} className="mb-1 text-slate-600" />
-                    <span className="text-[10px] font-bold font-arabic">إنستغرام</span>
-                  </button>
+                     <button
+                       onClick={() => {
+                         setUrlInput('https://www.instagram.com/instagram');
+                         setForegroundColor('#E1306C');
+                         setEyeColor('#E1306C');
+                       }}
+                       className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer ${
+                         urlInfo.platform === 'instagram'
+                           ? 'border-rose-500 bg-rose-50/40 text-rose-600 shadow-xs'
+                           : 'border-gray-50 hover:border-gray-150 text-slate-600 bg-gray-50/20 font-medium'
+                       }`}
+                       type="button"
+                     >
+                       <Instagram size={20} className="mb-1 text-slate-600" />
+                       <span className="text-[10px] font-bold font-arabic">إنستغرام</span>
+                     </button>
 
-                  <button
-                    onClick={() => {
-                      setUrlInput('https://www.tiktok.com/@tiktok');
-                      setForegroundColor('#000000');
-                      setEyeColor('#000000');
-                    }}
-                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer ${
-                      urlInfo.platform === 'tiktok'
-                        ? 'border-slate-800 bg-slate-100 text-slate-800 shadow-xs'
-                        : 'border-gray-50 hover:border-gray-150 text-slate-600 bg-gray-50/20 font-medium'
-                    }`}
-                    type="button"
-                  >
-                    <Music size={20} className="mb-1 text-slate-600" />
-                    <span className="text-[10px] font-bold font-arabic">تيك توك</span>
-                  </button>
-                </div>
+                     <button
+                       onClick={() => {
+                         setUrlInput('https://www.tiktok.com/@tiktok');
+                         setForegroundColor('#000000');
+                         setEyeColor('#000000');
+                       }}
+                       className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer ${
+                         urlInfo.platform === 'tiktok'
+                           ? 'border-slate-800 bg-slate-100 text-slate-800 shadow-xs'
+                           : 'border-gray-50 hover:border-gray-150 text-slate-600 bg-gray-50/20 font-medium'
+                       }`}
+                       type="button"
+                     >
+                       <Music size={20} className="mb-1 text-slate-600" />
+                       <span className="text-[10px] font-bold font-arabic">تيك توك</span>
+                     </button>
+                   </div>
+                 )}
 
-                <label className="text-sm font-medium font-arabic text-gray-600 mb-2 block" htmlFor="yt_url">
-                  {t.labelYtUrl}
-                </label>
-                
-                <div className="relative">
-                  <input
-                    id="yt_url"
-                    type="text"
-                    value={urlInput}
-                    onChange={(e) => setUrlInput(e.target.value)}
-                    placeholder={t.placeholderYtUrl}
-                    className={`w-full pl-4 pr-12 py-3.5 bg-gray-50/50 hover:bg-gray-50 focus:bg-white rounded-2xl border border-gray-200 font-mono text-sm transition-all focus:outline-none focus:ring-2 ${pStyle.focusClass}`}
-                    dir="ltr"
-                  />
-                  <div className={`absolute ${lang === 'ar' ? 'right-3.5' : 'left-3.5'} top-1/2 -translate-y-1/2`}>
-                    {pStyle.icon}
-                  </div>
-                </div>
+                 {(() => {
+                   let customLabel = t.labelYtUrl;
+                   let customPlaceholder = t.placeholderYtUrl;
 
-                {/* Validation Status Badge and Warning Banner */}
-                {(() => {
-                  const isUrlEmpty = !urlInput.trim();
-                  const isUrlValid = isUrlEmpty || urlInfo.isValid;
-                  
-                  if (!isUrlValid) {
-                    return (
-                      <div className="mt-3 p-3.5 bg-red-50 rounded-2xl border border-red-200 flex items-start gap-2.5 text-red-800 text-xs font-arabic leading-relaxed animate-fadeIn" id="url_validation_warning">
-                        <span className="p-1 bg-red-100 text-red-650 rounded-lg shrink-0 mt-0.5">
-                          <AlertCircle size={14} />
-                        </span>
-                        <div>
-                          <p className="font-bold">{t.unsupportedUrlWarn}</p>
-                        </div>
-                      </div>
-                    );
-                  } else if (!isUrlEmpty) {
-                    const platformLabels: Record<string, string> = {
-                      youtube: 'YouTube',
-                      facebook: 'Facebook',
-                      instagram: 'Instagram',
-                      tiktok: 'TikTok',
-                      other: lang === 'ar' ? 'موقع إلكتروني عام' : 'General Website'
-                    };
-                    const matchedPlatform = platformLabels[urlInfo.platform] || urlInfo.platform;
-                    return (
-                      <div className="mt-3 p-3 bg-emerald-50 rounded-2xl border border-emerald-150 flex items-center gap-2.5 text-emerald-850 text-xs font-arabic animate-fadeIn">
-                        <span className="p-1 bg-emerald-100 text-emerald-600 rounded-lg shrink-0">
-                          <Check size={14} />
-                        </span>
-                        <span>{t.validLink} ({matchedPlatform})</span>
-                      </div>
-                    );
-                  }
-                  return null;
-                })()}
+                   if (forcePlatform === 'youtube') {
+                     customLabel = lang === 'ar' ? 'أدخل رابط قناة أو فيديو أو شورتس يوتيوب لإنشاء رابط عميق وكيو آر:' : 'Enter YouTube Channel, Video, or Shorts URL for smart deep-link & QR:';
+                     customPlaceholder = lang === 'ar' ? 'https://www.youtube.com/@channelName أو رابط فيديو...' : 'https://www.youtube.com/@channelName or video link...';
+                   } else if (forcePlatform === 'facebook') {
+                     customLabel = lang === 'ar' ? 'أدخل رابط صفحة أو مجموعة أو حساب فيسبوك لإنشاء رابط عميق وكيو آر:' : 'Enter Facebook Page, Group, or Profile URL:';
+                     customPlaceholder = lang === 'ar' ? 'https://www.facebook.com/pageName' : 'https://www.facebook.com/pageName';
+                   } else if (forcePlatform === 'instagram') {
+                     customLabel = lang === 'ar' ? 'أدخل رابط حساب أو منشور أو ريلز إنستغرام لإنشاء رابط عميق وكيو آر:' : 'Enter Instagram Account, Post, or Reels URL:';
+                     customPlaceholder = lang === 'ar' ? 'https://www.instagram.com/userName' : 'https://www.instagram.com/userName';
+                    } else if (forcePlatform === 'website') {
+                      customLabel = lang === 'ar' ? 'أدخل رابط موقع إلكتروني، مدونة، متجر أو أي رابط لتوليد كود الـ QR:' : 'Enter any website, blog, store, or other link to generate its QR code:';
+                      customPlaceholder = 'https://example.com';
+                   } else if (forcePlatform === 'tiktok') {
+                     customLabel = lang === 'ar' ? 'أدخل رابط حساب أو فيديو تيك توك لإنشاء رابط عميق وكيو آر:' : 'Enter TikTok Profile or Video URL:';
+                     customPlaceholder = lang === 'ar' ? 'https://www.tiktok.com/@userName' : 'https://www.tiktok.com/@userName';
+                   }
+
+                   return (
+                     <>
+                       <label className="text-sm font-medium font-arabic text-gray-600 mb-2 block" htmlFor="yt_url">
+                         {customLabel}
+                       </label>
+                       
+                       <div className="relative">
+                         <input
+                           id="yt_url"
+                           type="text"
+                           value={urlInput}
+                           onChange={(e) => setUrlInput(e.target.value)}
+                           placeholder={customPlaceholder}
+                           className={`w-full pl-4 pr-12 py-3.5 bg-gray-50/50 hover:bg-gray-50 focus:bg-white rounded-2xl border border-gray-200 font-mono text-sm transition-all focus:outline-none focus:ring-2 ${pStyle.focusClass}`}
+                           dir="ltr"
+                         />
+                         <div className={`absolute ${lang === 'ar' ? 'right-3.5' : 'left-3.5'} top-1/2 -translate-y-1/2`}>
+                           {pStyle.icon}
+                         </div>
+                       </div>
+                     </>
+                   );
+                 })()}
+
+                 {/* Validation Status Badge and Warning Banner */}
+                 {(() => {
+                   const isUrlEmpty = !urlInput.trim();
+                   let isUrlValid = isUrlEmpty || urlInfo.isValid;
+                   if (!isUrlEmpty && forcePlatform && forcePlatform !== 'website') {
+                     isUrlValid = urlInfo.isValid && urlInfo.platform === forcePlatform;
+                   }
+                   
+                   if (!isUrlValid) {
+                     let warnMessage = t.unsupportedUrlWarn;
+                     if (forcePlatform === 'youtube') {
+                       warnMessage = lang === 'ar' 
+                         ? '⚠️ الرابط المُدخل غير صحيح! يرجى إدخال رابط يوتيوب صالح (قناة، فيديو، أو شورتس يحتوي على youtube.com أو youtu.be).'
+                         : '⚠️ Invalid link! Please enter a valid YouTube channel, video, or shorts link.';
+                     } else if (forcePlatform === 'facebook') {
+                       warnMessage = lang === 'ar' 
+                         ? '⚠️ الرابط المُدخل غير صحيح! يرجى إدخال رابط صفحة، مجموعة، منشور أو حساب فيسبوك صالح.'
+                         : '⚠️ Invalid link! Please enter a valid Facebook page, group, post, or profile link.';
+                     } else if (forcePlatform === 'instagram') {
+                       warnMessage = lang === 'ar' 
+                         ? '⚠️ الرابط المُدخل غير صحيح! يرجى إدخال رابط حساب، منشور أو ريلز إنستغرام صالح.'
+                         : '⚠️ Invalid link! Please enter a valid Instagram profile, post, or reels link.';
+                     } else if (forcePlatform === 'tiktok') {
+                       warnMessage = lang === 'ar' 
+                         ? '⚠️ الرابط المُدخل غير صحيح! يرجى إدخال رابط حساب أو فيديو تيك توك صالح.'
+                         : '⚠️ Invalid link! Please enter a valid TikTok profile or video link.';
+                     }
+
+                     return (
+                       <div className="mt-3 p-3.5 bg-red-50 rounded-2xl border border-red-200 flex items-start gap-2.5 text-red-800 text-xs font-arabic leading-relaxed animate-fadeIn" id="url_validation_warning">
+                         <span className="p-1 bg-red-100 text-red-650 rounded-lg shrink-0 mt-0.5">
+                           <AlertCircle size={14} />
+                         </span>
+                         <div>
+                           <p className="font-bold">{warnMessage}</p>
+                         </div>
+                       </div>
+                     );
+                   } else if (!isUrlEmpty) {
+                     const platformLabels: Record<string, string> = {
+                       youtube: 'YouTube',
+                       facebook: 'Facebook',
+                       instagram: 'Instagram',
+                       tiktok: 'TikTok',
+                       other: lang === 'ar' ? 'موقع إلكتروني عام' : 'General Website'
+                     };
+                     const matchedPlatform = platformLabels[urlInfo.platform] || urlInfo.platform;
+                     return (
+                       <div className="mt-3 p-3 bg-emerald-50 rounded-2xl border border-emerald-150 flex items-center gap-2.5 text-emerald-850 text-xs font-arabic animate-fadeIn">
+                         <span className="p-1 bg-emerald-100 text-emerald-600 rounded-lg shrink-0">
+                           <Check size={14} />
+                         </span>
+                         <span>{t.validLink} ({matchedPlatform})</span>
+                       </div>
+                     );
+                   }
+                   return null;
+                 })()}
 
               </>
             );
