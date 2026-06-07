@@ -546,7 +546,7 @@ export default function QRGenerator({
         }
       }
     } catch (err) {
-      console.error("Error fetching live scan stats:", err);
+      console.warn("Gracefully unresolved or local-only environment. (Live scan statistics offline):", err);
     } finally {
       if (!silent) setIsRefreshingStats(false);
     }
@@ -580,7 +580,7 @@ export default function QRGenerator({
         await fetchScanStats(true);
       }
     } catch (err) {
-      console.error("Error simulating scan:", err);
+      console.warn("Could not simulate scan at this time (Offline or connection refused):", err);
     } finally {
       setIsRefreshingStats(false);
     }
