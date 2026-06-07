@@ -20,7 +20,7 @@ export const translations = {
 
     // Navbar
     appTitle: "qrytube",
-    appSubTitle: "مولد كيو آر الذكي لقنوات اليوتيوب",
+    appSubTitle: "حوّل روابط اليوتيوب إلى QR احترافي.",
     navGenerator: "المنصة والأداة",
     navTips: "نصائح التفاعل والمشاهدات",
     navFaq: "الأسئلة الشائعة",
@@ -29,8 +29,9 @@ export const translations = {
 
     // Hero
     heroBadge: "أفضل أداة مجانية لرفع اشتراكات وتفاعل قناتك لعام 2026",
-    heroTitlePart1: "حول روابط اليوتيوب إلى رموز ",
-    heroTitlePart2: "QR بالروابط العميقة",
+    heroTitlePart1: "حوّل روابط اليوتيوب إلى ",
+    heroTitlePart2: "QR احترافي.",
+    heroSubtitle: "قم بإنشاء كيو آر مميز وتوليد روابط عميقة مجاناً لزيادة عدد المشتركين والتفاعل عبر فتح التطبيقات الرسمية مباشرة وبلا عناء.",
 
     // Tips Tab Content
     tipsHeading: "كيف تستغل كود الـ QR لزيادة عدد المشتركين الحقيقيين؟",
@@ -214,7 +215,7 @@ export const translations = {
 
     // Navbar
     appTitle: "qrytube",
-    appSubTitle: "Smart YouTube QR Code Generator",
+    appSubTitle: "Convert YouTube links into professional QR codes.",
     navGenerator: "Generator & Platform",
     navTips: "Growth & Engagement Tips",
     navFaq: "FAQs",
@@ -224,7 +225,8 @@ export const translations = {
     // Hero
     heroBadge: "The best free tool to boost your channel subscriptions and engagement in 2026",
     heroTitlePart1: "Convert YouTube URLs into ",
-    heroTitlePart2: "Deep Link QR Codes",
+    heroTitlePart2: "Professional QR Codes",
+    heroSubtitle: "Create outstanding QR codes and free deep links to boost followers and interaction by opening official apps directly and effortlessly.",
 
     // Tips Tab Content
     tipsHeading: "How to leverage QR codes to grow your real subscriber count?",

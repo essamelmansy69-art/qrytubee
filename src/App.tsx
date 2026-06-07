@@ -744,22 +744,29 @@ export default function App() {
       </header>
 
       {/* 2. HERO CONTENT SECTION */}
-      <section className="bg-gradient-to-b from-white to-slate-50 py-12 border-b border-slate-100 text-center relative overflow-hidden" id="hero_section">
+      <section className="bg-gradient-to-b from-white to-slate-50/50 dark:from-slate-900 dark:to-slate-950 py-16 border-b border-slate-100 dark:border-slate-800/60 text-center relative overflow-hidden" id="hero_section">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none">
-          <div className="absolute top-10 left-10 w-72 h-72 bg-red-400/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-5 right-20 w-80 h-80 bg-blue-400/5 rounded-full blur-3xl" />
+          <div className="absolute top-10 left-10 w-72 h-72 bg-red-500/10 dark:bg-red-500/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-5 right-20 w-80 h-80 bg-indigo-500/10 dark:bg-indigo-500/5 rounded-full blur-3xl" />
         </div>
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 relative text-center flex flex-col items-center">
           
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-yellow-500/10 text-yellow-700 text-xs font-bold rounded-lg font-arabic mb-4">
-            <Sparkles size={13} className="text-yellow-600" />
-            {t.heroBadge}
-          </span>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200/50 dark:border-slate-800/80 backdrop-blur-sm shadow-2xs mb-6 text-[11px] font-bold text-slate-600 dark:text-slate-300 tracking-wider uppercase font-arabic" id="hero_badge_pill">
+            <Sparkles size={12} className="text-yellow-500 animate-pulse shrink-0" />
+            <span>{t.heroBadge}</span>
+          </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black font-arabic text-slate-900 leading-tight tracking-tight lg:leading-normal">
-            {t.heroTitlePart1}<span className="text-red-600 block sm:inline-block">{t.heroTitlePart2}</span>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black font-arabic text-slate-900 dark:text-white leading-tight sm:leading-snug md:leading-normal tracking-tight max-w-3xl">
+            {t.heroTitlePart1}
+            <span className="bg-gradient-to-r from-red-600 via-rose-500 to-red-700 bg-clip-text text-transparent block sm:inline-block sm:ms-1.5 pb-1">
+              {t.heroTitlePart2}
+            </span>
           </h1>
+
+          <p className="mt-5 text-sm sm:text-base md:text-md text-slate-500 dark:text-slate-400 font-medium font-arabic max-w-2xl leading-relaxed">
+            {t.heroSubtitle}
+          </p>
 
         </div>
       </section>
@@ -875,7 +882,17 @@ export default function App() {
                 </div>
               </div>
             }>
-              <QRGenerator lang={lang} forcePlatform={activeTab === 'generator' ? 'youtube' : activeTab} />
+              <QRGenerator 
+                lang={lang} 
+                forcePlatform={activeTab === 'generator' ? 'youtube' : activeTab}
+                onSwitchTab={(tab) => {
+                  setActiveTab(tab);
+                  const targetPath = tab === 'generator' ? '/' : `/${tab}`;
+                  try {
+                    window.history.pushState({ tab }, '', targetPath);
+                  } catch (_) {}
+                }}
+              />
             </React.Suspense>
           </div>
         )}

@@ -430,10 +430,12 @@ const formatElapsedTime = (isoStr?: string, currentLang?: 'ar' | 'en') => {
 
 export default function QRGenerator({ 
   lang = 'ar',
-  forcePlatform
+  forcePlatform,
+  onSwitchTab
 }: { 
   lang?: 'ar' | 'en';
   forcePlatform?: 'youtube' | 'facebook' | 'instagram' | 'tiktok' | 'website';
+  onSwitchTab?: (tab: 'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website') => void;
 }) {
   const t = translations[lang];
 
@@ -1234,11 +1236,52 @@ export default function QRGenerator({
                  {(() => {
                    const isUrlEmpty = !urlInput.trim();
                    let isUrlValid = isUrlEmpty || urlInfo.isValid;
-                   if (!isUrlEmpty && forcePlatform && forcePlatform !== 'website') {
+                   const isPlatformMismatch = !isUrlEmpty && forcePlatform && forcePlatform !== 'website' && urlInfo.isValid && urlInfo.platform !== forcePlatform;
+                   if (isPlatformMismatch) {
+                     isUrlValid = false;
+                   } else if (!isUrlEmpty && forcePlatform && forcePlatform !== 'website') {
                      isUrlValid = urlInfo.isValid && urlInfo.platform === forcePlatform;
                    }
                    
                    if (!isUrlValid) {
+                     if (isPlatformMismatch) {
+                       const platformNames: Record<string, string> = {
+                         youtube: lang === 'ar' ? 'يوتيوب' : 'YouTube',
+                         facebook: lang === 'ar' ? 'فيسبوك' : 'Facebook',
+                         instagram: lang === 'ar' ? 'إنستغرام' : 'Instagram',
+                         tiktok: lang === 'ar' ? 'تيك توك' : 'TikTok',
+                       };
+                       const activePlatformName = platformNames[forcePlatform!] || forcePlatform;
+                       return (
+                         <div className="mt-3 p-4 bg-amber-50 dark:bg-amber-955/20 rounded-2xl border border-amber-200 dark:border-amber-800/40 flex flex-col gap-2.5 text-amber-950 dark:text-amber-300 text-xs font-arabic leading-relaxed animate-fadeIn" id="url_validation_warning">
+                           <div className="flex items-start gap-2.5">
+                             <span className="p-1.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-lg shrink-0 mt-0.5 animate-pulse">
+                               <Sparkles size={14} />
+                             </span>
+                             <div>
+                               <p className="font-bold">
+                                 {lang === 'ar' 
+                                   ? `⚠️ هذا الرابط يبدو كموقع إلكتروني عام وليس رابطاً لـ ${activePlatformName}!`
+                                   : `⚠️ This link appears to be a general website, not a ${activePlatformName} link!`}
+                               </p>
+                               <p className="mt-1 text-slate-700 dark:text-slate-300 font-medium">
+                                 {lang === 'ar'
+                                   ? 'لإنشاء كود كيو آر كود لموقع عام (مثل Terabox أو موقعك الشخصي) بنجاح، يمكنك التبديل فوراً لتبويب "مواقع أخرى" بالخيار أدناه.'
+                                   : 'To generate a QR code for this general website (such as Terabox or your personal domain), you can switch instantly to the "Other Websites" tab below.'}
+                               </p>
+                             </div>
+                           </div>
+                           {onSwitchTab && (
+                             <button
+                               onClick={() => onSwitchTab('website')}
+                               className="mt-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-xs transition-transform transform active:scale-95 cursor-pointer self-start text-[10.5px] font-arabic"
+                             >
+                               {lang === 'ar' ? '🔄 التحويل لتبويب "مواقع أخرى" وتوليد الكود الآن' : '🔄 Switch to "Other Websites" and generate now'}
+                             </button>
+                           )}
+                         </div>
+                       );
+                     }
                      let warnMessage = t.unsupportedUrlWarn;
                      if (forcePlatform === 'youtube') {
                        warnMessage = lang === 'ar' 
