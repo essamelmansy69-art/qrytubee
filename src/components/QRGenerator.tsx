@@ -1035,6 +1035,26 @@ export default function QRGenerator({
           </button>
         </div>
 
+        {/* Simple bullet headings directly under download buttons */}
+        <div className="pt-2 flex flex-col gap-1.5 text-start font-arabic border-t border-slate-100/60 dark:border-slate-800/40 mt-1" id="download_feature_bullet_headings">
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+            <span className="shrink-0 text-[11px]">✅</span>
+            <span>{t.featFree}</span>
+          </div>
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+            <span className="shrink-0 text-[11px]">✅</span>
+            <span>{t.featNoReg}</span>
+          </div>
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+            <span className="shrink-0 text-[11px]">✅</span>
+            <span>{t.featHighPng}</span>
+          </div>
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+            <span className="shrink-0 text-[11px]">✅</span>
+            <span>{t.featSupports}</span>
+          </div>
+        </div>
+
         {/* Analytics Section Removed */}
       </div>
     );

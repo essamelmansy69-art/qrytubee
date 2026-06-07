@@ -32,6 +32,10 @@ export const translations = {
     heroTitlePart1: "حوّل روابط اليوتيوب إلى ",
     heroTitlePart2: "QR احترافي.",
     heroSubtitle: "قم بإنشاء كيو آر مميز وتوليد روابط عميقة مجاناً لزيادة عدد المشتركين والتفاعل عبر فتح التطبيقات الرسمية مباشرة وبلا عناء.",
+    featFree: "مجاني 100%",
+    featNoReg: "بدون تسجيل",
+    featHighPng: "تحميل PNG عالي الجودة",
+    featSupports: "يدعم القنوات والفيديوهات والشورتس",
 
     // Tips Tab Content
     tipsHeading: "كيف تستغل كود الـ QR لزيادة عدد المشتركين الحقيقيين؟",
@@ -227,6 +231,10 @@ export const translations = {
     heroTitlePart1: "Convert YouTube URLs into ",
     heroTitlePart2: "Professional QR Codes",
     heroSubtitle: "Create outstanding QR codes and free deep links to boost followers and interaction by opening official apps directly and effortlessly.",
+    featFree: "100% Free",
+    featNoReg: "No Registration Required",
+    featHighPng: "High Quality PNG Downloads",
+    featSupports: "Supports Channels, Videos, & Shorts",
 
     // Tips Tab Content
     tipsHeading: "How to leverage QR codes to grow your real subscriber count?",
