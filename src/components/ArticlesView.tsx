@@ -97,6 +97,93 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
         document.head.appendChild(script);
       }
       script.text = JSON.stringify(schemaArray);
+    } else if (selectedArticle.id === 'youtube-deep-links-seo-2026') {
+      const faqSchema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "ما هي الروابط العميقة لليوتيوب (YouTube Deep Links)؟",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "هي روابط ذكية تتخطى المتصفح الداخلي لتطبيقات السوشيال ميديا وتوجه الهاتف لفتح تطبيق يوتيوب الرسمي مباشرة لمشاهدة الفيديو والاشتراك الفوري بحسابه النشط دون عراقيل تسجيل الدخول."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "لماذا يفشل المشاهدون في الاشتراك بقناتي من الروابط التقليدية العادية؟",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "لأن الروابط التقليدية تفتتح داخل متصفحات تواصل اجتماعي مدمجة ومعزولة تظهر الزائر كمسجل خروجه، وتطالبه بكتابة بريده الإلكتروني وكلمة المرور للقيام بأي متابعة، مما يدفع 90% للتراجع عن المتابعة."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "هل تدعم منصة Qrytube تحميل كود QR لليوتيوب بصيغة SVG ناقلية؟",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "نعم، تتيح لك المنصة تحميل أكواد QR لليوتيوب وصيغ عالية الوضوح مجانية تماماً مثل صيغة SVG المتجهة لضمان الإبقاء على الجمالية الفائقة والحواف الحادة عند تكبيرها وطباعتها على اللافتات بدون أي تشويش."
+            }
+          }
+        ]
+      };
+
+      const howToSchema = {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "كيفية إنشاء كود QR ورابط عميق لليوتيوب بنقرة واحدة",
+        "description": "دليل تبسيطي لإنشاء كود كيو أر ورابط ذكي مجاني لقنوات اليوتيوب يفتح في التطبيق فوراً.",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "name": "نسخ رابط القناة أو الفيديو",
+            "text": "انسخ الرابط الأصلي لقناتك أو للفيديو المطلوب ترويجه من تطبيق يوتيوب الرسمي.",
+            "url": window.location.origin
+          },
+          {
+            "@type": "HowToStep",
+            "name": "لصق الرابط في أداة Qrytube",
+            "text": "توجه إلى موقع Qrytube والصق الرابط في حقل التحليل والتوليد بالصفحة الرئيسية.",
+            "url": window.location.origin
+          },
+          {
+            "@type": "HowToStep",
+            "name": "تخصيص التصميم والألوان وشعار اليوتيوب",
+            "text": "اختر الألوان والأشكال المفضلة لكود الـ QR، وقم بإضافة الشعار ليكون واثق المظهر للزوار.",
+            "url": window.location.origin
+          },
+          {
+            "@type": "HowToStep",
+            "name": "التحميل بدقة عالية",
+            "text": "قم بتنزيل كود الـ QR الفعال بصيغ متقدمة مثل SVG أو PNG أو PDF لتسويق منسق على المطبوعات أو الشاشات.",
+            "url": window.location.origin
+          }
+        ]
+      };
+
+      const softwareSchema = {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Qrytube",
+        "operatingSystem": "Android, iOS, Web",
+        "applicationCategory": "BusinessApplication / Utilities",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      };
+
+      const schemaArray = [schemaMarkup, faqSchema, howToSchema, softwareSchema];
+      let script = document.getElementById('seo-article-schema') as HTMLScriptElement;
+      if (!script) {
+        script = document.createElement('script');
+        script.id = 'seo-article-schema';
+        script.type = 'application/ld+json';
+        document.head.appendChild(script);
+      }
+      script.text = JSON.stringify(schemaArray);
     } else if (selectedArticle.id === 'seo-2026-deep-link-trends') {
       const faqSchema = {
         "@context": "https://schema.org",
