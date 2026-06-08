@@ -43,6 +43,7 @@ const QRGenerator = React.lazy(() => import('./components/QRGenerator'));
 const ArticlesView = React.lazy(() => import('./components/ArticlesView'));
 const LegalView = React.lazy(() => import('./components/LegalView'));
 const FAQView = React.lazy(() => import('./components/FAQView'));
+const ChaptersGeneratorView = React.lazy(() => import('./components/ChaptersGeneratorView'));
 
 export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -96,7 +97,7 @@ export default function App() {
     return 'ar';
   });
 
-  const [activeTab, setActiveTab] = useState<'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact'>(() => {
+  const [activeTab, setActiveTab] = useState<'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact' | 'chapters'>(() => {
     try {
       const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
       if (path === 'terms') return 'terms';
@@ -107,6 +108,7 @@ export default function App() {
       if (path === 'instagram') return 'instagram';
       if (path === 'tiktok') return 'tiktok';
       if (path === 'website') return 'website';
+      if (path === 'chapters' || path === 'timestamp-generator' || path === 'youtube-chapters') return 'chapters';
       if (path === 'articles' || path.startsWith('articles/')) return 'articles';
     } catch (_) {}
     return 'generator';
@@ -206,6 +208,13 @@ export default function App() {
       desc = lang === 'ar'
         ? "تعرف على قصة Qrytube ورؤيتنا في مساعدة صناع المحتوى والمؤثرين العرب على النمو وزيادة الاشتراكات بنسب تصل إلى 200% باستخدام الروابط العميقة والـ QR الذكي."
         : "Learn about Qrytube’s mission to help creators, influencers, and brands boost engagement and drive mobile app traffic seamlessly.";
+    } else if (activeTab === 'chapters') {
+      title = lang === 'ar' 
+        ? "أداة تنسيق فصول مقاطع اليوتيوب والتايم ستامب | Qrytube" 
+        : "YouTube Chapters & Timestamp Generator Tool | Qrytube";
+      desc = lang === 'ar'
+        ? "أداة مجانية واحترافية لتوليد وتنسيق فصول اليوتيوب والتايم ستامب (Timestamps) متوافقة بالكامل مع قواعد السيو 2026 لتعزيز ظهور فديوهاتك في محركات بحث جوجل."
+        : "Free, automated tool to format YouTube video chapters and timestamps perfectly aligned with modern SEO 2026 indexing rules.";
     } else if (activeTab === 'contact') {
       title = lang === 'ar' ? "اتصل بنا | Qrytube" : "Contact Us | Qrytube";
       desc = lang === 'ar'
@@ -344,7 +353,7 @@ export default function App() {
         setSelectedArticleId(e.state.articleId || null);
       } else {
         const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
-        if (['terms', 'privacy', 'about', 'contact', 'facebook', 'instagram', 'tiktok', 'website'].includes(path)) {
+        if (['terms', 'privacy', 'about', 'contact', 'facebook', 'instagram', 'tiktok', 'website', 'chapters'].includes(path)) {
           setActiveTab(path as any);
           setSelectedArticleId(null);
         } else if (path === 'articles') {
@@ -945,6 +954,14 @@ export default function App() {
           <div className="transition-opacity duration-300">
             <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
               <LegalView lang={lang} docType="contact" />
+            </React.Suspense>
+          </div>
+        )}
+
+        {activeTab === 'chapters' && (
+          <div className="transition-opacity duration-300">
+            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
+              <ChaptersGeneratorView lang={lang} onReturn={() => setActiveTab('generator')} />
             </React.Suspense>
           </div>
         )}
