@@ -324,7 +324,7 @@ export default function App() {
     } catch (e) {
       console.error(e);
     }
-  }, [lang, activeTab]);
+  }, [lang, activeTab, selectedArticleId]);
 
   const t = translations[lang];
 
