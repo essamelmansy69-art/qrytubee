@@ -217,6 +217,87 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
         document.head.appendChild(script);
       }
       script.text = JSON.stringify(schemaArray);
+    } else if (selectedArticle.id === 'youtube-qr-marketing-2026') {
+      const faqSchema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "لماذا تفشل أكواد الـ QR التقليدية لليوتيوب؟",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "لأنها تفتح الرابط داخل المتصفحات الداخلية المدمجة في تطبيقات التواصل الاجتماعي، حيث تظهر القناة كضيف غير مسجل دخوله، مما يعيق الاشتراك الفوري ويتسبب في تخارج 90% من الزوار بسبب المطالبة ببيانات المرور."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "ما هي الروابط العميقة (Deep Links) وكيف تدعم زيادة المتابعين؟",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "هي بروتوكولات حيوية ذكية تسلم التوجيه مباشرة لفتح تطبيق يوتيوب الرسمي المثبت بالهاتف، لتتم عملية التفاعل والاشتراك بلمسة واحدة دون أي عوائق برمجية."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "هل تدعم منصة Qrytube صيغاً ناقلة مثل SVG لطباعة الأكواد؟",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "نعم، تتيح المنصة تحميل كود الـ QR بصيغة SVG فائقة النقاء والدقة لضمان بقاء الحواف حادة وجاهزة للتكبير والطباعة على كافة المطبوعات الميدانية والعبوات الإعلانية الكبيرة."
+            }
+          }
+        ]
+      };
+
+      const howToSchema = {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "طريقة توليد كود QR ذكي لليوتيوب بكبسة واحدة",
+        "description": "دليل مبسط لإنشاء رمز كيو آر ورابط عميق مجاني لقنوات اليوتيوب يفتح في التطبيق فوراً.",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "name": "نسخ رابط يوتيوب",
+            "text": "قم بنسخ الرابط الأصلي لقناتك أو الفيديو المطلوب ترويجه من يوتيوب.",
+            "url": window.location.origin
+          },
+          {
+            "@type": "HowToStep",
+            "name": "لصق الرابط في Qrytube",
+            "text": "توجه لصفحة Qrytube الرئيسية والصق الرابط في حقل التوليد الذكي.",
+            "url": window.location.origin
+          },
+          {
+            "@type": "HowToStep",
+            "name": "التخصيص والتحميل",
+            "text": "اختر الألوان المفضلة، أضف رمز اليوتيوب، ثم قم بالتحميل الفوري بدقة SVG أو PNG.",
+            "url": window.location.origin
+          }
+        ]
+      };
+
+      const softwareSchema = {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Qrytube",
+        "operatingSystem": "iOS, Android, Windows, macOS",
+        "applicationCategory": "BusinessApplication / Utilities",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      };
+
+      const schemaArray = [schemaMarkup, faqSchema, howToSchema, softwareSchema];
+      let script = document.getElementById('seo-article-schema') as HTMLScriptElement;
+      if (!script) {
+        script = document.createElement('script');
+        script.id = 'seo-article-schema';
+        script.type = 'application/ld+json';
+        document.head.appendChild(script);
+      }
+      script.text = JSON.stringify(schemaArray);
     } else {
       let script = document.getElementById('seo-article-schema') as HTMLScriptElement;
       if (!script) {
