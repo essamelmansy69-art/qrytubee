@@ -29,9 +29,9 @@ export const translations = {
 
     // Hero
     heroBadge: "أفضل أداة مجانية لرفع اشتراكات وتفاعل قناتك لعام 2026",
-    heroTitlePart1: "حوّل روابط اليوتيوب إلى ",
-    heroTitlePart2: "QR احترافي.",
-    heroSubtitle: "قم بإنشاء كيو آر مميز وتوليد روابط عميقة مجاناً لزيادة عدد المشتركين والتفاعل عبر فتح التطبيقات الرسمية مباشرة وبلا عناء.",
+    heroTitlePart1: "YouTube QR Code Generator | ",
+    heroTitlePart2: "إنشاء QR كود لرابط فيديو يوتيوب بضغطة واحدة",
+    heroSubtitle: "هل تريد تحويل رابط فيديوهاتك إلى QR Code احترافي؟ جرب أسرع أداة مجانية لإنشاء QR كود لروابط اليوتيوب، مخصصة لصناع المحتوى، سهلة الاستخدام وتدعم الهاتف والحاسوب.",
     featFree: "مجاني 100%",
     featNoReg: "بدون تسجيل",
     featHighPng: "تحميل PNG عالي الجودة",
@@ -228,9 +228,9 @@ export const translations = {
 
     // Hero
     heroBadge: "The best free tool to boost your channel subscriptions and engagement in 2026",
-    heroTitlePart1: "Convert YouTube URLs into ",
-    heroTitlePart2: "Professional QR Codes",
-    heroSubtitle: "Create outstanding QR codes and free deep links to boost followers and interaction by opening official apps directly and effortlessly.",
+    heroTitlePart1: "YouTube QR Code Generator | ",
+    heroTitlePart2: "Convert Video Links to Custom QRs in One Click",
+    heroSubtitle: "Do you want to convert your video links into a professional QR Code? Try the fastest free tool to generate QR codes for YouTube URLs, designed specifically for content creators on mobile and desktop.",
     featFree: "100% Free",
     featNoReg: "No Registration Required",
     featHighPng: "High Quality PNG Downloads",

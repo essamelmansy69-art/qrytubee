@@ -135,11 +135,11 @@ export default function App() {
 
     if (activeTab === 'generator') {
       title = lang === 'ar' 
-        ? "Qrytube | أداة إنشاء رموز QR ذكية لقنوات اليوتيوب" 
-        : "YouTube Smart QR Code & Deep Link Generator | Qrytube";
+        ? "YouTube QR Code Generator | إنشاء QR كود لرابط فيديو يوتيوب بضغطة واحدة" 
+        : "YouTube QR Code Generator | Smart YouTube Deep Link QR Tool";
       desc = lang === 'ar'
-        ? "اصنع رموز QR ذكية (Deep Links) لـقناتك على اليوتيوب مجاناً. تتيح للمتابعين فتح قناتك أو فيديوهاتك داخل تطبيق اليوتيوب مباشرة لزيادة المشاهدات والاشتراكات."
-        : "Create smart deep-link QR codes for YouTube creators. Force links to open directly inside the official YouTube mobile application.";
+        ? "هل تريد تحويل رابط فيديوهاتك إلى QR Code احترافي؟ جرب أسرع أداة مجانية لإنشاء QR كود لروابط اليوتيوب، مخصصة لصناع المحتوى، سهلة الاستخدام وتدعم الهاتف والحاسوب."
+        : "Convert your YouTube video urls into high conversion mobile deep links and custom QR codes instantly. Perfect for video creators and marketing.";
     } else if (activeTab === 'facebook') {
       title = lang === 'ar' 
         ? "أداة توليد كود QR ذكي للفيسبوك لفتح التطبيق مباشرة | Qrytube" 
@@ -222,11 +222,11 @@ export default function App() {
         : "Get in touch with the Qrytube professional team for support, feature feedback, partnership proposals, or customized enterprise integration solutions.";
     } else {
       title = lang === 'ar' 
-        ? "Qrytube | أداة إنشاء رموز QR ذكية لقنوات اليوتيوب" 
-        : "Viral QR Code Generator | Open Social Links Directly in Apps";
+        ? "YouTube QR Code Generator | إنشاء QR كود لرابط فيديو يوتيوب بضغطة واحدة" 
+        : "YouTube QR Code Generator | Viral QR Codes & Deep Links";
       desc = lang === 'ar'
-        ? "اصنع رموز QR ذكية (Deep Links) لـقناتك على اليوتيوب مجاناً. تتيح للمتابعين فتح قناتك أو فيديوهاتك داخل تطبيق اليوتيوب مباشرة لزيادة المشاهدات والاشتراكات."
-        : "Create smart deep-link QR codes for social media influencers. Force links to open directly inside YouTube, Facebook, Instagram, and TikTok apps.";
+        ? "هل تريد تحويل رابط فيديوهاتك إلى QR Code احترافي؟ جرب أسرع أداة مجانية لإنشاء QR كود لروابط اليوتيوب، مخصصة لصناع المحتوى، سهلة الاستخدام وتدعم الهاتف والحاسوب."
+        : "Convert YouTube and social video URLs to smart app deep link QR codes. Drive high subscriber engagement today.";
     }
 
     // Update document title
@@ -766,14 +766,14 @@ export default function App() {
             <span>{t.heroBadge}</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black font-arabic text-slate-900 dark:text-white leading-tight sm:leading-snug md:leading-normal tracking-tight max-w-3xl">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold font-arabic text-slate-900 dark:text-white leading-snug tracking-tight max-w-3xl">
             {t.heroTitlePart1}
             <span className="bg-gradient-to-r from-red-600 via-rose-500 to-red-700 bg-clip-text text-transparent block sm:inline-block sm:ms-1.5 pb-1">
               {t.heroTitlePart2}
             </span>
           </h1>
 
-          <p className="mt-5 text-sm sm:text-base md:text-md text-slate-700 dark:text-slate-300 font-semibold font-arabic max-w-2xl leading-relaxed">
+          <p className="mt-3 text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-normal font-arabic max-w-2xl leading-relaxed">
             {t.heroSubtitle}
           </p>
 
