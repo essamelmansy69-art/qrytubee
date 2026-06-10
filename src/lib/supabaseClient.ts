@@ -1,5 +1,6 @@
 /// <reference types="vite/client" />
 import { createClient } from "@supabase/supabase-js";
+import { detectVisitorSpecs, fetchVisitorCountry } from "../utils";
 
 // Retrieve environment variables using Vite's static import.meta.env.
 // Statically referenced to ensure Vite correctly replaces them during production builds (e.g. on GitHub, Vercel, Netlify, or active host envs).
@@ -167,7 +168,6 @@ export async function getOriginalUrlAndTrackClick(slug: string): Promise<{ origi
 
     // Direct awaited insertion to ensure registration completes before page navigation triggers
     try {
-      const { detectVisitorSpecs, fetchVisitorCountry } = await import("../utils");
       const { browser, device_type } = detectVisitorSpecs();
       
       let country = "Unknown";
