@@ -54,6 +54,12 @@ export default function App() {
   const isDynamicRoute = window.location.pathname.startsWith('/r/');
   const dynamicSlug = isDynamicRoute ? window.location.pathname.split('/r/')[1]?.trim() : null;
 
+  const queryParams = new URL(window.location.href).searchParams;
+  const rawRedirectUrl = queryParams.get('url') || queryParams.get('r');
+  const redirectUrl = isDynamicRoute ? resolvedDynamicUrl : rawRedirectUrl;
+  const redirectType = queryParams.get('type') || 'vnd';
+  const isRedirectRoute = window.location.pathname.startsWith('/redirect') || !!rawRedirectUrl || isDynamicRoute;
+
   useEffect(() => {
     if (isDynamicRoute && dynamicSlug) {
       setIsLoadingDynamic(true);
@@ -156,6 +162,7 @@ export default function App() {
   });
 
   useEffect(() => {
+    if (isRedirectRoute) return;
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     localStorage.setItem('qr_language', lang);
@@ -355,12 +362,13 @@ export default function App() {
     } catch (e) {
       console.error(e);
     }
-  }, [lang, activeTab, selectedArticleId]);
+  }, [lang, activeTab, selectedArticleId, isRedirectRoute]);
 
   const t = translations[lang];
 
   useEffect(() => {
     try {
+      if (isRedirectRoute) return;
       const currentPath = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
       // Include the language parameter in the target path during transitions so it persists if active
       const langParam = lang === 'en' ? '?lang=en' : '?lang=ar';
@@ -375,7 +383,7 @@ export default function App() {
         window.history.pushState({ tab: activeTab, articleId: selectedArticleId }, '', targetPath);
       }
     } catch (_) {}
-  }, [activeTab, lang, selectedArticleId]);
+  }, [activeTab, lang, selectedArticleId, isRedirectRoute]);
 
   useEffect(() => {
     const handlePopState = (e: PopStateEvent) => {
@@ -494,12 +502,6 @@ export default function App() {
   const fallbackTimerRef = React.useRef<any>(null);
   const t2Ref = React.useRef<any>(null);
   const t3Ref = React.useRef<any>(null);
-
-  const queryParams = new URL(window.location.href).searchParams;
-  const rawRedirectUrl = queryParams.get('url') || queryParams.get('r');
-  const redirectUrl = isDynamicRoute ? resolvedDynamicUrl : rawRedirectUrl;
-  const redirectType = queryParams.get('type') || 'vnd';
-  const isRedirectRoute = window.location.pathname.startsWith('/redirect') || !!rawRedirectUrl || isDynamicRoute;
 
   useEffect(() => {
     if (isRedirectRoute && redirectUrl) {

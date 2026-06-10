@@ -490,6 +490,11 @@ export function convertUrlToDeepLink(url: string, deviceOverride?: 'android' | '
     }
   }
 
+  // standard non-mobile browsers should navigate to standard web addresses directly
+  if (deviceType === 'standard') {
+    return trimmed.startsWith('http') ? trimmed : `https://${trimmed}`;
+  }
+
   // Let's parse with native URL class first for bulletproof safety
   let hostname = '';
   let pathname = '';
