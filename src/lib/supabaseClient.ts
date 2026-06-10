@@ -28,6 +28,37 @@ try {
   console.error("Failed to initialize Supabase client instance during startup:", e);
 }
 
+// Asynchronous promise barrier to secure configuration sync before database queries execute
+let resolveInitPromise: () => void = () => {};
+export const initPromise = new Promise<void>((resolve) => {
+  resolveInitPromise = resolve;
+});
+
+// Check with Express server asynchronously for actual live backend credentials (in case build-time env vars were blank)
+let isInitializing = false;
+export async function initSupabaseRuntime(): Promise<void> {
+  if (isInitializing) return;
+  isInitializing = true;
+  try {
+    const res = await fetch("/api/supabase-config");
+    if (res.ok) {
+      const config = await res.json();
+      if (config.supabaseUrl && config.supabaseAnonKey) {
+        console.log("[Supabase Config Proxy] Successfully retrieved active runtime credentials from Express server.");
+        supabaseInstance = createClient(config.supabaseUrl, config.supabaseAnonKey);
+      }
+    }
+  } catch (err) {
+    // Fail silently when server endpoint is unavailable (e.g. built statically on GitHub Pages)
+  } finally {
+    isInitializing = false;
+    resolveInitPromise();
+  }
+}
+
+// Instantly trigger dynamic credentials sync from active container
+initSupabaseRuntime().catch(() => {});
+
 export const supabase: any = new Proxy({} as any, {
   get(target, prop) {
     if (!supabaseInstance) {
@@ -59,6 +90,9 @@ export async function createDynamicQR(originalUrl: string): Promise<{ success: b
     if (!originalUrl) {
       return { success: false, error: "Original URL is required" };
     }
+
+    // Await configurations load before executing Supabase requests
+    await initPromise;
 
     let slug = generateUniqueSlug(6);
     let attempts = 0;
@@ -105,6 +139,9 @@ export async function createDynamicQR(originalUrl: string): Promise<{ success: b
  */
 export async function getOriginalUrlAndTrackClick(slug: string): Promise<{ originalUrl: string | null; qrId?: any; error?: string }> {
   try {
+    // Await configurations load before executing Supabase requests
+    await initPromise;
+
     const { data, error } = await supabase
       .from("dynamic_qr")
       .select("id, original_url, clicks")
@@ -141,6 +178,9 @@ export async function trackVisitorVisit(
 ): Promise<{ success: boolean; data?: any; error?: string }> {
   try {
     if (!qrId) return { success: false, error: "qr_id is required" };
+
+    // Await configurations load before executing Supabase requests
+    await initPromise;
 
     const { data, error } = await supabase
       .from("qr_visits")

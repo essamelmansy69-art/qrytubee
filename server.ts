@@ -187,6 +187,14 @@ async function startServer() {
     res.json({ status: "ok" });
   });
 
+  // 1b. Supabase config proxy for runtime client-side access
+  app.get("/api/supabase-config", (req, res) => {
+    res.json({
+      supabaseUrl: process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || null,
+      supabaseAnonKey: process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || null
+    });
+  });
+
   // 2. Track scan event
   app.all("/api/track-scan", (req, res) => {
     const tid = (req.query.tid || req.body?.tid || "").toString() || "unknown";
