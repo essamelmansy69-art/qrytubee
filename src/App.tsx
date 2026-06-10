@@ -71,24 +71,6 @@ export default function App() {
           } else {
             console.log("Resolved dynamic URL from Supabase successfully:", res.originalUrl);
             setResolvedDynamicUrl(res.originalUrl);
-
-            // Asynchronously log the visitor details into public.qr_visits
-            if (res.qrId) {
-              const { detectVisitorSpecs, fetchVisitorCountry } = await import('./utils');
-              const { browser, device_type } = detectVisitorSpecs();
-
-              fetchVisitorCountry()
-                .then((country) => {
-                  trackVisitorVisit(res.qrId, country, device_type, browser)
-                    .then(() => console.log("Visitor log successfully inserted into public.qr_visits table!"))
-                    .catch((err) => console.warn("Failed to insert visitor log:", err));
-                })
-                .catch((err) => {
-                  console.warn("Failed to fetch visitor country:", err);
-                  trackVisitorVisit(res.qrId, "Unknown", device_type, browser)
-                    .catch((err2) => console.warn("Fallback tracking failed:", err2));
-                });
-            }
           }
         })
         .catch((err) => {

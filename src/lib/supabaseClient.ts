@@ -152,14 +152,51 @@ export async function getOriginalUrlAndTrackClick(slug: string): Promise<{ origi
       return { originalUrl: null, error: error?.message || "Link code not found" };
     }
 
-    // Fire-and-forget update to keep redirections ultra quick
-    supabase
-      .from("dynamic_qr")
-      .update({ clicks: (data.clicks || 0) + 1 })
-      .eq("slug", slug)
-      .then(({ error: upError }) => {
-        if (upError) console.warn("Could not increment click telemetry:", upError);
-      });
+    // Await click metric increment to guarantee update is registered before redirection
+    try {
+      const { error: clickError } = await supabase
+        .from("dynamic_qr")
+        .update({ clicks: (data.clicks || 0) + 1 })
+        .eq("slug", slug);
+      if (clickError) {
+        console.error("[Supabase Click Increment Error]:", clickError);
+      }
+    } catch (upError) {
+      console.warn("Could not increment click telemetry:", upError);
+    }
+
+    // Direct awaited insertion to ensure registration completes before page navigation triggers
+    try {
+      const { detectVisitorSpecs, fetchVisitorCountry } = await import("../utils");
+      const { browser, device_type } = detectVisitorSpecs();
+      
+      let country = "Unknown";
+      try {
+        country = await fetchVisitorCountry();
+      } catch (_) {}
+
+      const { error: insertErr } = await supabase
+        .from("qr_visits")
+        .insert({
+          qr_id: data.id,
+          country: country || "Unknown",
+          device_type: device_type || "Desktop",
+          browser: browser || "Other"
+        });
+
+      if (insertErr) {
+        console.error("🔴 [Supabase Insert Visit Error] Full Debugging Object:", {
+          message: insertErr.message,
+          code: insertErr.code,
+          details: insertErr.details,
+          hint: insertErr.hint
+        });
+      } else {
+        console.log("🟢 [Supabase Resolution] Visitor visit successfully saved to public.qr_visits table!");
+      }
+    } catch (vErr) {
+      console.warn("Visitor logging exception catch block:", vErr);
+    }
 
     return { originalUrl: data.original_url, qrId: data.id };
   } catch (err: any) {
@@ -182,22 +219,21 @@ export async function trackVisitorVisit(
     // Await configurations load before executing Supabase requests
     await initPromise;
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("qr_visits")
       .insert({
         qr_id: qrId,
         country: country || "Unknown",
         device_type: deviceType || "Desktop",
         browser: browser || "Other"
-      })
-      .select();
+      });
 
     if (error) {
       console.error("Failed to insert visitor log:", error);
       return { success: false, error: error.message };
     }
 
-    return { success: true, data };
+    return { success: true };
   } catch (err: any) {
     console.error("Error during visitor log insertion:", err);
     return { success: false, error: err.message };
