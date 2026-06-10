@@ -31,7 +31,8 @@ import {
   Cloud,
   Sun,
   Moon,
-  Globe
+  Globe,
+  Video
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { translations } from './translations';
@@ -44,6 +45,7 @@ const ArticlesView = React.lazy(() => import('./components/ArticlesView'));
 const LegalView = React.lazy(() => import('./components/LegalView'));
 const FAQView = React.lazy(() => import('./components/FAQView'));
 const ChaptersGeneratorView = React.lazy(() => import('./components/ChaptersGeneratorView'));
+const VeoGeneratorView = React.lazy(() => import('./components/VeoGeneratorView'));
 
 export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -97,7 +99,7 @@ export default function App() {
     return 'ar';
   });
 
-  const [activeTab, setActiveTab] = useState<'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact' | 'chapters'>(() => {
+  const [activeTab, setActiveTab] = useState<'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact' | 'chapters' | 'veo'>(() => {
     try {
       const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
       if (path === 'terms') return 'terms';
@@ -110,6 +112,7 @@ export default function App() {
       if (path === 'website') return 'website';
       if (path === 'chapters' || path === 'timestamp-generator' || path === 'youtube-chapters') return 'chapters';
       if (path === 'articles' || path.startsWith('articles/')) return 'articles';
+      if (path === 'veo' || path === 'free-veo-3-video-generator' || path === 'veo-generator') return 'veo';
     } catch (_) {}
     return 'generator';
   });
@@ -215,6 +218,13 @@ export default function App() {
       desc = lang === 'ar'
         ? "أداة مجانية واحترافية لتوليد وتنسيق فصول اليوتيوب والتايم ستامب (Timestamps) متوافقة بالكامل مع قواعد السيو 2026 لتعزيز ظهور فديوهاتك في محركات بحث جوجل."
         : "Free, automated tool to format YouTube video chapters and timestamps perfectly aligned with modern SEO 2026 indexing rules.";
+    } else if (activeTab === 'veo') {
+      title = lang === 'ar' 
+        ? "انشاء فيديو veo 3 مجانا بلاحدود | Qrytube" 
+        : "Generate Free Google Veo 3 Videos Uncapped | Qrytube";
+      desc = lang === 'ar'
+        ? "تعلم خطوة بخطوة كيفية إنشاء وتوليد فيديوهات Veo 3 الذكية مجاناً وبدون قيود، باستخدام مولد الفيديو المتطور على موقع Geminigen."
+        : "Step-by-step master guide to generate high-fidelity Google Veo 3 videos completely uncapped on the professional Geminigen orders system.";
     } else if (activeTab === 'contact') {
       title = lang === 'ar' ? "اتصل بنا | Qrytube" : "Contact Us | Qrytube";
       desc = lang === 'ar'
@@ -306,6 +316,72 @@ export default function App() {
         document.head.appendChild(canonicalEl);
       }
       canonicalEl.setAttribute('href', defPath);
+
+      // 5. Inject Structured Schema for Veo tab
+      try {
+        const existingVeoScript = document.getElementById('veo-page-schema');
+        if (existingVeoScript) {
+          existingVeoScript.remove();
+        }
+        
+        if (activeTab === 'veo') {
+          const schemaArray = [
+            {
+              "@context": "https://schema.org",
+              "@type": "Article",
+              "headline": lang === 'ar' ? "انشاء فيديو veo 3 مجانا بلاحدود" : "Generate Free Google Veo 3 Videos Uncapped",
+              "description": desc,
+              "image": currentOrigin + "/og-image.png",
+              "author": {
+                "@type": "Organization",
+                "name": "Qrytube"
+              },
+              "publisher": {
+                "@type": "Organization",
+                "name": "Qrytube",
+                "logo": {
+                  "@type": "ImageObject",
+                  "url": currentOrigin + "/favicon.png"
+                }
+              },
+              "datePublished": "2026-06-10"
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": lang === 'ar' ? "هل توليد فيديو Veo 3 مجاني فعلاً على Geminigen؟" : "Is Veo 3 video generation really free on Geminigen?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": lang === 'ar' 
+                      ? "نعم، التوليد مجاني بالكامل وبدون قيود، وتتيح صفحة الطلبات تتبع وإصدار الفيديوهات مباشرة وبدقة عالية." 
+                      : "Yes, the video generation is fully free and unlimited. The orders page allows tracking and download of premium outputs."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": lang === 'ar' ? "كيف يمكنني الوصول لمولد Veo 3؟" : "How can I access the Veo 3 video editor?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": lang === 'ar' 
+                      ? "يمكنك الانتقال فوراً لصفحة الطلبات الرسمية عبر الرابط geminigen.ai/profile/orders وبدء كتابة الوصف." 
+                      : "You can transition instantly to the official orders feed via geminigen.ai/profile/orders and write descriptions."
+                  }
+                }
+              ]
+            }
+          ];
+          const script = document.createElement('script');
+          script.id = 'veo-page-schema';
+          script.type = 'application/ld+json';
+          script.text = JSON.stringify(schemaArray);
+          document.head.appendChild(script);
+        }
+      } catch (err) {
+        console.error("Schema injection error", err);
+      }
     } catch (_) {}
 
     // Update URL query parameters based on language without page reload
@@ -353,7 +429,7 @@ export default function App() {
         setSelectedArticleId(e.state.articleId || null);
       } else {
         const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
-        if (['terms', 'privacy', 'about', 'contact', 'facebook', 'instagram', 'tiktok', 'website', 'chapters'].includes(path)) {
+        if (['terms', 'privacy', 'about', 'contact', 'facebook', 'instagram', 'tiktok', 'website', 'chapters', 'veo'].includes(path)) {
           setActiveTab(path as any);
           setSelectedArticleId(null);
         } else if (path === 'articles') {
@@ -428,7 +504,7 @@ export default function App() {
     };
   }, []);
 
-  const handleNavClick = (tab: 'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact', event: React.MouseEvent) => {
+  const handleNavClick = (tab: 'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact' | 'chapters' | 'veo', event: React.MouseEvent) => {
     event.preventDefault();
     setActiveTab(tab);
     if (tab === 'articles') {
@@ -743,6 +819,15 @@ export default function App() {
               <span>{lang === 'ar' ? 'English' : 'العربية'}</span>
             </button>
 
+            <button
+              onClick={() => { setActiveTab('veo'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              className="hidden sm:inline-flex items-center gap-1.5 py-1 px-3 bg-gradient-to-r from-red-600 to-rose-500 hover:opacity-90 text-white text-[11px] font-bold rounded-full font-arabic shadow-2xs cursor-pointer transition-all duration-200"
+              id="header_veo_quick_btn"
+            >
+              <Video size={11} />
+              <span>{lang === 'ar' ? 'انشاء فيديو Veo 3' : 'Generate Veo 3 Video'}</span>
+            </button>
+
             <span className="hidden md:inline-flex items-center gap-1 py-1 px-2.5 bg-red-50 text-red-600 text-[10px] font-semibold rounded-full font-arabic">
               <Flame size={11} />
               {t.navFreeBadge}
@@ -962,6 +1047,14 @@ export default function App() {
           <div className="transition-opacity duration-300">
             <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
               <ChaptersGeneratorView lang={lang} onReturn={() => setActiveTab('generator')} />
+            </React.Suspense>
+          </div>
+        )}
+
+        {activeTab === 'veo' && (
+          <div className="transition-opacity duration-300">
+            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
+              <VeoGeneratorView lang={lang} onReturn={() => setActiveTab('generator')} />
             </React.Suspense>
           </div>
         )}
