@@ -1,9 +1,14 @@
 /// <reference types="vite/client" />
 import { createClient } from "@supabase/supabase-js";
 
-// Retrieve environment variables from Vite's import.meta.env
-const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL || "";
-const supabaseAnonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || "";
+// Retrieve environment variables from Vite's import.meta.env or use fallback credentials
+const supabaseUrl = 
+  (import.meta as any).env?.VITE_SUPABASE_URL || 
+  "https://empqrfflwdhwmmlrqais.supabase.co";
+
+const supabaseAnonKey = 
+  (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || 
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtcHFyZmZsd2Rod21tbHJxYWlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwNDA3MzAsImV4cCI6MjA5NjYxNjczMH0.aVxvYaYayaVorYKQUGAuOpuwx2ExQ3kMEz5AMhUFxrI";
 
 // Check if variables are defined
 if (!supabaseUrl || !supabaseAnonKey) {
