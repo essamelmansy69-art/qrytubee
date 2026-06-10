@@ -12,8 +12,24 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-// Create and export the Supabase client
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Create and export the Supabase client safely with a Proxy to prevent runtime throwing on empty or invalid credentials during import
+let supabaseInstance: any = null;
+try {
+  if (supabaseUrl && supabaseAnonKey && supabaseUrl.startsWith("http")) {
+    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey);
+  }
+} catch (e) {
+  console.error("Failed to initialize Supabase client instance during startup:", e);
+}
+
+export const supabase: any = new Proxy({} as any, {
+  get(target, prop) {
+    if (!supabaseInstance) {
+      throw new Error("Supabase is not fully configured. Please set a valid VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your browser env.");
+    }
+    return supabaseInstance[prop];
+  }
+});
 
 /**
  * Generates a high-entropy random alphanumeric slug of the specified length.
