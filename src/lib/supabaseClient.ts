@@ -102,7 +102,7 @@ export async function createDynamicQR(originalUrl: string): Promise<{ success: b
 /**
  * Resolves a unique slug into the target destination URL and triggers an asynchronous update to increment click metrics.
  */
-export async function getOriginalUrlAndTrackClick(slug: string): Promise<{ originalUrl: string | null; error?: string }> {
+export async function getOriginalUrlAndTrackClick(slug: string): Promise<{ originalUrl: string | null; qrId?: any; error?: string }> {
   try {
     const { data, error } = await supabase
       .from("dynamic_qr")
@@ -123,9 +123,43 @@ export async function getOriginalUrlAndTrackClick(slug: string): Promise<{ origi
         if (upError) console.warn("Could not increment click telemetry:", upError);
       });
 
-    return { originalUrl: data.original_url };
+    return { originalUrl: data.original_url, qrId: data.id };
   } catch (err: any) {
     return { originalUrl: null, error: err.message || "An unexpected error occurred" };
+  }
+}
+
+/**
+ * Tracks detailed visit metrics in the qr_visits table.
+ */
+export async function trackVisitorVisit(
+  qrId: any,
+  country: string,
+  deviceType: string,
+  browser: string
+): Promise<{ success: boolean; data?: any; error?: string }> {
+  try {
+    if (!qrId) return { success: false, error: "qr_id is required" };
+
+    const { data, error } = await supabase
+      .from("qr_visits")
+      .insert({
+        qr_id: qrId,
+        country: country || "Unknown",
+        device_type: deviceType || "Desktop",
+        browser: browser || "Other"
+      })
+      .select();
+
+    if (error) {
+      console.error("Failed to insert visitor log:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
+  } catch (err: any) {
+    console.error("Error during visitor log insertion:", err);
+    return { success: false, error: err.message };
   }
 }
 

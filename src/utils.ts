@@ -711,3 +711,85 @@ export function convertUrlToDeepLink(url: string, deviceOverride?: 'android' | '
 
   return trimmed.startsWith('http') ? trimmed : `https://${trimmed}`;
 }
+
+/**
+ * Detects visitor spec details like browser name and device type from userAgent string.
+ */
+export function detectVisitorSpecs(): { browser: string; device_type: string } {
+  try {
+    const ua = navigator.userAgent;
+    let browser = "Other";
+    let device_type = "Desktop";
+
+    // Browser detection
+    if (/FBAN|FBAV/i.test(ua)) {
+      browser = "Facebook App";
+    } else if (/Instagram/i.test(ua)) {
+      browser = "Instagram App";
+    } else if (/GSA/i.test(ua)) {
+      browser = "Google App";
+    } else if (/Chrome/i.test(ua) && /CriOS/i.test(ua)) {
+      browser = "Chrome iOS";
+    } else if (/Chrome/i.test(ua)) {
+      browser = "Chrome";
+    } else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) {
+      browser = "Safari";
+    } else if (/Firefox/i.test(ua) || /FxiOS/i.test(ua)) {
+      browser = "Firefox";
+    } else if (/Edg/i.test(ua) || /Edge/i.test(ua)) {
+      browser = "Edge";
+    } else if (/SamsungBrowser/i.test(ua)) {
+      browser = "Samsung Internet";
+    } else if (/Opera/i.test(ua) || /OPR/i.test(ua)) {
+      browser = "Opera";
+    }
+
+    // Device detection
+    if (/Mobi|Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)) {
+      device_type = "Mobile";
+    } else if (/Tablet|iPad|PlayBook|Silk/i.test(ua)) {
+      device_type = "Tablet";
+    }
+
+    return { browser, device_type };
+  } catch (_) {
+    return { browser: "Other", device_type: "Desktop" };
+  }
+}
+
+/**
+ * Fetches the visitor's approximate country name from free geolocation APIs.
+ */
+export async function fetchVisitorCountry(): Promise<string> {
+  try {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), 3500);
+    const res = await fetch("https://ipapi.co/json/", { signal: controller.signal });
+    clearTimeout(id);
+    if (!res.ok) throw new Error("Primary API failed");
+    const data = await res.json();
+    return data.country_name || data.country || "Unknown";
+  } catch (err) {
+    try {
+      const controller2 = new AbortController();
+      const id2 = setTimeout(() => controller2.abort(), 3500);
+      const res2 = await fetch("https://freeipapi.com/api/json", { signal: controller2.signal });
+      clearTimeout(id2);
+      if (!res2.ok) throw new Error("Secondary API failed");
+      const data2 = await res2.json();
+      return data2.countryName || "Unknown";
+    } catch (_) {
+      try {
+        // Tertiary API fallback as contingency
+        const controller3 = new AbortController();
+        const id3 = setTimeout(() => controller3.abort(), 3500);
+        const res3 = await fetch("https://ip-api.com/json/", { signal: controller3.signal });
+        clearTimeout(id3);
+        const data3 = await res3.json();
+        return data3.country || "Unknown";
+      } catch (__) {
+        return "Unknown";
+      }
+    }
+  }
+}
