@@ -218,7 +218,7 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
       }
       script.text = JSON.stringify(schemaArray);
     } else if (selectedArticle.id === 'youtube-qr-marketing-2026') {
-      const faqSchema = {
+      const faqSchema = lang === 'ar' ? {
         "@context": "https://schema.org",
         "@type": "FAQPage",
         "mainEntity": [
@@ -247,9 +247,38 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
             }
           }
         ]
+      } : {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Why do conventional YouTube QR codes fail?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Because they open links inside external in-app web browsers where users are logged out and forced to enter credentials, causing 90% of views to drop off."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What are deep links and how do they boost subscribers?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "They are optimized smart protocols that immediately forward the request to open the native YouTube app on the customer's device, enabling active subscription in a single swipe/click."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Qrytube support exporting vector SVGs for publishing?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, Qrytube provides high-fidelity vector SVGs, enabling boundless scalability for banners, stickers, billboards, and corporate packaging."
+            }
+          }
+        ]
       };
 
-      const howToSchema = {
+      const howToSchema = lang === 'ar' ? {
         "@context": "https://schema.org",
         "@type": "HowTo",
         "name": "طريقة توليد كود QR ذكي لليوتيوب بكبسة واحدة",
@@ -271,6 +300,31 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
             "@type": "HowToStep",
             "name": "التخصيص والتحميل",
             "text": "اختر الألوان المفضلة، أضف رمز اليوتيوب، ثم قم بالتحميل الفوري بدقة SVG أو PNG.",
+            "url": window.location.origin
+          }
+        ]
+      } : {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to Generate a Smart YouTube QR Code in 1-Click",
+        "description": "Simple steps to create free smart YouTube deep links and QR codes that pop up directly on the official app.",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "name": "Copy YouTube Link",
+            "text": "Copy the target address of your channel, favorite playlist, or video.",
+            "url": window.location.origin
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Paste link into Qrytube",
+            "text": "Navigate to the Qrytube search generator and drop it in.",
+            "url": window.location.origin
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Stylize and Download",
+            "text": "Attach colors, insert the custom badge icon, and export as SVG or PNG.",
             "url": window.location.origin
           }
         ]
