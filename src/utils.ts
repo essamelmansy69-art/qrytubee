@@ -583,7 +583,7 @@ export function convertUrlToDeepLink(url: string, deviceOverride?: 'android' | '
       if (playlistId) {
         return `youtube://www.youtube.com/playlist?list=${playlistId}`;
       } else if (videoId) {
-        return `youtube://www.youtube.com/watch?v=${videoId}`;
+        return `youtube://watch?v=${videoId}`;
       } else if (channelId) {
         if (channelId.startsWith('@')) {
           return `youtube://www.youtube.com/${channelId}`;

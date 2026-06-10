@@ -13,9 +13,9 @@ export const translations = {
     // Redirection screen
     redirecting: "جاري توجيهك لتطبيق يوتيوب...",
     redirectDesc: "نقوم بفتح الرابط بشكل مباشر في تطبيق YouTube الرسمي بخصائص الـ Deep Link لتجربة تفاعل فورية فائقة السرعة.",
-    redirectFallback: "إذا لم يفتح الهاتف تطبيق يوتيوب تلقائياً خلال لحظة، يرجى الضغط على أحد الأزرار بالأسفل:",
-    btnForceOpen: "اضغط هنا إذا لم يفتح التطبيق تلقائياً",
-    btnWebBrowser: "المواصلة عبر متصفح الويب لقناتنا",
+    redirectFallback: "تنبيه: أنظمة الهاتف الحديثة (iOS & Android) تتطلب لمس الشاشة يدوياً لفتح التطبيق الرسمي وضمان تشغيل مستقر. يرجى الضغط على الزر الأحمر المضيء بالأسفل للفتح فوراً في التطبيق:",
+    btnForceOpen: "📱 افتح في تطبيق يوتيوب الرسمي الآن 🚀",
+    btnWebBrowser: "المواصلة عبر متصفح الويب (إذا لم يكن لديك التطبيق)",
     managedBy: "توليد وإدارة وتوجيه آمن بالكامل بواسطة qrytube 🚀",
 
     // Navbar
@@ -212,9 +212,9 @@ export const translations = {
     // Redirection screen
     redirecting: "Redirecting you to YouTube...",
     redirectDesc: "We are opening the link directly inside the official YouTube App via Deep Link protocol for an instant, engaging experience.",
-    redirectFallback: "If your device does not open the YouTube App automatically in a moment, click one of the buttons below:",
-    btnForceOpen: "Click here to open the YouTube App now",
-    btnWebBrowser: "Continue via standard Web Browser",
+    redirectFallback: "Security Notice: Modern mobile operating systems (iOS & Android) require a physical screentap to securely launch native apps. Please tap the glowing red button below to launch in the official App:",
+    btnForceOpen: "📱 Open in Official YouTube App Now 🚀",
+    btnWebBrowser: "Continue via Web Browser (if you don't have the App)",
     managedBy: "Fully secure generation, management, and routing by qrytube 🚀",
 
     // Navbar

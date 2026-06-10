@@ -521,8 +521,8 @@ export default function App() {
         const deepLink = convertUrlToDeepLink(decodedUrl, deviceType);
         const fallbackUrl = platformInfo.cleanUrl || decodedUrl;
 
-        // Fallback timing parameters: 3000ms (3 seconds) limit before routing browser fallback
-        const timeoutDuration = 3000;
+        // Fallback timing parameters: 8000ms (8 seconds) limit before routing browser fallback
+        const timeoutDuration = 8000;
         const startTime = Date.now();
         let isRedirected = false;
 
@@ -560,11 +560,11 @@ export default function App() {
           }
         }, 450);
 
-        // 4. Absolute failsafe fallback: standard web page replace redirection after 3 seconds
+        // 4. Absolute failsafe fallback: standard web page replace redirection after 8 seconds
         fallbackTimerRef.current = setTimeout(() => {
           const elapsed = Date.now() - startTime;
           // Verify that user hasn't successfully switched apps
-          if (!isRedirected && elapsed < 4500 && !document.hidden) {
+          if (!isRedirected && elapsed < 9500 && !document.hidden) {
             window.location.replace(fallbackUrl);
           }
         }, timeoutDuration);
@@ -751,16 +751,16 @@ export default function App() {
           </div>
 
           {/* Quick spinner fallback button card */}
-          <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4" id="fallback_actions_card">
-            <span className="text-xs text-slate-300 font-arabic block font-semibold leading-relaxed">
+          <div className="bg-slate-900/80 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-xl" id="fallback_actions_card">
+            <span className="text-sm text-slate-200 font-arabic block font-semibold leading-relaxed">
               {t.redirectFallback}
             </span>
 
-            <div className="flex flex-col gap-2.5">
+            <div className="flex flex-col gap-3">
               {/* Force App link */}
               <button
                 onClick={handleForceOpenClick}
-                className={`w-full py-3.5 px-4 text-white rounded-xl font-bold font-arabic text-sm transition-all shadow-md active:scale-98 cursor-pointer ${loadingStyle.buttonClass}`}
+                className={`w-full py-4 px-5 text-white rounded-xl font-extrabold font-arabic text-base transition-all shadow-2xl active:scale-95 cursor-pointer ${loadingStyle.buttonClass} animate-pulse ring-4 ring-white/10`}
                 type="button"
                 id="force_open_app_btn"
               >
@@ -770,7 +770,7 @@ export default function App() {
               {/* standard web fallback */}
               <button
                 onClick={() => { if (decodedUrl) window.location.href = decodedUrl; }}
-                className="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl font-medium font-arabic text-xs transition-all cursor-pointer"
+                className="w-full py-3 px-4 bg-slate-800 hover:bg-slate-705 text-slate-300 hover:text-white rounded-xl font-semibold font-arabic text-xs transition-all cursor-pointer active:scale-98"
                 type="button"
                 id="open_via_browser_btn"
               >
