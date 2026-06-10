@@ -40,6 +40,7 @@ import {
   Clock,
   Monitor
 } from 'lucide-react';
+import { createDynamicQR } from '../lib/supabaseClient';
 import { QRConfig, QRStyle } from '../types';
 import { parseYoutubeUrl, buildDeepLink, convertUrlToDeepLink } from '../utils';
 import { translations } from '../translations';
@@ -462,6 +463,41 @@ export default function QRGenerator({
   const [trackingId, setTrackingId] = useState<string>(() => 'qr_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36).substring(4));
   const [deepLinkType, setDeepLinkType] = useState<'vnd' | 'ios' | 'android' | 'standard'>('vnd');
   const [useSmartLink, setUseSmartLink] = useState<boolean>(false);
+
+  // Dynamic QR Code states in Supabase
+  const [isDynamic, setIsDynamic] = useState<boolean>(false);
+  const [dynamicSlug, setDynamicSlug] = useState<string | null>(null);
+  const [isSavingDynamic, setIsSavingDynamic] = useState<boolean>(false);
+  const [supabaseError, setSupabaseError] = useState<string | null>(null);
+
+  const handleCreateDynamicLink = async () => {
+    if (!urlInput.trim() || !urlInfo.isValid) {
+      alert(lang === 'ar' ? 'يرجى إدخال رابط صحيح أولاً!' : 'Please enter a valid link first!');
+      return;
+    }
+
+    setIsSavingDynamic(true);
+    setSupabaseError(null);
+    try {
+      const res = await createDynamicQR(urlInput);
+      if (res.success && res.data) {
+        setDynamicSlug(res.data.slug);
+      } else {
+        setSupabaseError(res.error || (lang === 'ar' ? 'خطأ في الاتصال بقاعدة بيانات Supabase، تأكد من إعداد الجدول وسياسات RLS.' : 'Failed to connect to Supabase database. Make sure the table and RLS policies are set up.'));
+      }
+    } catch (err: any) {
+      console.error("Supabase creation error:", err);
+      setSupabaseError(err.message || "An unexpected error occurred during database insert");
+    } finally {
+      setIsSavingDynamic(false);
+    }
+  };
+
+  useEffect(() => {
+    setDynamicSlug(null);
+    setSupabaseError(null);
+  }, [urlInput]);
+
   const [foregroundColor, setForegroundColor] = useState('#FF0000');
   const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
   const [eyeColor, setEyeColor] = useState('#FF0000');
@@ -683,6 +719,12 @@ export default function QRGenerator({
     const trimmed = urlInput.trim();
     const fallbackUrl = trimmed || 'https://www.youtube.com';
     const originUrl = typeof window !== 'undefined' ? window.location.origin : 'https://qrytube.com';
+
+    // If dynamic QR code with Supabase is enabled and we have successfully resolved its slug
+    if (isDynamic && dynamicSlug) {
+      return `${originUrl}/r/${dynamicSlug}`;
+    }
+
     return `${originUrl}/redirect?url=${encodeURIComponent(fallbackUrl)}&tid=${trackingId}`;
   };
 
@@ -1366,7 +1408,110 @@ export default function QRGenerator({
                      );
                    }
                    return null;
-                 })()}
+                  })()}
+
+                  {/* Dynamic QR Code Converter Control widget (Supabase Integration) */}
+                  <div className="mt-5 p-4 bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-slate-200 dark:border-slate-800/80 transition-all font-arabic animate-fadeIn" id="dynamic_supabase_card">
+                    <div className="flex items-center justify-between mb-3 w-full">
+                      <div className="flex items-center gap-2">
+                        <span className="p-1.5 bg-red-50 dark:bg-red-955/20 text-red-650 dark:text-red-400 rounded-lg shrink-0">
+                          <Activity size={15} />
+                        </span>
+                        <div>
+                          <h3 className="text-xs font-bold text-gray-800 dark:text-gray-200">
+                            {lang === 'ar' ? 'نظام الـ Dynamic QR Code (Supabase)' : 'Dynamic QR Code System (Supabase)'}
+                          </h3>
+                          <p className="text-[10px] text-gray-550 max-w-[210px] truncate">
+                            {lang === 'ar' ? 'تعديل الرابط لاحقاً دون تغيير الباركود المطبوع!' : 'Modify link later without changing the printed code!'}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      {/* Interactive toggle switch styled with Tailwind */}
+                      <label id="dynamic_toggle_label" className="relative inline-flex items-center cursor-pointer select-none">
+                        <input 
+                          type="checkbox" 
+                          checked={isDynamic} 
+                          onChange={(e) => {
+                            setIsDynamic(e.target.checked);
+                            if (!e.target.checked) {
+                              setDynamicSlug(null);
+                            }
+                          }}
+                          className="sr-only peer" 
+                        />
+                        <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-slate-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-700 peer-checked:bg-red-600"></div>
+                      </label>
+                    </div>
+
+                    {isDynamic && (
+                      <div className="space-y-3 pt-2 border-t border-gray-150 dark:border-slate-850 animate-fadeIn" id="dynamic_controls_panel">
+                        <p className="text-[10.5px] text-slate-600 dark:text-slate-400 leading-relaxed font-semibold">
+                          {lang === 'ar'
+                            ? 'الرابط الديناميكي يسمح لك بتتبع الزيارات الحقيقية مباشرة وحفظ الرابط في قاعدة بيانات Supabase المشفرة.'
+                            : 'Dynamic links permit tracking real visit volumes and persisting destination URLs securely in Supabase.'}
+                        </p>
+
+                        {!dynamicSlug ? (
+                          <div className="space-y-2">
+                            <button
+                              type="button"
+                              onClick={handleCreateDynamicLink}
+                              disabled={!urlInput.trim() || !urlInfo.isValid || isSavingDynamic}
+                              className={
+                                !urlInput.trim() || !urlInfo.isValid
+                                  ? "w-full py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 text-xs font-semibold cursor-not-allowed opacity-60 bg-gray-100 text-gray-400"
+                                  : isSavingDynamic
+                                  ? "w-full py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 text-xs font-semibold cursor-wait bg-slate-200 text-slate-500"
+                                  : "w-full py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 text-xs font-semibold cursor-pointer bg-red-650 hover:bg-red-700 text-white shadow-xs hover:shadow-md"
+                              }
+                              id="btn_register_supabase"
+                            >
+                              {isSavingDynamic ? (
+                                <>
+                                  <div className="w-3.5 h-3.5 rounded-full border-2 border-slate-400 border-t-red-650 animate-spin" />
+                                  <span>{lang === 'ar' ? 'جاري الحفظ والإنشاء بـ Supabase...' : 'Persisting in Supabase...'}</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Sparkles size={14} className="animate-bounce" />
+                                  <span>{lang === 'ar' ? '⚡ توليد وحفظ ككود ديناميكي في Supabase' : '⚡ Generate & Save to Supabase'}</span>
+                                </>
+                              )}
+                            </button>
+                            {supabaseError && (
+                              <div className="p-2.5 bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400 text-[10px] rounded-lg border border-red-150 dark:border-red-900/40 flex items-start gap-1.5 animate-fadeIn">
+                                <AlertCircle size={12} className="shrink-0 mt-0.5" />
+                                <span>{supabaseError}</span>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="space-y-2 bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl animate-fadeIn font-sans" id="supabase_success_card">
+                            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+                              <CheckCircle2 size={15} />
+                              <span className="text-[11px] font-bold">
+                                {lang === 'ar' ? 'ممتاز! الكود الديناميكي مسجّل ونشط:' : 'Excellent! Dynamic code registered:'}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5 justify-between bg-white dark:bg-slate-950 p-1.5 rounded-lg border border-emerald-500/10">
+                              <span className="font-mono text-[10px] text-emerald-700 dark:text-emerald-400 tracking-wider truncate px-1 select-all" dir="ltr">
+                                {typeof window !== 'undefined' ? window.location.origin : 'https://qrytube.com'}/r/{dynamicSlug}
+                              </span>
+                              <span className="bg-emerald-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-md shrink-0">
+                                {lang === 'ar' ? 'مُفعّل' : 'SLUG ACTIVE'}
+                              </span>
+                            </div>
+                            <p className="text-[9.5px] text-slate-600 dark:text-slate-400 leading-normal">
+                              {lang === 'ar'
+                                ? '🎉 تم توليد الرابط المختصر الذكي! سيقوم الباركود الآن بتوجيه العملاء تلقائياً مع تتبع شامل فوري للاحصائيات!'
+                                : '🎉 Shortened link generated! The barcode will automatically steer scanners with detailed real-time click tracker logs!'}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
 
               </>
             );

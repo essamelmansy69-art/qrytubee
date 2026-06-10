@@ -50,9 +50,6 @@ export default function FooterView({ lang, onNavigate }: FooterViewProps) {
               <a href="/chapters" onClick={(e) => onNavigate('chapters', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">
                 {lang === 'ar' ? '🕒 صانع فصول توقيت فيديوهات اليوتيوب' : '🕒 YouTube Chapters Timestamp Generator'}
               </a>
-              <a href="/veo" onClick={(e) => onNavigate('veo', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">
-                {lang === 'ar' ? '🎬 صانع فيديو Google Veo 3 مجاناً وبلا حدود' : '🎬 Google Veo 3 Free AI Video Generator'}
-              </a>
               <div className="w-full h-px bg-slate-800 my-1" />
               <a href="/articles" onClick={(e) => onNavigate('articles', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.navArticles}</a>
               <a href="/faq" onClick={(e) => onNavigate('faq', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">{t.faqDetailsLabel}</a>

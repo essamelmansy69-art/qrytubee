@@ -31,8 +31,7 @@ import {
   Cloud,
   Sun,
   Moon,
-  Globe,
-  Video
+  Globe
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { translations } from './translations';
@@ -45,9 +44,39 @@ const ArticlesView = React.lazy(() => import('./components/ArticlesView'));
 const LegalView = React.lazy(() => import('./components/LegalView'));
 const FAQView = React.lazy(() => import('./components/FAQView'));
 const ChaptersGeneratorView = React.lazy(() => import('./components/ChaptersGeneratorView'));
-const VeoGeneratorView = React.lazy(() => import('./components/VeoGeneratorView'));
 
 export default function App() {
+  // Dynamic QR Code resolution states
+  const [resolvedDynamicUrl, setResolvedDynamicUrl] = useState<string | null>(null);
+  const [isLoadingDynamic, setIsLoadingDynamic] = useState<boolean>(false);
+  const [dynamicError, setDynamicError] = useState<string | null>(null);
+
+  const isDynamicRoute = window.location.pathname.startsWith('/r/');
+  const dynamicSlug = isDynamicRoute ? window.location.pathname.split('/r/')[1]?.trim() : null;
+
+  useEffect(() => {
+    if (isDynamicRoute && dynamicSlug) {
+      setIsLoadingDynamic(true);
+      import('./lib/supabaseClient')
+        .then(({ getOriginalUrlAndTrackClick }) => getOriginalUrlAndTrackClick(dynamicSlug))
+        .then(({ originalUrl, error }) => {
+          if (error || !originalUrl) {
+            setDynamicError(error || "The requested link could not be found or has expired.");
+          } else {
+            console.log("Resolved dynamic URL from Supabase successfully:", originalUrl);
+            setResolvedDynamicUrl(originalUrl);
+          }
+        })
+        .catch((err) => {
+          console.error("Error loading Supabase module:", err);
+          setDynamicError("Unable to establish standard route. Please try again.");
+        })
+        .finally(() => {
+          setIsLoadingDynamic(false);
+        });
+    }
+  }, [isDynamicRoute, dynamicSlug]);
+
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     try {
       const saved = localStorage.getItem('theme');
@@ -99,7 +128,7 @@ export default function App() {
     return 'ar';
   });
 
-  const [activeTab, setActiveTab] = useState<'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact' | 'chapters' | 'veo'>(() => {
+  const [activeTab, setActiveTab] = useState<'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact' | 'chapters'>(() => {
     try {
       const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
       if (path === 'terms') return 'terms';
@@ -112,7 +141,6 @@ export default function App() {
       if (path === 'website') return 'website';
       if (path === 'chapters' || path === 'timestamp-generator' || path === 'youtube-chapters') return 'chapters';
       if (path === 'articles' || path.startsWith('articles/')) return 'articles';
-      if (path === 'veo' || path === 'free-veo-3-video-generator' || path === 'veo-generator') return 'veo';
     } catch (_) {}
     return 'generator';
   });
@@ -218,13 +246,6 @@ export default function App() {
       desc = lang === 'ar'
         ? "أداة مجانية واحترافية لتوليد وتنسيق فصول اليوتيوب والتايم ستامب (Timestamps) متوافقة بالكامل مع قواعد السيو 2026 لتعزيز ظهور فديوهاتك في محركات بحث جوجل."
         : "Free, automated tool to format YouTube video chapters and timestamps perfectly aligned with modern SEO 2026 indexing rules.";
-    } else if (activeTab === 'veo') {
-      title = lang === 'ar' 
-        ? "انشاء فيديو veo 3 مجانا بلاحدود | Qrytube" 
-        : "Generate Free Google Veo 3 Videos Uncapped | Qrytube";
-      desc = lang === 'ar'
-        ? "تعلم خطوة بخطوة كيفية إنشاء وتوليد فيديوهات Veo 3 الذكية مجاناً وبدون قيود، باستخدام مولد الفيديو المتطور على موقع Geminigen."
-        : "Step-by-step master guide to generate high-fidelity Google Veo 3 videos completely uncapped on the professional Geminigen orders system.";
     } else if (activeTab === 'contact') {
       title = lang === 'ar' ? "اتصل بنا | Qrytube" : "Contact Us | Qrytube";
       desc = lang === 'ar'
@@ -316,72 +337,6 @@ export default function App() {
         document.head.appendChild(canonicalEl);
       }
       canonicalEl.setAttribute('href', defPath);
-
-      // 5. Inject Structured Schema for Veo tab
-      try {
-        const existingVeoScript = document.getElementById('veo-page-schema');
-        if (existingVeoScript) {
-          existingVeoScript.remove();
-        }
-        
-        if (activeTab === 'veo') {
-          const schemaArray = [
-            {
-              "@context": "https://schema.org",
-              "@type": "Article",
-              "headline": lang === 'ar' ? "انشاء فيديو veo 3 مجانا بلاحدود" : "Generate Free Google Veo 3 Videos Uncapped",
-              "description": desc,
-              "image": currentOrigin + "/og-image.png",
-              "author": {
-                "@type": "Organization",
-                "name": "Qrytube"
-              },
-              "publisher": {
-                "@type": "Organization",
-                "name": "Qrytube",
-                "logo": {
-                  "@type": "ImageObject",
-                  "url": currentOrigin + "/favicon.png"
-                }
-              },
-              "datePublished": "2026-06-10"
-            },
-            {
-              "@context": "https://schema.org",
-              "@type": "FAQPage",
-              "mainEntity": [
-                {
-                  "@type": "Question",
-                  "name": lang === 'ar' ? "هل توليد فيديو Veo 3 مجاني فعلاً على Geminigen؟" : "Is Veo 3 video generation really free on Geminigen?",
-                  "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": lang === 'ar' 
-                      ? "نعم، التوليد مجاني بالكامل وبدون قيود، وتتيح صفحة الطلبات تتبع وإصدار الفيديوهات مباشرة وبدقة عالية." 
-                      : "Yes, the video generation is fully free and unlimited. The orders page allows tracking and download of premium outputs."
-                  }
-                },
-                {
-                  "@type": "Question",
-                  "name": lang === 'ar' ? "كيف يمكنني الوصول لمولد Veo 3؟" : "How can I access the Veo 3 video editor?",
-                  "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": lang === 'ar' 
-                      ? "يمكنك الانتقال فوراً لصفحة الطلبات الرسمية عبر الرابط geminigen.ai/profile/orders وبدء كتابة الوصف." 
-                      : "You can transition instantly to the official orders feed via geminigen.ai/profile/orders and write descriptions."
-                  }
-                }
-              ]
-            }
-          ];
-          const script = document.createElement('script');
-          script.id = 'veo-page-schema';
-          script.type = 'application/ld+json';
-          script.text = JSON.stringify(schemaArray);
-          document.head.appendChild(script);
-        }
-      } catch (err) {
-        console.error("Schema injection error", err);
-      }
     } catch (_) {}
 
     // Update URL query parameters based on language without page reload
@@ -429,7 +384,7 @@ export default function App() {
         setSelectedArticleId(e.state.articleId || null);
       } else {
         const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
-        if (['terms', 'privacy', 'about', 'contact', 'facebook', 'instagram', 'tiktok', 'website', 'chapters', 'veo'].includes(path)) {
+        if (['terms', 'privacy', 'about', 'contact', 'facebook', 'instagram', 'tiktok', 'website', 'chapters'].includes(path)) {
           setActiveTab(path as any);
           setSelectedArticleId(null);
         } else if (path === 'articles') {
@@ -504,7 +459,7 @@ export default function App() {
     };
   }, []);
 
-  const handleNavClick = (tab: 'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact' | 'chapters' | 'veo', event: React.MouseEvent) => {
+  const handleNavClick = (tab: 'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact', event: React.MouseEvent) => {
     event.preventDefault();
     setActiveTab(tab);
     if (tab === 'articles') {
@@ -541,9 +496,10 @@ export default function App() {
   const t3Ref = React.useRef<any>(null);
 
   const queryParams = new URL(window.location.href).searchParams;
-  const redirectUrl = queryParams.get('url') || queryParams.get('r');
+  const rawRedirectUrl = queryParams.get('url') || queryParams.get('r');
+  const redirectUrl = isDynamicRoute ? resolvedDynamicUrl : rawRedirectUrl;
   const redirectType = queryParams.get('type') || 'vnd';
-  const isRedirectRoute = window.location.pathname.startsWith('/redirect') || !!redirectUrl;
+  const isRedirectRoute = window.location.pathname.startsWith('/redirect') || !!rawRedirectUrl || isDynamicRoute;
 
   useEffect(() => {
     if (isRedirectRoute && redirectUrl) {
@@ -626,7 +582,67 @@ export default function App() {
   }, [isRedirectRoute, redirectUrl, redirectType]);
 
   // If redirect parameter is active, render a loading screen instead of the full landing page
-  if (isRedirectRoute && redirectUrl) {
+  if (isRedirectRoute) {
+    // 1. Show dynamic link resolution error state
+    if (dynamicError) {
+      return (
+        <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 text-center" id="redirect_error_screen" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+          <div className="max-w-md w-full space-y-6 bg-slate-900 border border-red-500/20 rounded-2xl p-8 shadow-2xl">
+            <div className="w-16 h-16 bg-red-500/15 text-red-500 rounded-full flex items-center justify-center mx-auto animate-pulse">
+              <ShieldAlert size={32} />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-xl font-bold font-arabic">
+                {lang === 'ar' ? 'عذراً، الرابط غير متوفر' : 'Sorry, Link Unavailable'}
+              </h2>
+              <p className="text-sm text-slate-400 font-arabic leading-relaxed">
+                {lang === 'ar' 
+                  ? 'الرابط الديناميكي (Dynamic QR Code) الذي تريد تصفحه غير فعال، أو ربما لا يزال الجدول غير مهيأ بعد في Supabase.' 
+                  : 'The dynamic QR Code link you visited is inactive or the dynamic_qr table is not configured yet in Supabase.'}
+              </p>
+            </div>
+            <a 
+              href="/"
+              className="inline-block w-full py-3 px-4 bg-red-650 hover:bg-red-700 text-white font-semibold rounded-xl text-sm font-arabic transition-all shadow-sm"
+              onClick={() => {
+                window.location.href = '/';
+              }}
+            >
+              {lang === 'ar' ? 'الرجوع للموقع المولد' : 'Back to QR Builder'}
+            </a>
+          </div>
+        </div>
+      );
+    }
+
+    // 2. Show loading screen while fetching from Supabase
+    if (isDynamicRoute && !resolvedDynamicUrl) {
+      return (
+        <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 text-center" id="redirect_resolving_screen" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+          <div className="max-w-md w-full space-y-6">
+            <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
+              <div className="absolute inset-0 rounded-full border-4 border-slate-800 border-t-red-650 animate-spin" />
+              <Globe size={32} className="text-red-500 animate-pulse" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-lg font-bold font-arabic">
+                {lang === 'ar' ? 'جاري سحب عنوان التوجيه...' : 'Decrypting Routing Node...'}
+              </h2>
+              <p className="text-xs text-slate-400 font-arabic">
+                {lang === 'ar' 
+                  ? 'نقوم بالاتصال بـ Supabase لجلب الرابط الأصلي وزيادة عدد الزيارات تلقائياً.' 
+                  : 'Fetching dynamic target from Supabase and updating click telemetry.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (!redirectUrl) {
+      return null; // Safety fallback
+    }
+
     let decodedUrl = '';
     let deepLink = '';
     let platform = 'youtube';
@@ -817,15 +833,6 @@ export default function App() {
             >
               <Languages size={12} />
               <span>{lang === 'ar' ? 'English' : 'العربية'}</span>
-            </button>
-
-            <button
-              onClick={() => { setActiveTab('veo'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-              className="hidden sm:inline-flex items-center gap-1.5 py-1 px-3 bg-gradient-to-r from-red-600 to-rose-500 hover:opacity-90 text-white text-[11px] font-bold rounded-full font-arabic shadow-2xs cursor-pointer transition-all duration-200"
-              id="header_veo_quick_btn"
-            >
-              <Video size={11} />
-              <span>{lang === 'ar' ? 'انشاء فيديو Veo 3' : 'Generate Veo 3 Video'}</span>
             </button>
 
             <span className="hidden md:inline-flex items-center gap-1 py-1 px-2.5 bg-red-50 text-red-600 text-[10px] font-semibold rounded-full font-arabic">
@@ -1047,14 +1054,6 @@ export default function App() {
           <div className="transition-opacity duration-300">
             <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
               <ChaptersGeneratorView lang={lang} onReturn={() => setActiveTab('generator')} />
-            </React.Suspense>
-          </div>
-        )}
-
-        {activeTab === 'veo' && (
-          <div className="transition-opacity duration-300">
-            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
-              <VeoGeneratorView lang={lang} onReturn={() => setActiveTab('generator')} />
             </React.Suspense>
           </div>
         )}
