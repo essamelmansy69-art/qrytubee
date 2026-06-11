@@ -250,3 +250,56 @@ export async function trackVisitorVisit(
   }
 }
 
+/**
+ * Updates an existing dynamic QR code record in Supabase database using its slug.
+ */
+export async function updateDynamicQR(slug: string, newOriginalUrl: string): Promise<{ success: boolean; data?: any; error?: string }> {
+  try {
+    if (!slug) {
+      return { success: false, error: "Slug is required" };
+    }
+    if (!newOriginalUrl) {
+      return { success: false, error: "New original URL is required" };
+    }
+
+    // Await configurations load before executing Supabase requests
+    await initPromise;
+
+    const trimmedSlug = slug.trim();
+    // Check if the record exists first
+    const { data: existing, error: fetchError } = await supabase
+      .from("dynamic_qr")
+      .select("id")
+      .eq("slug", trimmedSlug)
+      .maybeSingle();
+
+    if (fetchError) {
+      return { success: false, error: fetchError.message };
+    }
+    if (!existing) {
+      return { 
+        success: false, 
+        error: "الرمز التعريفي (Slug) المدخل غير صحيح أو غير موجود. يرجى التحقق منه والمحاولة مرة أخرى." 
+      };
+    }
+
+    const { data, error } = await supabase
+      .from("dynamic_qr")
+      .update({
+        original_url: newOriginalUrl.trim()
+      })
+      .eq("slug", trimmedSlug)
+      .select()
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
+  } catch (err: any) {
+    return { success: false, error: err.message || "An unexpected error occurred" };
+  }
+}
+
+

@@ -437,7 +437,7 @@ export default function QRGenerator({
 }: { 
   lang?: 'ar' | 'en';
   forcePlatform?: 'youtube' | 'facebook' | 'instagram' | 'tiktok' | 'website';
-  onSwitchTab?: (tab: 'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website') => void;
+  onSwitchTab?: (tab: 'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'edit-qr') => void;
 }) {
   const t = translations[lang];
 
@@ -1487,7 +1487,7 @@ export default function QRGenerator({
                             )}
                           </div>
                         ) : (
-                          <div className="space-y-2 bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl animate-fadeIn font-sans" id="supabase_success_card">
+                          <div className="space-y-3 bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-2xl animate-fadeIn font-sans" id="supabase_success_card">
                             <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
                               <CheckCircle2 size={15} />
                               <span className="text-[11px] font-bold">
@@ -1502,6 +1502,44 @@ export default function QRGenerator({
                                 {lang === 'ar' ? 'مُفعّل' : 'SLUG ACTIVE'}
                               </span>
                             </div>
+
+                            {/* Display Slug Box clearly as requested */}
+                            <div className="bg-white/80 dark:bg-slate-950/80 p-2.5 text-center rounded-xl border border-emerald-500/15 font-arabic text-xs space-y-1">
+                              <span className="text-slate-500 dark:text-slate-400 text-[10px] block font-semibold">
+                                {lang === 'ar' ? '🔑 الـ Slug الخاص بك للتعديل لاحقاً:' : '🔑 Your unique Slug for future editing:'}
+                              </span>
+                              <span className="text-sm font-black font-mono tracking-wider text-rose-600 dark:text-rose-400 select-all block">
+                                {dynamicSlug}
+                              </span>
+                            </div>
+
+                            {/* Explanatory notice and interactive redirect link for editing */}
+                            <div className="p-2 bg-white/40 dark:bg-slate-950/40 rounded-xl border border-emerald-500/5 text-[10.5px] font-arabic font-bold text-slate-700 dark:text-slate-300 leading-normal">
+                              {lang === 'ar' ? (
+                                <p>
+                                  يمكنك استخدام هذا الـ Slug لتعديل رابطك لاحقاً في صفحة{' '}
+                                  <button
+                                    type="button"
+                                    onClick={() => onSwitchTab && onSwitchTab('edit-qr')}
+                                    className="text-red-650 hover:text-red-700 hover:underline inline-flex items-center gap-0.5 font-bold cursor-pointer"
+                                  >
+                                    تعديل الرابط /edit-qr
+                                  </button>
+                                </p>
+                              ) : (
+                                <p>
+                                  You can use this Slug to edit your link later on the{' '}
+                                  <button
+                                    type="button"
+                                    onClick={() => onSwitchTab && onSwitchTab('edit-qr')}
+                                    className="text-red-650 hover:text-red-700 hover:underline inline-flex items-center gap-0.5 font-bold cursor-pointer"
+                                  >
+                                    /edit-qr page
+                                  </button>
+                                </p>
+                              )}
+                            </div>
+
                             <p className="text-[9.5px] text-slate-600 dark:text-slate-400 leading-normal">
                               {lang === 'ar'
                                 ? '🎉 تم توليد الرابط المختصر الذكي! سيقوم الباركود الآن بتوجيه العملاء تلقائياً مع تتبع شامل فوري للاحصائيات!'

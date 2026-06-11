@@ -44,6 +44,7 @@ const ArticlesView = React.lazy(() => import('./components/ArticlesView'));
 const LegalView = React.lazy(() => import('./components/LegalView'));
 const FAQView = React.lazy(() => import('./components/FAQView'));
 const ChaptersGeneratorView = React.lazy(() => import('./components/ChaptersGeneratorView'));
+const EditQRView = React.lazy(() => import('./components/EditQRView'));
 
 export default function App() {
   // Dynamic QR Code resolution states
@@ -134,7 +135,7 @@ export default function App() {
     return 'ar';
   });
 
-  const [activeTab, setActiveTab] = useState<'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact' | 'chapters'>(() => {
+  const [activeTab, setActiveTab] = useState<'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact' | 'chapters' | 'edit-qr'>(() => {
     try {
       const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
       if (path === 'terms') return 'terms';
@@ -145,6 +146,7 @@ export default function App() {
       if (path === 'instagram') return 'instagram';
       if (path === 'tiktok') return 'tiktok';
       if (path === 'website') return 'website';
+      if (path === 'edit-qr' || path === 'edit-link') return 'edit-qr';
       if (path === 'chapters' || path === 'timestamp-generator' || path === 'youtube-chapters') return 'chapters';
       if (path === 'articles' || path.startsWith('articles/')) return 'articles';
     } catch (_) {}
@@ -253,6 +255,13 @@ export default function App() {
       desc = lang === 'ar'
         ? "أداة مجانية واحترافية لتوليد وتنسيق فصول اليوتيوب والتايم ستامب (Timestamps) متوافقة بالكامل مع قواعد السيو 2026 لتعزيز ظهور فديوهاتك في محركات بحث جوجل."
         : "Free, automated tool to format YouTube video chapters and timestamps perfectly aligned with modern SEO 2026 indexing rules.";
+    } else if (activeTab === 'edit-qr') {
+      title = lang === 'ar' 
+        ? "تعديل روابط الـ QR الديناميكية مجاناً | Qrytube" 
+        : "Edit Dynamic QR Code redirection urls | Qrytube";
+      desc = lang === 'ar'
+        ? "قم بالتعديل الذاتي وتحديث الرابط الموجه إليه كود الـ QR الديناميكي الخاص بك في أي وقت بكل سهولة مجاناً عن طريق رمز الـ Slug."
+        : "Self-edit and dynamically update the target redirection URL of your generated dynamic QR code for free using its slug.";
     } else if (activeTab === 'contact') {
       title = lang === 'ar' ? "اتصل بنا | Qrytube" : "Contact Us | Qrytube";
       desc = lang === 'ar'
@@ -392,7 +401,7 @@ export default function App() {
         setSelectedArticleId(e.state.articleId || null);
       } else {
         const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
-        if (['terms', 'privacy', 'about', 'contact', 'facebook', 'instagram', 'tiktok', 'website', 'chapters'].includes(path)) {
+        if (['terms', 'privacy', 'about', 'contact', 'facebook', 'instagram', 'tiktok', 'website', 'chapters', 'edit-qr'].includes(path)) {
           setActiveTab(path as any);
           setSelectedArticleId(null);
         } else if (path === 'articles') {
@@ -467,7 +476,7 @@ export default function App() {
     };
   }, []);
 
-  const handleNavClick = (tab: 'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact', event: React.MouseEvent) => {
+  const handleNavClick = (tab: 'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact' | 'edit-qr', event: React.MouseEvent) => {
     event.preventDefault();
     setActiveTab(tab);
     if (tab === 'articles') {
@@ -1056,6 +1065,14 @@ export default function App() {
           <div className="transition-opacity duration-300">
             <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
               <ChaptersGeneratorView lang={lang} onReturn={() => setActiveTab('generator')} />
+            </React.Suspense>
+          </div>
+        )}
+
+        {activeTab === 'edit-qr' && (
+          <div className="transition-opacity duration-300">
+            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
+              <EditQRView lang={lang} onReturn={() => setActiveTab('generator')} />
             </React.Suspense>
           </div>
         )}
