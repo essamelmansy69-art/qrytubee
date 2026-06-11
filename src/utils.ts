@@ -761,9 +761,24 @@ export function detectVisitorSpecs(): { browser: string; device_type: string } {
  * Fetches the visitor's approximate country name from free geolocation APIs.
  */
 export async function fetchVisitorCountry(): Promise<string> {
+  // First, attempt to retrieve country from our local server environment headers - near zero latency, CORS safe
   try {
     const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), 3500);
+    const id = setTimeout(() => controller.abort(), 1200);
+    const res = await fetch("/api/visitor-country", { signal: controller.signal });
+    clearTimeout(id);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.country && data.country !== "Unknown") {
+        return data.country;
+      }
+    }
+  } catch (_) {}
+
+  // Fallback to trusted third party sources with strict, fast timeouts
+  try {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), 1200);
     const res = await fetch("https://ipapi.co/json/", { signal: controller.signal });
     clearTimeout(id);
     if (!res.ok) throw new Error("Primary API failed");
@@ -772,7 +787,7 @@ export async function fetchVisitorCountry(): Promise<string> {
   } catch (err) {
     try {
       const controller2 = new AbortController();
-      const id2 = setTimeout(() => controller2.abort(), 3500);
+      const id2 = setTimeout(() => controller2.abort(), 1200);
       const res2 = await fetch("https://freeipapi.com/api/json", { signal: controller2.signal });
       clearTimeout(id2);
       if (!res2.ok) throw new Error("Secondary API failed");
@@ -780,9 +795,8 @@ export async function fetchVisitorCountry(): Promise<string> {
       return data2.countryName || "Unknown";
     } catch (_) {
       try {
-        // Tertiary API fallback as contingency
         const controller3 = new AbortController();
-        const id3 = setTimeout(() => controller3.abort(), 3500);
+        const id3 = setTimeout(() => controller3.abort(), 1200);
         const res3 = await fetch("https://ip-api.com/json/", { signal: controller3.signal });
         clearTimeout(id3);
         const data3 = await res3.json();

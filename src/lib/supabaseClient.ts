@@ -153,49 +153,59 @@ export async function getOriginalUrlAndTrackClick(slug: string): Promise<{ origi
       return { originalUrl: null, error: error?.message || "Link code not found" };
     }
 
-    // Await click metric increment to guarantee update is registered before redirection
+    // Perform telemetry record and clicks increment concurrently to minimize redirection duration
+    const { browser, device_type } = detectVisitorSpecs();
+    let country = "Unknown";
     try {
-      const { error: clickError } = await supabase
+      country = await fetchVisitorCountry();
+    } catch (_) {}
+
+    // Run both click increment and visit log in parallel
+    const telemetryPromises = [
+      // 1. Increment click count
+      supabase
         .from("dynamic_qr")
         .update({ clicks: (data.clicks || 0) + 1 })
-        .eq("slug", slug);
-      if (clickError) {
-        console.error("[Supabase Click Increment Error]:", clickError);
-      }
-    } catch (upError) {
-      console.warn("Could not increment click telemetry:", upError);
-    }
+        .eq("slug", slug)
+        .then(({ error: err }: any) => {
+          if (err) {
+            console.error("[Supabase Click Increment Error]:", err);
+            fetch(`/api/track-scan?error=${encodeURIComponent("Supabase Clicks Update Error (" + err.code + "): " + err.message)}`).catch(() => {});
+          }
+        })
+        .catch(() => {}),
 
-    // Direct awaited insertion to ensure registration completes before page navigation triggers
-    try {
-      const { browser, device_type } = detectVisitorSpecs();
-      
-      let country = "Unknown";
-      try {
-        country = await fetchVisitorCountry();
-      } catch (_) {}
-
-      const { error: insertErr } = await supabase
+      // 2. Insert visitor metrics record
+      supabase
         .from("qr_visits")
         .insert({
           qr_id: data.id,
           country: country || "Unknown",
           device_type: device_type || "Desktop",
           browser: browser || "Other"
-        });
+        })
+        .then(({ error: err }: any) => {
+          if (err) {
+            console.error("🔴 [Supabase Insert Visit Error] Full Debugging Object:", err);
+            // Log to local backend server so it appears in workspace console terminal
+            fetch(`/api/track-scan?error=${encodeURIComponent("Supabase Insert Error (" + err.code + "): " + err.message)}`).catch(() => {});
+          } else {
+            console.log("🟢 [Supabase Resolution] Visitor visit successfully saved to public.qr_visits table!");
+          }
+        })
+        .catch((e: any) => {
+          console.warn("Telemetry insert exception:", e);
+        })
+    ];
 
-      if (insertErr) {
-        console.error("🔴 [Supabase Insert Visit Error] Full Debugging Object:", {
-          message: insertErr.message,
-          code: insertErr.code,
-          details: insertErr.details,
-          hint: insertErr.hint
-        });
-      } else {
-        console.log("🟢 [Supabase Resolution] Visitor visit successfully saved to public.qr_visits table!");
-      }
-    } catch (vErr) {
-      console.warn("Visitor logging exception catch block:", vErr);
+    // Wait at most 2.5 seconds for telemetry queries to complete so poor connectivity never halts redirection
+    try {
+      await Promise.race([
+        Promise.all(telemetryPromises),
+        new Promise((resolve) => setTimeout(resolve, 2500))
+      ]);
+    } catch (e) {
+      console.warn("Telemetry saving promise racing exception:", e);
     }
 
     return { originalUrl: data.original_url, qrId: data.id };
