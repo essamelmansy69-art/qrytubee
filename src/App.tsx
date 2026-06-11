@@ -31,7 +31,8 @@ import {
   Cloud,
   Sun,
   Moon,
-  Globe
+  Globe,
+  Utensils
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { translations } from './translations';
@@ -44,6 +45,7 @@ const ArticlesView = React.lazy(() => import('./components/ArticlesView'));
 const LegalView = React.lazy(() => import('./components/LegalView'));
 const FAQView = React.lazy(() => import('./components/FAQView'));
 const ChaptersGeneratorView = React.lazy(() => import('./components/ChaptersGeneratorView'));
+const RestaurantQRView = React.lazy(() => import('./components/RestaurantQRView'));
 
 export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -97,7 +99,7 @@ export default function App() {
     return 'ar';
   });
 
-  const [activeTab, setActiveTab] = useState<'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact' | 'chapters'>(() => {
+  const [activeTab, setActiveTab] = useState<'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact' | 'chapters' | 'restaurant'>(() => {
     try {
       const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
       if (path === 'terms') return 'terms';
@@ -108,6 +110,7 @@ export default function App() {
       if (path === 'instagram') return 'instagram';
       if (path === 'tiktok') return 'tiktok';
       if (path === 'website') return 'website';
+      if (path === 'restaurant' || path === 'restaurant-qr' || path === 'menu-barcode') return 'restaurant';
       if (path === 'chapters' || path === 'timestamp-generator' || path === 'youtube-chapters') return 'chapters';
       if (path === 'articles' || path.startsWith('articles/')) return 'articles';
     } catch (_) {}
@@ -220,6 +223,13 @@ export default function App() {
       desc = lang === 'ar'
         ? "تواصل مع فريق الدعم الفني لموقع Qrytube للإبلاغ عن أي مشاكل أو المساعدة في تصميم وطباعة أكواد الـ QR كود والشعارات المخصصة لقنواتك."
         : "Get in touch with the Qrytube professional team for support, feature feedback, partnership proposals, or customized enterprise integration solutions.";
+    } else if (activeTab === 'restaurant') {
+      title = lang === 'ar'
+        ? "أداة توليد كود QR للمطاعم والمقاهي مجاناً | منيو باركود ذكي | Qrytube"
+        : "Free Restaurant QR Code Generator | Smart Table Menu Code | Qrytube";
+      desc = lang === 'ar'
+        ? "أنشئ كود QR ذكي ومجاني لمنيو مطعمك أو مقهاك. يدعم روابط المنيو الإلكتروني ومواقع الخرائط، قابل للتخصيص بالكامل مع إضافة شعار وألوان مميزة للطباعة."
+        : "Generate customizable, free QR codes for aggregate restaurant menus, food catalogs, and table stands. Include custom restaurant logos, custom frames, and download vector SVG and PDF flyers.";
     } else {
       title = lang === 'ar' 
         ? "YouTube QR Code Generator | إنشاء QR كود لرابط فيديو يوتيوب بضغطة واحدة" 
@@ -353,7 +363,7 @@ export default function App() {
         setSelectedArticleId(e.state.articleId || null);
       } else {
         const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
-        if (['terms', 'privacy', 'about', 'contact', 'facebook', 'instagram', 'tiktok', 'website', 'chapters'].includes(path)) {
+        if (['terms', 'privacy', 'about', 'contact', 'facebook', 'instagram', 'tiktok', 'website', 'chapters', 'restaurant'].includes(path)) {
           setActiveTab(path as any);
           setSelectedArticleId(null);
         } else if (path === 'articles') {
@@ -428,7 +438,7 @@ export default function App() {
     };
   }, []);
 
-  const handleNavClick = (tab: 'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact', event: React.MouseEvent) => {
+  const handleNavClick = (tab: 'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact' | 'restaurant', event: React.MouseEvent) => {
     event.preventDefault();
     setActiveTab(tab);
     if (tab === 'articles') {
@@ -784,7 +794,7 @@ export default function App() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" id="main_workspace">
         
         {/* Sleek Platform Sub-navigation tabs */}
-        {(activeTab === 'generator' || activeTab === 'facebook' || activeTab === 'instagram' || activeTab === 'tiktok' || activeTab === 'website') && (
+        {(activeTab === 'generator' || activeTab === 'facebook' || activeTab === 'instagram' || activeTab === 'tiktok' || activeTab === 'website' || activeTab === 'restaurant') && (
           <div className="mb-8 bg-slate-50/70 p-1.5 rounded-2xl border border-slate-100 flex items-center justify-start gap-1.5 sm:gap-2 max-w-2xl mx-auto overflow-x-auto scrollbar-none shadow-xs" id="platform_sub_navbar">
             <button
               onClick={() => setActiveTab('generator')}
@@ -845,6 +855,18 @@ export default function App() {
               <Globe size={16} />
               <span>{lang === 'ar' ? 'مواقع أخرى' : 'Other Websites'}</span>
             </button>
+
+            <button
+              onClick={() => setActiveTab('restaurant')}
+              className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold font-arabic cursor-pointer transition-all duration-300 whitespace-nowrap ${
+                activeTab === 'restaurant'
+                  ? 'bg-amber-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-amber-650 hover:bg-slate-100/50'
+              }`}
+            >
+              <Utensils size={16} />
+              <span>{lang === 'ar' ? 'منيو ومطاعم 🍽️' : 'Menus & Cafes'}</span>
+            </button>
           </div>
         )}
 
@@ -901,6 +923,20 @@ export default function App() {
                     window.history.pushState({ tab }, '', targetPath);
                   } catch (_) {}
                 }}
+              />
+            </React.Suspense>
+          </div>
+        )}
+
+        {activeTab === 'restaurant' && (
+          <div className="transition-opacity duration-300">
+            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
+              <RestaurantQRView 
+                lang={lang} 
+                onNavigateToYouTube={() => {
+                  setActiveTab('generator');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }} 
               />
             </React.Suspense>
           </div>
