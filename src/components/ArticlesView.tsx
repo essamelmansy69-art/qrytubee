@@ -26,7 +26,6 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
 
     const articleUrl = `${window.location.origin}/articles/${selectedArticle.id}`;
     const schemaMarkup: any = {
-      "@context": "https://schema.org",
       "@type": "BlogPosting",
       "mainEntityOfPage": {
         "@type": "WebPage",
@@ -52,13 +51,17 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
     };
 
     if (selectedArticle.image) {
-      schemaMarkup.image = [selectedArticle.image];
+      const imageUrl = selectedArticle.image.startsWith('http')
+        ? selectedArticle.image
+        : `${window.location.origin}${selectedArticle.image}`;
+      schemaMarkup.image = [imageUrl];
     }
+
+    const graphItems: any[] = [schemaMarkup];
 
     // Enhance structured schema markup specifically for our target 2026 Instagram Followers SEO article
     if (selectedArticle.id === 'instagram-followers-qr') {
       const faqSchema = {
-        "@context": "https://schema.org",
         "@type": "FAQPage",
         "mainEntity": [
           {
@@ -87,19 +90,9 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
           }
         ]
       };
-
-      const schemaArray = [schemaMarkup, faqSchema];
-      let script = document.getElementById('seo-article-schema') as HTMLScriptElement;
-      if (!script) {
-        script = document.createElement('script');
-        script.id = 'seo-article-schema';
-        script.type = 'application/ld+json';
-        document.head.appendChild(script);
-      }
-      script.text = JSON.stringify(schemaArray);
+      graphItems.push(faqSchema);
     } else if (selectedArticle.id === 'youtube-deep-links-seo-2026') {
       const faqSchema = {
-        "@context": "https://schema.org",
         "@type": "FAQPage",
         "mainEntity": [
           {
@@ -130,7 +123,6 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
       };
 
       const howToSchema = {
-        "@context": "https://schema.org",
         "@type": "HowTo",
         "name": "كيفية إنشاء كود QR ورابط عميق لليوتيوب بنقرة واحدة",
         "description": "دليل تبسيطي لإنشاء كود كيو أر ورابط ذكي مجاني لقنوات اليوتيوب يفتح في التطبيق فوراً.",
@@ -163,7 +155,6 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
       };
 
       const softwareSchema = {
-        "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "Qrytube",
         "operatingSystem": "Android, iOS, Web",
@@ -175,18 +166,9 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
         }
       };
 
-      const schemaArray = [schemaMarkup, faqSchema, howToSchema, softwareSchema];
-      let script = document.getElementById('seo-article-schema') as HTMLScriptElement;
-      if (!script) {
-        script = document.createElement('script');
-        script.id = 'seo-article-schema';
-        script.type = 'application/ld+json';
-        document.head.appendChild(script);
-      }
-      script.text = JSON.stringify(schemaArray);
+      graphItems.push(faqSchema, howToSchema, softwareSchema);
     } else if (selectedArticle.id === 'seo-2026-deep-link-trends') {
       const faqSchema = {
-        "@context": "https://schema.org",
         "@type": "FAQPage",
         "mainEntity": [
           {
@@ -207,19 +189,9 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
           }
         ]
       };
-
-      const schemaArray = [schemaMarkup, faqSchema];
-      let script = document.getElementById('seo-article-schema') as HTMLScriptElement;
-      if (!script) {
-        script = document.createElement('script');
-        script.id = 'seo-article-schema';
-        script.type = 'application/ld+json';
-        document.head.appendChild(script);
-      }
-      script.text = JSON.stringify(schemaArray);
+      graphItems.push(faqSchema);
     } else if (selectedArticle.id === 'youtube-qr-marketing-2026') {
       const faqSchema = lang === 'ar' ? {
-        "@context": "https://schema.org",
         "@type": "FAQPage",
         "mainEntity": [
           {
@@ -248,7 +220,6 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
           }
         ]
       } : {
-        "@context": "https://schema.org",
         "@type": "FAQPage",
         "mainEntity": [
           {
@@ -279,7 +250,6 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
       };
 
       const howToSchema = lang === 'ar' ? {
-        "@context": "https://schema.org",
         "@type": "HowTo",
         "name": "طريقة توليد كود QR ذكي لليوتيوب بكبسة واحدة",
         "description": "دليل مبسط لإنشاء رمز كيو آر ورابط عميق مجاني لقنوات اليوتيوب يفتح في التطبيق فوراً.",
@@ -304,7 +274,6 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
           }
         ]
       } : {
-        "@context": "https://schema.org",
         "@type": "HowTo",
         "name": "How to Generate a Smart YouTube QR Code in 1-Click",
         "description": "Simple steps to create free smart YouTube deep links and QR codes that pop up directly on the official app.",
@@ -331,7 +300,6 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
       };
 
       const softwareSchema = {
-        "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "Qrytube",
         "operatingSystem": "iOS, Android, Windows, macOS",
@@ -343,18 +311,9 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
         }
       };
 
-      const schemaArray = [schemaMarkup, faqSchema, howToSchema, softwareSchema];
-      let script = document.getElementById('seo-article-schema') as HTMLScriptElement;
-      if (!script) {
-        script = document.createElement('script');
-        script.id = 'seo-article-schema';
-        script.type = 'application/ld+json';
-        document.head.appendChild(script);
-      }
-      script.text = JSON.stringify(schemaArray);
+      graphItems.push(faqSchema, howToSchema, softwareSchema);
     } else if (selectedArticle.id === 'restaurant-menu-qr') {
       const faqSchema = lang === 'ar' ? {
-        "@context": "https://schema.org",
         "@type": "FAQPage",
         "mainEntity": [
           {
@@ -383,7 +342,6 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
           }
         ]
       } : {
-        "@context": "https://schema.org",
         "@type": "FAQPage",
         "mainEntity": [
           {
@@ -414,7 +372,6 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
       };
 
       const howToSchema = lang === 'ar' ? {
-        "@context": "https://schema.org",
         "@type": "HowTo",
         "name": "طريقة تصميم كود QR والمنيو لمطعمك بكبسة واحدة",
         "description": "دليل مبسط لإنشاء رمز كيو آر تفاعلي لقوائم طعام الكافيهات والمطاعم مجاناً.",
@@ -439,7 +396,6 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
           }
         ]
       } : {
-        "@context": "https://schema.org",
         "@type": "HowTo",
         "name": "How to Generate a Professional Restaurant Menu QR Code",
         "description": "Simple instructions to create high-quality, custom branded QR codes for contactless dining menus.",
@@ -466,7 +422,6 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
       };
 
       const softwareSchema = {
-        "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "Qrytube",
         "operatingSystem": "Android, iOS, Web, Windows",
@@ -478,31 +433,28 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
         }
       };
 
-      const schemaArray = [schemaMarkup, faqSchema, howToSchema, softwareSchema];
-      let script = document.getElementById('seo-article-schema') as HTMLScriptElement;
-      if (!script) {
-        script = document.createElement('script');
-        script.id = 'seo-article-schema';
-        script.type = 'application/ld+json';
-        document.head.appendChild(script);
-      }
-      script.text = JSON.stringify(schemaArray);
-    } else {
-      let script = document.getElementById('seo-article-schema') as HTMLScriptElement;
-      if (!script) {
-        script = document.createElement('script');
-        script.id = 'seo-article-schema';
-        script.type = 'application/ld+json';
-        document.head.appendChild(script);
-      }
-      script.text = JSON.stringify(schemaMarkup);
+      graphItems.push(faqSchema, howToSchema, softwareSchema);
     }
+
+    const unifiedSchema = {
+      "@context": "https://schema.org",
+      "@graph": graphItems
+    };
+
+    let script = document.getElementById('seo-article-schema') as HTMLScriptElement;
+    if (!script) {
+      script = document.createElement('script');
+      script.id = 'seo-article-schema';
+      script.type = 'application/ld+json';
+      document.head.appendChild(script);
+    }
+    script.text = JSON.stringify(unifiedSchema);
 
     return () => {
       const existing = document.getElementById('seo-article-schema');
       if (existing) existing.remove();
     };
-  }, [selectedArticle]);
+  }, [selectedArticle, lang]);
 
   // Simple Markdown content renderer for articles to avoid external parser bugs
   const renderMarkdown = (text: string) => {
