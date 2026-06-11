@@ -352,6 +352,141 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
         document.head.appendChild(script);
       }
       script.text = JSON.stringify(schemaArray);
+    } else if (selectedArticle.id === 'restaurant-menu-qr') {
+      const faqSchema = lang === 'ar' ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "ما هي فوائد كود QR للمطاعم والمنيو اللاتلامسي؟",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "توفير تجربة سريعة وخالية من اللمس للزبائن مع إمكانية تحديث الوجبات والأسعار فوراً، وزيادة قيمة الطلبات بنسبة 25% نتيجة العرض البصري الجذاب للمأكولات."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "كيف يدعم كود QR المنيو سيو المطاعم (Restaurant SEO)؟",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "عن طريق توجيه ترافيك جوال عالي الكفاءة لصفحة المنيو المحسنة تقنياً لسرعة التحميل، وإعلام محركات بحث جوجل بالأسعار والتفاصيل وقوائم الطعام عبر مخططات البيانات المهيكلة (Schema)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "هل يمكن طباعة كود كيو آر المنيو بجودة عالية دون بكسلة أو تشويه؟",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "نعم، تتيح Qrytube للمطاعم تحميل كود الـ QR والمنيو بصيغة SVG فائقة النقاء لطباعة حادة وبدون أي بكسلة على الطاولات وتأمين حماية قصوى."
+            }
+          }
+        ]
+      } : {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What are the benefits of a restaurant menu QR code?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "It delivers a frictionless, hygienic dining experience, allows instant menu and price updates, and boosts average order tickets by up to 25%."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does a menu QR code improve Restaurant SEO?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "By driving highly engaged direct mobile traffic to your menu pages, and communicating structured metadata like price, ratings, and operating hours cleanly to search engines."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I export my restaurant QR code as a high-fidelity vector?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, you can download the final output as a vector SVG file from Qrytube, ensuring sharp borders for professional prints on table stands and store signage."
+            }
+          }
+        ]
+      };
+
+      const howToSchema = lang === 'ar' ? {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "طريقة تصميم كود QR والمنيو لمطعمك بكبسة واحدة",
+        "description": "دليل مبسط لإنشاء رمز كيو آر تفاعلي لقوائم طعام الكافيهات والمطاعم مجاناً.",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "name": "لصق رابط المنيو",
+            "text": "قم بنسخ ولصق رابط المنيو الإلكتروني الخاص بمطعمك في أداة Qrytube.",
+            "url": window.location.origin
+          },
+          {
+            "@type": "HowToStep",
+            "name": "التخصيص والبراندنج",
+            "text": "احرص على رفع شعار مطعمك واضبط تباين الألوان الجذابة ليكون واثق المظهر للزبناء.",
+            "url": window.location.origin
+          },
+          {
+            "@type": "HowToStep",
+            "name": "تحميل بدقة 4K",
+            "text": "قم بتنزيل كود الـ QR بصيغة حادة مثل SVG أو PNG عالية الدقة لتناسب الطاولات ولا بكسلة فيها.",
+            "url": window.location.origin
+          }
+        ]
+      } : {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to Generate a Professional Restaurant Menu QR Code",
+        "description": "Simple instructions to create high-quality, custom branded QR codes for contactless dining menus.",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "name": "Insert Menu Link",
+            "text": "Paste your dynamic online menu link into the Qrytube builder card.",
+            "url": window.location.origin
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Stylize Brand Assets",
+            "text": "Upload your bistro logo and style the colors to fit your layout themes perfectly.",
+            "url": window.location.origin
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Export Ultra-Sharp SVG",
+            "text": "Download your high-resolution QR as an SVG file for print-ready layout scaling.",
+            "url": window.location.origin
+          }
+        ]
+      };
+
+      const softwareSchema = {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Qrytube",
+        "operatingSystem": "Android, iOS, Web, Windows",
+        "applicationCategory": "BusinessApplication / RestaurantUtilities",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      };
+
+      const schemaArray = [schemaMarkup, faqSchema, howToSchema, softwareSchema];
+      let script = document.getElementById('seo-article-schema') as HTMLScriptElement;
+      if (!script) {
+        script = document.createElement('script');
+        script.id = 'seo-article-schema';
+        script.type = 'application/ld+json';
+        document.head.appendChild(script);
+      }
+      script.text = JSON.stringify(schemaArray);
     } else {
       let script = document.getElementById('seo-article-schema') as HTMLScriptElement;
       if (!script) {
