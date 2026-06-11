@@ -44,46 +44,8 @@ const ArticlesView = React.lazy(() => import('./components/ArticlesView'));
 const LegalView = React.lazy(() => import('./components/LegalView'));
 const FAQView = React.lazy(() => import('./components/FAQView'));
 const ChaptersGeneratorView = React.lazy(() => import('./components/ChaptersGeneratorView'));
-const EditQRView = React.lazy(() => import('./components/EditQRView'));
 
 export default function App() {
-  // Dynamic QR Code resolution states
-  const [resolvedDynamicUrl, setResolvedDynamicUrl] = useState<string | null>(null);
-  const [isLoadingDynamic, setIsLoadingDynamic] = useState<boolean>(false);
-  const [dynamicError, setDynamicError] = useState<string | null>(null);
-
-  const isDynamicRoute = window.location.pathname.startsWith('/r/');
-  const dynamicSlug = isDynamicRoute ? window.location.pathname.split('/r/')[1]?.trim() : null;
-
-  const queryParams = new URL(window.location.href).searchParams;
-  const rawRedirectUrl = queryParams.get('url') || queryParams.get('r');
-  const redirectUrl = isDynamicRoute ? resolvedDynamicUrl : rawRedirectUrl;
-  const redirectType = queryParams.get('type') || 'vnd';
-  const isRedirectRoute = window.location.pathname.startsWith('/redirect') || !!rawRedirectUrl || isDynamicRoute;
-
-  useEffect(() => {
-    if (isDynamicRoute && dynamicSlug) {
-      setIsLoadingDynamic(true);
-      import('./lib/supabaseClient')
-        .then(async ({ getOriginalUrlAndTrackClick, trackVisitorVisit }) => {
-          const res = await getOriginalUrlAndTrackClick(dynamicSlug);
-          if (res.error || !res.originalUrl) {
-            setDynamicError(res.error || "The requested link could not be found or has expired.");
-          } else {
-            console.log("Resolved dynamic URL from Supabase successfully:", res.originalUrl);
-            setResolvedDynamicUrl(res.originalUrl);
-          }
-        })
-        .catch((err) => {
-          console.error("Error loading Supabase module:", err);
-          setDynamicError("Unable to establish standard route. Please try again.");
-        })
-        .finally(() => {
-          setIsLoadingDynamic(false);
-        });
-    }
-  }, [isDynamicRoute, dynamicSlug]);
-
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     try {
       const saved = localStorage.getItem('theme');
@@ -135,7 +97,7 @@ export default function App() {
     return 'ar';
   });
 
-  const [activeTab, setActiveTab] = useState<'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact' | 'chapters' | 'edit-qr'>(() => {
+  const [activeTab, setActiveTab] = useState<'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact' | 'chapters'>(() => {
     try {
       const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
       if (path === 'terms') return 'terms';
@@ -146,7 +108,6 @@ export default function App() {
       if (path === 'instagram') return 'instagram';
       if (path === 'tiktok') return 'tiktok';
       if (path === 'website') return 'website';
-      if (path === 'edit-qr' || path === 'edit-link') return 'edit-qr';
       if (path === 'chapters' || path === 'timestamp-generator' || path === 'youtube-chapters') return 'chapters';
       if (path === 'articles' || path.startsWith('articles/')) return 'articles';
     } catch (_) {}
@@ -164,7 +125,6 @@ export default function App() {
   });
 
   useEffect(() => {
-    if (isRedirectRoute) return;
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     localStorage.setItem('qr_language', lang);
@@ -255,13 +215,6 @@ export default function App() {
       desc = lang === 'ar'
         ? "أداة مجانية واحترافية لتوليد وتنسيق فصول اليوتيوب والتايم ستامب (Timestamps) متوافقة بالكامل مع قواعد السيو 2026 لتعزيز ظهور فديوهاتك في محركات بحث جوجل."
         : "Free, automated tool to format YouTube video chapters and timestamps perfectly aligned with modern SEO 2026 indexing rules.";
-    } else if (activeTab === 'edit-qr') {
-      title = lang === 'ar' 
-        ? "تعديل روابط الـ QR الديناميكية مجاناً | Qrytube" 
-        : "Edit Dynamic QR Code redirection urls | Qrytube";
-      desc = lang === 'ar'
-        ? "قم بالتعديل الذاتي وتحديث الرابط الموجه إليه كود الـ QR الديناميكي الخاص بك في أي وقت بكل سهولة مجاناً عن طريق رمز الـ Slug."
-        : "Self-edit and dynamically update the target redirection URL of your generated dynamic QR code for free using its slug.";
     } else if (activeTab === 'contact') {
       title = lang === 'ar' ? "اتصل بنا | Qrytube" : "Contact Us | Qrytube";
       desc = lang === 'ar'
@@ -371,13 +324,12 @@ export default function App() {
     } catch (e) {
       console.error(e);
     }
-  }, [lang, activeTab, selectedArticleId, isRedirectRoute]);
+  }, [lang, activeTab, selectedArticleId]);
 
   const t = translations[lang];
 
   useEffect(() => {
     try {
-      if (isRedirectRoute) return;
       const currentPath = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
       // Include the language parameter in the target path during transitions so it persists if active
       const langParam = lang === 'en' ? '?lang=en' : '?lang=ar';
@@ -392,7 +344,7 @@ export default function App() {
         window.history.pushState({ tab: activeTab, articleId: selectedArticleId }, '', targetPath);
       }
     } catch (_) {}
-  }, [activeTab, lang, selectedArticleId, isRedirectRoute]);
+  }, [activeTab, lang, selectedArticleId]);
 
   useEffect(() => {
     const handlePopState = (e: PopStateEvent) => {
@@ -401,7 +353,7 @@ export default function App() {
         setSelectedArticleId(e.state.articleId || null);
       } else {
         const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
-        if (['terms', 'privacy', 'about', 'contact', 'facebook', 'instagram', 'tiktok', 'website', 'chapters', 'edit-qr'].includes(path)) {
+        if (['terms', 'privacy', 'about', 'contact', 'facebook', 'instagram', 'tiktok', 'website', 'chapters'].includes(path)) {
           setActiveTab(path as any);
           setSelectedArticleId(null);
         } else if (path === 'articles') {
@@ -476,7 +428,7 @@ export default function App() {
     };
   }, []);
 
-  const handleNavClick = (tab: 'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact' | 'edit-qr', event: React.MouseEvent) => {
+  const handleNavClick = (tab: 'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact', event: React.MouseEvent) => {
     event.preventDefault();
     setActiveTab(tab);
     if (tab === 'articles') {
@@ -512,6 +464,11 @@ export default function App() {
   const t2Ref = React.useRef<any>(null);
   const t3Ref = React.useRef<any>(null);
 
+  const queryParams = new URL(window.location.href).searchParams;
+  const redirectUrl = queryParams.get('url') || queryParams.get('r');
+  const redirectType = queryParams.get('type') || 'vnd';
+  const isRedirectRoute = window.location.pathname.startsWith('/redirect') || !!redirectUrl;
+
   useEffect(() => {
     if (isRedirectRoute && redirectUrl) {
       try {
@@ -530,8 +487,8 @@ export default function App() {
         const deepLink = convertUrlToDeepLink(decodedUrl, deviceType);
         const fallbackUrl = platformInfo.cleanUrl || decodedUrl;
 
-        // Fallback timing parameters: 8000ms (8 seconds) limit before routing browser fallback
-        const timeoutDuration = 8000;
+        // Fallback timing parameters: 3000ms (3 seconds) limit before routing browser fallback
+        const timeoutDuration = 3000;
         const startTime = Date.now();
         let isRedirected = false;
 
@@ -569,11 +526,11 @@ export default function App() {
           }
         }, 450);
 
-        // 4. Absolute failsafe fallback: standard web page replace redirection after 8 seconds
+        // 4. Absolute failsafe fallback: standard web page replace redirection after 3 seconds
         fallbackTimerRef.current = setTimeout(() => {
           const elapsed = Date.now() - startTime;
           // Verify that user hasn't successfully switched apps
-          if (!isRedirected && elapsed < 9500 && !document.hidden) {
+          if (!isRedirected && elapsed < 4500 && !document.hidden) {
             window.location.replace(fallbackUrl);
           }
         }, timeoutDuration);
@@ -593,67 +550,7 @@ export default function App() {
   }, [isRedirectRoute, redirectUrl, redirectType]);
 
   // If redirect parameter is active, render a loading screen instead of the full landing page
-  if (isRedirectRoute) {
-    // 1. Show dynamic link resolution error state
-    if (dynamicError) {
-      return (
-        <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 text-center" id="redirect_error_screen" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-          <div className="max-w-md w-full space-y-6 bg-slate-900 border border-red-500/20 rounded-2xl p-8 shadow-2xl">
-            <div className="w-16 h-16 bg-red-500/15 text-red-500 rounded-full flex items-center justify-center mx-auto animate-pulse">
-              <ShieldAlert size={32} />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-xl font-bold font-arabic">
-                {lang === 'ar' ? 'عذراً، الرابط غير متوفر' : 'Sorry, Link Unavailable'}
-              </h2>
-              <p className="text-sm text-slate-400 font-arabic leading-relaxed">
-                {lang === 'ar' 
-                  ? 'الرابط الديناميكي (Dynamic QR Code) الذي تريد تصفحه غير فعال، أو ربما لا يزال الجدول غير مهيأ بعد في Supabase.' 
-                  : 'The dynamic QR Code link you visited is inactive or the dynamic_qr table is not configured yet in Supabase.'}
-              </p>
-            </div>
-            <a 
-              href="/"
-              className="inline-block w-full py-3 px-4 bg-red-650 hover:bg-red-700 text-white font-semibold rounded-xl text-sm font-arabic transition-all shadow-sm"
-              onClick={() => {
-                window.location.href = '/';
-              }}
-            >
-              {lang === 'ar' ? 'الرجوع للموقع المولد' : 'Back to QR Builder'}
-            </a>
-          </div>
-        </div>
-      );
-    }
-
-    // 2. Show loading screen while fetching from Supabase
-    if (isDynamicRoute && !resolvedDynamicUrl) {
-      return (
-        <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 text-center" id="redirect_resolving_screen" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-          <div className="max-w-md w-full space-y-6">
-            <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
-              <div className="absolute inset-0 rounded-full border-4 border-slate-800 border-t-red-650 animate-spin" />
-              <Globe size={32} className="text-red-500 animate-pulse" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-lg font-bold font-arabic">
-                {lang === 'ar' ? 'جاري سحب عنوان التوجيه...' : 'Decrypting Routing Node...'}
-              </h2>
-              <p className="text-xs text-slate-400 font-arabic">
-                {lang === 'ar' 
-                  ? 'نقوم بالاتصال بـ Supabase لجلب الرابط الأصلي وزيادة عدد الزيارات تلقائياً.' 
-                  : 'Fetching dynamic target from Supabase and updating click telemetry.'}
-              </p>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    if (!redirectUrl) {
-      return null; // Safety fallback
-    }
-
+  if (isRedirectRoute && redirectUrl) {
     let decodedUrl = '';
     let deepLink = '';
     let platform = 'youtube';
@@ -760,16 +657,16 @@ export default function App() {
           </div>
 
           {/* Quick spinner fallback button card */}
-          <div className="bg-slate-900/80 p-6 rounded-2xl border border-slate-800 space-y-4 shadow-xl" id="fallback_actions_card">
-            <span className="text-sm text-slate-200 font-arabic block font-semibold leading-relaxed">
+          <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4" id="fallback_actions_card">
+            <span className="text-xs text-slate-300 font-arabic block font-semibold leading-relaxed">
               {t.redirectFallback}
             </span>
 
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2.5">
               {/* Force App link */}
               <button
                 onClick={handleForceOpenClick}
-                className={`w-full py-4 px-5 text-white rounded-xl font-extrabold font-arabic text-base transition-all shadow-2xl active:scale-95 cursor-pointer ${loadingStyle.buttonClass} animate-pulse ring-4 ring-white/10`}
+                className={`w-full py-3.5 px-4 text-white rounded-xl font-bold font-arabic text-sm transition-all shadow-md active:scale-98 cursor-pointer ${loadingStyle.buttonClass}`}
                 type="button"
                 id="force_open_app_btn"
               >
@@ -779,7 +676,7 @@ export default function App() {
               {/* standard web fallback */}
               <button
                 onClick={() => { if (decodedUrl) window.location.href = decodedUrl; }}
-                className="w-full py-3 px-4 bg-slate-800 hover:bg-slate-705 text-slate-300 hover:text-white rounded-xl font-semibold font-arabic text-xs transition-all cursor-pointer active:scale-98"
+                className="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl font-medium font-arabic text-xs transition-all cursor-pointer"
                 type="button"
                 id="open_via_browser_btn"
               >
@@ -1065,14 +962,6 @@ export default function App() {
           <div className="transition-opacity duration-300">
             <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
               <ChaptersGeneratorView lang={lang} onReturn={() => setActiveTab('generator')} />
-            </React.Suspense>
-          </div>
-        )}
-
-        {activeTab === 'edit-qr' && (
-          <div className="transition-opacity duration-300">
-            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
-              <EditQRView lang={lang} onReturn={() => setActiveTab('generator')} />
             </React.Suspense>
           </div>
         )}

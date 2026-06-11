@@ -187,34 +187,8 @@ async function startServer() {
     res.json({ status: "ok" });
   });
 
-  // 1b. Supabase config proxy for runtime client-side access
-  app.get("/api/supabase-config", (req, res) => {
-    res.json({
-      supabaseUrl: process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || null,
-      supabaseAnonKey: process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || null
-    });
-  });
-
-  // 1c. Get visitor country based on secure Cloud headers (fast & CORS-safe fallback)
-  app.get("/api/visitor-country", (req, res) => {
-    try {
-      const code = getCountryCode(req);
-      const entry = (COUNTRY_MAP as any)[code] || { en: "Unknown" };
-      res.json({ country: entry.en || "Unknown", code: code });
-    } catch (_) {
-      res.json({ country: "Unknown", code: "UNKNOWN" });
-    }
-  });
-
   // 2. Track scan event
   app.all("/api/track-scan", (req, res) => {
-    // Check if it's a client telemetry error log
-    const clientErr = req.query.error || req.body?.error;
-    if (clientErr) {
-      console.error(`🚨 [Client Telemetry Error reported to Backend]: ${clientErr}`);
-      return res.status(200).json({ success: true, logged: true });
-    }
-
     const tid = (req.query.tid || req.body?.tid || "").toString() || "unknown";
     const target = (req.query.r || req.body?.r || "").toString() || "https://youtube.com";
     const platform = (req.query.platform || req.body?.platform || "youtube").toString();
