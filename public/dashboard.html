@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة التحكم | إدارة الروابط العميقة ورموز QR | Qrytube</title>
+  
+  <!-- Tailwind CSS Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Cairo & Inter Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- QRCode Library CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Cairo', 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-white min-h-screen flex flex-col justify-between selection:bg-red-500/30 selection:text-red-200">
+
+  <!-- Header -->
+  <header class="w-full py-4 px-6 border-b border-slate-900 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <a href="/" class="flex items-center gap-3">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="40" height="40" class="rounded-xl shadow-lg shadow-red-500/20">
+          <defs>
+            <linearGradient id="glossyRedDash" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#E51C1C" />
+              <stop offset="100%" stop-color="#800202" />
+            </linearGradient>
+            <linearGradient id="shineDash" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.3" />
+              <stop offset="35%" stop-color="#FFFFFF" stop-opacity="0.08" />
+              <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+            </linearGradient>
+            <g id="grid_p">
+              <rect x="0" y="0" width="18" height="18" rx="4" fill="none" stroke="#FFA6A6" stroke-width="3" />
+              <rect x="5" y="5" width="8" height="8" rx="2" fill="#FFA6A6" />
+            </g>
+          </defs>
+          <rect width="100" height="100" rx="22" fill="url(#glossyRedDash)" />
+          <use href="#grid_p" x="12" y="12" />
+          <use href="#grid_p" x="70" y="12" />
+          <use href="#grid_p" x="12" y="70" />
+          <g fill="#FFA6A6" opacity="0.95">
+            <rect x="36" y="12" width="4" height="4" />
+            <rect x="44" y="12" width="4" height="8" />
+            <rect x="60" y="12" width="4" height="4" />
+          </g>
+          <path d="M 45,34 L 45,66 L 68,50 Z" fill="url(#glossyRedDash)" stroke="#FFFFFF" stroke-width="5" stroke-linejoin="round"/>
+          <path d="M 0,22 A 22,22 0 0,1 24,0 L 76,0 A 22,22 0 0,1 100,22 Q 50,26 0,22 Z" fill="url(#shineDash)" />
+        </svg>
+        <div class="text-right">
+          <span class="text-lg font-black tracking-tight text-white block">Qrytube</span>
+          <span class="text-[10px] text-slate-400 block -mt-1 font-medium">لوحة التحكم السحابية للمستخدم</span>
+        </div>
+      </a>
+      
+      <!-- Right Controls -->
+      <div class="flex items-center gap-3">
+        <span class="text-xs text-slate-400 hidden sm:inline-block border-l border-slate-800 pl-3 mr-3" id="user_identity">...</span>
+        <button onclick="handleLogout()" class="text-xs bg-slate-900 border border-slate-800 hover:bg-red-950/45 hover:border-red-900/60 hover:text-red-300 transition-colors py-2 px-4 rounded-xl text-slate-300 flex items-center gap-1.5 duration-200 cursor-pointer">
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          <span>تسجيل خروج</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Workspace Section -->
+  <main class="flex-grow max-w-6xl w-full mx-auto py-10 px-4 space-y-10 relative">
+    
+    <!-- Top Greeting Area -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/20 p-6 rounded-3xl border border-slate-900 backdrop-blur-md">
+      <div>
+        <h1 class="text-2xl font-extrabold text-white">أهلاً بك في لوحة تحكم Qrytube الذكية 👋</h1>
+        <p class="text-slate-400 text-xs mt-1.5 leading-relaxed">قم بإنشاء كود QR تفاعلي للروابط العميقة التي تفتح مباشرة بداخل تطبيقات يوتيوب ومواقع التواصل الاجتماعي بسهولة.</p>
+      </div>
+      <!-- Stats Summary Strip -->
+      <div class="flex gap-4">
+        <div class="bg-slate-900/40 border border-slate-800 py-3 px-5 rounded-2xl text-center min-w-[100px]">
+          <span class="text-slate-500 text-[10px] uppercase font-bold block mb-1">الرابط النشط</span>
+          <span id="stat_total_links" class="text-xl font-extrabold text-white">0</span>
+        </div>
+        <div class="bg-slate-900/40 border border-slate-800 py-3 px-5 rounded-2xl text-center min-w-[100px]">
+          <span class="text-slate-500 text-[10px] uppercase font-bold block mb-1">إجمالي المسحات</span>
+          <span id="stat_total_scans" class="text-xl font-extrabold text-red-400">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generator & Interactive Output Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- Left side: Creation form (7 cols) -->
+      <div class="lg:col-span-7 bg-slate-900/40 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6">
+        <div class="flex items-center gap-2 border-b border-slate-805/65 pb-4">
+          <div class="p-2 bg-red-500/10 text-red-500 rounded-xl">
+            <i data-lucide="plus-circle" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-white">إنشاء رابط QR عميق وديناميكي جديد</h2>
+            <p class="text-slate-400 text-xs">املأ البيانات أدناه لتوليد الكود المحمي الخاص بك على قاعدة البيانات</p>
+          </div>
+        </div>
+
+        <form id="qr_create_form" class="space-y-4">
+          <!-- Alert -->
+          <div id="form_alert" class="hidden p-3.5 rounded-xl border text-xs leading-relaxed flex items-start gap-2">
+            <i id="form_alert_icon" class="w-4 h-4 shrink-0 mt-0.5"></i>
+            <span id="form_alert_msg" class="font-medium"></span>
+          </div>
+
+          <!-- Code title -->
+          <div>
+            <label for="title" class="block text-xs font-semibold text-slate-300 mb-2">عنوان الكود (للتنظيم والمتابعة)</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500">
+                <i data-lucide="tag" class="w-4 h-4"></i>
+              </span>
+              <input 
+                type="text" 
+                id="title" 
+                required 
+                placeholder="أفضل فيديو طبخ، منيو الطاولات، عرض العيد..."
+                class="w-full pr-10 pl-4 py-3 bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-red-650 focus:ring-1 focus:ring-red-650 rounded-xl text-sm text-white placeholder-slate-600 outline-none transition-all"
+              >
+            </div>
+          </div>
+
+          <!-- Original link -->
+          <div>
+            <label for="original_url" class="block text-xs font-semibold text-slate-300 mb-2">الرابط الأصلي (الموجه إليه)</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-500">
+                <i data-lucide="link" class="w-4 h-4"></i>
+              </span>
+              <input 
+                type="url" 
+                id="original_url" 
+                required 
+                placeholder="https://www.youtube.com/watch?v=... أو أي رابط"
+                class="w-full pr-10 pl-4 py-3 bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-red-650 focus:ring-1 focus:ring-red-650 rounded-xl text-sm text-white placeholder-slate-600 outline-none transition-all"
+              >
+            </div>
+            <p class="text-[10px] text-slate-500 mt-1.5">يمكنك وضع روابط يوتيوب، فيسبوك، إنستغرام، تيك توك، أو أي موقع إلكتروني بالكامل.</p>
+          </div>
+
+          <!-- Generate Button -->
+          <button 
+            type="submit" 
+            id="btn_generate"
+            class="w-full py-3.5 mt-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 transition-all font-bold text-sm text-white rounded-xl shadow-lg shadow-red-650/15 flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+          >
+            <i data-lucide="qr-code" class="w-4 h-4 animate-pulse"></i>
+            <span>حفظ الكود وتوليد كود الـ QR</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Right side: Quick render outcome (5 cols) -->
+      <div id="qr_result_card" class="lg:col-span-5 bg-slate-900/40 border border-slate-800 rounded-3xl p-6 sm:p-8 flex flex-col items-center justify-center text-center relative overflow-hidden transition-all h-full self-stretch min-h-[400px]">
+        
+        <div id="qr_result_empty" class="space-y-4">
+          <div class="w-20 h-20 mx-auto rounded-full bg-slate-900 border border-slate-850 flex items-center justify-center text-slate-700 animate-pulse">
+            <i data-lucide="qr-code" class="w-10 h-10"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-slate-400">بانتظار توليد كود الـ QR الديناميكي</h3>
+            <p class="text-slate-500 text-xs mt-1 max-w-[240px] leading-relaxed mx-auto">عند قيامك بحفظ كود جديد، سيتم عرضه هنا للتحميل الفوري بدقة ممتازة وبصيغة ذكية.</p>
+          </div>
+        </div>
+
+        <div id="qr_result_content" class="hidden w-full space-y-6">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-550/20 text-emerald-400 rounded-full text-[11px] font-bold">
+            <i data-lucide="badge-check" class="w-3.5 h-3.5"></i>
+            تم الحفظ والتوليد بنجاح!
+          </span>
+
+          <h3 id="display_title" class="text-md font-black text-white px-2 truncate leading-normal">---</h3>
+
+          <!-- QR Container -->
+          <div class="relative w-48 h-48 mx-auto p-3 bg-white rounded-2xl flex items-center justify-center shadow-2xl border border-red-500/10 scale-100" id="qr_holder_wrapper">
+            <div id="qrcode" class="w-full h-full flex items-center justify-center"></div>
+          </div>
+
+          <div class="space-y-2 max-w-xs mx-auto">
+            <p class="text-[10px] text-slate-400">رابط التوجيه الذكي الذي يحمل الكيو آر:</p>
+            <div class="flex items-center gap-1 bg-slate-950 p-2 rounded-xl border border-slate-800 text-[10px] text-red-400 font-mono select-all overflow-x-auto">
+              <span id="display_redirect_url" class="truncate flex-1 text-right">...</span>
+              <button onclick="copyToClipboard()" class="p-1 text-slate-400 hover:text-white transition-colors" title="نسخ الرابط">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Buttons Actions -->
+          <div class="flex flex-col gap-2 max-w-xs mx-auto">
+            <button 
+              onclick="downloadQR()" 
+              class="w-full py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              تحميل كود QR كصورة PNG
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- List of Users codes (12 cols) -->
+    <div id="all_codes_panel" class="bg-slate-900/40 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-805/65 pb-4 flex-wrap gap-2">
+        <div class="flex items-center gap-2">
+          <div class="p-2 bg-indigo-500/10 text-indigo-400 rounded-xl">
+            <i data-lucide="list" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-white">إحصائيات وأكواد QR الخاصة بك</h2>
+            <p class="text-slate-400 text-xs">قائمة كاملة بجميع الحملات النشطة وعدد مسحات الباركود الخاصة بها</p>
+          </div>
+        </div>
+
+        <!-- Reload Button -->
+        <button onclick="loadUserCodes()" class="text-xs bg-slate-950 hover:bg-slate-900 border border-slate-850 py-2 px-3.5 rounded-xl text-slate-400 hover:text-white transition-colors flex items-center gap-1.5 duration-200 cursor-pointer">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="refresh_icon"></i>
+          <span>تحديث البيانات</span>
+        </button>
+      </div>
+
+      <!-- Codes list -->
+      <div id="loader_state" class="text-center py-10">
+        <div class="w-8 h-8 rounded-full border-2 border-slate-800 border-t-red-605 animate-spin mx-auto mb-3"></div>
+        <p class="text-xs text-slate-500">جاري تحميل أكوادك وإحصائيات المسح الآمنة...</p>
+      </div>
+
+      <!-- Table View -->
+      <div id="content_state" class="hidden overflow-x-auto">
+        <table class="w-full text-right text-xs border-collapse">
+          <thead>
+            <tr class="border-b border-slate-850 text-slate-440 font-bold">
+              <th class="py-3.5 px-4">اسم / عنوان الكود</th>
+              <th class="py-3.5 px-4">رابط التوجيه</th>
+              <th class="py-3.5 px-4 max-w-xs truncate hidden md:table-cell">الرابط الأصلي المستهدف</th>
+              <th class="py-3.5 px-4 text-center">تاريخ الإنشاء</th>
+              <th class="py-3.5 px-4 text-center">إجمالي المسحات</th>
+              <th class="py-3.5 px-4 text-right">خيارات</th>
+            </tr>
+          </thead>
+          <tbody id="codes_tbody">
+            <!-- Dynamic rows -->
+          </tbody>
+        </table>
+        
+        <!-- Empty List -->
+        <div id="empty_list" class="hidden text-center py-14 space-y-3">
+          <div class="w-14 h-14 bg-slate-950 border border-slate-900 rounded-2xl flex items-center justify-center mx-auto text-slate-600">
+            <i data-lucide="inbox" class="w-7 h-7"></i>
+          </div>
+          <div>
+            <h4 class="text-slate-400 font-bold text-sm">ليس لديك أي أكواد QR مسجلة حالياً</h4>
+            <p class="text-slate-550 text-xs mt-1">تفضل بتعبئة النموذج بالأعلى وحفظ أول كود QR خاص بك على الفور!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full py-6 mt-10 text-center text-xs text-slate-500 border-t border-slate-950 bg-slate-950/20 backdrop-blur-md">
+    <div class="max-w-6xl mx-auto px-4">
+      لوحة تحكم مشفرة ومؤمنة بالكامل بالاعتماد على بروتوكولات حماية Supabase © Qrytube 2026.
+    </div>
+  </footer>
+
+  <!-- Setup Page Scripts -->
+  <script>
+    // Supabase Credentials
+    const SUPABASE_URL = 'https://nlqealsgziswublmbtkw.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5scWVhbHNnemlzd3VibG1idGt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyMjA5NjksImV4cCI6MjA5Njc5Njk2OX0.3lmxYWRtBpp_PMPKSfftW3SHeDxmim-SfuGShwovCW4';
+    
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    let currentUser = null;
+    let qrGeneratorInstance = null;
+    let currentlyGeneratedShortId = null;
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Verification authentication
+    async function checkAuth() {
+      const { data: { user } } = await _supabase.auth.getUser();
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+      currentUser = user;
+      document.getElementById('user_identity').innerText = user.email;
+      
+      // Load user campaigns
+      await loadUserCodes();
+    }
+    checkAuth();
+
+    // Helper: generate 6 chars random ID
+    function generateShortId() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let result = '';
+      for (let i = 0; i < 6; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    }
+
+    // Handles logout
+    async function handleLogout() {
+      const { error } = await _supabase.auth.signOut();
+      window.location.href = 'login.html';
+    }
+
+    // Handles Alert message in form
+    function showFormAlert(type, message) {
+      const box = document.getElementById('form_alert');
+      const msg = document.getElementById('form_alert_msg');
+      const icon = document.getElementById('form_alert_icon');
+
+      msg.innerText = message;
+      box.classList.remove('hidden');
+
+      if (type === 'error') {
+        box.className = "p-3.5 rounded-xl border border-red-500/20 bg-red-500/10 text-red-400 text-xs leading-relaxed flex items-start gap-2 animate-fade-in";
+        icon.setAttribute('data-lucide', 'alert-triangle');
+      } else {
+        box.className = "p-3.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 text-xs leading-relaxed flex items-start gap-2 animate-fade-in";
+        icon.setAttribute('data-lucide', 'check-circle-2');
+      }
+      lucide.createIcons();
+    }
+
+    function hideFormAlert() {
+      document.getElementById('form_alert').classList.add('hidden');
+    }
+
+    // Copy redirect link to clipboard
+    function copyToClipboard() {
+      const txt = document.getElementById('display_redirect_url').innerText;
+      navigator.clipboard.writeText(txt).then(() => {
+        alert('تم نسخ الرابط الحصري بنجاح!');
+      }).catch(e => console.error(e));
+    }
+
+    // Form creation submit handler
+    const form = document.getElementById('qr_create_form');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideFormAlert();
+
+      const title = document.getElementById('title').value.trim();
+      const original_url = document.getElementById('original_url').value.trim();
+      const btn = document.getElementById('btn_generate');
+
+      if (!title || !original_url) {
+        showFormAlert('error', 'الرجاء تعبئة جميع الخانات لحفظ الكود.');
+        return;
+      }
+
+      // Basic URL verification
+      try {
+        new URL(original_url);
+      } catch (_) {
+        showFormAlert('error', 'الرجاء إدخال رابط إنترنت صحيح بالكامل يبدأ بـ http:// أو https://.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.classList.add('opacity-70');
+
+      try {
+        const shortId = generateShortId();
+        
+        // Save to Supabase Table: qr_codes -> id, user_id, title, original_url
+        const { error } = await _supabase.from('qr_codes').insert({
+          id: shortId,
+          user_id: currentUser.id,
+          title: title,
+          original_url: original_url
+        });
+
+        if (error) throw error;
+
+        // Success! Display generated QR section
+        currentlyGeneratedShortId = shortId;
+        const redirectUrl = `${window.location.origin}/redirect.html?id=${shortId}`;
+        
+        document.getElementById('display_title').innerText = title;
+        document.getElementById('display_redirect_url').innerText = redirectUrl;
+
+        // Render QR Code using qrcodejs Library
+        const qrContainer = document.getElementById('qrcode');
+        qrContainer.innerHTML = ""; // Clear existing
+        
+        new QRCode(qrContainer, {
+          text: redirectUrl,
+          width: 192,
+          height: 192,
+          colorDark: "#111827",
+          colorLight: "#FFFFFF",
+          correctLevel: QRCode.CorrectLevel.H
+        });
+
+        // Toggle Views
+        document.getElementById('qr_result_empty').classList.add('hidden');
+        document.getElementById('qr_result_content').classList.remove('hidden');
+
+        // Reset Inputs
+        document.getElementById('title').value = '';
+        document.getElementById('original_url').value = '';
+
+        showFormAlert('success', 'تم حفظ الروابط العميقة وتوليد كود الـ QR الخاص بك بنجاح!');
+
+        // Reload the user lists
+        await loadUserCodes();
+
+      } catch (err) {
+        showFormAlert('error', err.message || 'حدث خطأ غير متوقع أثناء الحفظ بقاعدة البيانات.');
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('opacity-70');
+      }
+    });
+
+    // Load created codes and calculate metrics
+    async function loadUserCodes() {
+      const loader = document.getElementById('loader_state');
+      const container = document.getElementById('content_state');
+      const tbody = document.getElementById('codes_tbody');
+      const emptyEl = document.getElementById('empty_list');
+      const refreshIcon = document.getElementById('refresh_icon');
+
+      refreshIcon.classList.add('animate-spin');
+      loader.classList.remove('hidden');
+      container.classList.add('hidden');
+      emptyEl.classList.add('hidden');
+      tbody.innerHTML = '';
+
+      try {
+        // 1. Fetch user's QR codes
+        const { data: codes, error: codesErr } = await _supabase
+          .from('qr_codes')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false });
+
+        if (codesErr) throw codesErr;
+
+        // 2. Fetch all scan metrics for user statistics compiling
+        const { data: scans, error: scansErr } = await _supabase
+          .from('qr_scans')
+          .select('qr_id');
+
+        if (scansErr) throw scansErr;
+
+        // Compile counts map
+        const scanCounts = {};
+        let totalScansAggregate = 0;
+        
+        if (scans) {
+          scans.forEach(s => {
+            scanCounts[s.qr_id] = (scanCounts[s.qr_id] || 0) + 1;
+          });
+        }
+
+        // Display general metrics
+        const totalLinksNum = codes ? codes.length : 0;
+        document.getElementById('stat_total_links').innerText = totalLinksNum;
+
+        // Render table
+        if (!codes || codes.length === 0) {
+          emptyEl.classList.remove('hidden');
+          container.classList.remove('hidden');
+          document.getElementById('stat_total_scans').innerText = "0";
+        } else {
+          codes.forEach(code => {
+            const codeScansCount = scanCounts[code.id] || 0;
+            totalScansAggregate += codeScansCount;
+
+            const redirectUrl = `${window.location.origin}/redirect.html?id=${code.id}`;
+            const creationDate = new Date(code.created_at).toLocaleDateString('ar-EG', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
+            });
+
+            const row = document.createElement('tr');
+            row.className = "border-b border-slate-900 hover:bg-slate-900/20 transition-all font-medium text-slate-300";
+            row.innerHTML = `
+              <td class="py-4 px-4 font-bold text-white text-sm">${code.title}</td>
+              <td class="py-4 px-4 font-mono select-all text-red-400">
+                <a href="${redirectUrl}" target="_blank" class="hover:underline">${redirectUrl}</a>
+              </td>
+              <td class="py-4 px-4 max-w-xs truncate hidden md:table-cell text-slate-500" title="${code.original_url}">${code.original_url}</td>
+              <td class="py-4 px-4 text-center text-[10px] text-slate-400">${creationDate}</td>
+              <td class="py-4 px-4 text-center font-bold text-sm text-white">
+                <span class="inline-block py-1 px-3.5 bg-red-500/10 text-red-400 rounded-full border border-red-500/15">${codeScansCount}</span>
+              </td>
+              <td class="py-4 px-4 text-right flex items-center justify-end gap-1">
+                <button onclick="viewQrCodeDirect('${code.id}', '${code.title}', '${redirectUrl}')" class="p-2 hover:bg-slate-800 text-indigo-400 rounded-lg transition-colors cursor-pointer" title="عرض الكود">
+                  <i data-lucide="eye" class="w-4 h-4"></i>
+                </button>
+                <button onclick="handleDeleteCode('${code.id}')" class="p-2 hover:bg-red-950/40 text-red-500 rounded-lg transition-colors cursor-pointer" title="حذف الكود">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </td>
+            `;
+            tbody.appendChild(row);
+          });
+          
+          document.getElementById('stat_total_scans').innerText = totalScansAggregate;
+          container.classList.remove('hidden');
+        }
+
+      } catch (err) {
+        console.error("Failed to fetch campaigns", err);
+      } finally {
+        loader.classList.add('hidden');
+        refreshIcon.classList.remove('animate-spin');
+        lucide.createIcons();
+      }
+    }
+
+    // View QR inside the active sidebar card
+    function viewQrCodeDirect(id, title, redirectUrl) {
+      document.getElementById('display_title').innerText = title;
+      document.getElementById('display_redirect_url').innerText = redirectUrl;
+      currentlyGeneratedShortId = id;
+
+      const qrContainer = document.getElementById('qrcode');
+      qrContainer.innerHTML = ""; // Clear existing
+      
+      new QRCode(qrContainer, {
+        text: redirectUrl,
+        width: 192,
+        height: 192,
+        colorDark: "#111827",
+        colorLight: "#FFFFFF",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+
+      document.getElementById('qr_result_empty').classList.add('hidden');
+      document.getElementById('qr_result_content').classList.remove('hidden');
+      
+      // smooth scroll to preview
+      document.getElementById('qr_result_card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Handles download of generated QR code
+    function downloadQR() {
+      if (!currentlyGeneratedShortId) return;
+      const img = document.getElementById('qrcode').querySelector('img');
+      const canvas = document.getElementById('qrcode').querySelector('canvas');
+      
+      if (img && img.src) {
+        const link = document.createElement("a");
+        link.href = img.src;
+        link.download = `qrytube_qr_${currentlyGeneratedShortId}.png`;
+        link.click();
+      } else if (canvas) {
+        const link = document.createElement("a");
+        link.href = canvas.toDataURL("image/png");
+        link.download = `qrytube_qr_${currentlyGeneratedShortId}.png`;
+        link.click();
+      } else {
+        alert("محاولة طباعة الكود تعذرت حالياً، تأكد من ثبات الرابط المولد بالكامل.");
+      }
+    }
+
+    // Delete static campaign
+    async function handleDeleteCode(id) {
+      if (!confirm("هل أنت متأكد تماماً من رغبتك في حذف هذا الكود نهائياً؟ ستتوقف روابط التوجيه وتُحذف كافة الإحصائيات التابعة له.")) return;
+      
+      try {
+        // Delete all dependent scans
+        await _supabase.from('qr_scans').delete().eq('qr_id', id);
+        
+        // Delete campaign
+        const { error } = await _supabase.from('qr_codes').delete().eq('id', id);
+        if (error) throw error;
+        
+        // If current displayed preview represents deleted item, lock preview
+        if (currentlyGeneratedShortId === id) {
+          currentlyGeneratedShortId = null;
+          document.getElementById('qr_result_empty').classList.remove('hidden');
+          document.getElementById('qr_result_content').classList.add('hidden');
+        }
+
+        await loadUserCodes();
+      } catch (err) {
+        alert(err.message || "فشلت عملية الحذف، الرجاء المحاولة ثانيةً.");
+      }
+    }
+  </script>
+</body>
+</html>

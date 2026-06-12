@@ -731,6 +731,16 @@ export default function App() {
           
           {/* Right badge / Action badge, Theme & Language Toggles */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* Supabase Cloud Dashboard Portal Link */}
+            <a
+              href="/login.html"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-red-650 to-rose-650 hover:from-red-550 hover:to-rose-550 text-white text-[11px] font-extrabold rounded-xl font-arabic transition-all shadow-md shadow-red-500/15 cursor-pointer active:scale-95"
+              id="supabase_dashboard_link"
+            >
+              <Cloud size={13} className="animate-pulse" />
+              <span>{lang === 'ar' ? 'لوحة التحكم السحابية ⚡' : 'Cloud Dashboard ⚡'}</span>
+            </a>
+
             {/* Dark/Light Mode Toggle Button */}
             <button
               onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}
@@ -786,6 +796,24 @@ export default function App() {
           <p className="mt-3 text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-normal font-arabic max-w-2xl leading-relaxed">
             {t.heroSubtitle}
           </p>
+
+          {/* Supabase Dashboard Features promotion */}
+          <div className="mt-6 flex flex-wrap gap-2.5 justify-center max-w-lg">
+            <a 
+              href="/login.html" 
+              className="inline-flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-red-650 via-rose-600 to-red-750 text-white hover:opacity-95 rounded-2xl text-xs font-black font-arabic shadow-xl shadow-red-500/15 duration-200 active:scale-98 cursor-pointer"
+            >
+              <Cloud size={14} className="animate-bounce" />
+              <span>{lang === 'ar' ? 'سجل حساباً وتتبع إحصائياتك مجاناً 📊' : 'Register & Track Scan Analytics 📊'}</span>
+            </a>
+            <a 
+              href="/login.html" 
+              className="inline-flex items-center gap-2 px-5 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-705 dark:text-slate-300 rounded-2xl text-xs font-black font-arabic transition-all border border-slate-200/40 dark:border-slate-800 cursor-pointer"
+            >
+              <ShieldCheck size={14} className="text-emerald-550" />
+              <span>{lang === 'ar' ? 'إدارة رموز QR الديناميكية 🔐' : 'Manage Dynamic QRs 🔐'}</span>
+            </a>
+          </div>
 
         </div>
       </section>

@@ -532,6 +532,25 @@ async function startServer() {
     }
   });
 
+  // Expose routing endpoints for custom static Supabase Auth flow pages
+  app.get("/login.html", (req, res) => {
+    const file = path.join(process.cwd(), "public", "login.html");
+    if (fs.existsSync(file)) return res.sendFile(file);
+    res.status(404).send("File not found");
+  });
+
+  app.get("/dashboard.html", (req, res) => {
+    const file = path.join(process.cwd(), "public", "dashboard.html");
+    if (fs.existsSync(file)) return res.sendFile(file);
+    res.status(404).send("File not found");
+  });
+
+  app.get("/redirect.html", (req, res) => {
+    const file = path.join(process.cwd(), "public", "redirect.html");
+    if (fs.existsSync(file)) return res.sendFile(file);
+    res.status(404).send("File not found");
+  });
+
   // FRONTEND HANDLING / STATIC SERVING
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
