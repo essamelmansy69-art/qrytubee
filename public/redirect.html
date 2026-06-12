@@ -131,6 +131,7 @@
           .single();
 
         if (qrErr || !qrcodeData) {
+          console.error("Supabase select error:", qrErr);
           parent_title.innerText = "كود غير صالح ⚠️";
           parent_title.className = "text-xl font-extrabold text-red-500";
           parent_text.innerText = "الملف أو الكود المطلوب لم يعد موجوداً في قاعدة بيانات منصة Qrytube أو تم مسحه بواسطة مالكه.";
