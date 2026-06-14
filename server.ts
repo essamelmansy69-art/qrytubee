@@ -517,6 +517,46 @@ async function startServer() {
     <lastmod>2026-06-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+  </url>
+  <!-- 7. Restaurant Tool (Arabic) -->
+  <url>
+    <loc>${host}/restaurant</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="${host}/restaurant" />
+    <xhtml:link rel="alternate" hreflang="en" href="${host}/restaurant?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/restaurant" />
+    <lastmod>2026-06-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- 7. Restaurant Tool (English) -->
+  <url>
+    <loc>${host}/restaurant?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="${host}/restaurant" />
+    <xhtml:link rel="alternate" hreflang="en" href="${host}/restaurant?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/restaurant" />
+    <lastmod>2026-06-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- 8. Gym & Fitness Tool (Arabic) -->
+  <url>
+    <loc>${host}/gym</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="${host}/gym" />
+    <xhtml:link rel="alternate" hreflang="en" href="${host}/gym?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/gym" />
+    <lastmod>2026-06-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <!-- 8. Gym & Fitness Tool (English) -->
+  <url>
+    <loc>${host}/gym?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="${host}/gym" />
+    <xhtml:link rel="alternate" hreflang="en" href="${host}/gym?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/gym" />
+    <lastmod>2026-06-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
   </url>${articleUrls}
 </urlset>`;
     res.header("Content-Type", "application/xml");
@@ -649,6 +689,20 @@ async function startServer() {
           desc = isEn
             ? "Get in touch with the Qrytube professional team for support, feature feedback, partnership proposals, or customized enterprise integration solutions."
             : "تواصل مع فريق الدعم الفني لموقع Qrytube للإبلاغ عن أي مشاكل أو المساعدة في تصميم وطباعة أكواد الـ QR كود والشعارات المخصصة لقنواتك.";
+        } else if (cleanPath === "restaurant") {
+          title = isEn
+            ? "Free Restaurant QR Code Generator | Smart Table Menu Code | Qrytube"
+            : "أداة توليد كود QR للمطاعم والمقاهي مجاناً | منيو باركود ذكي | Qrytube";
+          desc = isEn
+            ? "Generate customizable, free QR codes for aggregate restaurant menus, food catalogs, and table stands. Include custom logos, frames, and download vector SVG/PDF flyers."
+            : "أنشئ كود QR ذكي ومجاني لمنيو مطعمك أو مقهاك. يدعم روابط المنيو الإلكتروني ومواقع الخرائط، قابل للتخصيص بالكامل مع إضافة شعار وألوان مميزة للطباعة.";
+        } else if (cleanPath === "gym") {
+          title = isEn
+            ? "Free Gym QR Code Generator | Smart Fitness Club Code | Qrytube"
+            : "أداة توليد كود QR للصالات الرياضية والجيم مجاناً | رمز كاشف ذكي | Qrytube";
+          desc = isEn
+            ? "Generate customizable, free QR codes for fitness centers, gym reception check-ins, and machinery tutorials. Include custom dumbbell symbols, custom frame templates, and download vector flyers/A4 PDF."
+            : "أنشئ كود QR ذكي ومجاني لصالتك الرياضية وناديك الصحي. يدعم روابط الاشتراكات، الحسابات، جداول التمارين، قابل للتخصيص بالكامل مع إضافة رموز الأثقال والشعارات للطباعة.";
         } else {
           // default/fallback
           title = isEn 

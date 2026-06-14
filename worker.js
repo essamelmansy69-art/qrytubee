@@ -10,7 +10,7 @@ const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
     <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/" />
     <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-13</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -20,7 +20,7 @@ const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
     <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/" />
     <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-13</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -30,7 +30,7 @@ const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
     <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/about" />
     <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/about?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/about" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -40,7 +40,7 @@ const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
     <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/about" />
     <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/about?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/about" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -50,7 +50,7 @@ const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
     <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/contact" />
     <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/contact?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/contact" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -60,7 +60,7 @@ const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
     <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/contact" />
     <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/contact?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/contact" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -70,7 +70,7 @@ const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
     <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/privacy" />
     <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/privacy?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/privacy" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -80,7 +80,7 @@ const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
     <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/privacy" />
     <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/privacy?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/privacy" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -90,7 +90,7 @@ const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
     <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/articles" />
     <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/articles?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/articles" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -100,7 +100,7 @@ const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
     <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/articles" />
     <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/articles?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/articles" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -110,7 +110,7 @@ const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
     <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/terms" />
     <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/terms?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/terms" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
@@ -120,9 +120,49 @@ const SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
     <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/terms" />
     <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/terms?lang=en" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/terms" />
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+  </url>
+  <!-- 7. Restaurant Tool (Arabic) -->
+  <url>
+    <loc>https://qrytube.com/restaurant</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/restaurant" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/restaurant?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/restaurant" />
+    <lastmod>2026-06-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- 7. Restaurant Tool (English) -->
+  <url>
+    <loc>https://qrytube.com/restaurant?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/restaurant" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/restaurant?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/restaurant" />
+    <lastmod>2026-06-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <!-- 8. Gym & Fitness Tool (Arabic) -->
+  <url>
+    <loc>https://qrytube.com/gym</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/gym" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/gym?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/gym" />
+    <lastmod>2026-06-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <!-- 8. Gym & Fitness Tool (English) -->
+  <url>
+    <loc>https://qrytube.com/gym?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/gym" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/gym?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://qrytube.com/gym" />
+    <lastmod>2026-06-13</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
   </url>
 </urlset>`;
 
@@ -333,18 +373,34 @@ export default {
     // 1. Serve dynamic sitemap.xml with correct headers by proxying to the origin server
     if (pathname === '/sitemap.xml') {
       try {
-        const response = await fetch(request);
+        // Bypass Cloudflare cache for the origin subrequest by adding a unique query parameter
+        const subRequestUrl = new URL(request.url);
+        subRequestUrl.searchParams.set('cf_bypass_cache', Date.now().toString());
+
+        const subRequestHeaders = new Headers(request.headers);
+        subRequestHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        subRequestHeaders.set('Pragma', 'no-cache');
+
+        const response = await fetch(new Request(subRequestUrl.toString(), {
+          method: request.method,
+          headers: subRequestHeaders,
+          redirect: 'follow'
+        }));
+
         if (response.ok) {
           const xmlText = await response.text();
-          return new Response(xmlText, {
-            status: 200,
-            headers: {
-              'Content-Type': 'application/xml; charset=utf-8',
-              'Cache-Control': 'public, max-age=3600, must-revalidate',
-              'Access-Control-Allow-Origin': '*',
-              'X-Content-Type-Options': 'nosniff',
-            },
-          });
+          // Safety Check: Verify that this is indeed valid XML and not HTML
+          if (xmlText.trim().startsWith('<?xml')) {
+            return new Response(xmlText, {
+              status: 200,
+              headers: {
+                'Content-Type': 'application/xml; charset=utf-8',
+                'Cache-Control': 'public, max-age=3600, must-revalidate',
+                'Access-Control-Allow-Origin': '*',
+                'X-Content-Type-Options': 'nosniff',
+              },
+            });
+          }
         }
       } catch (err) {
         // Fallback to static sitemap if origin is unreachable
@@ -366,18 +422,34 @@ export default {
     // 2. Serve robots.txt dynamically from the origin, falling back to static
     if (pathname === '/robots.txt') {
       try {
-        const response = await fetch(request);
+        // Bypass Cloudflare cache for the origin subrequest by adding a unique query parameter
+        const subRequestUrl = new URL(request.url);
+        subRequestUrl.searchParams.set('cf_bypass_cache', Date.now().toString());
+
+        const subRequestHeaders = new Headers(request.headers);
+        subRequestHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        subRequestHeaders.set('Pragma', 'no-cache');
+
+        const response = await fetch(new Request(subRequestUrl.toString(), {
+          method: request.method,
+          headers: subRequestHeaders,
+          redirect: 'follow'
+        }));
+
         if (response.ok) {
           const robotsText = await response.text();
-          return new Response(robotsText, {
-            status: 200,
-            headers: {
-              'Content-Type': 'text/plain; charset=utf-8',
-              'Cache-Control': 'public, max-age=3600, must-revalidate',
-              'Access-Control-Allow-Origin': '*',
-              'X-Content-Type-Options': 'nosniff',
-            },
-          });
+          // Safety Check: Verify that this is indeed valid robots.txt and not HTML
+          if (robotsText.trim().toLowerCase().includes('user-agent:')) {
+            return new Response(robotsText, {
+              status: 200,
+              headers: {
+                'Content-Type': 'text/plain; charset=utf-8',
+                'Cache-Control': 'public, max-age=3600, must-revalidate',
+                'Access-Control-Allow-Origin': '*',
+                'X-Content-Type-Options': 'nosniff',
+              },
+            });
+          }
         }
       } catch (err) {
         // Fallback

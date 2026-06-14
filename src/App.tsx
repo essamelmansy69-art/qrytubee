@@ -32,7 +32,8 @@ import {
   Sun,
   Moon,
   Globe,
-  Utensils
+  Utensils,
+  Dumbbell
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { translations } from './translations';
@@ -46,6 +47,7 @@ const LegalView = React.lazy(() => import('./components/LegalView'));
 const FAQView = React.lazy(() => import('./components/FAQView'));
 const ChaptersGeneratorView = React.lazy(() => import('./components/ChaptersGeneratorView'));
 const RestaurantQRView = React.lazy(() => import('./components/RestaurantQRView'));
+const GymQRView = React.lazy(() => import('./components/GymQRView'));
 
 export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
@@ -99,7 +101,7 @@ export default function App() {
     return 'ar';
   });
 
-  const [activeTab, setActiveTab] = useState<'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact' | 'chapters' | 'restaurant'>(() => {
+  const [activeTab, setActiveTab] = useState<'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact' | 'chapters' | 'restaurant' | 'gym'>(() => {
     try {
       const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
       if (path === 'terms') return 'terms';
@@ -111,6 +113,7 @@ export default function App() {
       if (path === 'tiktok') return 'tiktok';
       if (path === 'website') return 'website';
       if (path === 'restaurant' || path === 'restaurant-qr' || path === 'menu-barcode') return 'restaurant';
+      if (path === 'gym' || path === 'gym-qr' || path === 'gym-qr-generator' || path === 'fitness-barcode') return 'gym';
       if (path === 'chapters' || path === 'timestamp-generator' || path === 'youtube-chapters') return 'chapters';
       if (path === 'articles' || path.startsWith('articles/')) return 'articles';
     } catch (_) {}
@@ -230,6 +233,13 @@ export default function App() {
       desc = lang === 'ar'
         ? "أنشئ كود QR ذكي ومجاني لمنيو مطعمك أو مقهاك. يدعم روابط المنيو الإلكتروني ومواقع الخرائط، قابل للتخصيص بالكامل مع إضافة شعار وألوان مميزة للطباعة."
         : "Generate customizable, free QR codes for aggregate restaurant menus, food catalogs, and table stands. Include custom restaurant logos, custom frames, and download vector SVG and PDF flyers.";
+    } else if (activeTab === 'gym') {
+      title = lang === 'ar'
+        ? "أداة توليد كود QR للصالات الرياضية والجيم مجاناً | رمز كاشف ذكي | Qrytube"
+        : "Free Gym QR Code Generator | Smart Fitness Club Code | Qrytube";
+      desc = lang === 'ar'
+        ? "أنشئ كود QR ذكي ومجاني لصالتك الرياضية وناديك الصحي. يدعم روابط الاشتراكات، الحسابات، جداول التمارين، قابل للتخصيص بالكامل مع إضافة رموز الأثقال والشعارات للطباعة."
+        : "Generate customizable, free QR codes for fitness centers, gym reception check-ins, and machinery tutorials. Include custom dumbbell symbols, custom frame templates, and download vector flyers/A4 PDF.";
     } else {
       title = lang === 'ar' 
         ? "YouTube QR Code Generator | إنشاء QR كود لرابط فيديو يوتيوب بضغطة واحدة" 
@@ -363,7 +373,7 @@ export default function App() {
         setSelectedArticleId(e.state.articleId || null);
       } else {
         const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
-        if (['terms', 'privacy', 'about', 'contact', 'facebook', 'instagram', 'tiktok', 'website', 'chapters', 'restaurant'].includes(path)) {
+        if (['terms', 'privacy', 'about', 'contact', 'facebook', 'instagram', 'tiktok', 'website', 'chapters', 'restaurant', 'gym'].includes(path)) {
           setActiveTab(path as any);
           setSelectedArticleId(null);
         } else if (path === 'articles') {
@@ -438,7 +448,7 @@ export default function App() {
     };
   }, []);
 
-  const handleNavClick = (tab: 'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact' | 'restaurant', event: React.MouseEvent) => {
+  const handleNavClick = (tab: 'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact' | 'restaurant' | 'gym', event: React.MouseEvent) => {
     event.preventDefault();
     setActiveTab(tab);
     if (tab === 'articles') {
@@ -794,7 +804,7 @@ export default function App() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" id="main_workspace">
         
         {/* Sleek Platform Sub-navigation tabs */}
-        {(activeTab === 'generator' || activeTab === 'facebook' || activeTab === 'instagram' || activeTab === 'tiktok' || activeTab === 'website' || activeTab === 'restaurant') && (
+        {(activeTab === 'generator' || activeTab === 'facebook' || activeTab === 'instagram' || activeTab === 'tiktok' || activeTab === 'website' || activeTab === 'restaurant' || activeTab === 'gym') && (
           <div className="mb-8 bg-slate-50/70 p-1.5 rounded-2xl border border-slate-100 flex items-center justify-start gap-1.5 sm:gap-2 max-w-2xl mx-auto overflow-x-auto scrollbar-none shadow-xs" id="platform_sub_navbar">
             <button
               onClick={() => setActiveTab('generator')}
@@ -867,6 +877,18 @@ export default function App() {
               <Utensils size={16} />
               <span>{lang === 'ar' ? 'منيو ومطاعم 🍽️' : 'Menus & Cafes'}</span>
             </button>
+
+            <button
+              onClick={() => setActiveTab('gym')}
+              className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold font-arabic cursor-pointer transition-all duration-300 whitespace-nowrap ${
+                activeTab === 'gym'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-emerald-650 hover:bg-slate-100/50'
+              }`}
+            >
+              <Dumbbell size={16} />
+              <span>{lang === 'ar' ? 'كود الجيم 🏋️‍♂️' : 'Gym & Fitness'}</span>
+            </button>
           </div>
         )}
 
@@ -932,6 +954,20 @@ export default function App() {
           <div className="transition-opacity duration-300">
             <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
               <RestaurantQRView 
+                lang={lang} 
+                onNavigateToYouTube={() => {
+                  setActiveTab('generator');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }} 
+              />
+            </React.Suspense>
+          </div>
+        )}
+
+        {activeTab === 'gym' && (
+          <div className="transition-opacity duration-300">
+            <React.Suspense fallback={<div className="text-center py-10 font-arabic text-gray-500 animate-pulse">جاري التحميل...</div>}>
+              <GymQRView 
                 lang={lang} 
                 onNavigateToYouTube={() => {
                   setActiveTab('generator');
