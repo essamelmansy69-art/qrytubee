@@ -276,13 +276,13 @@ export default function App() {
     setMetaTag('property', 'og:title', title);
     setMetaTag('property', 'og:description', desc);
     setMetaTag('property', 'og:url', currentOrigin + '/');
-    setMetaTag('property', 'og:image', currentOrigin + '/og-image.png');
+    setMetaTag('property', 'og:image', currentOrigin + '/seo_2026_banner.webp');
     setMetaTag('property', 'og:site_name', 'QR Code Best');
 
     setMetaTag('name', 'twitter:card', 'summary_large_image');
     setMetaTag('name', 'twitter:title', title);
     setMetaTag('name', 'twitter:description', desc);
-    setMetaTag('name', 'twitter:image', currentOrigin + '/og-image.png');
+    setMetaTag('name', 'twitter:image', currentOrigin + '/seo_2026_banner.webp');
 
     // Programmatically render hreflang tags and canonical tag in <head> for search engines
     try {

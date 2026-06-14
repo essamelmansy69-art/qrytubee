@@ -24,7 +24,7 @@ export const articlesData: { ar: Article[]; en: Article[] } = {
       readTime: "قراءة 9 دقائق",
       category: "سيو انستقرام 2026",
       date: "2026-06-06",
-      image: "/instagram_qr_seo.png",
+      image: "/instagram_qr_seo.webp",
       content: `### ثورة التسويق الرقمي عبر انستقرام وقواعد سيو 2026
 
 في عام **2026**، نعيش في ذروة حقبة الهواتف الذكية والتصفح الفوري. أصبح جذب انتباه العميل أو المتابع أمراً صعباً ومحكوماً بمدى سهولة وسلاسة رحلة المستخدم (Frictionless UX). إذا كنت تروِّج لحسابك على انستقرام (Instagram) بهدف جذب آلاف المتابعين الجدد، وتريد توجيه أشخاص من فلاير مطبوع، أو لوحة إعلانية، أو فواتير، أو من موقعك الإلكتروني لزيارة حسابك، فإن استخدام الروابط ورموز الـ QR العادية كفيل بقتل **90%** من معايير التحويل والمتابعة المتوقعة!
@@ -831,7 +831,7 @@ export const articlesData: { ar: Article[]; en: Article[] } = {
       readTime: "قراءة 8 دقائق",
       category: "سيو 2026",
       date: "2026-06-06",
-      image: "/seo_2026_banner.png",
+      image: "/seo_2026_banner.webp",
       content: `### مشهد السيو المتطور لعام 2026 وقواعد جوجل والذكاء الاصطناعي
 
 في عام **2026**، نعيش في حقبة جديدة تماماً لتجربة محركات البحث؛ حيث اندمجت نتائج البحث التوليدية القائمة على الذكاء الاصطناعي (Generative Engine Optimization - GEO) بقوة بالغة في حقول نتائج البحث اليومية لجوجل. لم يعد كافياً حشو الكلمات الدلالية أو الاعتماد على معايير السيو التقليدية البالية. بدلاً من ذلك، باتت الخوارزميات تهتم بفهم **تجربة المستخدم الحقيقية والخالية من الاحتكاك (Frictionless UX)** كأقوى إشارة مرجعية لتفضيل الصفحات والمواقع وتمرير ترافيك مجاني خالص لها.
@@ -899,7 +899,7 @@ export const articlesData: { ar: Article[]; en: Article[] } = {
       readTime: "قراءة 12 دقيقة",
       category: "سيو يوتيوب 2026",
       date: "2026-06-08",
-      image: "/youtube_seo_qr_1780892833223.png",
+      image: "/youtube_seo_qr_1780892833223.webp",
       content: `### مقدمة: مشهد سيو اليوتيوب المتسارع لعام 2026 والتحدي الصامت للمنشئين
 
 يرحب بكم عصر **سيو اليوتيوب لعام 2026 (YouTube SEO 2026)** بحقبة تكنولوجية تتجاوز بكثير مجرد حشو الكلمات المفتاحية في العناوين والوصف. نعيش اليوم في عالم تقوده الهواتف الذكية بنسبة تقترب من 95% من إجمالي الزيارات عبر الإنترنت، حيث تندمج الهواتف والتطبيقات مع محركات البحث التقليدية والذكاء الاصطناعي التوليدي (GEO - Generative Engine Optimization).
@@ -1016,7 +1016,7 @@ export const articlesData: { ar: Article[]; en: Article[] } = {
       readTime: "قراءة 10 دقائق",
       category: "تسويق يوتيوب 2026",
       date: "2026-06-09",
-      image: "/youtube_qr_marketing.png",
+      image: "/youtube_qr_marketing.webp",
       content: `### استراتيجيات التسويق الحديث وعصر السيو الجديد لعام 2026
 
 في مشهد التسويق الرقمي الديناميكي لعام **2026**، تعد السرعة ومرونة تجربة المستخدم (Seamless UX) هما شريان الحياة لأي حملة ترويجية ناجحة. إذا كنت صانع محتوى على اليوتيوب أو مديراً للتسويق لعلامة تجارية، فلابد أنك لاحظت الصعوبة المتزايدة في تحويل المشاهدين من منصات خارجية أو إعلانات مطبوعة إلى مشتركين متفاعلين داخل قناتك.
@@ -1072,7 +1072,7 @@ export const articlesData: { ar: Article[]; en: Article[] } = {
       readTime: "قراءة 8 دقائق",
       category: "تسويق المطاعم والكافيهات",
       date: "2026-06-10",
-      image: "/restaurant_qr_seo.jpg",
+      image: "/restaurant_qr_seo.webp",
       content: `### المنيو الرقمي اللاتلامسي عبر كود QR: مستقبل الضيافة في 2026
 
 تعيش صناعة المطاعم والمقاهي في عام **2026** ثورة رقمية حقيقية، حيث أصبح كود المنيو اللاتلامسي (contactless QR menu) الركيزة الأساسية للتفاعل مع الزبائن والزوار. لم يعد مسح الكود مجرد بديل وقائي للمنيو الورقي، بل تحول إلى أداة تسويقية وعملية تفاعلية تزيد من متوسط مبيعات المطاعم بنسب قياسية تتجاوز **25%** من خلال دمج الصور الجذابة والتحديث السريع والعروض اليومية المغرية.
@@ -1125,7 +1125,7 @@ export const articlesData: { ar: Article[]; en: Article[] } = {
       readTime: "قراءة 5 دقائق",
       category: "شروحات الـ QR والسيو",
       date: "2026-06-12",
-      image: "/video_to_qr_seo.jpg",
+      image: "/video_to_qr_seo.webp",
       content: `### ثورة رموز القراءة السريعة (QR Codes) والبحث المرئي في عام 2026
 
 مع تسارع التوجه نحو التسويق الرقمي وبناء العلامات التجارية الشخصية والتجارية في عام **2026**، أصبحت منصات المحتوى المرئي مثل يوتيوب (YouTube)، تيك توك (TikTok)، وإنستغرام (Instagram Reels) هي الوجهة الأساسية للجمهور. في هذا الصدد، أصبح السؤال الأكثر شيوعاً بين صناع المحتوى والمسوقين هو: **كيف يمكنني تحويل رابط فيديو إلى كود QR مجاناً؟**
@@ -1205,7 +1205,7 @@ export const articlesData: { ar: Article[]; en: Article[] } = {
       readTime: "قراءة 6 دقائق",
       category: "شروحات الـ QR والسيو",
       date: "2026-06-13",
-      image: "/tiktok_insta_qr.jpg",
+      image: "/tiktok_insta_qr.webp",
       content: `### تطور منصات الفيديو القصير والبحث السريع في عام 2026
 
 في عام **2026**، فرضت منصات الفيديو القصير مثل تيك توك (TikTok) وإنستغرام ريلز (Instagram Reels) سيطرتها المطلقة على خوارزميات محركات البحث وميول المستخدمين في العالم العربي وحول العالم. وبسبب هذا التحول، لم يعد كود الـ QR التقليدي كافياً، بل أصبح بحاجة إلى تقنيات ذكية لضمان تجربة مستخدم سريعة تساهم في مضاعفة المبيعات والمتابعين والمشاهدات بطرق مبتكرة.
@@ -1264,7 +1264,7 @@ export const articlesData: { ar: Article[]; en: Article[] } = {
       readTime: "قراءة 7 دقائق",
       category: "تسويق صالات الجيم 2026",
       date: "2026-06-13",
-      image: "/gym_qr_seo.jpg",
+      image: "/gym_qr_seo.webp",
       content: `### التسويق الرياضي الحديث وصراع السيو المحلي لعام 2026
 
 في عام **2026**، تحولت المنافسة بين الصالات الرياضية (Gyms) والأندية الصحية إلى صراع تقني يعتمد على السرعة والذكاء وسلاسة تجربة المشترك. لم يعد المشترك مستعداً لملء استمارات ورقية طويلة أو مواجهة صعوبات تقنية لحجز حصة تدريبية أو تجديد اشتراكه الشهري.
@@ -1350,7 +1350,7 @@ Deep Links are custom programmatic links designed to act as bridges across mobil
       readTime: "10 min read",
       category: "YouTube Marketing 2026",
       date: "2026-06-09",
-      image: "/youtube_qr_marketing.png",
+      image: "/youtube_qr_marketing.webp",
       content: `### Modern Marketing Strategies and the 2026 Search Engine Optimization Era
 
 In the fast-paced, highly dynamic digital marketing landscape of **2026**, lightning-fast page speed and seamless user experience (Seamless UX) serve as the absolute lifeblood of any highly successful promotional campaign. If you are a dedicated YouTube content creator or an ambitious brand marketing executive, you have undoubtedly noticed that it is becoming increasingly difficult to convert passive viewers from external social platforms or offline physical print mediums into active, engaged subscribers directly on your YouTube channel.
@@ -1882,7 +1882,7 @@ Maximize the value of every single visitor. Build your smart links on qrytube to
       readTime: "8 min read",
       category: "Restaurant Marketing",
       date: "2026-06-10",
-      image: "/restaurant_qr_seo.jpg",
+      image: "/restaurant_qr_seo.webp",
       content: `### The Contactless Menu Revolution via QR Codes: Future of Hospitality in 2026
 
 In **2026**, the dynamic hospitality, dining, and café industries are undergoing a major digital transformation. Contactless menu QR codes have evolved from a simple post-pandemic safety measure into the cornerstone of modern customer interactions. Today's digital menu cards are robust marketing engines proven to increase average restaurant order sizes by up to **25%** through high-definition imagery, instant price updates, and tailored daily promotions.
@@ -1935,7 +1935,7 @@ To ensure the highest scanning interaction rates and an optimal visual experienc
       readTime: "5 min read",
       category: "QR Tutorials",
       date: "2026-06-12",
-      image: "/video_to_qr_seo.jpg",
+      image: "/video_to_qr_seo.webp",
       content: `### The QR Code Revolution in 2026
 At the dawn of **2026**, visual platforms like YouTube, Instagram, and TikTok remain the ultimate destinations for media, digital education, and eCommerce. To bridge physical banners with interactive online spaces, QR codes have matured into an indispensable tool. Whether you are an active creator pushing print flyers for a channel upgrade, or a store routing offline traffic to dynamic product teasers, searching how to **convert video link to QR code for free** has become a daily marketing quest for proactive brands.
 
@@ -2034,7 +2034,7 @@ To capture the highest digital responses and build organic authority:
       readTime: "6 min read",
       category: "Social Media Growth",
       date: "2026-06-13",
-      image: "/tiktok_insta_qr.jpg",
+      image: "/tiktok_insta_qr.webp",
       content: `### The Direct App Launch Paradigm of 2026
 
 In **2026**, digital audience conversion is all about friction reduction. With TikTok and Instagram Reels serving as central pillars for consumer search and brand discovery, static browser redirections are no longer viable. Today's high-impact marketers depend on smart technologies that instantly bridge offline visual targets with frictionless in-app behaviors. 
@@ -2119,7 +2119,7 @@ Qrytube simplifies high-performance QR generation into a zero-cost, reliable, se
       readTime: "6 min read",
       category: "Fitness Growth Strategy",
       date: "2026-06-13",
-      image: "/gym_qr_seo.jpg",
+      image: "/gym_qr_seo.webp",
       content: `### Athletic Marketing & Local SEO Alignment in 2026
 
 In **2026**, fitness centers, health clubs, and boutique academies operate in an extremely fast-paced environment where conversion friction equals failure. Forging a perfect bridge between printed physical ads, weight tags, and member subscriptions requires a friction-free mobile user experience (UX).

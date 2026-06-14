@@ -45,7 +45,7 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
         "name": "Qrytube",
         "logo": {
           "@type": "ImageObject",
-          "url": `${window.location.origin}/logo.png`
+          "url": `${window.location.origin}/favicon.webp`
         }
       }
     };

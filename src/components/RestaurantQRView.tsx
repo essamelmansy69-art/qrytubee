@@ -580,7 +580,7 @@ export default function RestaurantQRView({ lang, onNavigateToYouTube }: Restaura
           "name": lang === 'ar' ? "أداة توليد كود QR للمطاعم والمقاهي مجاناً" : "Free Restaurant QR Code Generator",
           "operatingSystem": "All",
           "applicationCategory": "BusinessApplication",
-          "imageUrl": "https://qrytube.com/og-image.png",
+          "imageUrl": "https://qrytube.com/seo_2026_banner.webp",
           "offers": {
             "@type": "Offer",
             "price": "0",
