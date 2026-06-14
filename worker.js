@@ -373,15 +373,11 @@ export default {
     // 1. Serve dynamic sitemap.xml with correct headers by proxying to the origin server
     if (pathname === '/sitemap.xml') {
       try {
-        // Bypass Cloudflare cache for the origin subrequest by adding a unique query parameter
-        const subRequestUrl = new URL(request.url);
-        subRequestUrl.searchParams.set('cf_bypass_cache', Date.now().toString());
-
         const subRequestHeaders = new Headers(request.headers);
         subRequestHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate');
         subRequestHeaders.set('Pragma', 'no-cache');
 
-        const response = await fetch(new Request(subRequestUrl.toString(), {
+        const response = await fetch(new Request(request, {
           method: request.method,
           headers: subRequestHeaders,
           redirect: 'follow'
@@ -422,15 +418,11 @@ export default {
     // 2. Serve robots.txt dynamically from the origin, falling back to static
     if (pathname === '/robots.txt') {
       try {
-        // Bypass Cloudflare cache for the origin subrequest by adding a unique query parameter
-        const subRequestUrl = new URL(request.url);
-        subRequestUrl.searchParams.set('cf_bypass_cache', Date.now().toString());
-
         const subRequestHeaders = new Headers(request.headers);
         subRequestHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate');
         subRequestHeaders.set('Pragma', 'no-cache');
 
-        const response = await fetch(new Request(subRequestUrl.toString(), {
+        const response = await fetch(new Request(request, {
           method: request.method,
           headers: subRequestHeaders,
           redirect: 'follow'
