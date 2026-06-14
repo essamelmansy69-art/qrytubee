@@ -330,8 +330,26 @@ export default {
       }
     }
 
-    // 1. Serve static sitemap.xml with correct headers
+    // 1. Serve dynamic sitemap.xml with correct headers by proxying to the origin server
     if (pathname === '/sitemap.xml') {
+      try {
+        const response = await fetch(request);
+        if (response.ok) {
+          const xmlText = await response.text();
+          return new Response(xmlText, {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/xml; charset=utf-8',
+              'Cache-Control': 'public, max-age=3600, must-revalidate',
+              'Access-Control-Allow-Origin': '*',
+              'X-Content-Type-Options': 'nosniff',
+            },
+          });
+        }
+      } catch (err) {
+        // Fallback to static sitemap if origin is unreachable
+      }
+
       let dynamicSitemap = SITEMAP_XML.replaceAll('https://qrytube.com', origin);
       dynamicSitemap = dynamicSitemap.replaceAll('https://qrytubee.essamelmansy69.workers.dev', origin);
       return new Response(dynamicSitemap.trim(), {
@@ -345,8 +363,26 @@ export default {
       });
     }
 
-    // 2. Serve robots.txt
+    // 2. Serve robots.txt dynamically from the origin, falling back to static
     if (pathname === '/robots.txt') {
+      try {
+        const response = await fetch(request);
+        if (response.ok) {
+          const robotsText = await response.text();
+          return new Response(robotsText, {
+            status: 200,
+            headers: {
+              'Content-Type': 'text/plain; charset=utf-8',
+              'Cache-Control': 'public, max-age=3600, must-revalidate',
+              'Access-Control-Allow-Origin': '*',
+              'X-Content-Type-Options': 'nosniff',
+            },
+          });
+        }
+      } catch (err) {
+        // Fallback
+      }
+
       let dynamicRobots = ROBOTS_TXT.replaceAll('https://qrytube.com', origin);
       dynamicRobots = dynamicRobots.replaceAll('https://qrytubee.essamelmansy69.workers.dev', origin);
       return new Response(dynamicRobots.trim(), {
