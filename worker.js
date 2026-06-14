@@ -383,11 +383,11 @@ export default {
         subRequestHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate');
         subRequestHeaders.set('Pragma', 'no-cache');
 
-        const response = await fetch(new Request(request.url, {
+        const response = await fetch(request, {
           method: request.method,
           headers: subRequestHeaders,
           redirect: 'follow'
-        }));
+        });
 
         if (response.ok) {
           const xmlText = await response.text();
@@ -429,11 +429,11 @@ export default {
         subRequestHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate');
         subRequestHeaders.set('Pragma', 'no-cache');
 
-        const response = await fetch(new Request(request.url, {
+        const response = await fetch(request, {
           method: request.method,
           headers: subRequestHeaders,
           redirect: 'follow'
-        }));
+        });
 
         if (response.ok) {
           const robotsText = await response.text();
