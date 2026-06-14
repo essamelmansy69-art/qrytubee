@@ -282,6 +282,11 @@ export default {
     const pathname = url.pathname.toLowerCase();
     const origin = url.origin;
 
+    // Prevents recursion loop where the worker fetches its own domain and re-enters itself
+    if (request.headers.get("X-From-Worker") === "true") {
+      return fetch(request);
+    }
+
     // A. Handle CORS preflight request (OPTIONS)
     if (request.method === "OPTIONS") {
       return new Response(null, {
@@ -374,10 +379,11 @@ export default {
     if (pathname === '/sitemap.xml') {
       try {
         const subRequestHeaders = new Headers(request.headers);
+        subRequestHeaders.set('X-From-Worker', 'true');
         subRequestHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate');
         subRequestHeaders.set('Pragma', 'no-cache');
 
-        const response = await fetch(new Request(request, {
+        const response = await fetch(new Request(request.url, {
           method: request.method,
           headers: subRequestHeaders,
           redirect: 'follow'
@@ -419,10 +425,11 @@ export default {
     if (pathname === '/robots.txt') {
       try {
         const subRequestHeaders = new Headers(request.headers);
+        subRequestHeaders.set('X-From-Worker', 'true');
         subRequestHeaders.set('Cache-Control', 'no-cache, no-store, must-revalidate');
         subRequestHeaders.set('Pragma', 'no-cache');
 
-        const response = await fetch(new Request(request, {
+        const response = await fetch(new Request(request.url, {
           method: request.method,
           headers: subRequestHeaders,
           redirect: 'follow'
