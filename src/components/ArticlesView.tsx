@@ -9,6 +9,37 @@ interface ArticlesViewProps {
   onSelectArticle: (id: string | null) => void;
 }
 
+function ImageWithFallback({ src, alt, className }: { src: string, alt: string, className?: string }) {
+  const [error, setError] = useState(false);
+
+  if (error || !src) {
+    return (
+      <div className="w-full h-full bg-gradient-to-br from-slate-900 via-slate-850 to-red-950 flex flex-col items-center justify-center p-6 text-center select-none relative overflow-hidden">
+        {/* Subtle grid pattern background */}
+        <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:14px_24px]" />
+        
+        <div className="z-10 space-y-2 flex flex-col items-center">
+          <BookOpen className="text-red-500/85 animate-pulse" size={32} />
+          <p className="text-[10px] font-black uppercase tracking-widest text-red-500 font-mono">Qrytube SEO Academy</p>
+          <span className="text-[10px] sm:text-xs text-slate-300 font-arabic line-clamp-1 max-w-[280px] opacity-70">{alt}</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      onError={() => setError(true)}
+      referrerPolicy="no-referrer"
+      loading="lazy"
+      decoding="async"
+    />
+  );
+}
+
 export default function ArticlesView({ lang, selectedArticleId, onSelectArticle }: ArticlesViewProps) {
   const [copied, setCopied] = useState(false);
   const t = translations[lang];
@@ -222,13 +253,10 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
         {/* Dynamic Image Banner */}
         {selectedArticle.image && (
           <div className="mb-8 rounded-3xl overflow-hidden aspect-video border border-slate-100 shadow-xs max-h-[360px] flex items-center justify-center bg-slate-50 relative">
-            <img
+            <ImageWithFallback
               src={selectedArticle.image}
               alt={selectedArticle.title}
               className="object-cover w-full h-full"
-              referrerPolicy="no-referrer"
-              loading="lazy"
-              decoding="async"
             />
           </div>
         )}
@@ -296,13 +324,10 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
                 {/* Optional Card Image cover */}
                 {article.image && (
                   <div className="mb-4 rounded-2xl overflow-hidden aspect-video border border-slate-100 bg-slate-50 relative">
-                    <img
+                    <ImageWithFallback
                       src={article.image}
                       alt={article.title}
                       className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-350"
-                      referrerPolicy="no-referrer"
-                      loading="lazy"
-                      decoding="async"
                     />
                   </div>
                 )}
