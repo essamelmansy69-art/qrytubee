@@ -1,25 +1,13 @@
-import * as dotenv from "dotenv";
-dotenv.config();
-
 import express from "express";
 import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import compression from "compression";
 import { articlesData } from "./src/data/seoContent";
-import { isSupabaseConfigured, dbUpsertCode, dbInsertScan } from "./src/lib/supabase";
-
 
 const PORT = 3000;
 
 async function startServer() {
-  console.log("=== Supabase Connection Status ===");
-  console.log("process.env.SUPABASE_URL is set:", !!process.env.SUPABASE_URL);
-  console.log("process.env.SUPABASE_SERVICE_ROLE_KEY is set:", !!process.env.SUPABASE_SERVICE_ROLE_KEY);
-  console.log("process.env.SUPABASE_KEY is set:", !!process.env.SUPABASE_KEY);
-  console.log("isSupabaseConfigured:", isSupabaseConfigured());
-  console.log("=================================");
-
   const app = express();
   app.use(compression());
   app.use(express.json());
@@ -281,24 +269,6 @@ async function startServer() {
 
     scheduleSave();
 
-    // Background sync to Supabase if configured
-    if (isSupabaseConfigured()) {
-      dbUpsertCode(tid, target, platform, true).catch(err => {
-        console.error("Supabase fail dbUpsertCode:", err);
-      });
-      dbInsertScan({
-        code_id: tid,
-        timestamp,
-        device,
-        os,
-        country,
-        platform,
-        target
-      }).catch(err => {
-        console.error("Supabase fail dbInsertScan:", err);
-      });
-    }
-
     res.status(200).json({ success: true, trackingId: tid, timestamp });
   });
 
@@ -339,7 +309,6 @@ async function startServer() {
     }
 
     res.json({
-      supabaseConnected: isSupabaseConfigured(),
       totalScans: analyticsData.totalScans || 0,
       scansByPlatform: analyticsData.scansByPlatform || {},
       scansByDevice: analyticsData.scansByDevice || {},

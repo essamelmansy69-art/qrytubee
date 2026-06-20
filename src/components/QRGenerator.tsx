@@ -1071,35 +1071,6 @@ export default function QRGenerator({
           </div>
         </div>
 
-        {/* Supabase Integration Sync Status */}
-        <div className="pt-3.5 mt-3 border-t border-slate-100 dark:border-slate-800/40 text-start font-arabic">
-          {analyticsResponse?.supabaseConnected ? (
-            <div className="flex flex-col gap-1 w-full bg-emerald-50 dark:bg-emerald-950/25 p-3 rounded-2xl border border-emerald-100 dark:border-emerald-900/30">
-              <div className="flex items-center gap-1.5 text-emerald-800 dark:text-emerald-400 text-xs font-bold">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
-                <span>{lang === 'ar' ? 'جاري المزامنة السحابية مع Supabase نشطة ⚡' : 'Connected to Supabase DB! ⚡'}</span>
-              </div>
-              <p className="text-[10px] text-emerald-700/80 dark:text-emerald-500 leading-relaxed font-medium mt-0.5">
-                {lang === 'ar' 
-                  ? 'تم ربط الموقع بنجاح بقاعدة بيانات Supabase. يتم الآن تسجيل وحفظ جميع ترميزات الـ QR كود وإحصائيات المسح والتحليلات سحابياً بالكامل.'
-                  : 'Successfully connected. Your active QR codes, scan history logs, and analytic demographics are being securely streamed to Supabase.'}
-              </p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-1 w-full bg-slate-50 dark:bg-slate-900/45 p-3 rounded-2xl border border-slate-100 dark:border-slate-800/60">
-              <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-400 text-xs font-bold">
-                <span className="w-2.5 h-2.5 rounded-full bg-slate-400 shrink-0"></span>
-                <span>{lang === 'ar' ? 'ربط قاعدة بيانات Supabase (نشط محلياً)' : 'Supabase Integration Ready'}</span>
-              </div>
-              <p className="text-[10px] text-slate-600 dark:text-slate-500 leading-relaxed mt-0.5">
-                {lang === 'ar'
-                  ? 'لقد تم ربط وبرمجة كود الاتصال بـ Supabase بنجاح! لتشغيل النسخ الاحتياطي والمزامنة السحابية بدلاً من الحفظ المحلي المؤقت، يرجى تهيئة كلاً من مفتاحي: SUPABASE_URL و SUPABASE_SERVICE_ROLE_KEY في إعدادات المنصة.'
-                  : 'Connector fully programmed and ready. To leverage instant remote persistence instead of local storage, define SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in your app environments.'}
-              </p>
-            </div>
-          )}
-        </div>
-
         {/* Analytics Section Removed */}
       </div>
     );
