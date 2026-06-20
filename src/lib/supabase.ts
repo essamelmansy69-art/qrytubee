@@ -1,17 +1,31 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.SUPABASE_URL || "https://empqrfflwdhwmmlrqais.supabase.co";
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || "";
+export function getSupabaseUrl(): string {
+  return process.env.SUPABASE_URL || "https://empqrfflwdhwmmlrqais.supabase.co";
+}
 
-export const isSupabaseConfigured = !!(supabaseUrl && supabaseServiceKey);
+export function getSupabaseServiceKey(): string {
+  return process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY || "";
+}
 
-export const supabase = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseServiceKey, {
+export function isSupabaseConfigured(): boolean {
+  const url = getSupabaseUrl();
+  const key = getSupabaseServiceKey();
+  return !!(url && key);
+}
+
+let supabaseClient: any = null;
+
+export function getSupabase() {
+  if (!supabaseClient && isSupabaseConfigured()) {
+    supabaseClient = createClient(getSupabaseUrl(), getSupabaseServiceKey(), {
       auth: {
         persistSession: false,
       },
-    })
-  : null;
+    });
+  }
+  return supabaseClient;
+}
 
 // Database Schema interfaces
 export interface SupabaseCode {
@@ -37,10 +51,11 @@ export interface SupabaseScan {
  * Ensures a tracking code exists or creates/updates it in Supabase
  */
 export async function dbUpsertCode(codeId: string, target: string, platform: string, incrementScan = true) {
-  if (!supabase) return null;
+  const client = getSupabase();
+  if (!client) return null;
   try {
     // Check if code exists
-    const { data: existing, error: fetchErr } = await supabase
+    const { data: existing, error: fetchErr } = await client
       .from("qrytube_codes")
       .select("id, total_scans")
       .eq("id", codeId)
@@ -52,7 +67,7 @@ export async function dbUpsertCode(codeId: string, target: string, platform: str
 
     if (existing) {
       const newTotal = existing.total_scans + (incrementScan ? 1 : 0);
-      const { error: updateErr } = await supabase
+      const { error: updateErr } = await client
         .from("qrytube_codes")
         .update({
           target,
@@ -65,7 +80,7 @@ export async function dbUpsertCode(codeId: string, target: string, platform: str
         console.error("[Supabase Error] Updating code scans:", updateErr.message);
       }
     } else {
-      const { error: insertErr } = await supabase
+      const { error: insertErr } = await client
         .from("qrytube_codes")
         .insert({
           id: codeId,
@@ -87,9 +102,10 @@ export async function dbUpsertCode(codeId: string, target: string, platform: str
  * Inserts a tracking scan event to Supabase
  */
 export async function dbInsertScan(scan: SupabaseScan) {
-  if (!supabase) return null;
+  const client = getSupabase();
+  if (!client) return null;
   try {
-    const { error } = await supabase
+    const { error } = await client
       .from("qrytube_scans")
       .insert(scan);
 
