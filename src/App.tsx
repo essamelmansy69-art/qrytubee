@@ -773,35 +773,37 @@ export default function App() {
       </header>
 
       {/* 2. HERO CONTENT SECTION */}
-      <section className="bg-gradient-to-b from-white to-slate-50/50 dark:from-slate-900 dark:to-slate-950 py-16 border-b border-slate-100 dark:border-slate-800/60 text-center relative overflow-hidden" id="hero_section">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none">
-          <div className="absolute top-10 left-10 w-72 h-72 bg-red-500/10 dark:bg-red-500/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-5 right-20 w-80 h-80 bg-indigo-500/10 dark:bg-indigo-500/5 rounded-full blur-3xl" />
-        </div>
-
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 relative text-center flex flex-col items-center">
-          
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200/50 dark:border-slate-800/80 backdrop-blur-sm shadow-2xs mb-6 text-[11px] font-bold text-slate-600 dark:text-slate-300 tracking-wider uppercase font-arabic" id="hero_badge_pill">
-            <Sparkles size={12} className="text-yellow-500 animate-pulse shrink-0" />
-            <span>{t.heroBadge}</span>
+      {activeTab !== 'articles' && (
+        <section className="bg-gradient-to-b from-white to-slate-50/50 dark:from-slate-900 dark:to-slate-950 py-16 border-b border-slate-100 dark:border-slate-800/60 text-center relative overflow-hidden" id="hero_section">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none">
+            <div className="absolute top-10 left-10 w-72 h-72 bg-red-500/10 dark:bg-red-500/5 rounded-full blur-3xl" />
+            <div className="absolute bottom-5 right-20 w-80 h-80 bg-indigo-500/10 dark:bg-indigo-500/5 rounded-full blur-3xl" />
           </div>
 
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold font-arabic text-slate-900 dark:text-white leading-snug tracking-tight max-w-3xl">
-            {t.heroTitlePart1}
-            <span className="bg-gradient-to-r from-red-600 via-rose-500 to-red-700 bg-clip-text text-transparent block sm:inline-block sm:ms-1.5 pb-1">
-              {t.heroTitlePart2}
-            </span>
-          </h1>
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 relative text-center flex flex-col items-center">
+            
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200/50 dark:border-slate-800/80 backdrop-blur-sm shadow-2xs mb-6 text-[11px] font-bold text-slate-600 dark:text-slate-300 tracking-wider uppercase font-arabic" id="hero_badge_pill">
+              <Sparkles size={12} className="text-yellow-500 animate-pulse shrink-0" />
+              <span>{t.heroBadge}</span>
+            </div>
 
-          <p className="mt-3 text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-normal font-arabic max-w-2xl leading-relaxed">
-            {t.heroSubtitle}
-          </p>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold font-arabic text-slate-900 dark:text-white leading-snug tracking-tight max-w-3xl">
+              {t.heroTitlePart1}
+              <span className="bg-gradient-to-r from-red-600 via-rose-500 to-red-700 bg-clip-text text-transparent block sm:inline-block sm:ms-1.5 pb-1">
+                {t.heroTitlePart2}
+              </span>
+            </h1>
 
-        </div>
-      </section>
+            <p className="mt-3 text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-normal font-arabic max-w-2xl leading-relaxed">
+              {t.heroSubtitle}
+            </p>
+
+          </div>
+        </section>
+      )}
 
       {/* 3. MAIN WORKSPACE / INTERACTIVE PLATFORM */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" id="main_workspace">
+      <main className={`${activeTab === 'articles' ? 'w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-12' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10'}`} id="main_workspace">
         
         {/* Sleek Platform Sub-navigation tabs */}
         {(activeTab === 'generator' || activeTab === 'facebook' || activeTab === 'instagram' || activeTab === 'tiktok' || activeTab === 'website' || activeTab === 'restaurant' || activeTab === 'gym') && (
