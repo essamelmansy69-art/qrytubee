@@ -484,10 +484,27 @@ export default function App() {
   const t2Ref = React.useRef<any>(null);
   const t3Ref = React.useRef<any>(null);
 
-  const queryParams = new URL(window.location.href).searchParams;
-  const redirectUrl = queryParams.get('url') || queryParams.get('r');
-  const redirectType = queryParams.get('type') || 'vnd';
-  const isRedirectRoute = window.location.pathname.startsWith('/redirect') || !!redirectUrl;
+  const { queryParams, redirectUrl, redirectType, isRedirectRoute } = React.useMemo(() => {
+    try {
+      const qParams = new URL(window.location.href).searchParams;
+      const rUrl = qParams.get('url') || qParams.get('r');
+      const rType = qParams.get('type') || 'vnd';
+      const isRed = window.location.pathname.startsWith('/redirect') || !!rUrl;
+      return {
+        queryParams: qParams,
+        redirectUrl: rUrl,
+        redirectType: rType,
+        isRedirectRoute: isRed
+      };
+    } catch (_) {
+      return {
+        queryParams: new URLSearchParams(),
+        redirectUrl: null,
+        redirectType: 'vnd',
+        isRedirectRoute: false
+      };
+    }
+  }, []);
 
   useEffect(() => {
     if (isRedirectRoute && redirectUrl) {
