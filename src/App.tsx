@@ -33,7 +33,8 @@ import {
   Moon,
   Globe,
   Utensils,
-  Dumbbell
+  Dumbbell,
+  Send
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { translations } from './translations';
@@ -72,7 +73,7 @@ export default function App() {
   }, [theme]);
 
   const [lang, setLang] = useState<'ar' | 'en'>(() => {
-    // Check URL Parameter first (highest priority)
+    // 1. Check URL Parameter (highest priority)
     try {
       const queryParams = new URL(window.location.href).searchParams;
       const urlLang = queryParams.get('lang');
@@ -80,10 +81,20 @@ export default function App() {
       if (urlLang === 'ar') return 'ar';
     } catch (_) {}
 
-    const saved = localStorage.getItem('qr_language');
-    if (saved === 'en' || saved === 'ar') return saved;
+    // 2. Check HTML Tag attribute set by server (pre-calculated based on Accept-Language)
+    try {
+      const htmlLang = document.documentElement.lang;
+      if (htmlLang === 'en') return 'en';
+      if (htmlLang === 'ar') return 'ar';
+    } catch (_) {}
 
-    // Detect visitor's language
+    // 3. Check LocalStorage (manual overrides)
+    try {
+      const saved = localStorage.getItem('qr_language');
+      if (saved === 'en' || saved === 'ar') return saved;
+    } catch (_) {}
+
+    // 4. Detect visitor's browser language
     try {
       const systemLanguages = navigator.languages || [];
       const hasArabicPreference = systemLanguages.some(l => l.toLowerCase().startsWith('ar'));
@@ -91,17 +102,16 @@ export default function App() {
       
       if (hasArabicPreference || mainBrowserLang.startsWith('ar')) {
         return 'ar';
-      } else {
-        // Default to English for foreigners (any non-Arabic language)
-        return 'en';
       }
     } catch (e) {
       // safe fallback
     }
-    return 'ar';
+
+    // Default to English for foreigners (non-Arabs)
+    return 'en';
   });
 
-  const [activeTab, setActiveTab] = useState<'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact' | 'chapters' | 'restaurant' | 'gym'>(() => {
+  const [activeTab, setActiveTab] = useState<'generator' | 'facebook' | 'instagram' | 'tiktok' | 'telegram' | 'website' | 'faq' | 'articles' | 'terms' | 'privacy' | 'about' | 'contact' | 'chapters' | 'restaurant' | 'gym'>(() => {
     try {
       const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
       if (path === 'terms') return 'terms';
@@ -111,6 +121,7 @@ export default function App() {
       if (path === 'facebook') return 'facebook';
       if (path === 'instagram') return 'instagram';
       if (path === 'tiktok') return 'tiktok';
+      if (path === 'telegram') return 'telegram';
       if (path === 'website') return 'website';
       if (path === 'restaurant' || path === 'restaurant-qr' || path === 'menu-barcode') return 'restaurant';
       if (path === 'gym' || path === 'gym-qr' || path === 'gym-qr-generator' || path === 'fitness-barcode') return 'gym';
@@ -167,6 +178,13 @@ export default function App() {
       desc = lang === 'ar'
         ? "أداة مجانية لتوليد كود QR ذكي وروابط عميقة لصفحتك أو مقاطع تيك توك لتوجيه المشاهدين إلى حسابك الرسمي بالتطبيق مباشرة."
         : "Generate smart QR codes and deep links for TikTok profiles and videos. Open directly in the official TikTok app.";
+    } else if (activeTab === 'telegram') {
+      title = lang === 'ar' 
+        ? "أداة توليد كود QR ذكي لقناة التليجرام لفتح التطبيق مباشرة | Qrytube" 
+        : "Telegram Smart QR Code & Deep Link Generator | Qrytube";
+      desc = lang === 'ar'
+        ? "اصنع كود QR ذكي لقناتك أو مجموعتك على تليجرام لفتح التطبيق وتصفح القناة والاشتراك بها بضغطة واحدة دون مغادرة المتصفحات الداخلية."
+        : "Generate custom deep link QR codes for Telegram channels, groups, and invites. Force links to open directly inside the official Telegram app.";
     } else if (activeTab === 'website') {
       title = lang === 'ar' 
         ? "أداة توليد كود QR ذكي لأي موقع إلكتروني أو رابط | Qrytube" 
@@ -373,7 +391,7 @@ export default function App() {
         setSelectedArticleId(e.state.articleId || null);
       } else {
         const path = window.location.pathname.toLowerCase().replace(/^\/|\/$/g, '');
-        if (['terms', 'privacy', 'about', 'contact', 'facebook', 'instagram', 'tiktok', 'website', 'chapters', 'restaurant', 'gym'].includes(path)) {
+        if (['terms', 'privacy', 'about', 'contact', 'facebook', 'instagram', 'tiktok', 'telegram', 'website', 'chapters', 'restaurant', 'gym'].includes(path)) {
           setActiveTab(path as any);
           setSelectedArticleId(null);
         } else if (path === 'articles') {
@@ -448,7 +466,7 @@ export default function App() {
     };
   }, []);
 
-  const handleNavClick = (tab: 'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact' | 'restaurant' | 'gym', event: React.MouseEvent) => {
+  const handleNavClick = (tab: 'generator' | 'facebook' | 'instagram' | 'tiktok' | 'telegram' | 'website' | 'articles' | 'faq' | 'terms' | 'privacy' | 'about' | 'contact' | 'restaurant' | 'gym', event: React.MouseEvent) => {
     event.preventDefault();
     setActiveTab(tab);
     if (tab === 'articles') {
@@ -874,6 +892,18 @@ export default function App() {
             </button>
 
             <button
+              onClick={() => setActiveTab('telegram')}
+              className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold font-arabic cursor-pointer transition-all duration-300 whitespace-nowrap ${
+                activeTab === 'telegram'
+                  ? 'bg-[#24A1DE] text-white shadow-xs'
+                  : 'text-slate-600 hover:text-[#24A1DE] hover:bg-slate-100/50'
+              }`}
+            >
+              <Send size={16} />
+              <span>{lang === 'ar' ? 'تليجرام' : 'Telegram'}</span>
+            </button>
+
+            <button
               onClick={() => setActiveTab('website')}
               className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold font-arabic cursor-pointer transition-all duration-300 whitespace-nowrap ${
                 activeTab === 'website'
@@ -912,7 +942,7 @@ export default function App() {
         )}
 
         {/* Dynamic Navigation Tabs Content render */}
-        {(activeTab === 'generator' || activeTab === 'facebook' || activeTab === 'instagram' || activeTab === 'tiktok' || activeTab === 'website') && (
+        {(activeTab === 'generator' || activeTab === 'facebook' || activeTab === 'instagram' || activeTab === 'tiktok' || activeTab === 'telegram' || activeTab === 'website') && (
           <div className="transition-opacity duration-300 animate-fade-in" key={activeTab}>
             <React.Suspense fallback={
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full max-w-7xl mx-auto animate-pulse" id="qr_skeleton_loader">

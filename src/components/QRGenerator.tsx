@@ -435,8 +435,8 @@ export default function QRGenerator({
   onSwitchTab
 }: { 
   lang?: 'ar' | 'en';
-  forcePlatform?: 'youtube' | 'facebook' | 'instagram' | 'tiktok' | 'website';
-  onSwitchTab?: (tab: 'generator' | 'facebook' | 'instagram' | 'tiktok' | 'website') => void;
+  forcePlatform?: 'youtube' | 'facebook' | 'instagram' | 'tiktok' | 'telegram' | 'website';
+  onSwitchTab?: (tab: 'generator' | 'facebook' | 'instagram' | 'tiktok' | 'telegram' | 'website') => void;
 }) {
   const t = translations[lang];
 
@@ -455,6 +455,7 @@ export default function QRGenerator({
      if (forcePlatform === 'facebook') return 'https://www.facebook.com/facebook';
      if (forcePlatform === 'instagram') return 'https://www.instagram.com/instagram';
      if (forcePlatform === 'tiktok') return 'https://www.tiktok.com/@tiktok';
+     if (forcePlatform === 'telegram') return 'https://t.me/telegram';
      if (forcePlatform === 'website') return 'https://google.com';
      return '';
    });
@@ -493,6 +494,10 @@ export default function QRGenerator({
       setUrlInput('https://www.tiktok.com/@tiktok');
       setForegroundColor('#000000');
       setEyeColor('#000000');
+    } else if (forcePlatform === 'telegram') {
+      setUrlInput('https://t.me/telegram');
+      setForegroundColor('#24A1DE');
+      setEyeColor('#24A1DE');
     } else if (forcePlatform === 'website') {
       setUrlInput('https://google.com');
       setForegroundColor('#4F46E5');
@@ -674,6 +679,9 @@ export default function QRGenerator({
       } else if (urlInfo.platform === 'tiktok') {
         setForegroundColor('#000000');
         setEyeColor('#000000');
+      } else if (urlInfo.platform === 'telegram') {
+        setForegroundColor('#24A1DE');
+        setEyeColor('#24A1DE');
       }
     }
   }, [urlInfo.platform]);

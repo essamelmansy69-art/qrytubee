@@ -142,6 +142,43 @@ export function parseYoutubeUrl(url: string): youtubeUrlInfo {
     };
   }
 
+  // 3.5. TELEGRAM DETECTION
+  if (/telegram\.org|telegram\.me|t\.me/i.test(trimmed)) {
+    // A. Channel/Group/User link
+    const tgProfileRegex = /(?:https?:\/\/)?(?:www\.)?(?:t\.me|telegram\.me|telegram\.org)\/([a-zA-Z0-9_]{5,32})(?:\/|\?|$)/i;
+    let match = trimmed.match(tgProfileRegex);
+    if (match && !['joinchat', 'share', 'addstickers', 'addemoji', 'c', 'socks', 'proxy'].includes(match[1].toLowerCase())) {
+      return {
+        isValid: true,
+        platform: 'telegram',
+        type: 'channel',
+        id: match[1],
+        cleanUrl: `https://t.me/${match[1]}`,
+      };
+    }
+
+    // B. Invite/Private links
+    const tgInviteRegex = /(?:https?:\/\/)?(?:www\.)?(?:t\.me|telegram\.me)\/(?:\+|joinchat\/)([a-zA-Z0-9_-]+)/i;
+    match = trimmed.match(tgInviteRegex);
+    if (match) {
+      return {
+        isValid: true,
+        platform: 'telegram',
+        type: 'playlist', // map join link to playlist/group-style collections
+        id: match[1],
+        cleanUrl: trimmed.startsWith('http') ? trimmed : `https://${trimmed}`,
+      };
+    }
+
+    return {
+      isValid: true,
+      platform: 'telegram',
+      type: 'unknown',
+      id: trimmed,
+      cleanUrl: trimmed.startsWith('http') ? trimmed : `https://${trimmed}`,
+    };
+  }
+
   // 4. YOUTUBE DETACTION (DEFAULT)
   // A. Regular short/share URL: https://youtu.be/VIDEO_ID
   const shortShareRegex = /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]{11})(?:\?|&|$)/i;
@@ -360,6 +397,40 @@ export function extractTiktokUsername(url: string): string | null {
   return null;
 }
 
+export function extractTelegramUsername(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    const pathParts = parsed.pathname.split('/').filter(Boolean);
+    const filtered = pathParts.filter(p => !['joinchat', 'share', 'addstickers', 'addemoji', 'c', 'socks', 'proxy', '+'].includes(p.toLowerCase()));
+    if (filtered.length > 0) {
+      return filtered[0];
+    }
+  } catch (_) {
+    const clean = url.replace(/^(https?:\/\/)?(www\.)?(t\.me|telegram\.me|telegram\.org)\//i, '').split(/[?#]/)[0];
+    const parts = clean.split('/').filter(Boolean).filter(p => !['joinchat', 'share', 'addstickers', 'addemoji', 'c', 'socks', 'proxy', '+'].includes(p.toLowerCase()));
+    if (parts.length > 0) return parts[0];
+  }
+  return null;
+}
+
+export function extractTelegramInviteHash(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    const pathname = parsed.pathname;
+    if (pathname.includes('/joinchat/')) {
+      const parts = pathname.split('/joinchat/').filter(Boolean);
+      if (parts.length > 1) return parts[1].split(/[?#]/)[0];
+    }
+    if (pathname.startsWith('/+')) {
+      return pathname.substring(2).split(/[?#]/)[0];
+    }
+  } catch (_) {}
+  
+  const inviteMatch = url.match(/(?:\+|joinchat\/)([a-zA-Z0-9_-]+)/i);
+  if (inviteMatch) return inviteMatch[1];
+  return null;
+}
+
 /**
  * Converts a regular url into a native mobile app deep link.
  * Supports multiple social media platforms beautifully.
@@ -393,6 +464,18 @@ export function buildDeepLink(url: string, type: 'vnd' | 'ios' | 'android' | 'st
     const username = extractTiktokUsername(url);
     if (username) {
       return `snssdk1128://user/profile/${username}`;
+    }
+    return info.cleanUrl;
+  }
+
+  if (info.platform === 'telegram') {
+    const username = extractTelegramUsername(url);
+    if (username) {
+      return `tg://resolve?domain=${username}`;
+    }
+    const inviteHash = extractTelegramInviteHash(url);
+    if (inviteHash) {
+      return `tg://join?invite=${inviteHash}`;
     }
     return info.cleanUrl;
   }
@@ -701,6 +784,45 @@ export function convertUrlToDeepLink(url: string, deviceOverride?: 'android' | '
         return `snssdk1128://user/profile/${username}`;
       }
       return `snssdk1128://`;
+    }
+  }
+
+  // 5. TELEGRAM ADVANCED PARSING
+  if (hostname.includes('t.me') || hostname.includes('telegram.me') || hostname.includes('telegram.org')) {
+    let telegramUsername = '';
+    let inviteHash = '';
+
+    const pathParts = pathname.split('/').filter(Boolean);
+    if (pathname.includes('/joinchat/')) {
+      const parts = pathname.split('/joinchat/').filter(Boolean);
+      if (parts.length > 1) {
+        inviteHash = parts[1].split(/[?#]/)[0];
+      }
+    } else if (pathname.startsWith('/+')) {
+      inviteHash = pathname.substring(2).split(/[?#]/)[0];
+    } else {
+      const filtered = pathParts.filter(p => !['joinchat', 'share', 'addstickers', 'addemoji', 'c', 'socks', 'proxy'].includes(p.toLowerCase()));
+      if (filtered.length > 0) {
+        telegramUsername = filtered[0];
+      }
+    }
+
+    const normalizedFallback = trimmed.startsWith('http') ? trimmed : `https://${trimmed}`;
+
+    if (deviceType === 'android') {
+      if (inviteHash) {
+        return `intent://join?invite=${inviteHash}#Intent;package=org.telegram.messenger;scheme=tg;S.browser_fallback_url=${encodeURIComponent(normalizedFallback)};end`;
+      } else if (telegramUsername) {
+        return `intent://resolve?domain=${telegramUsername}#Intent;package=org.telegram.messenger;scheme=tg;S.browser_fallback_url=${encodeURIComponent(normalizedFallback)};end`;
+      }
+      return `intent://#Intent;package=org.telegram.messenger;scheme=tg;S.browser_fallback_url=${encodeURIComponent(normalizedFallback)};end`;
+    } else {
+      if (inviteHash) {
+        return `tg://join?invite=${inviteHash}`;
+      } else if (telegramUsername) {
+        return `tg://resolve?domain=${telegramUsername}`;
+      }
+      return `tg://`;
     }
   }
 
