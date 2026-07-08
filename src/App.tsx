@@ -646,6 +646,12 @@ export default function App() {
             buttonClass: 'bg-slate-950 hover:bg-black border border-slate-850',
             icon: <Music size={48} />
           };
+        case 'telegram':
+          return {
+            bgClass: 'bg-[#24A1DE] shadow-sky-500/40',
+            buttonClass: 'bg-[#24A1DE] hover:bg-[#2090C5]',
+            icon: <Send size={48} />
+          };
         case 'youtube':
         default:
           return {
@@ -674,6 +680,11 @@ export default function App() {
           return {
             title: isAr ? "جاري فتح تطبيق تيك توك..." : "Opening TikTok App...",
             desc: isAr ? "نقوم بفتح الحساب أو الفيديو في تطبيق TikTok الرسمي لتتمكن من التفاعل والمتابعة بسهولة." : "Opening the account or video directly inside the official TikTok App to let you interact and follow smoothly."
+          };
+        case 'telegram':
+          return {
+            title: isAr ? "جاري فتح تطبيق تليجرام..." : "Opening Telegram App...",
+            desc: isAr ? "نقوم بفتح القناة أو المجموعة في تطبيق Telegram الرسمي لتتمكن من الاشتراك والمتابعة فوراً." : "Opening the channel or group directly inside the official Telegram App to let you subscribe and interact instantly."
           };
         case 'youtube':
         default:
@@ -841,7 +852,7 @@ export default function App() {
       <main className={`${activeTab === 'articles' ? 'w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-12' : 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10'}`} id="main_workspace">
         
         {/* Sleek Platform Sub-navigation tabs */}
-        {(activeTab === 'generator' || activeTab === 'facebook' || activeTab === 'instagram' || activeTab === 'tiktok' || activeTab === 'website' || activeTab === 'restaurant' || activeTab === 'gym') && (
+        {(activeTab === 'generator' || activeTab === 'facebook' || activeTab === 'instagram' || activeTab === 'tiktok' || activeTab === 'telegram' || activeTab === 'website' || activeTab === 'restaurant' || activeTab === 'gym') && (
           <div className="mb-8 bg-slate-50/70 p-1.5 rounded-2xl border border-slate-100 flex items-center justify-start gap-1.5 sm:gap-2 max-w-2xl mx-auto overflow-x-auto scrollbar-none shadow-xs" id="platform_sub_navbar">
             <button
               onClick={() => setActiveTab('generator')}

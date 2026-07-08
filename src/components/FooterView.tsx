@@ -47,6 +47,9 @@ export default function FooterView({ lang, onNavigate }: FooterViewProps) {
               <a href="/tiktok" onClick={(e) => onNavigate('tiktok', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">
                 {lang === 'ar' ? '⚫ صانع كود QR تيك توك الذكي' : '⚫ TikTok Smart QR Generator'}
               </a>
+              <a href="/telegram" onClick={(e) => onNavigate('telegram', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">
+                {lang === 'ar' ? '✈️ صانع كود QR تليجرام الذكي' : '✈️ Telegram Smart QR Generator'}
+              </a>
               <a href="/chapters" onClick={(e) => onNavigate('chapters', e)} className="text-slate-300 hover:text-white cursor-pointer transition-colors block">
                 {lang === 'ar' ? '🕒 صانع فصول توقيت فيديوهات اليوتيوب' : '🕒 YouTube Chapters Timestamp Generator'}
               </a>
