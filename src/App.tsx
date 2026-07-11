@@ -260,10 +260,10 @@ export default function App() {
         : "Generate customizable, free QR codes for fitness centers, gym reception check-ins, and machinery tutorials. Include custom dumbbell symbols, custom frame templates, and download vector flyers/A4 PDF.";
     } else {
       title = lang === 'ar' 
-        ? "YouTube QR Code Generator | إنشاء QR كود لرابط فيديو يوتيوب بضغطة واحدة" 
+        ? "أفضل مولد QR Code ليوتيوب | فتح مباشر داخل التطبيق (Deep Link)" 
         : "YouTube QR Code Generator | Viral QR Codes & Deep Links";
       desc = lang === 'ar'
-        ? "هل تريد تحويل رابط فيديوهاتك إلى QR Code احترافي؟ جرب أسرع أداة مجانية لإنشاء QR كود لروابط اليوتيوب، مخصصة لصناع المحتوى، سهلة الاستخدام وتدعم الهاتف والحاسوب."
+        ? "لا تضيع مشاهداتك! أنشئ QR Code احترافي لفيديوهات وقنوات يوتيوب يفتح التطبيق مباشرة على هاتف المستخدم بدلاً من المتصفح. أداة مجانية، سريعة، ومثالية لزيادة اشتراكاتك وتفاعلك في عام 2026."
         : "Convert YouTube and social video URLs to smart app deep link QR codes. Drive high subscriber engagement today.";
     }
 

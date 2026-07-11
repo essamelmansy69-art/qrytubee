@@ -45,7 +45,10 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
   const [currentPage, setCurrentPage] = useState(1);
   const articlesPerPage = 6;
   const t = translations[lang];
-  const articles = articlesData[lang];
+  // Sort articles from newest to oldest (by date descending)
+  const articles = [...articlesData[lang]].sort((a, b) => {
+    return new Date(b.date).getTime() - new Date(a.date).getTime();
+  });
 
   const selectedArticle = articles.find(a => a.id.toLowerCase() === selectedArticleId?.toLowerCase());
 
