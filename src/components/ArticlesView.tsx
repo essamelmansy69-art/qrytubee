@@ -42,10 +42,20 @@ function ImageWithFallback({ src, alt, className }: { src: string, alt: string, 
 
 export default function ArticlesView({ lang, selectedArticleId, onSelectArticle }: ArticlesViewProps) {
   const [copied, setCopied] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const articlesPerPage = 6;
   const t = translations[lang];
   const articles = articlesData[lang];
 
   const selectedArticle = articles.find(a => a.id.toLowerCase() === selectedArticleId?.toLowerCase());
+
+  // reset page to 1 when changing language
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [lang]);
+
+  const totalPages = Math.ceil(articles.length / articlesPerPage);
+  const currentArticles = articles.slice((currentPage - 1) * articlesPerPage, currentPage * articlesPerPage);
 
   // Dynamic SEO 2026 Schema JSON-LD injection
   useEffect(() => {
@@ -313,7 +323,7 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
 
       {/* Grid space - Beautiful, fluid Grid filling the full container width */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="articles_cards_grid">
-        {articles.map((article) => {
+        {currentArticles.map((article) => {
           const isAudit = article.id === 'website-seo-audit';
           return (
             <article
@@ -376,6 +386,70 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
           );
         })}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t border-slate-100 dark:border-slate-800/80 mt-10 animate-fadeIn" id="articles_pagination">
+          <div className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-arabic">
+            {lang === 'ar' 
+              ? `عرض المقالات ${(currentPage - 1) * articlesPerPage + 1} - ${Math.min(currentPage * articlesPerPage, articles.length)} من أصل ${articles.length}`
+              : `Showing articles ${(currentPage - 1) * articlesPerPage + 1} - ${Math.min(currentPage * articlesPerPage, articles.length)} of ${articles.length}`}
+          </div>
+          
+          <div className="flex flex-wrap items-center justify-center gap-2" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+            <button
+              onClick={() => {
+                if (currentPage > 1) {
+                  setCurrentPage(prev => prev - 1);
+                  const el = document.getElementById('articles_list_workspace');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              disabled={currentPage === 1}
+              className="px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-red-600 dark:hover:text-red-400 transition-all text-xs font-bold font-arabic cursor-pointer flex items-center gap-1.5"
+            >
+              {lang === 'ar' ? <ArrowRight size={14} /> : <ArrowLeft size={14} />}
+              <span>{lang === 'ar' ? 'السابق' : 'Previous'}</span>
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+              const isCurrent = currentPage === page;
+              return (
+                <button
+                  key={page}
+                  onClick={() => {
+                    setCurrentPage(page);
+                    const el = document.getElementById('articles_list_workspace');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center font-bold font-mono text-xs sm:text-sm transition-all cursor-pointer ${
+                    isCurrent
+                      ? 'bg-red-650 text-white shadow-md shadow-red-500/20 font-extrabold'
+                      : 'bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-slate-700 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  {page}
+                </button>
+              );
+            })}
+
+            <button
+              onClick={() => {
+                if (currentPage < totalPages) {
+                  setCurrentPage(prev => prev + 1);
+                  const el = document.getElementById('articles_list_workspace');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              disabled={currentPage === totalPages}
+              className="px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-red-600 dark:hover:text-red-400 transition-all text-xs font-bold font-arabic cursor-pointer flex items-center gap-1.5"
+            >
+              <span>{lang === 'ar' ? 'التالي' : 'Next'}</span>
+              {lang === 'ar' ? <ArrowLeft size={14} /> : <ArrowRight size={14} />}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
