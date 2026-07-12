@@ -145,7 +145,7 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
         // Parse bold references in lists
         const listText = trimmed.replace('- ', '');
         return (
-          <p key={idx} className="mr-5 ml-5 text-slate-650 dark:text-slate-300 font-arabic text-sm sm:text-base leading-relaxed mb-2.5 flex items-start gap-2">
+          <p key={idx} className="mr-5 ml-5 text-slate-800 dark:text-slate-300 font-arabic text-sm sm:text-base leading-relaxed mb-2.5 flex items-start gap-2">
             <span className="text-red-550 dark:text-red-500 shrink-0 select-none">•</span>
             <span>{parseBoldText(listText)}</span>
           </p>
@@ -171,7 +171,7 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
       }
 
       return (
-        <p key={idx} className="text-sm sm:text-base text-slate-650 dark:text-slate-300 font-arabic leading-relaxed mb-4">
+        <p key={idx} className="text-sm sm:text-base text-slate-800 dark:text-slate-300 font-arabic leading-relaxed mb-4">
           {parseBoldText(line)}
         </p>
       );
@@ -190,12 +190,12 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
 
   if (selectedArticle) {
     return (
-      <div className={`w-full max-w-5xl mx-auto ${lang === 'ar' ? 'text-right' : 'text-left'} animate-fadeIn`} id="active_article_reader">
+      <div className={`w-full max-w-7xl mx-auto ${lang === 'ar' ? 'text-right' : 'text-left'} animate-fadeIn px-2 sm:px-4`} id="active_article_reader">
         
         {/* Navigation bar to return */}
         <button
           onClick={() => onSelectArticle(null)}
-          className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-450 hover:text-red-650 dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors mb-6 cursor-pointer bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 px-4 py-2 rounded-xl shadow-xs"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-red-650 dark:hover:text-red-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors mb-6 cursor-pointer bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 px-4 py-2 rounded-xl shadow-xs"
           type="button"
           id="back_to_blog_btn"
         >
@@ -203,11 +203,11 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
           <span>{t.backToArticles}</span>
         </button>
 
-        {/* Content Card with simple, spacious layout */}
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 md:p-12 border border-slate-100 dark:border-slate-850 shadow-xs">
+        {/* Simple, wide, borderless content wrapper */}
+        <div className="space-y-6">
           
           {/* Header Metadata */}
-          <div className="space-y-4 mb-6">
+          <div className="space-y-4">
             <span className="inline-block px-3 py-1 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 text-xs font-bold rounded-lg font-arabic">
               {selectedArticle.category}
             </span>
@@ -215,7 +215,7 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
               {selectedArticle.title}
             </h1>
 
-            <div className={`flex flex-wrap items-center gap-4 text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-arabic`}>
+            <div className={`flex flex-wrap items-center gap-4 text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-arabic pb-4 border-b border-slate-100 dark:border-slate-800`}>
               <span className="flex items-center gap-1.5">
                 <Calendar size={14} />
                 <span>{selectedArticle.date}</span>
@@ -231,14 +231,25 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
             </div>
           </div>
 
+          {/* Dynamic Image Banner */}
+          {selectedArticle.image && (
+            <div className="w-full rounded-2xl overflow-hidden aspect-video border border-slate-100 dark:border-slate-800 shadow-xs max-h-[450px] flex items-center justify-center bg-slate-50 dark:bg-slate-950 relative">
+              <ImageWithFallback
+                src={selectedArticle.image}
+                alt={selectedArticle.title}
+                className="object-cover w-full h-full"
+              />
+            </div>
+          )}
+
           {/* Dynamic Share URL Bar */}
-          <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-4 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-700 dark:text-slate-300">
+          <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800/60 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-700 dark:text-slate-300">
             <div className="flex items-center gap-2 overflow-hidden w-full sm:w-auto">
               <Share2 size={16} className="text-slate-500 dark:text-slate-455 shrink-0" />
               <span className="text-xs font-bold font-arabic shrink-0 text-slate-850 dark:text-slate-200">
                 {lang === 'ar' ? 'رابط المقال المخصص للسيو:' : 'SEO Targeted Link:'}
               </span>
-              <span className="text-xs font-mono bg-white dark:bg-slate-900 px-2.5 py-1 rounded truncate text-slate-650 dark:text-slate-400 select-all border border-slate-100 dark:border-slate-800" dir="ltr">
+              <span className="text-xs font-mono bg-white dark:bg-slate-900 px-2.5 py-1 rounded truncate text-slate-600 dark:text-slate-400 select-all border border-slate-100 dark:border-slate-800" dir="ltr">
                 {`${window.location.origin}/articles/${selectedArticle.id}`}
               </span>
             </div>
@@ -263,22 +274,8 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
             </button>
           </div>
 
-          {/* Decorative banner */}
-          <div className="h-1 bg-gradient-to-r from-red-650 via-rose-500 to-indigo-600 mb-8 rounded-full" />
-
-          {/* Dynamic Image Banner */}
-          {selectedArticle.image && (
-            <div className="mb-8 rounded-2xl overflow-hidden aspect-video border border-slate-100 dark:border-slate-800 shadow-xs max-h-[400px] flex items-center justify-center bg-slate-50 dark:bg-slate-950 relative">
-              <ImageWithFallback
-                src={selectedArticle.image}
-                alt={selectedArticle.title}
-                className="object-cover w-full h-full"
-              />
-            </div>
-          )}
-
-          {/* Dynamic content rendering */}
-          <div className="space-y-1 mb-10 prose prose-slate dark:prose-invert max-w-none text-slate-800 dark:text-slate-200">
+          {/* Dynamic content rendering - Full width and very spacious */}
+          <div className="space-y-2 mb-10 prose prose-slate dark:prose-invert max-w-none text-slate-800 dark:text-slate-200" id="article_body_content">
             {renderMarkdown(selectedArticle.content)}
           </div>
 
@@ -312,79 +309,79 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
   }
 
   return (
-    <div className="space-y-10 w-full max-w-none" id="articles_list_workspace">
+    <div className="space-y-8 w-full max-w-7xl mx-auto px-2 sm:px-4" id="articles_list_workspace">
       
       {/* Tab intro text */}
-      <div className={`text-center max-w-3xl mx-auto space-y-4 mb-10`}>
-        <h2 className="text-3xl sm:text-4xl font-extrabold font-arabic text-slate-900 dark:text-white tracking-tight">
+      <div className={`text-center max-w-3xl mx-auto space-y-3 mb-8`}>
+        <h2 className="text-2xl sm:text-3xl font-extrabold font-arabic text-slate-900 dark:text-white tracking-tight">
           {t.seoArticlesHeading}
         </h2>
-        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 font-arabic leading-relaxed max-w-2xl mx-auto">
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-arabic leading-relaxed max-w-2xl mx-auto">
           {t.seoArticlesDesc}
         </p>
       </div>
 
-      {/* Grid space - Beautiful, fluid Grid filling the full container width */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="articles_cards_grid">
+      {/* Simple, wide stacked articles list */}
+      <div className="space-y-4 w-full" id="articles_cards_grid">
         {currentArticles.map((article) => {
           const isAudit = article.id === 'website-seo-audit';
           return (
             <article
               key={article.id}
               onClick={() => onSelectArticle(article.id)}
-              className={`bg-white dark:bg-slate-900 rounded-3xl p-6 border transition-all duration-300 cursor-pointer flex flex-col justify-between group overflow-hidden relative ${
+              className={`bg-white dark:bg-slate-900 rounded-2xl p-5 sm:p-6 border transition-all duration-300 cursor-pointer flex flex-col md:flex-row gap-5 items-start md:items-center justify-between group overflow-hidden relative ${
                 isAudit 
-                  ? 'border-emerald-200 dark:border-emerald-800/60 hover:border-emerald-300 dark:hover:border-emerald-700 shadow-sm hover:shadow-md bg-emerald-50/10 dark:bg-emerald-950/10' 
-                  : 'border-slate-100 dark:border-slate-800/80 hover:border-slate-200 dark:hover:border-slate-700 shadow-sm hover:shadow-lg dark:hover:shadow-slate-950/40'
+                  ? 'border-emerald-200 dark:border-emerald-800/40 hover:border-emerald-300 dark:hover:border-emerald-700/80 bg-emerald-50/5 dark:bg-emerald-950/5' 
+                  : 'border-slate-100 dark:border-slate-800/60 hover:border-slate-200 dark:hover:border-slate-700 bg-white/40 dark:bg-slate-900/40'
               }`}
             >
-              <div className="space-y-4">
-                {/* Optional Card Image cover */}
-                {article.image && (
-                  <div className="mb-4 rounded-2xl overflow-hidden aspect-video border border-slate-100/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 relative">
-                    <ImageWithFallback
-                      src={article.image}
-                      alt={article.title}
-                      className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                )}
-                
+              <div className="space-y-3 flex-1 min-w-0 w-full">
                 {/* Meta details */}
-                <div className="flex items-center justify-between">
-                  <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded ${
+                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 font-arabic">
+                  <span className={`px-2 py-0.5 text-[10px] font-bold rounded ${
                     isAudit 
                       ? 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-400' 
                       : 'bg-red-50 dark:bg-red-950/30 text-red-650 dark:text-red-400'
                   }`}>
                     {article.category}
                   </span>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-500 font-mono">{article.date}</span>
+                  <span>•</span>
+                  <span className="font-mono text-[11px]">{article.date}</span>
+                  <span>•</span>
+                  <span className="flex items-center gap-1 font-mono text-[11px]">
+                    <Clock size={12} />
+                    <span>{article.readTime}</span>
+                  </span>
                 </div>
 
-                <h3 className={`font-bold font-arabic text-base sm:text-lg text-slate-900 dark:text-white group-hover:text-red-650 dark:group-hover:text-red-500 transition-colors leading-snug ${
+                <h3 className={`font-bold font-arabic text-lg sm:text-xl text-slate-900 dark:text-white group-hover:text-red-650 dark:group-hover:text-red-400 transition-colors leading-snug ${
                   lang === 'ar' ? 'text-right' : 'text-left'
                 }`}>
                   {article.title}
                 </h3>
 
-                <p className={`text-xs sm:text-sm text-slate-650 dark:text-slate-400 font-arabic leading-relaxed line-clamp-3 ${
+                <p className={`text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-arabic leading-relaxed line-clamp-2 ${
                   lang === 'ar' ? 'text-right' : 'text-left'
                 }`}>
                   {article.excerpt}
                 </p>
+
+                <div className="pt-2">
+                  <span className="inline-flex items-center gap-1 text-xs font-extrabold text-red-600 dark:text-red-450 group-hover:underline font-arabic">
+                    {t.readMore}
+                  </span>
+                </div>
               </div>
 
-              {/* Action footer */}
-              <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800 mt-5 text-xs font-bold text-slate-600 dark:text-slate-400 group-hover:text-red-650 dark:group-hover:text-red-500 font-arabic transition-colors">
-                <span className="flex items-center gap-1.5 text-slate-500 dark:text-slate-500 font-mono font-normal">
-                  <Clock size={12} />
-                  <span>{article.readTime}</span>
-                </span>
-                <span className="flex items-center gap-1 font-extrabold group-hover:underline text-red-600 dark:text-red-400">
-                  {t.readMore}
-                </span>
-              </div>
+              {article.image && (
+                <div className="w-full md:w-48 shrink-0 aspect-video md:aspect-[4/3] rounded-xl overflow-hidden border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 relative">
+                  <ImageWithFallback
+                    src={article.image}
+                    alt={article.title}
+                    className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+              )}
             </article>
           );
         })}

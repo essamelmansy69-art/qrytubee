@@ -778,7 +778,7 @@ export default function App() {
                 <h1 className="text-md sm:text-base font-black font-arabic text-gray-900 tracking-tight leading-none">
                   {t.appTitle}
                 </h1>
-                <span className="text-[10px] sm:text-[11px] font-medium font-arabic text-slate-650 dark:text-slate-400 mt-0.5">
+                <span className="text-[10px] sm:text-[11px] font-medium font-arabic text-slate-500 dark:text-slate-400 mt-0.5">
                   {t.appSubTitle}
                 </span>
               </div>

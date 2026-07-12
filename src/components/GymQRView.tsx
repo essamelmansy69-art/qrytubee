@@ -699,7 +699,7 @@ export default function GymQRView({ lang, onNavigateToYouTube }: GymQRViewProps)
                     onChange={(e) => { setLogoMargin(e.target.checked); setGenerationTrigger(prev => prev + 1); }}
                     className="w-4 h-4 rounded text-indigo-600 accent-indigo-600"
                   />
-                  <label htmlFor="logo_margin_chk" className="text-xs font-bold text-slate-650 dark:text-slate-300 cursor-pointer">
+                  <label htmlFor="logo_margin_chk" className="text-xs font-bold text-slate-500 dark:text-slate-300 cursor-pointer">
                     {lang === 'ar' ? 'حماية الشعار بخلفية دائرية معزولة' : 'Isolate logo with circular backdrop mask'}
                   </label>
                 </div>

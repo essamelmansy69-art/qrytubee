@@ -226,3 +226,26 @@ html.dark footer a:hover {
   color: #ffffff !important;
 }
 
+/* Ensure ultra-high-contrast text visibility in SEO Articles for both Light and Dark modes */
+#article_body_content p,
+#article_body_content li {
+  color: #1e293b !important; /* Extremely high contrast dark gray/charcoal for light mode */
+}
+
+#article_body_content h3,
+#article_body_content h4 {
+  color: #0f172a !important; /* Bold headings in near-black for light mode */
+}
+
+/* Dark mode overrides */
+html.dark #article_body_content p,
+html.dark #article_body_content li {
+  color: #cbd5e1 !important; /* Soft white/slate-200 for dark mode */
+}
+
+html.dark #article_body_content h3,
+html.dark #article_body_content h4 {
+  color: #ffffff !important; /* Pure white for dark mode headings */
+}
+
+

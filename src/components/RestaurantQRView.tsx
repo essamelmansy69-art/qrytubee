@@ -851,7 +851,7 @@ export default function RestaurantQRView({ lang, onNavigateToYouTube }: Restaura
             {selectedIcon !== 'none' && (
               <div className="bg-slate-50 p-4 rounded-2xl border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5 text-right">
-                  <label className="text-[11px] font-black text-slate-650 font-arabic flex justify-between leading-none">
+                  <label className="text-[11px] font-black text-slate-500 font-arabic flex justify-between leading-none">
                     <span>{lang === 'ar' ? 'حجم الرمز بالمنتصف:' : 'Center symbol size factor:'}</span>
                     <span className="font-mono text-[10px] text-amber-700">{Math.round(logoScale * 100)}%</span>
                   </label>
@@ -862,7 +862,7 @@ export default function RestaurantQRView({ lang, onNavigateToYouTube }: Restaura
                     step="0.02"
                     value={logoScale}
                     onChange={(e) => setLogoScale(parseFloat(e.target.value))}
-                    className="w-full accent-amber-650 cursor-pointer h-1.5 bg-slate-200 rounded-lg appearance-none"
+                    className="w-full accent-amber-600 cursor-pointer h-1.5 bg-slate-200 rounded-lg appearance-none"
                   />
                 </div>
 
@@ -938,7 +938,7 @@ export default function RestaurantQRView({ lang, onNavigateToYouTube }: Restaura
           <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-xs flex flex-col items-center justify-between text-center relative overflow-hidden" id="interactive_restaurant_preview_stage">
             
             {/* Table Mockup Frame selectors */}
-            <div className="w-full flex justify-between items-center pb-4 border-b border-gray-100 mb-6 font-arabic text-slate-650">
+            <div className="w-full flex justify-between items-center pb-4 border-b border-gray-100 mb-6 font-arabic text-slate-500">
               <span className="text-xs font-bold font-arabic">{lang === 'ar' ? 'اختر شكل فريم العرض:' : 'Stand Mockup style:'}</span>
               <div className="flex gap-1.5" id="preset_frame_selectors">
                 {['acrylic', 'wooden', 'none'].map((f) => (
@@ -1178,7 +1178,7 @@ export default function RestaurantQRView({ lang, onNavigateToYouTube }: Restaura
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative bg-gradient-to-r from-red-600 via-rose-650 to-red-700 text-white rounded-3xl p-6 sm:p-8 shadow-lg overflow-hidden border border-red-500/30 font-arabic text-right flex flex-col md:flex-row items-center justify-between gap-6"
+        className="relative bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white rounded-3xl p-6 sm:p-8 shadow-lg overflow-hidden border border-red-500/30 font-arabic text-right flex flex-col md:flex-row items-center justify-between gap-6"
         id="youtube_creator_tip_banner"
       >
         <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full blur-2xl" />
@@ -1204,7 +1204,7 @@ export default function RestaurantQRView({ lang, onNavigateToYouTube }: Restaura
 
         <button
           onClick={onNavigateToYouTube}
-          className="relative z-10 px-6 py-3.5 bg-white hover:bg-slate-50 text-red-650 hover:text-red-700 font-extrabold text-xs sm:text-sm rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform active:scale-97 cursor-pointer shrink-0 flex items-center gap-2"
+          className="relative z-10 px-6 py-3.5 bg-white hover:bg-slate-50 text-red-600 hover:text-red-700 font-extrabold text-xs sm:text-sm rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform active:scale-97 cursor-pointer shrink-0 flex items-center gap-2"
           type="button"
           id="navigate_to_youtube_qr_btn"
         >
