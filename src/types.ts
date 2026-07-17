@@ -1,18 +1,30 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+export type QRStyle = 'dots' | 'squares' | 'rounded';
+
 export interface QRConfig {
-  url: string;
-  dotsColor: string;
-  bgColor: string;
-  logoUrl?: string;
+  text: string;
+  originalUrl: string;
+  deepLinkType: 'vnd' | 'ios' | 'android' | 'standard';
+  foregroundColor: string;
+  backgroundColor: string;
+  eyeColor: string;
+  logoUrl: string | null;
   logoScale: number; // 0.1 to 0.3
-  frameText?: string;
-  frameColor: string;
-  frameType: 'none' | 'basic' | 'modern';
+  logoMargin: boolean;
+  qrStyle: QRStyle;
   errorCorrectionLevel: 'L' | 'M' | 'Q' | 'H';
-  qrStyle: 'square' | 'dots' | 'rounded';
 }
 
-export interface CampaignStats {
-  scansToday: number;
-  linksCreated: number;
-  activeCampaigns: number;
+export type PlatformType = 'youtube' | 'facebook' | 'instagram' | 'tiktok' | 'telegram' | 'other';
+
+export interface youtubeUrlInfo {
+  isValid: boolean;
+  platform: PlatformType;
+  type: 'video' | 'channel' | 'shorts' | 'playlist' | 'profile' | 'post' | 'unknown';
+  id: string;
+  cleanUrl: string;
 }

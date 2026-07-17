@@ -99,9 +99,97 @@
     <noscript>
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;805&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400&display=swap" />
     </noscript>
+    <style>:root{--font-sans:"Inter","Cairo",system-ui,sans-serif}body{margin:0;padding:0;background-color:#fbfafe;color:#0f172a;font-family:var(--font-sans);-webkit-font-smoothing:antialiased}#root{min-height:100vh;display:flex;flex-direction:column}.crit-nav{background-color:rgba(255,255,255,.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(226,232,240,.8);height:72px;width:100%;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;box-sizing:border-box}.crit-logo{display:flex;align-items:center;gap:.75rem}.crit-logo-icon{width:44px;height:44px;background:linear-gradient(135deg,#ef4444 0%,#b91c1c 100%);border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(239,68,68,.25)}.crit-logo-svg{width:20px;height:20px;fill:#fff}.crit-logo-text{font-size:1.4rem;font-weight:800;color:#0f172a;letter-spacing:-.025em}.crit-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:2.5rem 1rem;box-sizing:border-box}.crit-hero{text-align:center;max-width:640px;margin-bottom:2rem;margin-top:1rem}.crit-title{font-size:1.875rem;font-weight:800;line-height:1.25;color:#0f172a;margin:0 0 .75rem 0}.crit-subtitle{font-size:.95rem;color:#334155;margin:0}.crit-card{background-color:#fff;border-radius:20px;border:1px solid rgba(226,232,240,.8);box-shadow:0 4px 20px -2px rgba(15,23,42,.05);width:100%;max-width:580px;padding:1.75rem;box-sizing:border-box}.crit-input-lbl{font-size:.875rem;font-weight:600;color:#334155;margin-bottom:.5rem;display:block}.crit-input-box{height:48px;background-color:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;width:100%;box-sizing:border-box}</style>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div id="root">
+      <!-- Critical View Instant Render Mock Structure (Hydrates instantly to React) -->
+      <nav class="crit-nav">
+        <div class="crit-logo">
+          <div class="crit-logo-icon" style="background: none; box-shadow: none; display: flex; align-items: center; justify-content: center;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="44" height="44" style="border-radius: 12px; width: 44px; height: 44px;" id="crit_logo_svg">
+              <defs>
+                <linearGradient id="glossyRedCrit" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#E51C1C" />
+                  <stop offset="100%" stop-color="#800202" />
+                </linearGradient>
+                <linearGradient id="shineGradCrit" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.3" />
+                  <stop offset="35%" stop-color="#FFFFFF" stop-opacity="0.08" />
+                  <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+                </linearGradient>
+                <g id="f_p_crit">
+                  <rect x="0" y="0" width="18" height="18" rx="4" fill="none" stroke="#FFA6A6" stroke-width="3" />
+                  <rect x="5" y="5" width="8" height="8" rx="2" fill="#FFA6A6" />
+                </g>
+              </defs>
+
+              <rect x="2" y="2" width="96" height="96" rx="22" fill="url(#glossyRedCrit)" stroke="#600101" stroke-width="1.5" />
+              <rect x="3.5" y="3.5" width="93" height="93" rx="20.5" fill="none" stroke="#FF7E7E" stroke-width="1" opacity="0.25" />
+
+              <use href="#f_p_crit" x="12" y="12" />
+              <use href="#f_p_crit" x="70" y="12" />
+              <use href="#f_p_crit" x="12" y="70" />
+
+              <g fill="#FFA6A6" opacity="0.95">
+                <rect x="36" y="12" width="4" height="4" rx="1" />
+                <rect x="44" y="12" width="4" height="8" rx="1" />
+                <rect x="60" y="12" width="4" height="4" rx="1" />
+                
+                <rect x="52" y="16" width="8" height="4" rx="1" />
+                <rect x="36" y="24" width="4" height="4" rx="1" />
+                <rect x="60" y="24" width="4" height="4" rx="1" />
+                <rect x="44" y="24" width="4" height="4" rx="1" />
+
+                <rect x="12" y="36" width="4" height="8" rx="1" />
+                <rect x="20" y="36" width="4" height="4" rx="1" />
+                <rect x="24" y="40" width="4" height="12" rx="1" />
+                <rect x="12" y="48" width="8" height="4" rx="1" />
+                <rect x="12" y="56" width="4" height="4" rx="1" />
+                <rect x="20" y="56" width="8" height="4" rx="1" />
+
+                <rect x="70" y="36" width="8" height="4" rx="1" />
+                <rect x="84" y="36" width="4" height="8" rx="1" />
+                <rect x="76" y="44" width="4" height="4" rx="1" />
+                <rect x="80" y="48" width="8" height="4" rx="1" />
+                <rect x="70" y="56" width="4" height="8" rx="1" />
+                <rect x="80" y="56" width="8" height="4" rx="1" />
+
+                <rect x="36" y="72" width="12" height="4" rx="1" />
+                <rect x="36" y="80" width="4" height="8" rx="1" />
+                <rect x="44" y="76" width="8" height="4" rx="1" />
+                <rect x="56" y="72" width="4" height="4" rx="1" />
+                <rect x="52" y="80" width="8" height="4" rx="1" />
+                <rect x="64" y="76" width="4" height="8" rx="1" />
+              </g>
+
+              <path
+                d="M 45,34 L 45,66 L 68,50 Z"
+                fill="url(#glossyRedCrit)"
+                stroke="#FFFFFF"
+                stroke-width="5.5"
+                stroke-linejoin="round"
+                stroke-linecap="round"
+              />
+
+              <path d="M 2,24 A 22,22 0 0,1 24,2 L 76,2 A 22,22 0 0,1 98,24 Q 50,28 2,24 Z" fill="url(#shineGradCrit)" />
+            </svg>
+          </div>
+          <span class="crit-logo-text">Qrytube</span>
+        </div>
+      </nav>
+      <main class="crit-main">
+        <div class="crit-hero">
+          <h1 class="crit-title">منشئ رموز QR الذكية لليوتيوب</h1>
+          <p class="crit-subtitle">قم بتوليد الباركود الذكي الذي يفتح روابط قناتك مباشرة في التطبيق الرسمي لزيادة التفاعل ✨</p>
+        </div>
+        <div class="crit-card">
+          <label class="crit-input-lbl" for="crit_url_input">أدخل رابط قناة اليوتيوب أو الفيديو الخاص بك</label>
+          <input class="crit-input-box" id="crit_url_input" type="text" placeholder="https://youtube.com/..." disabled style="padding: 0 1rem; border: 1px solid #e2e8f0; font-size: 0.875rem;" />
+        </div>
+      </main>
+    </div>
+    <script type="module" defer src="/src/main.tsx"></script>
   </body>
 </html>
+
