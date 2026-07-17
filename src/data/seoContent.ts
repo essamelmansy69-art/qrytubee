@@ -23,7 +23,7 @@ export const seoContent: SEOContent = {
       readTime: "قراءة 10 دقائق",
       category: "نمو يوتيوب 2026",
       date: "2026-07-15",
-      image: "/youtube_subscribers_seo.jpg",
+      image: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=800&q=80",
       content: `### مقدمة: تطور خوارزميات يوتيوب في عام 2026
 
 أهلاً بك في عام **2026**، حيث يشهد إنتاج المحتوى المرئي ثورة حقيقية بفضل تقنيات الذكاء الاصطناعي وتغير سلوك المشاهدين. لم يعد يوتيوب مجرد منصة لمقاطع الفيديو التقليدية، بل أصبح محرك بحث ذكي فائق الدقة يعتمد كلياً على تفاعل الجمهور الحقيقي ومدة المشاهدة الإجمالية. وبناءً عليه، فإن السعي نحو **"زيادة مشتركين اليوتيوب"** يتطلب الآن استراتيجيات حديثة ومختلفة كلياً عن السنوات الماضية.
@@ -60,7 +60,7 @@ export const seoContent: SEOContent = {
       readTime: "قراءة 8 دقائق",
       category: "سيو تيك توك 2026",
       date: "2026-07-16",
-      image: "/tiktok_insta_qr.webp",
+      image: "https://images.unsplash.com/photo-1598128558393-70ff21433be0?auto=format&fit=crop&w=800&q=80",
       content: `### استراتيجية السيو في تيك توك لعام 2026
 
 تيك توك ليس مجرد تطبيق لمشاركة المقاطع القصيرة بل تحول لمحرك بحث عملاق تعتمد عليه فئات واسعة من الشباب للوصول إلى المعلومات والمنتجات. بالتالي، فإن تطبيق **سيو تيك توك** هو سر النجاح في تحقيق انتشار فيروسي للفيديوهات دون الحاجة لدفع دولار واحد للإعلانات.
@@ -82,7 +82,7 @@ export const seoContent: SEOContent = {
       readTime: "قراءة 12 دقيقة",
       category: "تكنولوجيا المطاعم 2026",
       date: "2026-07-16",
-      image: "/restaurant_qr_seo.webp",
+      image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
       content: `### مقدمة: ثورة التحول الرقمي في قطاع الضيافة عام 2026 وأهمية المنيو الذكي
 
 مرحباً بك في عام **2026**، العصر الرقمي المتسارع حيث تندمج الحلول الذكية مع تفاصيل حياتنا اليومية لتقديم تجارب استثنائية تفاعلية. في هذا العصر الجديد، لم تعد المطاعم والمقاهي مجرد أماكن لتقديم الوجبات اللذيذة فحسب، بل تحولت إلى واحات رقمية متكاملة تقدم للزبون تجارب حسية وبصرية فائقة السلاسة من اللحظة الأولى لدخوله من الباب. وفي قلب هذه الثورة التقنية، يتربع نظام **"منيو مطعم كيو ار كود"** كواحد من أهم الأدوات التقنية وأكثرها طلباً لتبسيط وتحديث عمليات البيع والطلب، متفوقاً تماماً على المنيوهات الورقية التقليدية التي أصبحت عبئاً مادياً وتنظيمياً على أصحاب المشاريع.
@@ -96,7 +96,7 @@ export const seoContent: SEOContent = {
       readTime: "قراءة 7 دقائق",
       category: "تسويق صالات الجيم",
       date: "2026-07-16",
-      image: "/gym_qr_seo.webp",
+      image: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=800&q=80",
       content: `### ثورة الأكواد الذكية في عالم اللياقة البدنية
 
 في عام **2026**، تتنافس صالات اللياقة البدنية (Gym) لتقديم أفضل تجربة رقمية تفاعلية للاعبين. تتيح لك رموز الاستجابة السريعة (QR Code) المتطورة من منصة **Qrytube** توفير تجربة خالية من التعقيد للمشتركين لفتح جداول التمارين، حجز الحصص الرياضية، أو حتى متابعة قنوات التمرين الخاصة بالصالة على يوتيوب وتيك توك مباشرة من خلال مسح سريع للكود الملصق على الأجهزة الرياضية.
@@ -114,7 +114,7 @@ export const seoContent: SEOContent = {
       readTime: "قراءة 6 دقائق",
       category: "تسويق انستغرام 2026",
       date: "2026-07-16",
-      image: "/instagram_qr_seo.webp",
+      image: "https://images.unsplash.com/photo-1611224885990-ab7363d1f2a9?auto=format&fit=crop&w=800&q=80",
       content: `### معضلة المتصفح الداخلي لمنصات التواصل الاجتماعي
 
 عند نشر رابط حسابك على إنستغرام داخل منشورات فيسبوك أو تليجرام، تفتحه تلك المنصات داخل متصفحها الخاص. هذا المتصفح يمنع المستخدم من الضغط على زر المتابعة أو كتابة تعليق إلا بعد تسجيل الدخول كتابياً لإنستغرام، وهو ما يرفضه 95% من المستخدمين لعدم تذكر كلمات المرور.
@@ -131,7 +131,7 @@ export const seoContent: SEOContent = {
       readTime: "قراءة 5 دقائق",
       category: "التسويق الرقمي 2026",
       date: "2026-07-16",
-      image: "/whatsapp_qr_blog.jpg",
+      image: "https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?auto=format&fit=crop&w=800&q=80",
       content: `### تواصل أسرع مع العملاء عبر واتساب
 
 يعتبر تطبيق واتساب قناة التواصل الأولى والمفضلة للعملاء لسرعة الرد وسهولة الاستخدام. ولكن مطالبة العميل بحفظ رقم هاتفك أولاً ثم فتح التطبيق للبحث عن الاسم يعتبر حاجزاً كبيراً يضيع الكثير من المبيعات المحتملة.
@@ -229,7 +229,7 @@ export const seoContent: SEOContent = {
       readTime: "10 min read",
       category: "YouTube Growth 2026",
       date: "2026-07-15",
-      image: "/youtube_subscribers_seo.jpg",
+      image: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=800&q=80",
       content: `### Introduction: The Evolution of YouTube's Algorithm in 2026
 
 Welcome to **2026**, where visual content is experiencing an amazing evolution driven by AI technologies and changing viewer behaviors. YouTube has transformed from a simple video repository into a highly intelligent semantic search engine that values authentic viewer retention and deep engagement above all else. Consequently, growing your **"YouTube subscribers"** requires completely updated tactics.
@@ -243,7 +243,7 @@ Avoiding old shortcuts like sub-for-sub or purchased bot subscriptions is critic
       readTime: "8 min read",
       category: "TikTok SEO 2026",
       date: "2026-07-16",
-      image: "/tiktok_insta_qr.webp",
+      image: "https://images.unsplash.com/photo-1598128558393-70ff21433be0?auto=format&fit=crop&w=800&q=80",
       content: `### TikTok as a Search Engine in 2026
 
 TikTok has cemented itself as a major search engine, especially for younger generations looking for visual answers to their queries. Implementing professional **TikTok SEO** is your secret weapon to achieving viral reach without spent budgets on advertisement campaigns.
@@ -261,7 +261,7 @@ TikTok has cemented itself as a major search engine, especially for younger gene
       readTime: "12 min read",
       category: "Restaurant Tech 2026",
       date: "2026-07-16",
-      image: "/restaurant_qr_seo.webp",
+      image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
       content: `### Introduction: The Restaurant Digital Revolution of 2026
 
 In **2026**, restaurants and cafes are adopting interactive digital solutions to streamline ordering and reduce paper waste. At the heart of this change is the **"restaurant menu QR code"**, an elegant system that connects guests instantly to rich food menus with pricing and vivid imagery.
@@ -275,7 +275,7 @@ Creating a professional contactless menu QR code with **Qrytube** is 100% free a
       readTime: "7 min read",
       category: "Gym Marketing",
       date: "2026-07-16",
-      image: "/gym_qr_seo.webp",
+      image: "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=800&q=80",
       content: `### The Gym Digitalization Era
 
 In **2026**, fitness enthusiasts demand seamless interactions. Placing custom **Qrytube** QR codes on exercise machinery lets players instantly scan and view workout instruction videos, check trainer schedules, or enroll in classes, greatly boosting overall client satisfaction and loyalty.`
@@ -287,7 +287,7 @@ In **2026**, fitness enthusiasts demand seamless interactions. Placing custom **
       readTime: "6 min read",
       category: "Instagram Tech 2026",
       date: "2026-07-16",
-      image: "/instagram_qr_seo.webp",
+      image: "https://images.unsplash.com/photo-1611224885990-ab7363d1f2a9?auto=format&fit=crop&w=800&q=80",
       content: `### The Sandbox Browser Barrier
 
 When users click your Instagram link inside other platforms, they are trapped in a crippled embedded web view asking them to log in to click follow or leave feedback. **Qrytube** links bypass this friction by launching the official native Instagram application immediately, allowing one-click engagement.`
@@ -299,7 +299,7 @@ When users click your Instagram link inside other platforms, they are trapped in
       readTime: "5 min read",
       category: "Digital Marketing 2026",
       date: "2026-07-16",
-      image: "/whatsapp_qr_blog.jpg",
+      image: "https://images.unsplash.com/photo-1614741118887-7a4ee193a5fa?auto=format&fit=crop&w=800&q=80",
       content: `### Accelerate Business Communication
 
 Requiring clients to save your phone number and search for it on WhatsApp before talking creates a major friction point. Generate a free **Qrytube** WhatsApp QR code with a pre-filled text (e.g. 'I am interested in your services'). When scanned, it immediately opens a direct conversation line, multiplying conversions.`

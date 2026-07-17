@@ -58,10 +58,11 @@ export const ArticlesView: React.FC<ArticlesViewProps> = ({ lang }) => {
             <img
               src={selectedArticle.image}
               alt={selectedArticle.title}
+              referrerPolicy="no-referrer"
               className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"
               onError={(e) => {
                 // Fail-safe placeholder if image not found
-                e.currentTarget.src = 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=1000';
+                e.currentTarget.src = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80';
               }}
             />
           </div>
@@ -149,9 +150,10 @@ export const ArticlesView: React.FC<ArticlesViewProps> = ({ lang }) => {
                 <img
                   src={article.image}
                   alt={article.title}
+                  referrerPolicy="no-referrer"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   onError={(e) => {
-                    e.currentTarget.src = 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=1000';
+                    e.currentTarget.src = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80';
                   }}
                 />
                 <span className="absolute top-4 right-4 bg-red-600 text-white text-xs font-black px-3 py-1 rounded-full shadow-md">
