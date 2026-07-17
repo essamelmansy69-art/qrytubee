@@ -14,6 +14,13 @@ function getSitemapXml() {
     { path: "/articles", freq: "weekly", priority: "0.9", label: "Articles" },
     { path: "/restaurant", freq: "weekly", priority: "0.8", label: "Restaurant" },
     { path: "/gym", freq: "weekly", priority: "0.9", label: "Gym" },
+    { path: "/facebook", freq: "weekly", priority: "0.8", label: "Facebook" },
+    { path: "/instagram", freq: "weekly", priority: "0.8", label: "Instagram" },
+    { path: "/tiktok", freq: "weekly", priority: "0.8", label: "TikTok" },
+    { path: "/telegram", freq: "weekly", priority: "0.8", label: "Telegram" },
+    { path: "/website", freq: "weekly", priority: "0.8", label: "Website" },
+    { path: "/faq", freq: "weekly", priority: "0.7", label: "FAQ" },
+    { path: "/chapters", freq: "weekly", priority: "0.8", label: "Chapters" },
   ];
 
   let xml = `<?xml version="1.0" encoding="UTF-8"?>

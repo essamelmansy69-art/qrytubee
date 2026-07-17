@@ -396,168 +396,52 @@ async function startServer() {
   </url>`;
     }
 
+    const staticPages = [
+      { path: "", freq: "daily", priority: "1.0" },
+      { path: "/about", freq: "monthly", priority: "0.8" },
+      { path: "/contact", freq: "monthly", priority: "0.8" },
+      { path: "/privacy", freq: "monthly", priority: "0.5" },
+      { path: "/terms", freq: "monthly", priority: "0.5" },
+      { path: "/articles", freq: "weekly", priority: "0.9" },
+      { path: "/restaurant", freq: "weekly", priority: "0.8" },
+      { path: "/gym", freq: "weekly", priority: "0.9" },
+      { path: "/facebook", freq: "weekly", priority: "0.8" },
+      { path: "/instagram", freq: "weekly", priority: "0.8" },
+      { path: "/tiktok", freq: "weekly", priority: "0.8" },
+      { path: "/telegram", freq: "weekly", priority: "0.8" },
+      { path: "/website", freq: "weekly", priority: "0.8" },
+      { path: "/faq", freq: "weekly", priority: "0.7" },
+      { path: "/chapters", freq: "weekly", priority: "0.8" },
+    ];
+
+    let staticUrls = "";
+    for (const page of staticPages) {
+      const route = page.path;
+      const lastmod = "2026-06-13";
+
+      staticUrls += `
+  <url>
+    <loc>${host}${route}</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="${host}${route}" />
+    <xhtml:link rel="alternate" hreflang="en" href="${host}${route}?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${host}${route}" />
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>${page.freq}</changefreq>
+    <priority>${page.priority}</priority>
+  </url>
+  <url>
+    <loc>${host}${route}?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="ar" href="${host}${route}" />
+    <xhtml:link rel="alternate" hreflang="en" href="${host}${route}?lang=en" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="${host}${route}" />
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>${page.freq}</changefreq>
+    <priority>${page.priority}</priority>
+  </url>`;
+    }
+
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  <!-- 1. Deep Linker (Arabic) -->
-  <url>
-    <loc>${host}/</loc>
-    <xhtml:link rel="alternate" hreflang="ar" href="${host}/" />
-    <xhtml:link rel="alternate" hreflang="en" href="${host}/?lang=en" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/" />
-    <lastmod>2026-06-13</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <!-- 1. Deep Linker (English) -->
-  <url>
-    <loc>${host}/?lang=en</loc>
-    <xhtml:link rel="alternate" hreflang="ar" href="${host}/" />
-    <xhtml:link rel="alternate" hreflang="en" href="${host}/?lang=en" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/" />
-    <lastmod>2026-06-13</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <!-- 2. About Us (Arabic) -->
-  <url>
-    <loc>${host}/about</loc>
-    <xhtml:link rel="alternate" hreflang="ar" href="${host}/about" />
-    <xhtml:link rel="alternate" hreflang="en" href="${host}/about?lang=en" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/about" />
-    <lastmod>2026-06-13</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <!-- 2. About Us (English) -->
-  <url>
-    <loc>${host}/about?lang=en</loc>
-    <xhtml:link rel="alternate" hreflang="ar" href="${host}/about" />
-    <xhtml:link rel="alternate" hreflang="en" href="${host}/about?lang=en" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/about" />
-    <lastmod>2026-06-13</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <!-- 3. Contact (Arabic) -->
-  <url>
-    <loc>${host}/contact</loc>
-    <xhtml:link rel="alternate" hreflang="ar" href="${host}/contact" />
-    <xhtml:link rel="alternate" hreflang="en" href="${host}/contact?lang=en" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/contact" />
-    <lastmod>2026-06-13</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <!-- 3. Contact (English) -->
-  <url>
-    <loc>${host}/contact?lang=en</loc>
-    <xhtml:link rel="alternate" hreflang="ar" href="${host}/contact" />
-    <xhtml:link rel="alternate" hreflang="en" href="${host}/contact?lang=en" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/contact" />
-    <lastmod>2026-06-13</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <!-- 4. Privacy Policy (Arabic) -->
-  <url>
-    <loc>${host}/privacy</loc>
-    <xhtml:link rel="alternate" hreflang="ar" href="${host}/privacy" />
-    <xhtml:link rel="alternate" hreflang="en" href="${host}/privacy?lang=en" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/privacy" />
-    <lastmod>2026-06-13</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <!-- 4. Privacy Policy (English) -->
-  <url>
-    <loc>${host}/privacy?lang=en</loc>
-    <xhtml:link rel="alternate" hreflang="ar" href="${host}/privacy" />
-    <xhtml:link rel="alternate" hreflang="en" href="${host}/privacy?lang=en" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/privacy" />
-    <lastmod>2026-06-13</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <!-- 5. Articles (Arabic) -->
-  <url>
-    <loc>${host}/articles</loc>
-    <xhtml:link rel="alternate" hreflang="ar" href="${host}/articles" />
-    <xhtml:link rel="alternate" hreflang="en" href="${host}/articles?lang=en" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/articles" />
-    <lastmod>2026-06-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <!-- 5. Articles (English) -->
-  <url>
-    <loc>${host}/articles?lang=en</loc>
-    <xhtml:link rel="alternate" hreflang="ar" href="${host}/articles" />
-    <xhtml:link rel="alternate" hreflang="en" href="${host}/articles?lang=en" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/articles" />
-    <lastmod>2026-06-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <!-- 6. Terms of Service (Arabic) -->
-  <url>
-    <loc>${host}/terms</loc>
-    <xhtml:link rel="alternate" hreflang="ar" href="${host}/terms" />
-    <xhtml:link rel="alternate" hreflang="en" href="${host}/terms?lang=en" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/terms" />
-    <lastmod>2026-06-13</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <!-- 6. Terms of Service (English) -->
-  <url>
-    <loc>${host}/terms?lang=en</loc>
-    <xhtml:link rel="alternate" hreflang="ar" href="${host}/terms" />
-    <xhtml:link rel="alternate" hreflang="en" href="${host}/terms?lang=en" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/terms" />
-    <lastmod>2026-06-13</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <!-- 7. Restaurant Tool (Arabic) -->
-  <url>
-    <loc>${host}/restaurant</loc>
-    <xhtml:link rel="alternate" hreflang="ar" href="${host}/restaurant" />
-    <xhtml:link rel="alternate" hreflang="en" href="${host}/restaurant?lang=en" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/restaurant" />
-    <lastmod>2026-06-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <!-- 7. Restaurant Tool (English) -->
-  <url>
-    <loc>${host}/restaurant?lang=en</loc>
-    <xhtml:link rel="alternate" hreflang="ar" href="${host}/restaurant" />
-    <xhtml:link rel="alternate" hreflang="en" href="${host}/restaurant?lang=en" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/restaurant" />
-    <lastmod>2026-06-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <!-- 8. Gym & Fitness Tool (Arabic) -->
-  <url>
-    <loc>${host}/gym</loc>
-    <xhtml:link rel="alternate" hreflang="ar" href="${host}/gym" />
-    <xhtml:link rel="alternate" hreflang="en" href="${host}/gym?lang=en" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/gym" />
-    <lastmod>2026-06-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <!-- 8. Gym & Fitness Tool (English) -->
-  <url>
-    <loc>${host}/gym?lang=en</loc>
-    <xhtml:link rel="alternate" hreflang="ar" href="${host}/gym" />
-    <xhtml:link rel="alternate" hreflang="en" href="${host}/gym?lang=en" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="${host}/gym" />
-    <lastmod>2026-06-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>${articleUrls}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${staticUrls}${articleUrls}
 </urlset>`;
     res.header("Content-Type", "application/xml");
     res.status(200).send(sitemap);
