@@ -1,1704 +1,708 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import React, { useState, useEffect, useRef } from 'react';
-let _cachedQRCode: any = null;
-const getQRCodeLib = async () => {
-  if (!_cachedQRCode) {
-    const mod = await import('qrcode');
-    _cachedQRCode = mod.default || mod;
-  }
-  return _cachedQRCode;
-};
+import QRCode from 'qrcode';
+import { getDeepLink } from '../utils';
+import { downloadAsPNG, downloadAsSVG, downloadAsPDF } from '../utils/qrDownloadHelper';
+import { Language, translations } from '../translations';
 import { 
-  Youtube, 
   Sparkles, 
+  Image as ImageIcon, 
   Download, 
-  Copy, 
-  Share2,
-  RotateCcw, 
-  Settings, 
-  ExternalLink, 
-  Check, 
-  AlertCircle,
-  HelpCircle,
-  Smartphone,
-  CheckCircle2,
-  Eye,
+  Maximize2, 
   Info,
-  Facebook,
-  Instagram,
-  Music,
-  UploadCloud,
-  Trash2,
-  FileText,
-  BarChart3,
-  Globe,
-  Activity,
-  Clock,
-  Monitor
+  Palette,
+  Layout,
+  QrCode,
+  Link as LinkIcon
 } from 'lucide-react';
-import { QRConfig, QRStyle } from '../types';
-import { parseYoutubeUrl, buildDeepLink, convertUrlToDeepLink } from '../utils';
-import { translations } from '../translations';
 
-import { motion } from 'motion/react';
-
-const COLOR_TEMPLATES = [
-  { name: 'يوتيوب الكلاسيكي', dark: '#FF0000', light: '#FFFFFF', eye: '#FF0000' },
-  { name: 'الوضع الداكن الفاخر', dark: '#FFFFFF', light: '#0F0F0F', eye: '#FF0000' },
-  { name: 'الذهبي الأنيق', dark: '#C5A880', light: '#121212', eye: '#C5A880' },
-  { name: 'أسود مونوكروم', dark: '#000000', light: '#FFFFFF', eye: '#000000' },
-];
-
-interface QRVisualPreviewProps {
-  canvasRef: React.RefObject<HTMLCanvasElement | null>;
-  selectedFrame: 'none' | 'scan_me' | 'retro' | 'smartphone' | 'modern_badge';
-  frameColor: string;
-  frameTextTop: string;
-  frameTextBottom: string;
-  lang: 'ar' | 'en';
-  t: any;
-  urlInput: string;
-  urlInfo: any;
-  activePayload: string;
+interface QRGeneratorProps {
+  lang: Language;
 }
 
-const QRVisualPreview: React.FC<QRVisualPreviewProps> = ({
-  canvasRef,
-  selectedFrame,
-  frameColor,
-  frameTextTop,
-  frameTextBottom,
-  lang,
-  t,
-  urlInput,
-  urlInfo,
-  activePayload,
-}) => {
-  const [copied, setCopied] = useState(false);
-  const [showShareMenu, setShowShareMenu] = useState(false);
-
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(activePayload);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (_) {}
-  };
-
-  return (
-    <div className="w-full flex flex-col items-center justify-center text-center p-4 sm:p-5 bg-slate-50/40 rounded-2xl border border-gray-100 group relative w-full shadow-xs" id="direct_canvas_container">
-      <span className="text-[10px] font-bold text-slate-605 font-arabic tracking-wider uppercase mb-0.5 block">{t.previewHeading}</span>
-      <h3 className="text-xs font-bold font-arabic text-gray-700 mb-2">{t.finalQrLabel}</h3>
-
-      {/* Square canvas wrapper box ensuring crisp 1:1 rendering on all screens */}
-      {selectedFrame === 'none' ? (
-        <div className="w-36 h-36 min-w-[9rem] min-h-[9rem] max-w-full aspect-square bg-white rounded-xl shadow-xs border border-gray-100 p-1.5 flex items-center justify-center transition-all duration-300 group-hover:shadow-md group-hover:scale-102 overflow-hidden" id="canvas_square_box">
-          <canvas
-            ref={canvasRef}
-            width={256}
-            height={256}
-            className="!w-full !h-full !max-w-full !max-h-full object-contain rounded-md"
-            id="final_qr_canvas"
-          />
-        </div>
-      ) : selectedFrame === 'scan_me' ? (
-        <div 
-          style={{ borderColor: frameColor }} 
-          className="relative p-4 rounded-2xl bg-white border-4 shadow-sm flex flex-col items-center gap-2 max-w-[210px] select-none transition-all duration-300 transform group-hover:scale-102"
-          id="canvas_square_box"
-        >
-          <div 
-            style={{ backgroundColor: frameColor }} 
-            className="text-white text-[9px] font-black px-3 py-1 rounded-full uppercase font-arabic leading-none tracking-wider shrink-0 text-center"
-          >
-            {frameTextTop || (lang === 'ar' ? 'فيديو ذكي' : 'INSTANT LINK')}
-          </div>
-          <div className="w-28 h-28 aspect-square bg-white p-1 rounded-lg border border-gray-100 flex items-center justify-center overflow-hidden">
-            <canvas ref={canvasRef} width={256} height={256} className="w-full h-full object-contain" id="final_qr_canvas" />
-          </div>
-          <div style={{ color: frameColor }} className="text-[9px] font-extrabold font-arabic flex items-center gap-1 mt-0.5 text-center shrink-0 max-w-[170px] truncate">
-            <span>{frameTextBottom || (lang === 'ar' ? 'امسح لمشاهدة الفيديو 📱' : 'SCAN TO WATCH 📱')}</span>
-          </div>
-        </div>
-      ) : selectedFrame === 'retro' ? (
-        <div 
-          style={{ borderColor: frameColor }} 
-          className="relative p-4 rounded-none bg-white border-2 border-double shadow-xs flex flex-col items-center gap-2.5 w-48 relative select-none transition-all duration-300 transform group-hover:scale-102"
-          id="canvas_square_box"
-        >
-          <div className="absolute top-1 left-1 w-2 h-2 border-t border-l" style={{ borderColor: frameColor }} />
-          <div className="absolute top-1 right-1 w-2 h-2 border-t border-r" style={{ borderColor: frameColor }} />
-          <div className="absolute bottom-1 left-1 w-2 h-2 border-b border-l" style={{ borderColor: frameColor }} />
-          <div className="absolute bottom-1 right-1 w-2 h-2 border-b border-r" style={{ borderColor: frameColor }} />
-
-          <div 
-            style={{ color: frameColor }} 
-            className="text-[8px] font-black tracking-widest font-mono text-center shrink-0 max-w-[150px] truncate"
-          >
-            {frameTextTop || '★ DIRECT PREMIUM ★'}
-          </div>
-          <div className="w-28 h-28 aspect-square bg-white p-1 flex items-center justify-center overflow-hidden">
-            <canvas ref={canvasRef} width={256} height={256} className="w-full h-full object-contain" id="final_qr_canvas" />
-          </div>
-          <div 
-            style={{ color: frameColor }} 
-            className="text-[8px] font-black tracking-wider font-mono text-center shrink-0 max-w-[150px] truncate"
-          >
-            {frameTextBottom || (lang === 'ar' ? 'مسح سريع آمن' : 'OFFICIAL SECURE BRAND')}
-          </div>
-        </div>
-      ) : selectedFrame === 'smartphone' ? (
-        <div 
-          className="w-48 bg-slate-900 rounded-[32px] p-2 shadow-lg border-2 border-slate-700 relative overflow-hidden flex flex-col items-center select-none transition-all duration-300 transform group-hover:scale-102"
-          id="canvas_square_box"
-        >
-          <div className="absolute top-0 inset-x-0 h-3 bg-slate-900 rounded-b-lg flex items-center justify-center z-10">
-            <div className="w-10 h-1 bg-slate-800 rounded-full"></div>
-          </div>
-          
-          <div className="w-full bg-slate-950 rounded-[26px] pt-3 p-2 flex flex-col items-center justify-between min-h-[170px]">
-            <div className="w-full flex justify-between px-1.5 text-[7px] text-slate-500 font-mono mb-1">
-              <span>09:41</span>
-              <div className="flex items-center gap-0.5">
-                <span>📶</span>
-                <span>🔋</span>
-              </div>
-            </div>
-            
-            <div className="w-24 h-24 aspect-square p-1.5 bg-white rounded-lg shadow-inner overflow-hidden flex items-center justify-center">
-              <canvas ref={canvasRef} width={256} height={256} className="w-full h-full object-contain" id="final_qr_canvas" />
-            </div>
-
-            <div className="w-full mt-2 shrink-0">
-              <div 
-                style={{ backgroundColor: frameColor }} 
-                className="w-full py-1 text-center text-[7.5px] text-white font-extrabold rounded-lg shadow-xs font-arabic truncate"
-              >
-                {frameTextBottom || (lang === 'ar' ? 'افتح التطبيق مباشرة ➔' : 'OPEN IN APP ➔')}
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div 
-          style={{ borderColor: frameColor }} 
-          className="relative p-4 rounded-3xl bg-slate-950 border border-slate-800 shadow-md flex flex-col items-center gap-2 max-w-[210px] select-none overflow-hidden transition-all duration-300 transform group-hover:scale-102"
-          id="canvas_square_box"
-        >
-          <div className="absolute top-0 right-0 w-16 h-16 bg-white/5 rounded-full blur-xl pointer-events-none" />
-          <div 
-            style={{ color: frameColor }} 
-            className="text-[8px] font-black tracking-widest uppercase font-arabic leading-none shrink-0 text-center max-w-[170px] truncate"
-          >
-            {frameTextTop || (lang === 'ar' ? 'رابط ذكي فوري' : 'INSTANT LINK')}
-          </div>
-          <div className="w-28 h-28 aspect-square bg-white p-1 rounded-lg border border-gray-100 flex items-center justify-center overflow-hidden">
-            <canvas ref={canvasRef} width={256} height={256} className="w-full h-full object-contain" id="final_qr_canvas" />
-          </div>
-          <div 
-            style={{ backgroundColor: frameColor }} 
-            className="text-white text-[8px] font-black px-2.5 py-1 text-center shrink-0 w-full truncate mt-0.5 rounded-full font-arabic"
-          >
-            {frameTextBottom || (lang === 'ar' ? 'مسح سريع للمشاهدة' : 'SCAN TO WATCH')}
-          </div>
-        </div>
-      )}
-
-      {/* Soft overlay or caption for empty/placeholder state */}
-      {(!urlInput.trim()) ? (
-        <span className="mt-2 text-[10px] font-bold font-arabic text-slate-505 bg-slate-100/80 px-2 py-0.5 rounded-md">
-          💡 {lang === 'ar' ? 'معاينة افتراضية نشطة' : 'Active default preview'}
-        </span>
-      ) : (!urlInfo.isValid) ? (
-        <span className="mt-2 text-[10px] font-bold font-arabic text-red-500 bg-red-50 px-2 py-0.5 rounded-md">
-          ⚠️ {lang === 'ar' ? 'الرابط غير صحيح' : 'Invalid Link'}
-        </span>
-      ) : null}
-
-      {/* Deep Link URL Copy & Share Section */}
-      {urlInput.trim() && urlInfo.isValid && (
-        <div className="mt-4 w-full px-1 space-y-1.5 animate-fadeIn" id="deep_link_copy_section">
-          <label htmlFor="direct_deep_link_url_input" className="text-[10px] font-bold text-gray-700 font-arabic text-center block w-full">
-            🔗 {lang === 'ar' ? 'رابط التوجيه الذكي المباشر:' : 'Direct Deep Link URL:'}
-          </label>
-          <div className="flex gap-1 items-center bg-white border border-gray-200 rounded-xl p-1 shadow-sm w-full max-w-[240px] mx-auto">
-            <input 
-              id="direct_deep_link_url_input"
-              type="text" 
-              readOnly 
-              value={activePayload} 
-              className="flex-1 bg-transparent border-none text-[10px] font-mono text-slate-705 outline-none px-1 text-center truncate" 
-              dir="ltr"
-              onClick={(e) => (e.target as HTMLInputElement).select()}
-            />
-            <button
-              onClick={handleCopyLink}
-              title={lang === 'ar' ? 'نسخ الرابط' : 'Copy Link'}
-              className={`p-1.5 rounded-lg text-[9px] font-extrabold font-arabic transition-all whitespace-nowrap shrink-0 flex items-center justify-center ${
-                copied 
-                  ? 'bg-emerald-500 text-white shadow-sm' 
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-800 shadow-3xs'
-              }`}
-            >
-              {copied ? (
-                <Check size={11} className="text-white" />
-              ) : (
-                <Copy size={11} />
-              )}
-            </button>
-            <button
-              onClick={() => setShowShareMenu(!showShareMenu)}
-              title={lang === 'ar' ? 'مشاركة الرابط' : 'Share Link'}
-              className={`p-1.5 rounded-lg text-[9px] font-extrabold font-arabic transition-all whitespace-nowrap shrink-0 flex items-center justify-center ${
-                showShareMenu 
-                  ? 'bg-red-650 text-white shadow-sm' 
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-800 shadow-3xs'
-              }`}
-            >
-              <Share2 size={11} />
-            </button>
-          </div>
-
-          {/* Social Share grid dropdown */}
-          {showShareMenu && (
-            <motion.div 
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white border border-gray-150 p-2.5 rounded-2xl shadow-md w-full max-w-[240px] mx-auto mt-2 grid grid-cols-4 gap-2 text-center"
-              id="share_socials_grid"
-            >
-              {/* WhatsApp */}
-              <a 
-                href={`https://api.whatsapp.com/send?text=${encodeURIComponent((lang === 'ar' ? 'اصنع معي الروابط الذكية بلمسة واحدة: ' : 'Generate smart deep links too: ') + activePayload)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center gap-1 p-1.5 rounded-xl hover:bg-emerald-50 text-emerald-600 transition-colors"
-                title="WhatsApp"
-              >
-                <div className="w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center text-white shadow-2xs hover:scale-105 transition-transform">
-                  <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
-                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.42 9.864-9.864c.002-2.637-1.019-5.114-2.875-6.973C16.586 1.908 14.113.883 11.48.883c-5.448 0-9.873 4.423-9.877 9.872a9.8 9.8 0 0 0 1.488 5.142l-.97 3.543 3.634-.954c1.556.85 3.111 1.258 4.302 1.21zM17.18 14.9c-.3-.15-1.785-.88-2.067-.98-.28-.1-.49-.15-.69.15t-.79.98c-.2.23-.4.25-.7.1s-1.27-.47-2.42-1.5c-.89-.8-1.5-1.78-1.67-2.08-.18-.3-.02-.46.13-.61.13-.13.3-.34.45-.51.15-.17.2-.28.3-.48.1-.2.05-.38-.02-.53-.07-.15-.69-1.66-.94-2.27-.25-.6-.5-.51-.69-.51-.18-.01-.39-.01-.59-.01s-.53.07-.81.38c-.28.31-1.07 1.05-1.07 2.56s1.09 2.97 1.24 3.18c.15.21 2.15 3.28 5.21 4.6 1.76.76 2.62.91 3.24.87.69-.04 2.26-.92 2.58-1.82.32-.89.32-1.66.23-1.81-.09-.15-.33-.23-.63-.38z"/>
-                  </svg>
-                </div>
-                <span className="text-[8px] font-bold font-arabic leading-none">{lang === 'ar' ? 'واتساب' : 'WhatsApp'}</span>
-              </a>
-
-              {/* Twitter / X */}
-              <a 
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent((lang === 'ar' ? 'اصنع الروابط الذكية مجاناً مع Qrytube ' : 'Easiest way to target your viewers with smart links: ') + activePayload)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center gap-1 p-1.5 rounded-xl hover:bg-slate-50 text-slate-800 transition-colors"
-                title="Twitter / X"
-              >
-                <div className="w-8 h-8 rounded-full bg-black flex items-center justify-center text-white shadow-2xs hover:scale-105 transition-transform">
-                  <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 fill-current">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                  </svg>
-                </div>
-                <span className="text-[8px] font-bold font-arabic leading-none">{lang === 'ar' ? 'تويتر' : 'Twitter'}</span>
-              </a>
-
-              {/* Telegram */}
-              <a 
-                href={`https://t.me/share/url?url=${encodeURIComponent(activePayload)}&text=${encodeURIComponent(lang === 'ar' ? 'رابط ذكي لتوجيه المشاهدين مباشرة للتطبيق تلقائياً!' : 'Direct application deep link smart redirector!')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center gap-1 p-1.5 rounded-xl hover:bg-sky-50 text-sky-600 transition-colors"
-                title="Telegram"
-              >
-                <div className="w-8 h-8 rounded-full bg-[#0088cc] flex items-center justify-center text-white shadow-2xs hover:scale-105 transition-transform">
-                  <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
-                    <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.56 8.61l-1.91 9c-.14.63-.51.79-1.04.49l-2.92-2.15-1.41 1.36c-.15.15-.29.28-.59.28l.21-2.97 5.41-4.89c.23-.21-.05-.32-.36-.12L10.23 13.9l-2.88-.9c-.63-.2-.64-.63.13-.93L16.63 8c.52-.19.98.11.77.94z"/>
-                  </svg>
-                </div>
-                <span className="text-[8px] font-bold font-arabic leading-none">{lang === 'ar' ? 'تليجرام' : 'Telegram'}</span>
-              </a>
-
-              {/* Facebook */}
-              <a 
-                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(activePayload)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center gap-1 p-1.5 rounded-xl hover:bg-indigo-50 text-indigo-600 transition-colors"
-                title="Facebook"
-              >
-                <div className="w-8 h-8 rounded-full bg-[#1877F2] flex items-center justify-center text-white shadow-2xs hover:scale-105 transition-transform">
-                  <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                  </svg>
-                </div>
-                <span className="text-[8px] font-bold font-arabic leading-none">{lang === 'ar' ? 'فيسبوك' : 'Facebook'}</span>
-              </a>
-            </motion.div>
-          )}
-        </div>
-      )}
-
-      <p className="mt-2 text-[10px] font-arabic text-slate-605 max-w-[200px] leading-relaxed">
-        {t.previewSyncMsg}
-      </p>
-    </div>
-  );
-};
-
-const COUNTRY_MAP: { [key: string]: string } = {
-  SA: "السعودية / Saudi Arabia",
-  EG: "مصر / Egypt",
-  AE: "الإمارات / UAE",
-  US: "أمريكا / USA",
-  GB: "بريطانيا / UK",
-  DZ: "الجزائر / Algeria",
-  MA: "المغرب / Morocco",
-  IQ: "العراق / Iraq",
-  JO: "الأردن / Jordan",
-  YE: "اليمن / Yemen",
-  SY: "سوريا / Syria",
-  LY: "ليبيا / Libya",
-  SD: "السودان / Sudan",
-  OM: "عمان / Oman",
-  QA: "قطر / Qatar",
-  KW: "الكويت / Kuwait",
-  BH: "البحرين / Bahrain",
-  LB: "لبنان / Lebanon",
-  PS: "فلسطين / Palestine",
-  TN: "تونس / Tunisia",
-  FR: "فرنسا / France",
-  TR: "تركيا / Turkey",
-  DE: "ألمانيا / Germany",
-  CA: "كندا / Canada",
-  IN: "الهند / India",
-  UNKNOWN: "غير معروف / Unknown",
-};
-
-const COUNTRY_FLAGS: { [key: string]: string } = {
-  SA: "🇸🇦",
-  EG: "🇪🇬",
-  AE: "🇦🇪",
-  US: "🇺🇸",
-  GB: "🇬🇧",
-  DZ: "🇩🇿",
-  MA: "🇲🇦",
-  IQ: "🇮🇶",
-  JO: "🇯🇴",
-  YE: "🇾🇪",
-  SY: "🇸🇾",
-  LY: "🇱🇾",
-  SD: "🇸🇩",
-  OM: "🇴🇲",
-  QA: "🇶🇦",
-  KW: "🇰🇼",
-  BH: "🇧🇭",
-  LB: "🇱🇧",
-  PS: "🇵🇸",
-  TN: "🇹🇳",
-  FR: "🇫🇷",
-  TR: "🇹🇷",
-  DE: "🇩🇪",
-  CA: "🇨🇦",
-  IN: "🇮🇳",
-  UNKNOWN: "🌐",
-};
-
-const formatElapsedTime = (isoStr?: string, currentLang?: 'ar' | 'en') => {
-  if (!isoStr) return '';
-  const now = new Date();
-  const date = new Date(isoStr);
-  const diffMs = now.getTime() - date.getTime();
-  const diffSec = Math.floor(diffMs / 1000);
-  const diffMin = Math.floor(diffSec / 60);
-  const diffHr = Math.floor(diffMin / 60);
-
-  const isAr = currentLang === 'ar';
-  if (diffSec < 15) return isAr ? 'الآن' : 'Just now';
-  if (diffSec < 60) return isAr ? `منذ ${diffSec} ثانية` : `${diffSec}s ago`;
-  if (diffMin < 60) {
-    if (diffMin === 1) return isAr ? 'منذ دقيقة' : '1m ago';
-    if (diffMin === 2) return isAr ? 'منذ دقيقتين' : '2m ago';
-    return isAr ? `منذ ${diffMin} دقائق` : `${diffMin}m ago`;
-  }
-  if (diffHr < 24) {
-    if (diffHr === 1) return isAr ? 'منذ ساعة' : '1h ago';
-    if (diffHr === 2) return isAr ? 'منذ ساعتين' : '2h ago';
-    return isAr ? `منذ ${diffHr} ساعات` : `${diffHr}h ago`;
-  }
-  return date.toLocaleDateString(isAr ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric' });
-};
-
-export default function QRGenerator({ 
-  lang = 'ar',
-  forcePlatform,
-  onSwitchTab
-}: { 
-  lang?: 'ar' | 'en';
-  forcePlatform?: 'youtube' | 'facebook' | 'instagram' | 'tiktok' | 'telegram' | 'website';
-  onSwitchTab?: (tab: 'generator' | 'facebook' | 'instagram' | 'tiktok' | 'telegram' | 'website') => void;
-}) {
+export const QRGenerator: React.FC<QRGeneratorProps> = ({ lang }) => {
   const t = translations[lang];
 
-  const getColorTemplateName = (name: string) => {
-    switch (name) {
-      case 'يوتيوب الكلاسيكي': return t.classicYtTemplate;
-      case 'الوضع الداكن الفاخر': return t.luxuryDarkTemplate;
-      case 'الذهبي الأنيق': return t.goldTemplate;
-      case 'أسود مونوكروم': return t.monochromeTemplate;
-      default: return name;
-    }
-  };
-
-   const [urlInput, setUrlInput] = useState(() => {
-     if (forcePlatform === 'youtube') return 'https://www.youtube.com/@YouTube';
-     if (forcePlatform === 'facebook') return 'https://www.facebook.com/facebook';
-     if (forcePlatform === 'instagram') return 'https://www.instagram.com/instagram';
-     if (forcePlatform === 'tiktok') return 'https://www.tiktok.com/@tiktok';
-     if (forcePlatform === 'telegram') return 'https://t.me/telegram';
-     if (forcePlatform === 'website') return 'https://google.com';
-     return '';
-   });
-
-  const [trackingId, setTrackingId] = useState<string>(() => 'qr_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36).substring(4));
-  const [deepLinkType, setDeepLinkType] = useState<'vnd' | 'ios' | 'android' | 'standard'>('vnd');
-  const [useSmartLink, setUseSmartLink] = useState<boolean>(false);
-  const [foregroundColor, setForegroundColor] = useState('#FF0000');
-  const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
-  const [eyeColor, setEyeColor] = useState('#FF0000');
+  // Primary states
+  const [url, setUrl] = useState('');
+  const [dotsColor, setDotsColor] = useState('#EF4444');
+  const [bgColor, setBgColor] = useState('#FFFFFF');
+  const [logoUrl, setLogoUrl] = useState<string | undefined>(undefined);
+  const [logoScale, setLogoScale] = useState(0.2);
+  const [frameText, setFrameText] = useState('امسح للاشتراك');
+  const [frameColor, setFrameColor] = useState('#EF4444');
+  const [frameType, setFrameType] = useState<'none' | 'basic' | 'modern'>('modern');
   const [errorCorrectionLevel, setErrorCorrectionLevel] = useState<'L' | 'M' | 'Q' | 'H'>('H');
-  const [downloadSize, setDownloadSize] = useState<number>(2048);
-  const [downloadFormat, setDownloadFormat] = useState<'png' | 'jpg'>('png');
-  const [copied, setCopied] = useState<boolean>(false);
-  const [renderedPayload, setRenderedPayload] = useState<string>('');
-
-  const [customLogo, setCustomLogo] = useState<string | null>(null);
-  const [logoScale, setLogoScale] = useState<number>(0.18);
-  const [logoMargin, setLogoMargin] = useState<boolean>(true);
-  const [isDragging, setIsDragging] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (forcePlatform === 'youtube') {
-      setUrlInput('https://www.youtube.com/@YouTube');
-      setForegroundColor('#FF0000');
-      setEyeColor('#FF0000');
-    } else if (forcePlatform === 'facebook') {
-      setUrlInput('https://www.facebook.com/facebook');
-      setForegroundColor('#1877F2');
-      setEyeColor('#1877F2');
-    } else if (forcePlatform === 'instagram') {
-      setUrlInput('https://www.instagram.com/instagram');
-      setForegroundColor('#E1306C');
-      setEyeColor('#E1306C');
-    } else if (forcePlatform === 'tiktok') {
-      setUrlInput('https://www.tiktok.com/@tiktok');
-      setForegroundColor('#000000');
-      setEyeColor('#000000');
-    } else if (forcePlatform === 'telegram') {
-      setUrlInput('https://t.me/telegram');
-      setForegroundColor('#24A1DE');
-      setEyeColor('#24A1DE');
-    } else if (forcePlatform === 'website') {
-      setUrlInput('https://google.com');
-      setForegroundColor('#4F46E5');
-      setEyeColor('#4F46E5');
-    } else {
-      setUrlInput('');
-    }
-  }, [forcePlatform]);
-
-  useEffect(() => {
-    setTrackingId('qr_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36).substring(4));
-  }, [urlInput]);
-  const [isDesktop, setIsDesktop] = useState<boolean>(() => {
-    if (typeof window !== 'undefined') {
-      return window.innerWidth >= 1024;
-    }
-    return false;
-  });
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsDesktop(window.innerWidth >= 1024);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Analytics tracking state
-  const [scanCount, setScanCount] = useState<number>(0);
-  const [scanHistory, setScanHistory] = useState<Array<{ date: string; device: string; os?: string; country?: string; timestamp?: string }>>([]);
-  const [isRefreshingStats, setIsRefreshingStats] = useState<boolean>(false);
-  const [analyticsResponse, setAnalyticsResponse] = useState<any>(null);
-  const [simulateSuccess, setSimulateSuccess] = useState<boolean>(false);
-  const [analyticsTab, setAnalyticsTab] = useState<'overview' | 'demographics' | 'logs'>('overview');
-
-  const fetchScanStats = async (silent = false) => {
-    if (!urlInput.trim() || !urlInfo.isValid) return;
-    try {
-      if (!silent) setIsRefreshingStats(true);
-      const response = await fetch(`/api/analytics?tid=${trackingId}`);
-      if (response.ok) {
-        const data = await response.json();
-        setAnalyticsResponse(data);
-        if (data.specificCode) {
-          setScanCount(data.specificCode.total || 0);
-          setScanHistory(data.specificCode.scans || []);
-        } else {
-          setScanCount(0);
-          setScanHistory([]);
-        }
-      }
-    } catch (err) {
-      console.warn("Gracefully unresolved or local-only environment. (Live scan statistics offline):", err);
-    } finally {
-      if (!silent) setIsRefreshingStats(false);
-    }
+  const [qrStyle, setQrStyle] = useState<'square' | 'dots' | 'rounded'>('rounded');
+  
+  // Extra states
+  const [activeTab, setActiveTab] = useState<'design' | 'logo' | 'frame'>('design');
+  const [matrix, setMatrix] = useState<boolean[][]>([]);
+  const stats = {
+    scansToday: 1542,
+    linksCreated: 4892,
+    activeCampaigns: 310
   };
 
-  const handleSimulateScan = async () => {
-    if (!urlInput.trim() || !urlInfo.isValid) return;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Generate QR matrix whenever URL or settings change
+  useEffect(() => {
     try {
-      setIsRefreshingStats(true);
+      const activeUrl = url.trim() || 'https://qrytube.com';
+      const deepLinkInfo = getDeepLink(activeUrl);
       
-      // Randomize country and device parameters to make the live demo dashboard interesting!
-      const countries = ['EG', 'SA', 'AE', 'DZ', 'MA', 'IQ', 'JO', 'US', 'GB', 'FR', 'TR', 'DE', 'CA', 'IN'];
-      const randomCountry = countries[Math.floor(Math.random() * countries.length)];
-      
-      const mockedUAs = [
-        'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1', // iOS Mobile
-        'Mozilla/5.0 (Linux; Android 13; SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36', // Android Mobile
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36', // Windows Desktop
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36', // macOS Desktop
-        'Mozilla/5.0 (iPad; CPU OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1', // iPad Tablet
-        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36' // Linux Desktop
-      ];
-      const randomUA = mockedUAs[Math.floor(Math.random() * mockedUAs.length)];
-
-      const res = await fetch(`/api/track-scan?tid=${encodeURIComponent(trackingId)}&r=${encodeURIComponent(urlInput.trim())}&platform=${encodeURIComponent(urlInfo.platform || 'youtube')}&ua=${encodeURIComponent(randomUA)}&country=${encodeURIComponent(randomCountry)}`, {
-        method: 'POST'
-      });
-      if (res.ok) {
-        setSimulateSuccess(true);
-        setTimeout(() => setSimulateSuccess(false), 3500);
-        await fetchScanStats(true);
-      }
-    } catch (err) {
-      console.warn("Could not simulate scan at this time (Offline or connection refused):", err);
-    } finally {
-      setIsRefreshingStats(false);
-    }
-  };
-
-  useEffect(() => {
-    let statInterval: any = null;
-    if (urlInput.trim() && urlInfo.isValid) {
-      fetchScanStats(false);
-      statInterval = setInterval(() => {
-        fetchScanStats(true);
-      }, 4050); // Auto-refresh silently every ~4 seconds
-    } else {
-      setScanCount(0);
-      setScanHistory([]);
-      setAnalyticsResponse(null);
-    }
-    return () => {
-      if (statInterval) clearInterval(statInterval);
-    };
-  }, [trackingId, urlInput]);
-
-  // Decorative print frames state variables
-  const [selectedFrame, setSelectedFrame] = useState<'none'>('none');
-  const [frameColor, setFrameColor] = useState<string>('#FF0000');
-  const [frameTextTop, setFrameTextTop] = useState<string>('');
-  const [frameTextBottom, setFrameTextBottom] = useState<string>('');
-
-  // File Upload Handlers for custom central logo
-  const handleLogoUpload = (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      alert(t.alertUploadType);
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        setCustomLogo(e.target.result as string);
-        // Automatically ensure high quality error correction (H) is selected if safe central logo branding is set
-        setErrorCorrectionLevel('H');
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleLogoUpload(e.dataTransfer.files[0]);
-    }
-  };
-
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  // Parse URL to show useful UI statistics
-  const urlInfo = parseYoutubeUrl(urlInput);
-  const formattedDeepLink = buildDeepLink(urlInput, deepLinkType);
-
-  const isUrlEmpty = !urlInput.trim();
-  let isUrlValid = isUrlEmpty || urlInfo.isValid;
-  if (!isUrlEmpty && forcePlatform && forcePlatform !== 'website') {
-    isUrlValid = urlInfo.isValid && urlInfo.platform === forcePlatform;
-  }
-  const isInvalid = !isUrlValid || isUrlEmpty;
-
-
-
-  // Auto-switch colors when platform changes
-  useEffect(() => {
-    if (urlInfo.isValid) {
-      if (urlInfo.platform === 'youtube') {
-        setForegroundColor('#FF0000');
-        setEyeColor('#FF0000');
-      } else if (urlInfo.platform === 'facebook') {
-        setForegroundColor('#1877F2');
-        setEyeColor('#1877F2');
-      } else if (urlInfo.platform === 'instagram') {
-        setForegroundColor('#E1306C');
-        setEyeColor('#E1306C');
-      } else if (urlInfo.platform === 'tiktok') {
-        setForegroundColor('#000000');
-        setEyeColor('#000000');
-      } else if (urlInfo.platform === 'telegram') {
-        setForegroundColor('#24A1DE');
-        setEyeColor('#24A1DE');
-      }
-    }
-  }, [urlInfo.platform]);
-
-  // Active payload to embed inside the QR
-  const getActivePayload = () => {
-    const trimmed = urlInput.trim();
-    const fallbackUrl = trimmed || 'https://www.youtube.com';
-    const originUrl = typeof window !== 'undefined' ? window.location.origin : 'https://qrytube.com';
-    return `${originUrl}/redirect?url=${encodeURIComponent(fallbackUrl)}&tid=${trackingId}`;
-  };
-
-  // Check if QR colors are dangerously inverted for standard mobile lenses
-  const isColorWayInverted = () => {
-    try {
-      const getBrightness = (hex: string) => {
-        const c = hex.replace('#', '');
-        if (c.length === 3) {
-          // expand short hex
-          const r = parseInt(c[0] + c[0], 16);
-          const g = parseInt(c[1] + c[1], 16);
-          const b = parseInt(c[2] + c[2], 16);
-          return (r * 299 + g * 587 + b * 114) / 1000;
-        }
-        const r = parseInt(c.substring(0, 2), 16);
-        const g = parseInt(c.substring(2, 4), 16);
-        const b = parseInt(c.substring(4, 6), 16);
-        return (r * 299 + g * 587 + b * 114) / 1000;
-      };
-      
-      const fgBrightness = getBrightness(foregroundColor);
-      const bgBrightness = getBrightness(backgroundColor);
-      // If foreground is lighter than background, QR is inverted
-      return fgBrightness > bgBrightness;
-    } catch (_) {
-      return false;
-    }
-  };
-
-  // Re-generate QR Code in Preview Canvas
-  const generateQRCode = async () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const payload = getActivePayload();
-    setRenderedPayload(payload);
-
-    try {
-      const isUrlEmpty = !urlInput.trim();
-      const isUrlValid = isUrlEmpty || urlInfo.isValid;
-      const isInvalid = !isUrlValid || isUrlEmpty;
-
-      // Draw base QR Code on high-resolution canvas
-      // To get crisp rendering, we draw at 512x512 initially for preview
-      const qrOptions = {
-        width: 512,
-        margin: 2,
+      const qr = QRCode.create(deepLinkInfo.deepUrl, {
         errorCorrectionLevel: errorCorrectionLevel,
-        color: {
-          dark: isInvalid ? '#94A3B8' : foregroundColor,
-          light: isInvalid ? '#F8FAFC' : backgroundColor
+      });
+
+      const size = qr.modules.size;
+      const newMatrix: boolean[][] = [];
+      for (let r = 0; r < size; r++) {
+        const row: boolean[] = [];
+        for (let c = 0; c < size; c++) {
+          row.push(qr.modules.get(r, c) === 1);
+        }
+        newMatrix.push(row);
+      }
+      setMatrix(newMatrix);
+    } catch (err) {
+      console.error('QR Generation Error:', err);
+    }
+  }, [url, errorCorrectionLevel]);
+
+  // Handle Logo Upload
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setLogoUrl(event.target.result as string);
         }
       };
-
-      const qrcodeLib = await getQRCodeLib();
-      await qrcodeLib.toCanvas(canvas, payload, qrOptions);
-
-      // Dynamically overlay uploaded custom logo if set
-      if (customLogo) {
-        const logoImg = new Image();
-        logoImg.src = customLogo;
-        await new Promise((resolve) => {
-          logoImg.onload = () => {
-            const ctx = canvas.getContext('2d');
-            if (ctx) {
-              const cx = canvas.width / 2;
-              const cy = canvas.height / 2;
-              const logoSize = canvas.width * logoScale;
-
-              if (logoMargin) {
-                ctx.fillStyle = backgroundColor;
-                const badgeSize = logoSize * 1.25;
-                const badgeX = cx - badgeSize / 2;
-                const badgeY = cy - badgeSize / 2;
-                const radius = badgeSize * 0.2;
-
-                ctx.beginPath();
-                if (ctx.roundRect) {
-                  ctx.roundRect(badgeX, badgeY, badgeSize, badgeSize, radius);
-                } else {
-                  ctx.moveTo(badgeX + radius, badgeY);
-                  ctx.lineTo(badgeX + badgeSize - radius, badgeY);
-                  ctx.quadraticCurveTo(badgeX + badgeSize, badgeY, badgeX + badgeSize, badgeY + radius);
-                  ctx.lineTo(badgeX + badgeSize, badgeY + badgeSize - radius);
-                  ctx.quadraticCurveTo(badgeX + badgeSize, badgeY + badgeSize, badgeX + badgeSize - radius, badgeY + badgeSize);
-                  ctx.lineTo(badgeX + radius, badgeY + badgeSize);
-                  ctx.quadraticCurveTo(badgeX, badgeY + badgeSize, badgeX, badgeY + badgeSize - radius);
-                  ctx.lineTo(badgeX, badgeY + radius);
-                  ctx.quadraticCurveTo(badgeX, badgeY, badgeX + radius, badgeY);
-                }
-                ctx.closePath();
-                ctx.fill();
-              }
-
-              ctx.drawImage(logoImg, cx - logoSize / 2, cy - logoSize / 2, logoSize, logoSize);
-            }
-            resolve(true);
-          };
-          logoImg.onerror = () => {
-            console.error("Failed to load custom logo in preview render");
-            resolve(true);
-          };
-        });
-      }
-    } catch (err) {
-      console.error("Error generating QR", err);
+      reader.readAsDataURL(file);
     }
   };
 
-  // Run on option change
-  useEffect(() => {
-    generateQRCode();
-  }, [
-    isDesktop,
-    urlInput, 
-    deepLinkType, 
-    useSmartLink,
-    foregroundColor, 
-    backgroundColor, 
-    errorCorrectionLevel,
-    customLogo,
-    logoScale,
-    logoMargin,
-    selectedFrame,
-    frameColor,
-    frameTextTop,
-    frameTextBottom
-  ]);
-
-  const selectColorTemplate = (tpl: typeof COLOR_TEMPLATES[0]) => {
-    setForegroundColor(tpl.dark);
-    setBackgroundColor(tpl.light);
-    setEyeColor(tpl.eye);
-  };
-
-  // Download High-Resolution version of the QR Code
-  const handleDownload = async () => {
-    const payload = getActivePayload();
-    if (!payload || !urlInput.trim()) {
-      alert(t.alertInputFirst);
-      return;
-    }
-    const realTopText = frameTextTop || (selectedFrame === 'retro' ? '★ DIRECT PREMIUM ★' : selectedFrame === 'smartphone' ? '' : (lang === 'ar' ? 'رابط ذكي فوري' : 'INSTANT LINK'));
-    const realBottomText = frameTextBottom || (selectedFrame === 'retro' ? (lang === 'ar' ? 'الملصق الرسمي الآمن' : 'OFFICIAL SECURE BRAND') : selectedFrame === 'smartphone' ? (lang === 'ar' ? 'افتح التطبيق مباشرة ➔' : 'OPEN IN APP ➔') : selectedFrame === 'modern_badge' ? (lang === 'ar' ? 'مسح سريع للمشاهدة' : 'SCAN TO WATCH') : (lang === 'ar' ? 'امسح لمشاهدة الفيديو 📱' : 'SCAN TO WATCH 📱'));
-    try {
-      const helper = await import('../utils/qrDownloadHelper');
-      await helper.handleDownloadPng({
-        payload,
-        urlInput,
-        downloadSize,
-        downloadFormat,
-        errorCorrectionLevel,
-        foregroundColor,
-        backgroundColor,
-        customLogo,
-        logoScale,
-        logoMargin,
-        lang,
-        t,
-        selectedFrame,
-        frameColor,
-        frameTextTop: realTopText,
-        frameTextBottom: realBottomText
-      });
-    } catch (err) {
-      console.error("error during high-res download generation", err);
+  // Quick Templates Config
+  const applyTemplate = (theme: 'youtube' | 'tiktok' | 'gym' | 'restaurant') => {
+    if (theme === 'youtube') {
+      setDotsColor('#E51C1C');
+      setBgColor('#FFFFFF');
+      setFrameColor('#E51C1C');
+      setFrameType('modern');
+      setFrameText(lang === 'ar' ? 'امسح للاشتراك بالقناة' : 'Scan to Subscribe');
+      setQrStyle('rounded');
+      setLogoScale(0.2);
+    } else if (theme === 'tiktok') {
+      setDotsColor('#010101');
+      setBgColor('#FFFFFF');
+      setFrameColor('#00F2FE');
+      setFrameType('modern');
+      setFrameText(lang === 'ar' ? 'تابع حسابي تيك توك' : 'Scan to Follow');
+      setQrStyle('dots');
+      setLogoScale(0.2);
+    } else if (theme === 'gym') {
+      setDotsColor('#B59410');
+      setBgColor('#111827');
+      setFrameColor('#B59410');
+      setFrameType('basic');
+      setFrameText(lang === 'ar' ? 'جدول تمارين الجيم المحدث' : 'Scan Gym Workout');
+      setQrStyle('rounded');
+      setLogoScale(0.22);
+    } else if (theme === 'restaurant') {
+      setDotsColor('#065F46');
+      setBgColor('#FDFBF7');
+      setFrameColor('#065F46');
+      setFrameType('modern');
+      setFrameText(lang === 'ar' ? 'امسح لمشاهدة المنيو' : 'Scan to View Menu');
+      setQrStyle('rounded');
+      setLogoScale(0.18);
     }
   };
 
-  // Download high-quality custom vector SVG version of the QR Code
-  const handleDownloadSvg = async () => {
-    const payload = getActivePayload();
-    if (!payload || !urlInput.trim()) {
-      alert(t.alertInputFirst);
-      return;
-    }
-    const realTopText = frameTextTop || (selectedFrame === 'retro' ? '★ DIRECT PREMIUM ★' : selectedFrame === 'smartphone' ? '' : (lang === 'ar' ? 'رابط ذكي فوري' : 'INSTANT LINK'));
-    const realBottomText = frameTextBottom || (selectedFrame === 'retro' ? (lang === 'ar' ? 'الملصق الرسمي الآمن' : 'OFFICIAL SECURE BRAND') : selectedFrame === 'smartphone' ? (lang === 'ar' ? 'افتح التطبيق مباشرة ➔' : 'OPEN IN APP ➔') : selectedFrame === 'modern_badge' ? (lang === 'ar' ? 'مسح سريع للمشاهدة' : 'SCAN TO WATCH') : (lang === 'ar' ? 'امسح لمشاهدة الفيديو 📱' : 'SCAN TO WATCH 📱'));
-    try {
-      const helper = await import('../utils/qrDownloadHelper');
-      await helper.handleDownloadSvg({
-        payload,
-        urlInput,
-        downloadSize,
-        downloadFormat,
-        errorCorrectionLevel,
-        foregroundColor,
-        backgroundColor,
-        customLogo,
-        logoScale,
-        logoMargin,
-        lang,
-        t,
-        selectedFrame,
-        frameColor,
-        frameTextTop: realTopText,
-        frameTextBottom: realBottomText
-      });
-    } catch (err) {
-      console.error("error during vector SVG download generation", err);
-    }
-  };
+  // Render SVG QR modules
+  const size = matrix.length;
+  const viewBoxSize = 100;
+  const cellSize = viewBoxSize / (size || 21);
 
-  // Download high-quality custom vector PDF version of the QR Code
-  const handleDownloadPdf = async () => {
-    const payload = getActivePayload();
-    if (!payload || !urlInput.trim()) {
-      alert(t.alertInputFirst);
-      return;
-    }
-    const realTopText = frameTextTop || (selectedFrame === 'retro' ? '★ DIRECT PREMIUM ★' : selectedFrame === 'smartphone' ? '' : (lang === 'ar' ? 'رابط ذكي فوري' : 'INSTANT LINK'));
-    const realBottomText = frameTextBottom || (selectedFrame === 'retro' ? (lang === 'ar' ? 'الملصق الرسمي الآمن' : 'OFFICIAL SECURE BRAND') : selectedFrame === 'smartphone' ? (lang === 'ar' ? 'افتح التطبيق مباشرة ➔' : 'OPEN IN APP ➔') : selectedFrame === 'modern_badge' ? (lang === 'ar' ? 'مسح سريع للمشاهدة' : 'SCAN TO WATCH') : (lang === 'ar' ? 'امسح لمشاهدة الفيديو 📱' : 'SCAN TO WATCH 📱'));
-    try {
-      const helper = await import('../utils/qrDownloadHelper');
-      await helper.handleDownloadPdf({
-        payload,
-        urlInput,
-        downloadSize,
-        downloadFormat,
-        errorCorrectionLevel,
-        foregroundColor,
-        backgroundColor,
-        customLogo,
-        logoScale,
-        logoMargin,
-        lang,
-        t,
-        selectedFrame,
-        frameColor,
-        frameTextTop: realTopText,
-        frameTextBottom: realBottomText
-      });
-    } catch (err) {
-      console.error("error during vector PDF download generation", err);
-    }
-  };
+  const renderQRContent = () => {
+    if (size === 0) return null;
 
-  // Copy QR Image directly to Clipboard
-  const handleCopyToClipboard = async () => {
-    try {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
+    const paths: React.ReactNode[] = [];
 
-      canvas.toBlob(async (blob) => {
-        if (!blob) return;
-        try {
-          await navigator.clipboard.write([
-            new ClipboardItem({
-              'image/png': blob
-            })
-          ]);
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        } catch (err) {
-          console.error("Failed to copy image to clipboard: ", err);
-          // Fallback context link
-          try {
-            await navigator.clipboard.writeText(getActivePayload());
-            alert(t.clipboardFallbackMsg);
-          } catch (_) {}
+    // Helper to determine if a cell belongs to a finder pattern
+    const isFinderPattern = (r: number, c: number) => {
+      if (r < 7 && c < 7) return true; // Top-Left
+      if (r < 7 && c >= size - 7) return true; // Top-Right
+      if (r >= size - 7 && c < 7) return true; // Bottom-Left
+      return false;
+    };
+
+    // Helper to check if we should mask center for logo
+    const isCenterMask = (r: number, c: number) => {
+      if (!logoUrl) return false;
+      const center = size / 2;
+      const margin = Math.ceil(size * logoScale * 0.7);
+      return (
+        r >= center - margin &&
+        r <= center + margin &&
+        c >= center - margin &&
+        c <= center + margin
+      );
+    };
+
+    // Render cells
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        if (matrix[r][c] && !isFinderPattern(r, c) && !isCenterMask(r, c)) {
+          const x = c * cellSize;
+          const y = r * cellSize;
+
+          if (qrStyle === 'dots') {
+            paths.push(
+              <circle
+                key={`c-${r}-${c}`}
+                cx={x + cellSize / 2}
+                cy={y + cellSize / 2}
+                r={cellSize * 0.4}
+                fill={dotsColor}
+              />
+            );
+          } else if (qrStyle === 'rounded') {
+            paths.push(
+              <rect
+                key={`r-${r}-${c}`}
+                x={x + cellSize * 0.05}
+                y={y + cellSize * 0.05}
+                width={cellSize * 0.9}
+                height={cellSize * 0.9}
+                rx={cellSize * 0.35}
+                fill={dotsColor}
+              />
+            );
+          } else {
+            // Square style
+            paths.push(
+              <rect
+                key={`s-${r}-${c}`}
+                x={x}
+                y={y}
+                width={cellSize}
+                height={cellSize}
+                fill={dotsColor}
+              />
+            );
+          }
         }
-      }, 'image/png');
-    } catch (err) {
-      console.error(err);
+      }
     }
+
+    // Helper to draw clean nested finder patterns
+    const drawFinderPattern = (cx: number, cy: number, keyPrefix: string) => {
+      const outerSize = cellSize * 7;
+      const innerSize = cellSize * 3;
+      return (
+        <g key={keyPrefix}>
+          {/* Outer ring */}
+          <rect
+            x={cx}
+            y={cy}
+            width={outerSize}
+            height={outerSize}
+            rx={qrStyle !== 'square' ? cellSize * 1.5 : 0}
+            fill="none"
+            stroke={dotsColor}
+            strokeWidth={cellSize}
+          />
+          {/* Inner solid module */}
+          <rect
+            x={cx + cellSize * 2}
+            y={cy + cellSize * 2}
+            width={innerSize}
+            height={innerSize}
+            rx={qrStyle !== 'square' ? cellSize * 0.6 : 0}
+            fill={dotsColor}
+          />
+        </g>
+      );
+    };
+
+    // Finder pattern positions
+    paths.push(drawFinderPattern(0, 0, 'f-tl'));
+    paths.push(drawFinderPattern((size - 7) * cellSize, 0, 'f-tr'));
+    paths.push(drawFinderPattern(0, (size - 7) * cellSize, 'f-bl'));
+
+    return paths;
   };
 
-  const renderActionButtons = () => {
-    const isUrlEmpty = !urlInput.trim();
-    const isUrlValid = isUrlEmpty || urlInfo.isValid;
-    const isInvalid = !isUrlValid || isUrlEmpty;
-
-    return (
-      <div className="space-y-4 w-full">
-        {/* Copy to clipboard button */}
-        <button
-          onClick={handleCopyToClipboard}
-          disabled={isInvalid}
-          className={`w-full py-3 px-4 rounded-xl font-arabic font-semibold transition-all flex items-center justify-center gap-2 text-xs ${
-            isInvalid
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-60'
-              : copied 
-              ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-inner cursor-pointer'
-              : 'bg-gray-100 hover:bg-gray-200 text-gray-700 cursor-pointer'
-          }`}
-          type="button"
-          id="copy_qr_btn"
-        >
-          {copied ? (
-            <>
-              <Check size={16} />
-              <span>{t.copiedToast}</span>
-            </>
-          ) : (
-            <>
-              <Copy size={16} />
-              <span>{t.btnCopyImage}</span>
-            </>
-          )}
-        </button>
-
-        {/* Pro Print Export - PNG, SVG, & PDF Download buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5" id="pro_export_action_buttons">
-          {/* PNG Download Button */}
-          <button
-            onClick={handleDownload}
-            disabled={isInvalid}
-            className={`py-3 px-2 text-white rounded-xl font-semibold font-arabic flex items-center justify-center gap-1.5 transition-all text-[11px] ${
-              isInvalid
-                ? 'bg-red-400/60 text-white/75 cursor-not-allowed'
-                : 'bg-red-600 hover:bg-red-700 cursor-pointer shadow-xs hover:shadow-md'
-            }`}
-            type="button"
-            id="direct_download_png_btn"
-          >
-            <Download size={14} />
-            <span>{t.btnDownloadPng}</span>
-          </button>
-
-          {/* SVG Download Button */}
-          <button
-            onClick={handleDownloadSvg}
-            disabled={isInvalid}
-            className={`py-3 px-2 text-white rounded-xl font-semibold font-arabic flex items-center justify-center gap-1.5 transition-all text-[11px] ${
-              isInvalid
-                ? 'bg-slate-500/40 text-white/50 cursor-not-allowed'
-                : 'bg-slate-800 hover:bg-slate-900 cursor-pointer shadow-xs hover:shadow-md'
-            }`}
-            type="button"
-            id="direct_download_svg_btn"
-          >
-            <Sparkles size={14} />
-            <span>{t.btnDownloadSvg}</span>
-          </button>
-
-          {/* PDF Vector Download Button */}
-          <button
-            onClick={handleDownloadPdf}
-            disabled={isInvalid}
-            className={`py-3 px-2 text-white rounded-xl font-semibold font-arabic flex items-center justify-center gap-1.5 transition-all text-[11px] ${
-              isInvalid
-                ? 'bg-blue-400/60 text-white/75 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700 cursor-pointer shadow-xs hover:shadow-md'
-            }`}
-            type="button"
-            id="direct_download_pdf_btn"
-          >
-            <FileText size={14} />
-            <span>{t.btnDownloadPdf}</span>
-          </button>
-        </div>
-
-        {/* Simple bullet headings directly under download buttons */}
-        <div className="pt-2 flex flex-col gap-1.5 text-start font-arabic border-t border-slate-100/60 dark:border-slate-800/40 mt-1" id="download_feature_bullet_headings">
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
-            <span className="shrink-0 text-[11px]">✅</span>
-            <span>
-              {t.featFree.includes("100") ? (
-                <>
-                  {t.featFree.split("100").map((part, idx, arr) => (
-                    <span key={idx}>
-                      {part}
-                      {idx < arr.length - 1 && (
-                        <span className="text-emerald-600 dark:text-emerald-400 font-black font-mono mx-0.5">100</span>
-                      )}
-                    </span>
-                  ))}
-                </>
-              ) : (
-                t.featFree
-              )}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
-            <span className="shrink-0 text-[11px]">✅</span>
-            <span>{t.featNoReg}</span>
-          </div>
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
-            <span className="shrink-0 text-[11px]">✅</span>
-            <span>{t.featHighPng}</span>
-          </div>
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
-            <span className="shrink-0 text-[11px]">✅</span>
-            <span>{t.featSupports}</span>
-          </div>
-        </div>
-
-        {/* Analytics Section Removed */}
-      </div>
-    );
-  };
+  const hasLogo = !!logoUrl;
 
   return (
-    <div className="space-y-8 w-full" id="qr_parent_container">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full max-w-7xl mx-auto" id="qr_main_layout">
-
-        {/* LEFT PANEL: INPUTS & PREVIEW (8 COLS) */}
-        <div className="lg:col-span-8 space-y-6" id="qr_left_panel">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start w-full" id="qr_generator_workspace">
+      {/* LEFT COLUMN: Controls & Form */}
+      <div className="lg:col-span-7 flex flex-col gap-6" id="qr_controls_sidebar">
         
-        {/* Module 1: The Link Input */}
-        <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-100 flex flex-col justify-start" id="module_link_input">
+        {/* Step 1: Input URL */}
+        <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm flex flex-col gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-600">
+              <LinkIcon className="w-4 h-4" />
+            </div>
+            <h2 className="text-lg font-bold text-slate-800 font-sans">{t.inputLabel}</h2>
+          </div>
           
-          {/* Dynamic Platform Accent Resolver */}
-          {(() => {
-            const getPlatformStyles = () => {
-              switch(urlInfo.platform) {
-                case 'facebook':
-                  return {
-                    focusClass: 'focus:border-blue-500 focus:ring-blue-100',
-                    bgClass: 'bg-sky-50 text-sky-600',
-                    icon: <Facebook size={20} className="text-[#1877F2]" />,
-                    badgeIcon: <Facebook size={20} />
-                  };
-                case 'instagram':
-                  return {
-                    focusClass: 'focus:border-rose-500 focus:ring-rose-100',
-                    bgClass: 'bg-rose-50 text-rose-600',
-                    icon: <Instagram size={20} className="text-[#E1306C]" />,
-                    badgeIcon: <Instagram size={20} />
-                  };
-                case 'tiktok':
-                  return {
-                    focusClass: 'focus:border-slate-800 focus:ring-slate-200',
-                    bgClass: 'bg-slate-100 text-slate-800',
-                    icon: <Music size={20} className="text-black" />,
-                    badgeIcon: <Music size={20} />
-                  };
-                case 'other':
-                  return {
-                    focusClass: 'focus:border-indigo-500 focus:ring-indigo-100',
-                    bgClass: 'bg-indigo-50 text-indigo-600',
-                    icon: <Globe size={20} className="text-[#4F46E5]" />,
-                    badgeIcon: <Globe size={20} />
-                  };
-                case 'youtube':
-                default:
-                  if (forcePlatform === 'website') {
-                    return {
-                      focusClass: 'focus:border-indigo-500 focus:ring-indigo-100',
-                      bgClass: 'bg-indigo-50 text-indigo-600',
-                      icon: <Globe size={20} className="text-[#4F46E5]" />,
-                      badgeIcon: <Globe size={20} />
-                    };
-                  }
-                  return {
-                    focusClass: 'focus:border-red-500 focus:ring-red-100',
-                    bgClass: 'bg-red-50 text-red-600',
-                    icon: <Youtube size={20} className={urlInfo.isValid && urlInfo.type !== 'unknown' ? 'text-red-500' : 'text-slate-600'} />,
-                    badgeIcon: <Youtube size={20} />
-                  };
-              }
-            };
-            const pStyle = getPlatformStyles();
-
-            return (
-              <>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold font-arabic text-gray-800 flex items-center gap-2">
-                    <span className={`p-2 rounded-xl transition-all duration-300 ${pStyle.bgClass}`}>
-                      {pStyle.badgeIcon}
-                    </span>
-                    {t.mod1Title}
-                  </h2>
-                  <div className="text-xs text-slate-600 font-mono">STEP 1</div>
-                </div>
-
-                 {/* Horizontal Quick Swappers - Only show if not forced to a single platform */}
-                 {!forcePlatform && (
-                   <div className="grid grid-cols-4 gap-2 mb-5" id="social_swappers">
-                     <button
-                       onClick={() => {
-                         setUrlInput('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
-                         setForegroundColor('#FF0000');
-                         setEyeColor('#FF0000');
-                       }}
-                       className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer ${
-                         urlInfo.platform === 'youtube'
-                           ? 'border-red-500 bg-red-50/40 text-red-600 shadow-xs'
-                           : 'border-gray-50 hover:border-gray-150 text-slate-600 bg-gray-50/20 font-medium'
-                       }`}
-                       type="button"
-                     >
-                       <Youtube size={20} className="mb-1 text-slate-600" />
-                       <span className="text-[10px] font-bold font-arabic">يوتيوب</span>
-                     </button>
-
-                     <button
-                       onClick={() => {
-                         setUrlInput('https://www.facebook.com/facebook');
-                         setForegroundColor('#1877F2');
-                         setEyeColor('#1877F2');
-                       }}
-                       className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer ${
-                         urlInfo.platform === 'facebook'
-                           ? 'border-blue-500 bg-blue-50/40 text-blue-600 shadow-xs'
-                           : 'border-gray-50 hover:border-gray-150 text-slate-600 bg-gray-50/20 font-medium'
-                       }`}
-                       type="button"
-                     >
-                       <Facebook size={20} className="mb-1 text-slate-600" />
-                       <span className="text-[10px] font-bold font-arabic">فيسبوك</span>
-                     </button>
-
-                     <button
-                       onClick={() => {
-                         setUrlInput('https://www.instagram.com/instagram');
-                         setForegroundColor('#E1306C');
-                         setEyeColor('#E1306C');
-                       }}
-                       className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer ${
-                         urlInfo.platform === 'instagram'
-                           ? 'border-rose-500 bg-rose-50/40 text-rose-600 shadow-xs'
-                           : 'border-gray-50 hover:border-gray-150 text-slate-600 bg-gray-50/20 font-medium'
-                       }`}
-                       type="button"
-                     >
-                       <Instagram size={20} className="mb-1 text-slate-600" />
-                       <span className="text-[10px] font-bold font-arabic">إنستغرام</span>
-                     </button>
-
-                     <button
-                       onClick={() => {
-                         setUrlInput('https://www.tiktok.com/@tiktok');
-                         setForegroundColor('#000000');
-                         setEyeColor('#000000');
-                       }}
-                       className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer ${
-                         urlInfo.platform === 'tiktok'
-                           ? 'border-slate-800 bg-slate-100 text-slate-800 shadow-xs'
-                           : 'border-gray-50 hover:border-gray-150 text-slate-600 bg-gray-50/20 font-medium'
-                       }`}
-                       type="button"
-                     >
-                       <Music size={20} className="mb-1 text-slate-600" />
-                       <span className="text-[10px] font-bold font-arabic">تيك توك</span>
-                     </button>
-                   </div>
-                 )}
-
-                 {(() => {
-                   let customLabel = t.labelYtUrl;
-                   let customPlaceholder = t.placeholderYtUrl;
-
-                   if (forcePlatform === 'youtube') {
-                     customLabel = lang === 'ar' ? 'أدخل رابط قناة أو فيديو أو شورتس يوتيوب لإنشاء رابط عميق وكيو آر:' : 'Enter YouTube Channel, Video, or Shorts URL for smart deep-link & QR:';
-                     customPlaceholder = lang === 'ar' ? 'https://www.youtube.com/@channelName أو رابط فيديو...' : 'https://www.youtube.com/@channelName or video link...';
-                   } else if (forcePlatform === 'facebook') {
-                     customLabel = lang === 'ar' ? 'أدخل رابط صفحة أو مجموعة أو حساب فيسبوك لإنشاء رابط عميق وكيو آر:' : 'Enter Facebook Page, Group, or Profile URL:';
-                     customPlaceholder = lang === 'ar' ? 'https://www.facebook.com/pageName' : 'https://www.facebook.com/pageName';
-                   } else if (forcePlatform === 'instagram') {
-                     customLabel = lang === 'ar' ? 'أدخل رابط حساب أو منشور أو ريلز إنستغرام لإنشاء رابط عميق وكيو آر:' : 'Enter Instagram Account, Post, or Reels URL:';
-                     customPlaceholder = lang === 'ar' ? 'https://www.instagram.com/userName' : 'https://www.instagram.com/userName';
-                    } else if (forcePlatform === 'website') {
-                      customLabel = lang === 'ar' ? 'أدخل رابط موقع إلكتروني، مدونة، متجر أو أي رابط لتوليد كود الـ QR:' : 'Enter any website, blog, store, or other link to generate its QR code:';
-                      customPlaceholder = 'https://example.com';
-                   } else if (forcePlatform === 'tiktok') {
-                     customLabel = lang === 'ar' ? 'أدخل رابط حساب أو فيديو تيك توك لإنشاء رابط عميق وكيو آر:' : 'Enter TikTok Profile or Video URL:';
-                     customPlaceholder = lang === 'ar' ? 'https://www.tiktok.com/@userName' : 'https://www.tiktok.com/@userName';
-                   }
-
-                   return (
-                     <>
-                       <label className="text-sm font-medium font-arabic text-gray-600 mb-2 block" htmlFor="yt_url">
-                         {customLabel}
-                       </label>
-                       
-                       <div className="relative">
-                         <input
-                           id="yt_url"
-                           type="text"
-                           value={urlInput}
-                           onChange={(e) => setUrlInput(e.target.value)}
-                           placeholder={customPlaceholder}
-                           className={`w-full pl-4 pr-12 py-3.5 bg-gray-50/50 hover:bg-gray-50 focus:bg-white rounded-2xl border border-gray-200 font-mono text-sm transition-all focus:outline-none focus:ring-2 ${pStyle.focusClass}`}
-                           dir="ltr"
-                         />
-                         <div className={`absolute ${lang === 'ar' ? 'right-3.5' : 'left-3.5'} top-1/2 -translate-y-1/2`}>
-                           {pStyle.icon}
-                         </div>
-                       </div>
-                     </>
-                   );
-                 })()}
-
-                 {/* Validation Status Badge and Warning Banner */}
-                 {(() => {
-                   const isUrlEmpty = !urlInput.trim();
-                   let isUrlValid = isUrlEmpty || urlInfo.isValid;
-                   const isPlatformMismatch = !isUrlEmpty && forcePlatform && forcePlatform !== 'website' && urlInfo.isValid && urlInfo.platform !== forcePlatform;
-                   if (isPlatformMismatch) {
-                     isUrlValid = false;
-                   } else if (!isUrlEmpty && forcePlatform && forcePlatform !== 'website') {
-                     isUrlValid = urlInfo.isValid && urlInfo.platform === forcePlatform;
-                   }
-                   
-                   if (!isUrlValid) {
-                     if (isPlatformMismatch) {
-                       const platformNames: Record<string, string> = {
-                         youtube: lang === 'ar' ? 'يوتيوب' : 'YouTube',
-                         facebook: lang === 'ar' ? 'فيسبوك' : 'Facebook',
-                         instagram: lang === 'ar' ? 'إنستغرام' : 'Instagram',
-                         tiktok: lang === 'ar' ? 'تيك توك' : 'TikTok',
-                       };
-                       const activePlatformName = platformNames[forcePlatform!] || forcePlatform;
-                       return (
-                         <div className="mt-3 p-4 bg-amber-50 dark:bg-amber-955/20 rounded-2xl border border-amber-200 dark:border-amber-800/40 flex flex-col gap-2.5 text-amber-950 dark:text-amber-300 text-xs font-arabic leading-relaxed animate-fadeIn" id="url_validation_warning">
-                           <div className="flex items-start gap-2.5">
-                             <span className="p-1.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-lg shrink-0 mt-0.5 animate-pulse">
-                               <Sparkles size={14} />
-                             </span>
-                             <div>
-                               <p className="font-bold">
-                                 {lang === 'ar' 
-                                   ? `⚠️ هذا الرابط يبدو كموقع إلكتروني عام وليس رابطاً لـ ${activePlatformName}!`
-                                   : `⚠️ This link appears to be a general website, not a ${activePlatformName} link!`}
-                               </p>
-                               <p className="mt-1 text-slate-700 dark:text-slate-300 font-medium">
-                                 {lang === 'ar'
-                                   ? 'لإنشاء كود كيو آر كود لموقع عام (مثل Terabox أو موقعك الشخصي) بنجاح، يمكنك التبديل فوراً لتبويب "مواقع أخرى" بالخيار أدناه.'
-                                   : 'To generate a QR code for this general website (such as Terabox or your personal domain), you can switch instantly to the "Other Websites" tab below.'}
-                               </p>
-                             </div>
-                           </div>
-                           {onSwitchTab && (
-                             <button
-                               onClick={() => onSwitchTab('website')}
-                               className="mt-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-xs transition-transform transform active:scale-95 cursor-pointer self-start text-[10.5px] font-arabic"
-                             >
-                               {lang === 'ar' ? '🔄 التحويل لتبويب "مواقع أخرى" وتوليد الكود الآن' : '🔄 Switch to "Other Websites" and generate now'}
-                             </button>
-                           )}
-                         </div>
-                       );
-                     }
-                     let warnMessage = t.unsupportedUrlWarn;
-                     if (forcePlatform === 'youtube') {
-                       warnMessage = lang === 'ar' 
-                         ? '⚠️ الرابط المُدخل غير صحيح! يرجى إدخال رابط يوتيوب صالح (قناة، فيديو، أو شورتس يحتوي على youtube.com أو youtu.be).'
-                         : '⚠️ Invalid link! Please enter a valid YouTube channel, video, or shorts link.';
-                     } else if (forcePlatform === 'facebook') {
-                       warnMessage = lang === 'ar' 
-                         ? '⚠️ الرابط المُدخل غير صحيح! يرجى إدخال رابط صفحة، مجموعة، منشور أو حساب فيسبوك صالح.'
-                         : '⚠️ Invalid link! Please enter a valid Facebook page, group, post, or profile link.';
-                     } else if (forcePlatform === 'instagram') {
-                       warnMessage = lang === 'ar' 
-                         ? '⚠️ الرابط المُدخل غير صحيح! يرجى إدخال رابط حساب، منشور أو ريلز إنستغرام صالح.'
-                         : '⚠️ Invalid link! Please enter a valid Instagram profile, post, or reels link.';
-                     } else if (forcePlatform === 'tiktok') {
-                       warnMessage = lang === 'ar' 
-                         ? '⚠️ الرابط المُدخل غير صحيح! يرجى إدخال رابط حساب أو فيديو تيك توك صالح.'
-                         : '⚠️ Invalid link! Please enter a valid TikTok profile or video link.';
-                     }
-
-                     return (
-                       <div className="mt-3 p-3.5 bg-red-50 rounded-2xl border border-red-200 flex items-start gap-2.5 text-red-800 text-xs font-arabic leading-relaxed animate-fadeIn" id="url_validation_warning">
-                         <span className="p-1 bg-red-100 text-red-650 rounded-lg shrink-0 mt-0.5">
-                           <AlertCircle size={14} />
-                         </span>
-                         <div>
-                           <p className="font-bold">{warnMessage}</p>
-                         </div>
-                       </div>
-                     );
-                   } else if (!isUrlEmpty) {
-                     const platformLabels: Record<string, string> = {
-                       youtube: 'YouTube',
-                       facebook: 'Facebook',
-                       instagram: 'Instagram',
-                       tiktok: 'TikTok',
-                       other: lang === 'ar' ? 'موقع إلكتروني عام' : 'General Website'
-                     };
-                     const matchedPlatform = platformLabels[urlInfo.platform] || urlInfo.platform;
-                     return (
-                       <div className="mt-3 p-3 bg-emerald-50 rounded-2xl border border-emerald-150 flex items-center gap-2.5 text-emerald-850 text-xs font-arabic animate-fadeIn">
-                         <span className="p-1 bg-emerald-100 text-emerald-600 rounded-lg shrink-0">
-                           <Check size={14} />
-                         </span>
-                         <span>{t.validLink} ({matchedPlatform})</span>
-                       </div>
-                     );
-                   }
-                   return null;
-                 })()}
-
-              </>
-            );
-          })()}
-
-          {/* Aesthetic Divider - mobile only */}
-          <div className="w-full h-px bg-gray-100 my-6 lg:hidden" />
-
-          {/* Mobile-only Preview */}
-          {!isDesktop && (
-            <div className="lg:hidden w-full flex flex-col items-center mb-2 gap-5" id="direct_preview_area_mobile">
-              <QRVisualPreview
-                canvasRef={canvasRef}
-                selectedFrame={selectedFrame}
-                frameColor={frameColor}
-                frameTextTop={frameTextTop}
-                frameTextBottom={frameTextBottom}
-                lang={lang}
-                t={t}
-                urlInput={urlInput}
-                urlInfo={urlInfo}
-                activePayload={getActivePayload()}
-              />
-            </div>
-          )}
-
-        </div>
-
-        {/* Module 3: Branding & Custom Colors */}
-        <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-100" id="module_colors_branding">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold font-arabic text-gray-800 flex items-center gap-2">
-              <span className="p-2 bg-purple-50 text-purple-600 rounded-xl">
-                <Settings size={20} />
-              </span>
-              {t.mod3Title}
-            </h2>
-            <div className="text-xs text-slate-600 font-mono">STEP 2</div>
-          </div>
-
-          {/* Color Presets Templates */}
-          <div className="mb-6">
-            <span className="text-xs font-semibold text-slate-600 font-arabic block mb-2.5">{t.colorPresetsLabel}</span>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2" id="color_presets_grid">
-              {COLOR_TEMPLATES.map((tpl, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => selectColorTemplate(tpl)}
-                  className={`flex items-center gap-2 p-2 rounded-xl border border-gray-100 hover:border-gray-200 hover:bg-gray-50 ${lang === 'ar' ? 'text-right' : 'text-left'} cursor-pointer text-xs font-arabic`}
-                  type="button"
-                >
-                  <div className="flex -space-x-1 pl-1" dir="ltr">
-                    <span className="w-4 h-4 rounded-full border border-gray-200 inline-block shrink-0 shadow-xs" style={{ backgroundColor: tpl.dark }} />
-                    <span className="w-4 h-4 rounded-full border border-gray-200 inline-block shrink-0 shadow-xs" style={{ backgroundColor: tpl.light }} />
-                  </div>
-                  <span className="text-gray-700 truncate font-medium">{getColorTemplateName(tpl.name)}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Custom Palette Pickers */}
-            <div className="space-y-4">
-              {/* Foreground Color picker */}
-              <div>
-                <label className="text-xs font-semibold text-gray-600 font-arabic mb-2 block" htmlFor="foreground_color">
-                  {t.labelForeground}
-                </label>
-                <div className="flex items-center gap-2.5">
-                  <div className="relative w-12 h-10 rounded-xl overflow-hidden border border-gray-200 shrink-0 cursor-pointer">
-                    <input
-                      id="foreground_color"
-                      type="color"
-                      value={foregroundColor}
-                      onChange={(e) => setForegroundColor(e.target.value)}
-                      className="absolute inset-x-0 inset-y-0 w-20 h-20 -m-4 cursor-pointer"
-                    />
-                  </div>
-                  <input
-                    type="text"
-                    value={foregroundColor}
-                    onChange={(e) => setForegroundColor(e.target.value)}
-                    aria-label={t.labelForeground}
-                    className="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-200 font-mono text-sm focus:outline-none focus:border-red-500 uppercase"
-                  />
-                </div>
-              </div>
-
-              {/* Background Color picker */}
-              <div>
-                <label className="text-xs font-semibold text-gray-600 font-arabic mb-2 block" htmlFor="background_color">
-                  {t.labelBackground}
-                </label>
-                <div className="flex items-center gap-2.5">
-                  <div className="relative w-12 h-10 rounded-xl overflow-hidden border border-gray-200 shrink-0 cursor-pointer">
-                    <input
-                      id="background_color"
-                      type="color"
-                      value={backgroundColor}
-                      onChange={(e) => setBackgroundColor(e.target.value)}
-                      className="absolute inset-x-0 inset-y-0 w-20 h-20 -m-4 cursor-pointer"
-                    />
-                  </div>
-                  <input
-                    type="text"
-                    value={backgroundColor}
-                    onChange={(e) => setBackgroundColor(e.target.value)}
-                    aria-label={t.labelBackground}
-                    className="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-200 font-mono text-sm focus:outline-none focus:border-red-500 uppercase"
-                  />
-                </div>
-              </div>
-            </div>
-
-
-          </div>
-
-          {/* Dynamic Inverted colors warning banner */}
-          {isColorWayInverted() && (
-            <div className={`mt-5 p-4 bg-amber-50 rounded-2xl border border-amber-200 flex items-start gap-3 ${lang === 'ar' ? 'text-right' : 'text-left'} animate-fadeIn`} id="inverted_color_banner">
-              <span className="p-2 bg-amber-100 text-amber-700 rounded-xl mt-0.5 shrink-0">
-                <AlertCircle size={18} />
-              </span>
-              <div className="space-y-1">
-                <h4 className="font-extrabold text-xs text-amber-950 font-arabic">{t.darkInvertedWarnTitle}</h4>
-                <p className="text-[11px] text-amber-800 font-arabic leading-relaxed">
-                  {t.darkInvertedWarnDesc}
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Module 4: Center Custom Logo (Optional) */}
-        <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-100" id="module_center_logo">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold font-arabic text-gray-800 flex items-center gap-2">
-              <span className="p-2 bg-rose-50 text-rose-600 rounded-xl">
-                <Youtube size={20} />
-              </span>
-              {t.mod4Title}
-            </h2>
-            <div className="text-xs text-slate-600 font-mono">STEP 3</div>
-          </div>
-
-          <p className="text-xs font-arabic text-slate-600 mb-4 leading-relaxed">
-            {t.mod4Desc}
-          </p>
-
-          {/* Drag & Drop Upload Zone */}
-          <div
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            className={`relative rounded-2xl border-2 border-dashed p-6 transition-all duration-200 text-center flex flex-col items-center justify-center cursor-pointer ${
-              isDragging
-                ? 'border-red-500 bg-red-50/50'
-                : customLogo
-                ? 'border-emerald-300 bg-emerald-50/10'
-                : 'border-gray-200 bg-gray-50/30 hover:border-gray-300 hover:bg-gray-50/80'
-            }`}
-            onClick={() => document.getElementById('logo_file_input')?.click()}
-            id="logo_dropzone"
-          >
+          <div className="relative">
             <input
-              id="logo_file_input"
-              type="file"
-              accept="image/*"
-              className="hidden"
-              aria-label={t.uploadCustomLabel || "Upload Custom Logo"}
-              onChange={(e) => {
-                if (e.target.files && e.target.files[0]) {
-                  handleLogoUpload(e.target.files[0]);
-                }
-              }}
+              type="text"
+              id="qr_main_url_input"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder={t.placeholder}
+              dir="ltr"
+              className="w-full h-14 pl-4 pr-12 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 font-sans focus:bg-white focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all outline-none text-base"
             />
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+              <QrCode className="w-5 h-5" />
+            </div>
+          </div>
 
-            {customLogo ? (
-              <div className="space-y-3">
-                <div className="mx-auto w-16 h-16 rounded-xl border border-gray-100 shadow-sm p-1.5 bg-white flex items-center justify-center overflow-hidden">
-                  <img
-                    src={customLogo}
-                    alt="Channel Logo Preview"
-                    width={64}
-                    height={64}
-                    loading="lazy"
-                    className="w-full h-full object-contain rounded-md animate-scaleIn"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-emerald-700 font-arabic flex items-center justify-center gap-1.5">
-                    <CheckCircle2 size={14} className="text-emerald-500" />
-                    {t.successUploadMsg}
-                  </p>
-                  <p className="text-[10px] text-slate-600 font-arabic mt-0.5">
-                    {t.changeImgTip}
-                  </p>
+          {/* Quick Templates Buttons */}
+          <div className="flex flex-col gap-2 mt-2">
+            <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5 text-yellow-500 animate-pulse" />
+              {t.quickTemplates}
+            </span>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <button
+                type="button"
+                onClick={() => applyTemplate('youtube')}
+                className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg border border-red-100 bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold transition-colors"
+              >
+                🎥 يوتيوب
+              </button>
+              <button
+                type="button"
+                onClick={() => applyTemplate('tiktok')}
+                className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-bold transition-colors"
+              >
+                🎵 تيك توك
+              </button>
+              <button
+                type="button"
+                onClick={() => applyTemplate('gym')}
+                className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg border border-yellow-200 bg-slate-900 text-yellow-500 hover:bg-slate-800 text-xs font-bold transition-colors"
+              >
+                🏋️ جيم ذهبي
+              </button>
+              <button
+                type="button"
+                onClick={() => applyTemplate('restaurant')}
+                className="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg border border-emerald-100 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold transition-colors"
+              >
+                🍔 منيو مطعم
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Customization Panel */}
+        <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
+          {/* Tab Navigation */}
+          <div className="flex border-b border-slate-100 mb-6">
+            <button
+              onClick={() => setActiveTab('design')}
+              className={`flex-1 pb-3 text-sm font-bold flex items-center justify-center gap-2 border-b-2 transition-all ${
+                activeTab === 'design'
+                  ? 'border-red-500 text-red-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <Palette className="w-4 h-4" />
+              {t.customize}
+            </button>
+            <button
+              onClick={() => setActiveTab('logo')}
+              className={`flex-1 pb-3 text-sm font-bold flex items-center justify-center gap-2 border-b-2 transition-all ${
+                activeTab === 'logo'
+                  ? 'border-red-500 text-red-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <ImageIcon className="w-4 h-4" />
+              الشعار (Logo)
+            </button>
+            <button
+              onClick={() => setActiveTab('frame')}
+              className={`flex-1 pb-3 text-sm font-bold flex items-center justify-center gap-2 border-b-2 transition-all ${
+                activeTab === 'frame'
+                  ? 'border-red-500 text-red-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <Layout className="w-4 h-4" />
+              الإطار (Frame)
+            </button>
+          </div>
+
+          {/* TAB 1: DESIGN */}
+          {activeTab === 'design' && (
+            <div className="flex flex-col gap-5 animate-fade-in" id="design_tab_controls">
+              {/* Pattern Style */}
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-bold text-slate-700">{t.qrStyle}</label>
+                <div className="grid grid-cols-3 gap-3">
+                  <button
+                    onClick={() => setQrStyle('square')}
+                    className={`py-2.5 px-4 rounded-xl border text-sm font-bold transition-all ${
+                      qrStyle === 'square'
+                        ? 'border-red-500 bg-red-50/50 text-red-600'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {t.qrStyleSquare}
+                  </button>
+                  <button
+                    onClick={() => setQrStyle('dots')}
+                    className={`py-2.5 px-4 rounded-xl border text-sm font-bold transition-all ${
+                      qrStyle === 'dots'
+                        ? 'border-red-500 bg-red-50/50 text-red-600'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {t.qrStyleDots}
+                  </button>
+                  <button
+                    onClick={() => setQrStyle('rounded')}
+                    className={`py-2.5 px-4 rounded-xl border text-sm font-bold transition-all ${
+                      qrStyle === 'rounded'
+                        ? 'border-red-500 bg-red-50/50 text-red-600'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {t.qrStyleRounded}
+                  </button>
                 </div>
               </div>
-            ) : (
-              <div className="space-y-2">
-                <div className="mx-auto p-3 bg-red-50 text-red-600 rounded-2xl w-fit">
-                  <UploadCloud size={24} />
+
+              {/* Color Controls */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-bold text-slate-700">{t.dotsColor}</label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="color"
+                      value={dotsColor}
+                      onChange={(e) => setDotsColor(e.target.value)}
+                      className="w-12 h-12 rounded-xl border border-slate-200 cursor-pointer overflow-hidden p-0"
+                    />
+                    <input
+                      type="text"
+                      value={dotsColor}
+                      onChange={(e) => setDotsColor(e.target.value)}
+                      className="flex-1 h-11 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono"
+                    />
+                  </div>
                 </div>
-                <p className="text-xs font-bold text-gray-700 font-arabic">
-                  {t.dragDropText}
-                </p>
-                <p className="text-[10px] text-slate-600 font-arabic">
-                  {t.uploadFormatTip}
-                </p>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-bold text-slate-700">{t.bgColor}</label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="color"
+                      value={bgColor}
+                      onChange={(e) => setBgColor(e.target.value)}
+                      className="w-12 h-12 rounded-xl border border-slate-200 cursor-pointer overflow-hidden p-0"
+                    />
+                    <input
+                      type="text"
+                      value={bgColor}
+                      onChange={(e) => setBgColor(e.target.value)}
+                      className="flex-1 h-11 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Error correction */}
+              <div className="flex flex-col gap-2 mt-2">
+                <label className="text-sm font-bold text-slate-700 flex items-center gap-1.5">
+                  <Info className="w-4 h-4 text-slate-400" />
+                  {t.errorCorrection} (أمان قراءة الكود المخدوش)
+                </label>
+                <div className="grid grid-cols-4 gap-2">
+                  {(['L', 'M', 'Q', 'H'] as const).map((level) => (
+                    <button
+                      key={level}
+                      onClick={() => setErrorCorrectionLevel(level)}
+                      className={`py-2 rounded-lg border text-xs font-bold transition-all ${
+                        errorCorrectionLevel === level
+                          ? 'border-red-500 bg-red-50 text-red-600'
+                          : 'border-slate-200 bg-white text-slate-500 hover:bg-slate-50'
+                      }`}
+                    >
+                      {level} {level === 'H' ? '(أعلى أمان/أكبر حجم)' : ''}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: LOGO */}
+          {activeTab === 'logo' && (
+            <div className="flex flex-col gap-5 animate-fade-in" id="logo_tab_controls">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-bold text-slate-700">{t.logoUpload}</label>
+                <div className="flex flex-col sm:flex-row gap-4 items-center">
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full sm:w-auto h-12 px-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                  >
+                    <ImageIcon className="w-4 h-4" />
+                    اختر صورة أو شعار
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    className="hidden"
+                  />
+                  {logoUrl && (
+                    <button
+                      onClick={() => setLogoUrl(undefined)}
+                      className="text-red-500 hover:text-red-600 text-sm font-bold"
+                    >
+                      {t.logoClear}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {logoUrl && (
+                <div className="flex flex-col gap-2 animate-fade-in">
+                  <label className="text-sm font-bold text-slate-700 flex justify-between">
+                    <span>حجم الشعار في الكود</span>
+                    <span className="font-mono text-slate-500">{Math.round(logoScale * 100)}%</span>
+                  </label>
+                  <input
+                    type="range"
+                    min="0.1"
+                    max="0.3"
+                    step="0.02"
+                    value={logoScale}
+                    onChange={(e) => setLogoScale(parseFloat(e.target.value))}
+                    className="w-full accent-red-500 cursor-pointer h-2 bg-slate-100 rounded-lg appearance-none"
+                  />
+                  <span className="text-xs text-slate-400">
+                    * ملاحظة: يوصى بـ 20% كحد أقصى للحفاظ على سهولة القراءة الفورية للكود.
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 3: FRAME */}
+          {activeTab === 'frame' && (
+            <div className="flex flex-col gap-5 animate-fade-in" id="frame_tab_controls">
+              {/* Frame Style */}
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-bold text-slate-700">{t.frameType}</label>
+                <div className="grid grid-cols-3 gap-3">
+                  <button
+                    onClick={() => setFrameType('none')}
+                    className={`py-2.5 px-4 rounded-xl border text-sm font-bold transition-all ${
+                      frameType === 'none'
+                        ? 'border-red-500 bg-red-50/50 text-red-600'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {t.frameNone}
+                  </button>
+                  <button
+                    onClick={() => setFrameType('basic')}
+                    className={`py-2.5 px-4 rounded-xl border text-sm font-bold transition-all ${
+                      frameType === 'basic'
+                        ? 'border-red-500 bg-red-50/50 text-red-600'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {t.frameBasic}
+                  </button>
+                  <button
+                    onClick={() => setFrameType('modern')}
+                    className={`py-2.5 px-4 rounded-xl border text-sm font-bold transition-all ${
+                      frameType === 'modern'
+                        ? 'border-red-500 bg-red-50/50 text-red-600'
+                        : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {t.frameModern}
+                  </button>
+                </div>
+              </div>
+
+              {frameType !== 'none' && (
+                <>
+                  {/* Frame Text */}
+                  <div className="flex flex-col gap-2 animate-fade-in">
+                    <label className="text-sm font-bold text-slate-700">{t.frameTextLabel}</label>
+                    <input
+                      type="text"
+                      value={frameText}
+                      onChange={(e) => setFrameText(e.target.value)}
+                      className="w-full h-11 px-4 rounded-xl bg-slate-50 border border-slate-200 text-sm font-sans"
+                    />
+                  </div>
+
+                  {/* Frame Color */}
+                  <div className="flex flex-col gap-2 animate-fade-in">
+                    <label className="text-sm font-bold text-slate-700">لون الإطار</label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="color"
+                        value={frameColor}
+                        onChange={(e) => setFrameColor(e.target.value)}
+                        className="w-12 h-12 rounded-xl border border-slate-200 cursor-pointer overflow-hidden p-0"
+                      />
+                      <input
+                        type="text"
+                        value={frameColor}
+                        onChange={(e) => setFrameColor(e.target.value)}
+                        className="flex-1 h-11 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* RIGHT COLUMN: PREVIEW & EXPORT */}
+      <div className="lg:col-span-5 flex flex-col gap-6" id="qr_preview_column">
+        <div className="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm flex flex-col items-center justify-center gap-6 relative">
+          
+          {/* Dynamic Interactive QR Wrapper Frame */}
+          <div 
+            id="qr_complete_wrapper" 
+            style={{ backgroundColor: bgColor }}
+            className={`p-6 rounded-2xl flex flex-col items-center justify-center border border-slate-100 transition-all shadow-md relative ${
+              frameType === 'modern' ? 'pt-8 pb-10' : ''
+            }`}
+          >
+            {/* Top Frame indicator */}
+            {frameType === 'basic' && (
+              <div 
+                style={{ color: frameColor }}
+                className="text-xs font-black tracking-widest text-center mb-4 uppercase font-sans border-b pb-1 px-4"
+              >
+                {frameText || 'SCAN ME'}
+              </div>
+            )}
+
+            {/* Main QR Code SVG */}
+            <div className="relative p-3 rounded-xl bg-white shadow-inner" id="qr_svg_container">
+              <svg
+                id="generated_qr_svg"
+                viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`}
+                className="w-64 h-64 md:w-72 md:h-72"
+              >
+                {/* SVG background */}
+                <rect width={viewBoxSize} height={viewBoxSize} fill="#FFFFFF" rx={2} />
+                
+                {/* Matrix modules path */}
+                {renderQRContent()}
+
+                {/* Draw embedded logo */}
+                {hasLogo && (
+                  <g>
+                    {/* Background clipping shield */}
+                    <rect
+                      x={viewBoxSize / 2 - (viewBoxSize * logoScale) / 2 - 1}
+                      y={viewBoxSize / 2 - (viewBoxSize * logoScale) / 2 - 1}
+                      width={viewBoxSize * logoScale + 2}
+                      height={viewBoxSize * logoScale + 2}
+                      rx={(viewBoxSize * logoScale + 2) * 0.25}
+                      fill="#FFFFFF"
+                    />
+                    {/* Embedded logo image */}
+                    <image
+                      href={logoUrl}
+                      x={viewBoxSize / 2 - (viewBoxSize * logoScale) / 2}
+                      y={viewBoxSize / 2 - (viewBoxSize * logoScale) / 2}
+                      width={viewBoxSize * logoScale}
+                      height={viewBoxSize * logoScale}
+                      preserveAspectRatio="xMidYMid slice"
+                    />
+                  </g>
+                )}
+              </svg>
+            </div>
+
+            {/* Bottom Frame (Modern Style Banner) */}
+            {frameType === 'modern' && (
+              <div 
+                style={{ backgroundColor: frameColor }}
+                className="absolute bottom-0 left-0 right-0 py-3.5 rounded-b-2xl flex items-center justify-center gap-2 text-white font-extrabold text-sm shadow-md font-sans px-4 text-center"
+              >
+                <Maximize2 className="w-4 h-4 animate-pulse shrink-0" />
+                <span className="truncate">{frameText || 'امسح للاشتراك'}</span>
               </div>
             )}
           </div>
 
-          {/* Logo visual adjustments controls (appears only when custom logo is set) */}
-          {customLogo && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              className="mt-5 pt-4 border-t border-gray-100 space-y-4"
-              id="logo_visual_controls"
+          {/* Action Download Buttons */}
+          <div className="flex flex-col gap-3.5 w-full">
+            <button
+              onClick={() => downloadAsPNG('qr_complete_wrapper', `qrytube_${Date.now()}`)}
+              className="w-full h-13 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-sm flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer"
             >
-              <h3 className="font-bold text-xs font-arabic text-gray-700 block">
-                🛠️ {t.visualControlHeading}
-              </h3>
+              <Download className="w-4.5 h-4.5" />
+              {t.downloadPNG}
+            </button>
 
-              {/* Slider for scaling */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs font-arabic">
-                  <span className="text-gray-650 font-semibold">{t.logoScaleLabel}</span>
-                  <span className="text-emerald-600 font-mono font-bold font-arabic">{(logoScale * 100).toFixed(0)}%</span>
-                </div>
-                <input
-                  id="logo_scale_slider"
-                  type="range"
-                  min="0.15"
-                  max="0.30"
-                  step="0.01"
-                  value={logoScale}
-                  onChange={(e) => setLogoScale(parseFloat(e.target.value))}
-                  className="w-full min-h-[1.5rem] accent-red-600 hover:accent-red-700 cursor-pointer"
-                  aria-label={t.logoScaleLabel}
-                />
-                <div className="flex justify-between text-[10px] text-slate-600 font-arabic font-medium">
-                  <span>{t.balancedSmall}</span>
-                  <span>{t.largeOverlay}</span>
-                </div>
-              </div>
+            <button
+              onClick={() => downloadAsSVG('generated_qr_svg', `qrytube_${Date.now()}`)}
+              className="w-full h-11 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            >
+              <Maximize2 className="w-4 h-4" />
+              {t.downloadSVG}
+            </button>
 
-              {/* Protective white boundary mask toggle */}
-              <label className="flex items-center gap-2.5 cursor-pointer bg-slate-50/50 hover:bg-slate-50 border border-slate-100 p-3 rounded-2xl select-none transition-all" htmlFor="logo_margin_checkbox">
-                <input
-                  id="logo_margin_checkbox"
-                  type="checkbox"
-                  checked={logoMargin}
-                  onChange={(e) => setLogoMargin(e.target.checked)}
-                  className="w-4 h-4 rounded text-red-600 focus:ring-red-500 border-gray-300 accent-red-600 cursor-pointer"
-                  aria-label={t.maskCheckboxLabel}
-                />
-                <span className="text-xs text-gray-700 font-arabic leading-relaxed font-semibold">
-                  {t.maskCheckboxLabel}
-                </span>
-              </label>
-
-              {/* Remove current logo button */}
-              <button
-                type="button"
-                onClick={() => setCustomLogo(null)}
-                className="w-full py-2.5 px-3 bg-red-50 hover:bg-red-100 text-red-600 font-bold font-arabic rounded-xl transition-all cursor-pointer text-xs flex items-center justify-center gap-1.5"
-                id="remove_logo_btn"
-              >
-                <Trash2 size={14} />
-                <span>{t.removeLogoBtn}</span>
-              </button>
-            </motion.div>
-          )}
+            <button
+              onClick={() => downloadAsPDF('qr_complete_wrapper', `qrytube_${Date.now()}`)}
+              className="w-full h-11 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            >
+              📊 {t.downloadPDF}
+            </button>
+          </div>
         </div>
 
-      </div>
-
-      {/* RIGHT PANEL: DESKTOP-ONLY STICKY DESIGN PREVIEW (4 COLS ON DESKTOP, HIDDEN ON MOBILE) */}
-      {isDesktop && (
-        <div className="hidden lg:block lg:col-span-4 lg:sticky lg:top-24 space-y-6 self-start" id="qr_right_panel">
-          <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-100 flex flex-col items-center gap-5" id="desktop_sticky_preview_card">
-            <h2 className="text-base font-bold font-arabic text-gray-800 text-center flex items-center justify-center gap-1.5">
-              <span>📱 {lang === 'ar' ? 'معاينة حية ومباشرة' : 'Live Design Preview'}</span>
-            </h2>
-            <QRVisualPreview
-              canvasRef={canvasRef}
-              selectedFrame={selectedFrame}
-              frameColor={frameColor}
-              frameTextTop={frameTextTop}
-              frameTextBottom={frameTextBottom}
-              lang={lang}
-              t={t}
-              urlInput={urlInput}
-              urlInfo={urlInfo}
-              activePayload={getActivePayload()}
-            />
-            <div className="w-full h-px bg-gray-100 my-1" />
-            <h3 className="text-xs font-bold font-arabic text-gray-700 text-center">
-              📥 {lang === 'ar' ? 'تحميل وحفظ كود الـ QR بدقة عالية' : 'Download High-Res QR Code'}
-            </h3>
-            <div className="w-full space-y-3">
-              {renderActionButtons()}
+        {/* Live Statistics Block */}
+        <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 text-white flex flex-col gap-4">
+          <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+            <h3 className="font-extrabold text-sm tracking-wide text-slate-200 uppercase">{t.analyticsTitle}</h3>
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="flex flex-col">
+              <span className="text-2xl font-black text-emerald-400 font-sans">{stats.scansToday}</span>
+              <span className="text-[11px] font-semibold text-slate-400">{t.scansToday}</span>
+            </div>
+            <div className="flex flex-col border-l border-r border-slate-800 px-4">
+              <span className="text-2xl font-black text-red-400 font-sans">{stats.linksCreated}</span>
+              <span className="text-[11px] font-semibold text-slate-400">{t.linksCreated}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-2xl font-black text-blue-400 font-sans">{stats.activeCampaigns}</span>
+              <span className="text-[11px] font-semibold text-slate-400">{t.activeCampaigns}</span>
             </div>
           </div>
         </div>
-      )}
-
-      {/* Mobile-Only Download Actions: positioned at the absolute bottom, visible only on screens smaller than lg */}
-      <div className="lg:hidden col-span-1 md:col-span-12 space-y-4 mt-2" id="mobile_bottom_section">
-        <div className="bg-white rounded-3xl p-6 shadow-xs border border-gray-100" id="mobile_actions_wrapper">
-          <h3 className="text-sm font-bold font-arabic text-gray-850 mb-3 text-center flex items-center justify-center gap-2">
-            📥 {lang === 'ar' ? 'تحميل وحفظ كود الـ QR' : 'Download & Save QR Code'}
-          </h3>
-          {renderActionButtons()}
-        </div>
       </div>
-
     </div>
-
-  </div>
   );
-}
+};
