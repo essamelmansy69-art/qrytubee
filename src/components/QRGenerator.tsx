@@ -593,17 +593,22 @@ export default function QRGenerator({
 
   useEffect(() => {
     let statInterval: any = null;
+    let initialTimeout: any = null;
     if (urlInput.trim() && urlInfo.isValid) {
-      fetchScanStats(false);
-      statInterval = setInterval(() => {
+      // Defer initial analytics call slightly so it doesn't compete with critical render resources
+      initialTimeout = setTimeout(() => {
         fetchScanStats(true);
-      }, 4050); // Auto-refresh silently every ~4 seconds
+        statInterval = setInterval(() => {
+          fetchScanStats(true);
+        }, 10000); // Poll every 10 seconds instead of 4 seconds to conserve network bandwidth
+      }, 2000);
     } else {
       setScanCount(0);
       setScanHistory([]);
       setAnalyticsResponse(null);
     }
     return () => {
+      if (initialTimeout) clearTimeout(initialTimeout);
       if (statInterval) clearInterval(statInterval);
     };
   }, [trackingId, urlInput]);

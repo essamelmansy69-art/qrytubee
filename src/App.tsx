@@ -40,7 +40,7 @@ import { motion } from 'motion/react';
 import { translations } from './translations';
 import FooterView from './components/FooterView';
 import QrytubeLogo from './components/QrytubeLogo';
-import { articlesData } from './data/seoContent';
+import { articleSummaries } from './data/articleSummaries';
 
 const QRGenerator = React.lazy(() => import('./components/QRGenerator'));
 const ArticlesView = React.lazy(() => import('./components/ArticlesView'));
@@ -201,7 +201,7 @@ export default function App() {
         : "Find answers about dynamic deep links, custom brand styling, high-resolution QR scanning, and secure browser-to-app routing on Qrytube.";
     } else if (activeTab === 'articles') {
       if (selectedArticleId) {
-        const article = articlesData[lang]?.find(a => a.id.toLowerCase() === selectedArticleId.toLowerCase());
+        const article = articleSummaries[lang]?.find(a => a.id.toLowerCase() === selectedArticleId.toLowerCase());
         if (article) {
           title = `${article.title} | Qrytube`;
           desc = article.excerpt;
@@ -429,6 +429,12 @@ export default function App() {
       if (initialized) return;
       initialized = true;
 
+      // Remove interaction listeners
+      window.removeEventListener('scroll', initGA);
+      window.removeEventListener('mousemove', initGA);
+      window.removeEventListener('touchstart', initGA);
+      window.removeEventListener('click', initGA);
+
       // Create tracking script element with async attribute
       const script = document.createElement('script');
       script.async = true;
@@ -446,23 +452,20 @@ export default function App() {
       gtag('config', 'G-QWM83Z109Z');
     };
 
-    const handleLoad = () => {
-      // Defer execution slightly to not block the current rendering cycle
-      setTimeout(initGA, 0);
-    };
+    // Attach listeners to initialize on first user interaction or after 5 seconds
+    const timeoutId = setTimeout(initGA, 5000);
 
-    // Lazy load approach: load after window has fully loaded, or after a 3-second fallback delay
-    const timeoutId = setTimeout(initGA, 3000);
-
-    if (document.readyState === 'complete') {
-      handleLoad();
-    } else {
-      window.addEventListener('load', handleLoad);
-    }
+    window.addEventListener('scroll', initGA, { passive: true, once: true });
+    window.addEventListener('mousemove', initGA, { passive: true, once: true });
+    window.addEventListener('touchstart', initGA, { passive: true, once: true });
+    window.addEventListener('click', initGA, { passive: true, once: true });
 
     return () => {
       clearTimeout(timeoutId);
-      window.removeEventListener('load', handleLoad);
+      window.removeEventListener('scroll', initGA);
+      window.removeEventListener('mousemove', initGA);
+      window.removeEventListener('touchstart', initGA);
+      window.removeEventListener('click', initGA);
     };
   }, []);
 

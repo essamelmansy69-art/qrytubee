@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { articlesData, Article } from '../data/seoContent';
+import { articleSummaries } from '../data/articleSummaries';
+import type { Article } from '../data/seoContent';
 import { translations } from '../translations';
 import { ArrowLeft, ArrowRight, Calendar, Clock, BookOpen, Share2 } from 'lucide-react';
 
@@ -43,14 +44,36 @@ function ImageWithFallback({ src, alt, className }: { src: string, alt: string, 
 export default function ArticlesView({ lang, selectedArticleId, onSelectArticle }: ArticlesViewProps) {
   const [copied, setCopied] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [fullArticle, setFullArticle] = useState<Article | null>(null);
+  const [loadingContent, setLoadingContent] = useState(false);
   const articlesPerPage = 6;
   const t = translations[lang];
-  // Sort articles from newest to oldest (by date descending)
-  const articles = [...articlesData[lang]].sort((a, b) => {
+
+  // Sort summaries from newest to oldest (by date descending)
+  const articles = [...(articleSummaries[lang] || [])].sort((a, b) => {
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   });
 
-  const selectedArticle = articles.find(a => a.id.toLowerCase() === selectedArticleId?.toLowerCase());
+  const selectedSummary = articles.find(a => a.id.toLowerCase() === selectedArticleId?.toLowerCase());
+
+  // Dynamically load full article content when selectedArticleId changes
+  useEffect(() => {
+    if (selectedArticleId) {
+      setLoadingContent(true);
+      import('../data/seoContent').then(mod => {
+        const art = mod.articlesData[lang]?.find(a => a.id.toLowerCase() === selectedArticleId.toLowerCase());
+        setFullArticle(art || null);
+        setLoadingContent(false);
+      }).catch(() => {
+        setLoadingContent(false);
+      });
+    } else {
+      setFullArticle(null);
+      setLoadingContent(false);
+    }
+  }, [selectedArticleId, lang]);
+
+  const selectedArticle = fullArticle || (selectedSummary ? { ...selectedSummary, content: '' } : null);
 
   // reset page to 1 when changing language
   useEffect(() => {
@@ -276,7 +299,14 @@ export default function ArticlesView({ lang, selectedArticleId, onSelectArticle 
 
           {/* Dynamic content rendering - Full width and very spacious */}
           <div className="space-y-2 mb-10 prose prose-slate dark:prose-invert max-w-none text-slate-800 dark:text-slate-200" id="article_body_content">
-            {renderMarkdown(selectedArticle.content)}
+            {loadingContent ? (
+              <div className="py-12 flex justify-center items-center text-slate-500 font-arabic text-sm">
+                <div className="w-6 h-6 border-2 border-red-600 border-t-transparent rounded-full animate-spin me-2" />
+                <span>{lang === 'ar' ? 'جاري تحميل المقال...' : 'Loading article...'}</span>
+              </div>
+            ) : (
+              renderMarkdown(selectedArticle.content)
+            )}
           </div>
 
           {/* Share Section or useful CTA */}

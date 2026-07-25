@@ -656,7 +656,7 @@ async function startServer() {
           /<link\s+([^>]*href="([^"]+\.css)"[^>]*rel="stylesheet"[^>]*|[^>]*rel="stylesheet"[^>]*href="([^"]+\.css)"[^>]*)\/?>/gi,
           (m, p1, p2, p3) => {
             const cssUrl = p2 || p3;
-            return `<link rel="stylesheet" href="${cssUrl}" media="all" />`;
+            return `<link rel="preload" href="${cssUrl}" as="style" onload="this.onload=null;this.rel='stylesheet'" /><noscript><link rel="stylesheet" href="${cssUrl}"></noscript>`;
           }
         );
 
