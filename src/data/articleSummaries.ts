@@ -1,6 +1,15 @@
 export const articleSummaries = {
   "ar": [
     {
+      "id": "youtube-earnings-usa-2026",
+      "title": "دليلك الشامل لعام 2026: أسرار ربح اليوتيوب في امريكا وكيفية رفع الـ RPM ومضاعفة الأرباح (سيو 2026)",
+      "excerpt": "استكشف أسرار ربح اليوتيوب في امريكا لعام 2026. تعلم كيف ترفع معدل CPM و RPM، وتستهدف الجمهور الأمريكي المحقق لأعلى عائد، وتستغل الروابط العميقة عبر Qrytube لزيادة المشتركين والمشاهدات.",
+      "readTime": "قراءة 9 دقائق",
+      "category": "سيو يوتيوب 2026",
+      "date": "2026-07-24",
+      "image": "/youtube_usa_earnings_seo.jpg"
+    },
+    {
       "id": "grow-whatsapp-channels-2026",
       "title": "دليلك الشامل لعام 2026: أسرار تكبير قنوات واتساب وتنمية المتابعين واستغلال الروابط العميقة (سيو 2026)",
       "excerpt": "اكتشف أفضل الطرق والاستراتيجيات الحصرية لعام 2026 لـ تكبير قنوات واتساب بشكل طبيعي وآمن. دليلك الكامل للتفوق على خوارزمية واتساب ومضاعفة المتابعين عبر منصة Qrytube.",
@@ -434,6 +443,15 @@ export const articleSummaries = {
     }
   ],
   "en": [
+    {
+      "id": "youtube-earnings-usa-2026",
+      "title": "2026 Masterclass: How to Maximize YouTube Earnings in the USA (RPM Boost & Deep Links Guide)",
+      "excerpt": "Step-by-step 2026 guide on how to maximize YouTube earnings in the USA. Master high RPM niches, US audience targeting, and bypass in-app browser barriers using Qrytube deep links.",
+      "readTime": "9 min read",
+      "category": "YouTube SEO 2026",
+      "date": "2026-07-24",
+      "image": "/youtube_usa_earnings_seo.jpg"
+    },
     {
       "id": "grow-whatsapp-channels-2026",
       "title": "2026 Masterclass: Ultimate Guide to Growing WhatsApp Channels and Maximizing Subscribers with Deep Links",
