@@ -1,6 +1,15 @@
 export const articleSummaries = {
   "ar": [
     {
+      "id": "touchless-menu-restaurant-guide-2026",
+      "title": "الدليل الشامل لعام 2026: كيف تحدث تقنية الـ Touchless Menu ثورة في عالم المطاعم وكيف تضاعف مبيعاتك (سيو 2026)",
+      "excerpt": "استكشف كيف ترفع تقنية الـ Touchless Menu (قائمة الطعام بدون تلامس) من أرباح المطاعم والمقاهي لعام 2026. دليلك الكامل لمواصفات المنيو الرقمي، تحسين تجربة الزبون، وإنشاء أكواد QR وروابط عميقة مجاناً عبر Qrytube.",
+      "readTime": "قراءة 10 دقائق",
+      "category": "حلول المطاعم الرقمية 2026",
+      "date": "2026-07-26",
+      "image": "/touchless_menu_seo.jpg"
+    },
+    {
       "id": "when-start-earning-money-youtube-2026",
       "title": "متى تبدأ الكسب من اليوتيوب؟ دليلك الشامل لعام 2026 وشروط الربح (When Do You Start Earning Money on YouTube)",
       "excerpt": "متى تبدأ الكسب من اليوتيوب؟ اكتشف الشروط والتحديثات الجديدة لبرنامج شركاء يوتيوب (YPP) لعام 2026، وكيفية تسريع تحقيق 1000 مشترك و4000 ساعة مشاهدة باستغلال الروابط العميقة عبر Qrytube.",
@@ -461,6 +470,15 @@ export const articleSummaries = {
     }
   ],
   "en": [
+    {
+      "id": "touchless-menu-restaurant-guide-2026",
+      "title": "The Ultimate 2026 Guide to Touchless Menu Systems: Boosting Restaurant Revenue & Customer Experience",
+      "excerpt": "Learn how implementing a touchless menu transforms dining in 2026. Discover how QR code ordering, instant contactless menus, and Qrytube deep links eliminate customer friction and increase table turnover.",
+      "readTime": "10 min read",
+      "category": "Digital Restaurant Solutions 2026",
+      "date": "2026-07-26",
+      "image": "/touchless_menu_seo.jpg"
+    },
     {
       "id": "when-start-earning-money-youtube-2026",
       "title": "When Do You Start Earning Money on YouTube? (2026 Milestones & Monetization Guide)",
