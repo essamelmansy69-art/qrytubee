@@ -1,6 +1,15 @@
 export const articleSummaries = {
   "ar": [
     {
+      "id": "earn-money-whatsapp-2026",
+      "title": "دليلك الشامل لعام 2026: طرق ربح مال من واتساب واستراتيجيات تحويل المحادثات إلى دخل مستدام (سيو 2026)",
+      "excerpt": "تعلم أسرار ربح مال من واتساب لعام 2026. استكشف كيفية الاستفادة من قنوات واتساب، التسويق بالعمولة، المتجر المباشر، وربط الروابط العميقة عبر Qrytube لمضاعفة المبيعات والمتابعين.",
+      "readTime": "قراءة 9 دقائق",
+      "category": "تجارة رقمية 2026",
+      "date": "2026-07-25",
+      "image": "/whatsapp_monetization_seo.jpg"
+    },
+    {
       "id": "youtube-earnings-usa-2026",
       "title": "دليلك الشامل لعام 2026: أسرار ربح اليوتيوب في امريكا وكيفية رفع الـ RPM ومضاعفة الأرباح (سيو 2026)",
       "excerpt": "استكشف أسرار ربح اليوتيوب في امريكا لعام 2026. تعلم كيف ترفع معدل CPM و RPM، وتستهدف الجمهور الأمريكي المحقق لأعلى عائد، وتستغل الروابط العميقة عبر Qrytube لزيادة المشتركين والمشاهدات.",
@@ -451,6 +460,15 @@ export const articleSummaries = {
       "category": "YouTube SEO 2026",
       "date": "2026-07-24",
       "image": "/youtube_usa_earnings_seo.jpg"
+    },
+    {
+      "id": "earn-money-whatsapp-2026",
+      "title": "2026 Masterclass: How to Earn Money from WhatsApp (Affiliate & Deep Links Guide)",
+      "excerpt": "Comprehensive 2026 guide on how to earn money from WhatsApp. Master channels monetization, affiliate sales, and bypass in-app browser barriers with Qrytube deep links.",
+      "readTime": "9 min read",
+      "category": "Digital Commerce 2026",
+      "date": "2026-07-25",
+      "image": "/whatsapp_monetization_seo.jpg"
     },
     {
       "id": "grow-whatsapp-channels-2026",
