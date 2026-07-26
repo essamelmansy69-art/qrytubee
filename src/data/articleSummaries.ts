@@ -1,6 +1,15 @@
 export const articleSummaries = {
   "ar": [
     {
+      "id": "when-start-earning-money-youtube-2026",
+      "title": "متى تبدأ الكسب من اليوتيوب؟ دليلك الشامل لعام 2026 وشروط الربح (When Do You Start Earning Money on YouTube)",
+      "excerpt": "متى تبدأ الكسب من اليوتيوب؟ اكتشف الشروط والتحديثات الجديدة لبرنامج شركاء يوتيوب (YPP) لعام 2026، وكيفية تسريع تحقيق 1000 مشترك و4000 ساعة مشاهدة باستغلال الروابط العميقة عبر Qrytube.",
+      "readTime": "قراءة 7 دقائق",
+      "category": "سيو يوتيوب 2026",
+      "date": "2026-07-25",
+      "image": "/when_start_earning_youtube_seo.jpg"
+    },
+    {
       "id": "earn-money-whatsapp-2026",
       "title": "دليلك الشامل لعام 2026: طرق ربح مال من واتساب واستراتيجيات تحويل المحادثات إلى دخل مستدام (سيو 2026)",
       "excerpt": "تعلم أسرار ربح مال من واتساب لعام 2026. استكشف كيفية الاستفادة من قنوات واتساب، التسويق بالعمولة، المتجر المباشر، وربط الروابط العميقة عبر Qrytube لمضاعفة المبيعات والمتابعين.",
@@ -452,6 +461,15 @@ export const articleSummaries = {
     }
   ],
   "en": [
+    {
+      "id": "when-start-earning-money-youtube-2026",
+      "title": "When Do You Start Earning Money on YouTube? (2026 Milestones & Monetization Guide)",
+      "excerpt": "Wondering when do you start earning money on YouTube? Discover updated 2026 YPP thresholds, subscriber milestones, short-form criteria, and how Qrytube deep links accelerate your monetization.",
+      "readTime": "7 min read",
+      "category": "YouTube SEO 2026",
+      "date": "2026-07-25",
+      "image": "/when_start_earning_youtube_seo.jpg"
+    },
     {
       "id": "youtube-earnings-usa-2026",
       "title": "2026 Masterclass: How to Maximize YouTube Earnings in the USA (RPM Boost & Deep Links Guide)",
