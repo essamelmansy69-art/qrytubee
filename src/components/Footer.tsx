@@ -51,14 +51,15 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegal, onOpenArticles }) =
 
           <div className="flex items-center gap-2">
             {onOpenArticles && (
-              <button
+              <a
+                href="/articles"
                 onClick={handleArticlesClick}
                 className="inline-flex items-center gap-2 text-xs font-bold text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 px-4 py-2 rounded-xl transition-all shadow-md active:scale-95"
                 id="footer_articles_btn"
               >
                 <BookOpen className="w-4 h-4 text-slate-950" />
                 <span>مقالات ودلائل الصيانة</span>
-              </button>
+              </a>
             )}
 
             <a
@@ -77,14 +78,15 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegal, onOpenArticles }) =
         {/* Legal Pages Bar */}
         <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-semibold text-slate-300 border-b border-slate-800/80 pb-5">
           {onOpenArticles && (
-            <button
+            <a
+              href="/articles"
               onClick={handleArticlesClick}
               className="hover:text-amber-400 transition-all flex items-center gap-1 py-1 text-amber-300 font-bold"
               id="footer_seo_articles_link"
             >
               <BookOpen className="w-3.5 h-3.5 text-amber-400" />
               <span>مقالات التشطيب والديكور (SEO)</span>
-            </button>
+            </a>
           )}
 
           <a

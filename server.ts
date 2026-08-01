@@ -18,24 +18,34 @@ async function startServer() {
 
   // Proxy endpoint to safely fetch handymen CSV from Google Sheets without CORS issues
   app.get("/api/handymen-csv", async (req, res) => {
-    try {
-      const csvUrl = "https://docs.google.com/spreadsheets/d/1if4NKgBB7eCr1nKe0gtMNMWWKadg-drm6R7areIclSY/export?format=csv";
-      const response = await fetch(csvUrl, {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    const urls = [
+      "https://docs.google.com/spreadsheets/d/1if4NKgBB7eCr1nKe0gtMNMWWKadg-drm6R7areIclSY/export?format=csv",
+      "https://docs.google.com/spreadsheets/d/1if4NKgBB7eCr1nKe0gtMNMWWKadg-drm6R7areIclSY/gviz/tq?tqx=out:csv"
+    ];
+
+    for (const url of urls) {
+      try {
+        const response = await fetch(url, {
+          redirect: 'follow',
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "text/csv,text/plain,*/*"
+          }
+        });
+        if (response.ok) {
+          const csvData = await response.text();
+          if (csvData && !csvData.trim().startsWith('<!DOCTYPE') && !csvData.trim().startsWith('<html')) {
+            res.setHeader("Content-Type", "text/csv; charset=utf-8");
+            res.setHeader("Cache-Control", "public, max-age=60");
+            return res.send(csvData);
+          }
         }
-      });
-      if (!response.ok) {
-        throw new Error(`Google Sheet response code ${response.status}`);
+      } catch (e: any) {
+        console.warn(`Attempt to fetch ${url} failed:`, e?.message || e);
       }
-      const csvData = await response.text();
-      res.setHeader("Content-Type", "text/csv; charset=utf-8");
-      res.setHeader("Cache-Control", "public, max-age=60"); // Cache for 1 min
-      res.send(csvData);
-    } catch (err: any) {
-      console.error("Failed to fetch handymen CSV from Google Sheet:", err?.message || err);
-      res.status(500).json({ error: "Failed to fetch handymen data from Google Sheet", details: err?.message });
     }
+
+    res.status(502).json({ error: "Could not retrieve CSV from Google Sheets" });
   });
 
   // FRONTEND HANDLING / STATIC SERVING

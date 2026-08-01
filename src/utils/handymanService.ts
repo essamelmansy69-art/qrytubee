@@ -140,26 +140,52 @@ export async function fetchHandymenData(): Promise<{ handymen: Handyman[]; total
   try {
     let csvText = '';
     
-    // Try 1: Direct fetch from Google Sheets CSV URL
+    // Try 1: Call server proxy endpoint first (avoids CORS issues in browser)
     try {
-      const resp = await fetch(GOOGLE_SHEET_CSV_URL, { cache: 'no-store' });
-      if (resp.ok) {
-        csvText = await resp.text();
-      }
-    } catch (directErr) {
-      console.warn("Direct CSV fetch failed, trying proxy endpoint...", directErr);
-    }
-
-    // Try 2: Proxy endpoint /api/handymen-csv if direct fetch returned empty or failed
-    if (!csvText || csvText.trim().length === 0) {
       const proxyResp = await fetch('/api/handymen-csv', { cache: 'no-store' });
       if (proxyResp.ok) {
-        csvText = await proxyResp.text();
+        const text = await proxyResp.text();
+        if (text && !text.trim().startsWith('<!DOCTYPE') && !text.trim().startsWith('<html')) {
+          csvText = text;
+        }
+      }
+    } catch (proxyErr) {
+      console.warn("Proxy CSV fetch failed, falling back to direct URLs...", proxyErr);
+    }
+
+    // Try 2: Direct fetch from Google Sheets CSV export URL if proxy is unavailable
+    if (!csvText || csvText.trim().length === 0) {
+      try {
+        const resp = await fetch(GOOGLE_SHEET_CSV_URL, { cache: 'no-store' });
+        if (resp.ok) {
+          const text = await resp.text();
+          if (text && !text.trim().startsWith('<!DOCTYPE') && !text.trim().startsWith('<html')) {
+            csvText = text;
+          }
+        }
+      } catch (directErr) {
+        console.warn("Direct CSV fetch failed:", directErr);
+      }
+    }
+
+    // Try 3: Alternative gviz CSV endpoint
+    if (!csvText || csvText.trim().length === 0) {
+      try {
+        const gvizUrl = "https://docs.google.com/spreadsheets/d/1if4NKgBB7eCr1nKe0gtMNMWWKadg-drm6R7areIclSY/gviz/tq?tqx=out:csv";
+        const gvizResp = await fetch(gvizUrl, { cache: 'no-store' });
+        if (gvizResp.ok) {
+          const text = await gvizResp.text();
+          if (text && !text.trim().startsWith('<!DOCTYPE') && !text.trim().startsWith('<html')) {
+            csvText = text;
+          }
+        }
+      } catch (gvizErr) {
+        console.warn("Gviz CSV fetch failed:", gvizErr);
       }
     }
 
     if (!csvText || csvText.trim().length === 0) {
-      console.warn("Using fallback handymen dataset due to empty response from CSV.");
+      console.warn("Using fallback handymen dataset.");
       return { handymen: FALLBACK_HANDYMEN, totalFetched: FALLBACK_HANDYMEN.length, error: null };
     }
 

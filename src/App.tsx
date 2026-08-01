@@ -28,18 +28,100 @@ export default function App() {
   const [articlesModalOpen, setArticlesModalOpen] = useState<boolean>(false);
   const [selectedArticleSlug, setSelectedArticleSlug] = useState<string | null>(null);
 
+  // Router & Sub-link Navigation System
+  const navigateTo = (path: string, pushState = true) => {
+    if (pushState && window.location.pathname + window.location.search !== path) {
+      window.history.pushState({}, '', path);
+    }
+    syncStateFromUrl(path);
+  };
+
+  const syncStateFromUrl = (targetPath?: string) => {
+    const rawPath = targetPath !== undefined ? targetPath : window.location.pathname;
+    const path = rawPath.toLowerCase();
+    const searchParams = new URLSearchParams(window.location.search);
+    const articleParam = searchParams.get('article');
+    const professionParam = searchParams.get('profession');
+
+    // 1. Article Detail (/article/slug or /articles/slug or ?article=slug)
+    if (path.startsWith('/article/') || (path.startsWith('/articles/') && path.split('/').filter(Boolean).length > 1)) {
+      const parts = path.split('/').filter(Boolean);
+      const slug = parts[1] || null;
+      setSelectedArticleSlug(slug);
+      setArticlesModalOpen(true);
+      setLegalModalOpen(false);
+    } else if (articleParam) {
+      setSelectedArticleSlug(articleParam);
+      setArticlesModalOpen(true);
+      setLegalModalOpen(false);
+    }
+    // 2. Articles Directory (/articles or /blog)
+    else if (path === '/articles' || path === '/articles/' || path === '/blog') {
+      setSelectedArticleSlug(null);
+      setArticlesModalOpen(true);
+      setLegalModalOpen(false);
+    }
+    // 3. Privacy Policy (/privacy)
+    else if (path === '/privacy' || path === '/privacy/') {
+      setLegalTab('privacy');
+      setLegalModalOpen(true);
+      setArticlesModalOpen(false);
+    }
+    // 4. Terms & Conditions (/terms)
+    else if (path === '/terms' || path === '/terms/') {
+      setLegalTab('terms');
+      setLegalModalOpen(true);
+      setArticlesModalOpen(false);
+    }
+    // 5. Contact / About Us (/contact or /about)
+    else if (path === '/contact' || path === '/contact/' || path === '/about') {
+      setLegalTab('contact');
+      setLegalModalOpen(true);
+      setArticlesModalOpen(false);
+    }
+    // 6. Profession Filter (/profession/name or ?profession=name)
+    else if (path.startsWith('/profession/')) {
+      const parts = path.split('/').filter(Boolean);
+      const prof = decodeURIComponent(parts[1] || 'الكل');
+      setSelectedProfession(prof);
+      setLegalModalOpen(false);
+      setArticlesModalOpen(false);
+    } else if (professionParam) {
+      setSelectedProfession(professionParam);
+      setLegalModalOpen(false);
+      setArticlesModalOpen(false);
+    }
+    // 7. Homepage (/)
+    else {
+      setLegalModalOpen(false);
+      setArticlesModalOpen(false);
+      setSelectedArticleSlug(null);
+    }
+  };
+
   const openLegal = (tab: LegalTab) => {
-    setLegalTab(tab);
-    setLegalModalOpen(true);
+    const target = tab === 'contact' ? '/contact' : `/${tab}`;
+    navigateTo(target);
   };
 
   const openArticles = (slug?: string) => {
-    if (slug) {
-      setSelectedArticleSlug(slug);
-    } else {
-      setSelectedArticleSlug(null);
-    }
-    setArticlesModalOpen(true);
+    const target = slug ? `/article/${slug}` : '/articles';
+    navigateTo(target);
+  };
+
+  const handleCloseModals = () => {
+    const target = selectedProfession !== 'الكل'
+      ? `/?profession=${encodeURIComponent(selectedProfession)}`
+      : '/';
+    navigateTo(target);
+  };
+
+  const handleSelectProfession = (prof: string) => {
+    setSelectedProfession(prof);
+    const target = prof !== 'الكل'
+      ? `/?profession=${encodeURIComponent(prof)}`
+      : '/';
+    navigateTo(target);
   };
 
   const loadData = async (showFullLoading: boolean = true) => {
@@ -61,28 +143,21 @@ export default function App() {
   };
 
   useEffect(() => {
-    // Check if initial URL path or params request legal or articles directly (for SEO crawlers & direct links)
-    const path = window.location.pathname.toLowerCase();
-    const searchParams = new URLSearchParams(window.location.search);
-    const articleParam = searchParams.get('article');
+    syncStateFromUrl();
 
-    if (articleParam) {
-      openArticles(articleParam);
-    } else if (path.includes('articles') || path.includes('blog')) {
-      openArticles();
-    } else if (path.includes('privacy')) {
-      openLegal('privacy');
-    } else if (path.includes('terms')) {
-      openLegal('terms');
-    } else if (path.includes('contact') || path.includes('about')) {
-      openLegal('contact');
-    } else if (path.includes('sitemap')) {
-      openLegal('sitemap');
-    }
+    const onPopState = () => {
+      syncStateFromUrl();
+    };
+
+    window.addEventListener('popstate', onPopState);
 
     // If cache exists, load in background without blocking screen
     const hasCache = !!initialCache && initialCache.length > 0;
     loadData(!hasCache);
+
+    return () => {
+      window.removeEventListener('popstate', onPopState);
+    };
   }, []);
 
   // Collect all unique professions available in the approved handymen list
@@ -134,7 +209,7 @@ export default function App() {
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           selectedProfession={selectedProfession}
-          setSelectedProfession={setSelectedProfession}
+          setSelectedProfession={handleSelectProfession}
           availableProfessions={availableProfessions}
           totalResults={filteredHandymen.length}
         />
@@ -268,17 +343,19 @@ export default function App() {
       {/* Legal & Compliance Modal */}
       <LegalPages
         isOpen={legalModalOpen}
-        onClose={() => setLegalModalOpen(false)}
+        onClose={handleCloseModals}
         initialTab={legalTab}
+        onTabChange={(tab) => openLegal(tab)}
       />
 
       {/* SEO Articles Modal */}
       <ArticlesModal
         isOpen={articlesModalOpen}
-        onClose={() => setArticlesModalOpen(false)}
+        onClose={handleCloseModals}
         selectedSlug={selectedArticleSlug}
+        onSelectArticle={(slug) => openArticles(slug || undefined)}
         onSelectProfessionFilter={(prof) => {
-          setSelectedProfession(prof);
+          handleSelectProfession(prof);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
       />

@@ -6,6 +6,7 @@ interface ArticlesModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedSlug?: string | null;
+  onSelectArticle?: (slug: string | null) => void;
   onSelectProfessionFilter?: (profession: string) => void;
 }
 
@@ -13,6 +14,7 @@ export const ArticlesModal: React.FC<ArticlesModalProps> = ({
   isOpen,
   onClose,
   selectedSlug,
+  onSelectArticle,
   onSelectProfessionFilter,
 }) => {
   const [activeArticle, setActiveArticle] = useState<Article | null>(null);
@@ -27,6 +29,8 @@ export const ArticlesModal: React.FC<ArticlesModalProps> = ({
       if (found) {
         setActiveArticle(found);
       }
+    } else {
+      setActiveArticle(null);
     }
   }, [selectedSlug, isOpen]);
 
@@ -43,8 +47,15 @@ export const ArticlesModal: React.FC<ArticlesModalProps> = ({
     return matchesCategory && matchesSearch;
   });
 
+  const handleSelectArticle = (article: Article | null) => {
+    setActiveArticle(article);
+    if (onSelectArticle) {
+      onSelectArticle(article ? article.slug : null);
+    }
+  };
+
   const handleShare = (article: Article) => {
-    const url = `https://dkora.online/?article=${article.slug}`;
+    const url = `https://dkora.online/article/${article.slug}`;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(url);
       setCopied(true);
@@ -98,7 +109,7 @@ export const ArticlesModal: React.FC<ArticlesModalProps> = ({
               {/* Breadcrumb & Navigation */}
               <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-4">
                 <button
-                  onClick={() => setActiveArticle(null)}
+                  onClick={() => handleSelectArticle(null)}
                   className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-amber-600 bg-slate-100 px-3 py-1.5 rounded-xl transition-all"
                   id="back_to_articles_list_btn"
                 >
@@ -282,7 +293,7 @@ export const ArticlesModal: React.FC<ArticlesModalProps> = ({
                 {filteredArticles.map(article => (
                   <article
                     key={article.id}
-                    onClick={() => setActiveArticle(article)}
+                    onClick={() => handleSelectArticle(article)}
                     className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between"
                   >
                     <div className="space-y-3">

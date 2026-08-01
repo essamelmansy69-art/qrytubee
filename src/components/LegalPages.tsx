@@ -7,9 +7,10 @@ interface LegalPagesProps {
   isOpen: boolean;
   onClose: () => void;
   initialTab?: LegalTab;
+  onTabChange?: (tab: LegalTab) => void;
 }
 
-export const LegalPages: React.FC<LegalPagesProps> = ({ isOpen, onClose, initialTab = 'privacy' }) => {
+export const LegalPages: React.FC<LegalPagesProps> = ({ isOpen, onClose, initialTab = 'privacy', onTabChange }) => {
   const [activeTab, setActiveTab] = useState<LegalTab>(initialTab);
   const [contactSubmitted, setContactSubmitted] = useState(false);
   const [contactForm, setContactForm] = useState({ name: '', email: '', subject: 'اقتراح', message: '' });
@@ -21,6 +22,13 @@ export const LegalPages: React.FC<LegalPagesProps> = ({ isOpen, onClose, initial
   }, [isOpen, initialTab]);
 
   if (!isOpen) return null;
+
+  const handleTabSelect = (tab: LegalTab) => {
+    setActiveTab(tab);
+    if (onTabChange) {
+      onTabChange(tab);
+    }
+  };
 
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +73,7 @@ export const LegalPages: React.FC<LegalPagesProps> = ({ isOpen, onClose, initial
         {/* Tab Navigation */}
         <div className="bg-slate-100 border-b border-slate-200 px-4 py-2 flex items-center gap-2 overflow-x-auto shrink-0 scrollbar-none">
           <button
-            onClick={() => setActiveTab('privacy')}
+            onClick={() => handleTabSelect('privacy')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 ${
               activeTab === 'privacy'
                 ? 'bg-amber-500 text-slate-950 shadow-sm'
@@ -78,7 +86,7 @@ export const LegalPages: React.FC<LegalPagesProps> = ({ isOpen, onClose, initial
           </button>
 
           <button
-            onClick={() => setActiveTab('terms')}
+            onClick={() => handleTabSelect('terms')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 ${
               activeTab === 'terms'
                 ? 'bg-amber-500 text-slate-950 shadow-sm'
@@ -91,7 +99,7 @@ export const LegalPages: React.FC<LegalPagesProps> = ({ isOpen, onClose, initial
           </button>
 
           <button
-            onClick={() => setActiveTab('contact')}
+            onClick={() => handleTabSelect('contact')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shrink-0 ${
               activeTab === 'contact'
                 ? 'bg-amber-500 text-slate-950 shadow-sm'
