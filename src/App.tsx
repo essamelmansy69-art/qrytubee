@@ -5,29 +5,41 @@ import { HandymanCard } from './components/HandymanCard';
 import { SponsorBanner } from './components/SponsorBanner';
 import { Footer } from './components/Footer';
 import { Handyman } from './types';
-import { fetchHandymenData, GOOGLE_FORM_URL } from './utils/handymanService';
-import { AlertTriangle, RefreshCw, PlusCircle, Wrench, ShieldCheck, CheckCircle2, PhoneCall } from 'lucide-react';
+import { fetchHandymenData, getCachedHandymen, GOOGLE_FORM_URL } from './utils/handymanService';
+import { AlertTriangle, RefreshCw, PlusCircle, Wrench, ShieldCheck, CheckCircle2, PhoneCall, Loader2 } from 'lucide-react';
 
 export default function App() {
-  const [handymen, setHandymen] = useState<Handyman[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  // 1. Instant rendering: load from localStorage cache immediately if available
+  const initialCache = getCachedHandymen();
+  const [handymen, setHandymen] = useState<Handyman[]>(initialCache || []);
+  const [isLoading, setIsLoading] = useState<boolean>(!initialCache);
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedProfession, setSelectedProfession] = useState<string>('الكل');
 
-  const loadData = async () => {
-    setIsLoading(true);
+  const loadData = async (showFullLoading: boolean = true) => {
+    if (showFullLoading && handymen.length === 0) {
+      setIsLoading(true);
+    } else {
+      setIsRefreshing(true);
+    }
     setError(null);
     const result = await fetchHandymenData();
-    setHandymen(result.handymen);
+    if (result.handymen && result.handymen.length > 0) {
+      setHandymen(result.handymen);
+    }
     if (result.error) {
       setError(result.error);
     }
     setIsLoading(false);
+    setIsRefreshing(false);
   };
 
   useEffect(() => {
-    loadData();
+    // If cache exists, load in background without blocking screen
+    const hasCache = !!initialCache && initialCache.length > 0;
+    loadData(!hasCache);
   }, []);
 
   // Collect all unique professions available in the approved handymen list
@@ -101,25 +113,42 @@ export default function App() {
           </div>
         )}
 
-        {/* Loading Skeleton */}
+        {/* Background refreshing indicator pill if cache is present */}
+        {isRefreshing && !isLoading && (
+          <div className="mb-4 bg-slate-900 text-amber-300 border border-amber-500/30 rounded-2xl p-3 flex items-center justify-between text-xs font-semibold shadow-sm animate-pulse">
+            <div className="flex items-center gap-2">
+              <Loader2 className="w-4 h-4 text-amber-400 animate-spin" />
+              <span>جاري تحديث دليل الصنايعية بالخلفية من جوجل شيت...</span>
+            </div>
+            <span className="text-[11px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded-lg">بيانات مؤقتة نشطة</span>
+          </div>
+        )}
+
+        {/* Loading Skeleton & Arabic Spinner */}
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 my-6">
-            {[1, 2, 3, 4].map((n) => (
-              <div key={n} className="bg-white rounded-2xl p-5 border border-slate-200 animate-pulse space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-slate-200 rounded-xl" />
-                  <div className="space-y-2 flex-1">
-                    <div className="h-4 bg-slate-200 rounded w-2/3" />
-                    <div className="h-3 bg-slate-200 rounded w-1/3" />
+          <div className="space-y-4 my-6">
+            <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-center justify-center gap-3 text-amber-800 font-bold text-sm text-center">
+              <Loader2 className="w-5 h-5 text-amber-600 animate-spin shrink-0" />
+              <span>جاري تحميل دليل الصنايعية المعتمدين من شيت جوجل...</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[1, 2, 3, 4].map((n) => (
+                <div key={n} className="bg-white rounded-2xl p-5 border border-slate-200 animate-pulse space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-slate-200 rounded-xl" />
+                    <div className="space-y-2 flex-1">
+                      <div className="h-4 bg-slate-200 rounded w-2/3" />
+                      <div className="h-3 bg-slate-200 rounded w-1/3" />
+                    </div>
+                  </div>
+                  <div className="h-10 bg-slate-100 rounded-xl" />
+                  <div className="grid grid-cols-2 gap-2 pt-2">
+                    <div className="h-10 bg-slate-200 rounded-xl" />
+                    <div className="h-10 bg-slate-200 rounded-xl" />
                   </div>
                 </div>
-                <div className="h-10 bg-slate-100 rounded-xl" />
-                <div className="grid grid-cols-2 gap-2 pt-2">
-                  <div className="h-10 bg-slate-200 rounded-xl" />
-                  <div className="h-10 bg-slate-200 rounded-xl" />
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         ) : filteredHandymen.length > 0 ? (
           /* Handyman Cards Grid */

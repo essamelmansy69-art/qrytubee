@@ -1,6 +1,31 @@
 import Papa from 'papaparse';
 import { Handyman } from '../types';
 
+export const HANDYMEN_CACHE_KEY = 'egypt_handymen_cache_v2';
+
+export function getCachedHandymen(): Handyman[] | null {
+  try {
+    const cached = localStorage.getItem(HANDYMEN_CACHE_KEY);
+    if (!cached) return null;
+    const parsed = JSON.parse(cached);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed;
+    }
+  } catch (err) {
+    console.warn("Failed to read handymen cache from localStorage:", err);
+  }
+  return null;
+}
+
+export function setCachedHandymen(handymen: Handyman[]): void {
+  try {
+    if (handymen && handymen.length > 0) {
+      localStorage.setItem(HANDYMEN_CACHE_KEY, JSON.stringify(handymen));
+    }
+  } catch (err) {
+    console.warn("Failed to save handymen cache to localStorage:", err);
+  }
+}
 export const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1if4NKgBB7eCr1nKe0gtMNMWWKadg-drm6R7areIclSY/export?format=csv";
 export const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSe1DdO1fgTi2C3atmqrszWCRn5vvb8R3NvF9-yhvv1qzR0Cqw/viewform?usp=publish-editor";
 
@@ -199,6 +224,9 @@ export async function fetchHandymenData(): Promise<{ handymen: Handyman[]; total
 
     // If Google Sheet parsed 0 approved handymen (e.g. initial setup), include sample handymen merged with approved
     const finalHandymen = approvedOnly.length > 0 ? approvedOnly : FALLBACK_HANDYMEN;
+
+    // Cache the result in localStorage for instant future page loads
+    setCachedHandymen(finalHandymen);
 
     return {
       handymen: finalHandymen,

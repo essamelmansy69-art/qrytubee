@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wrench, Heart, ShieldCheck, PlusCircle } from 'lucide-react';
+import { Wrench, Heart, Globe, PlusCircle, ExternalLink } from 'lucide-react';
 import { GOOGLE_FORM_URL } from '../utils/handymanService';
 
 export const Footer: React.FC = () => {
@@ -13,7 +13,19 @@ export const Footer: React.FC = () => {
             </div>
             <div className="text-right">
               <span className="text-lg font-bold text-white block leading-tight font-serif">دليل صنايعية مصر</span>
-              <span className="text-xs text-amber-400/90 font-medium">برعاية محل حدايد وبويات مصر</span>
+              <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
+                برعاية{' '}
+                <a
+                  href="https://dkora.online"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-amber-400 hover:text-amber-300 font-bold underline decoration-amber-400/50 hover:decoration-amber-300 transition-all inline-flex items-center gap-0.5"
+                  id="footer_sponsor_link"
+                >
+                  <span>موقع ديكورا</span>
+                  <ExternalLink className="w-3 h-3 text-amber-400" />
+                </a>
+              </span>
             </div>
           </div>
 

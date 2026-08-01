@@ -45,6 +45,8 @@ export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman }) => {
                 <img
                   src={handyman.imageUrl}
                   alt={handyman.name}
+                  loading="lazy"
+                  decoding="async"
                   className="w-12 h-12 rounded-xl object-cover border border-slate-200 shadow-xs"
                   onError={(e) => {
                     // Fallback to initial avatar if image fails loading
