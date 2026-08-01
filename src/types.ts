@@ -1,30 +1,31 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-export type QRStyle = 'dots' | 'squares' | 'rounded';
-
-export interface QRConfig {
-  text: string;
-  originalUrl: string;
-  deepLinkType: 'vnd' | 'ios' | 'android' | 'standard';
-  foregroundColor: string;
-  backgroundColor: string;
-  eyeColor: string;
-  logoUrl: string | null;
-  logoScale: number; // 0.1 to 0.3
-  logoMargin: boolean;
-  qrStyle: QRStyle;
-  errorCorrectionLevel: 'L' | 'M' | 'Q' | 'H';
+export interface Handyman {
+  id: string;
+  timestamp: string;
+  name: string;
+  profession: string;
+  phone: string;
+  whatsapp: string;
+  areas: string;
+  imageUrl?: string;
+  status: string;
+  isApproved: boolean;
 }
 
-export type PlatformType = 'youtube' | 'facebook' | 'instagram' | 'tiktok' | 'telegram' | 'other';
+export type ProfessionCategory = 
+  | 'الكل'
+  | 'سباك'
+  | 'نقاش'
+  | 'كهربائي'
+  | 'نجار'
+  | 'فني تكييف'
+  | 'حداد'
+  | 'فني دش'
+  | 'ألوميتال'
+  | 'فني صيانة أجهزة';
 
-export interface youtubeUrlInfo {
-  isValid: boolean;
-  platform: PlatformType;
-  type: 'video' | 'channel' | 'shorts' | 'playlist' | 'profile' | 'post' | 'unknown';
+export interface ProfessionFilter {
   id: string;
-  cleanUrl: string;
+  label: string;
+  iconName: string;
+  color: string;
 }
