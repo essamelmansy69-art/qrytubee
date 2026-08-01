@@ -18,6 +18,12 @@ async function startServer() {
 
   // Proxy endpoint to safely fetch handymen CSV from Google Sheets without CORS issues
   app.get("/api/handymen-csv", async (req, res) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+
     const urls = [
       "https://docs.google.com/spreadsheets/d/1if4NKgBB7eCr1nKe0gtMNMWWKadg-drm6R7areIclSY/export?format=csv",
       "https://docs.google.com/spreadsheets/d/1if4NKgBB7eCr1nKe0gtMNMWWKadg-drm6R7areIclSY/gviz/tq?tqx=out:csv"
@@ -36,7 +42,6 @@ async function startServer() {
           const csvData = await response.text();
           if (csvData && !csvData.trim().startsWith('<!DOCTYPE') && !csvData.trim().startsWith('<html')) {
             res.setHeader("Content-Type", "text/csv; charset=utf-8");
-            res.setHeader("Cache-Control", "public, max-age=60");
             return res.send(csvData);
           }
         }

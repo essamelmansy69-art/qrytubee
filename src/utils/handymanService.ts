@@ -87,47 +87,27 @@ export async function fetchHandymenData(): Promise<{ handymen: Handyman[]; total
   try {
     let csvText = '';
     
-    // Try 1: Call server proxy endpoint first (avoids CORS issues in browser)
-    try {
-      const proxyResp = await fetch('/api/handymen-csv', { cache: 'no-store' });
-      if (proxyResp.ok) {
-        const text = await proxyResp.text();
-        if (text && !text.trim().startsWith('<!DOCTYPE') && !text.trim().startsWith('<html')) {
-          csvText = text;
-        }
-      }
-    } catch (proxyErr) {
-      console.warn("Proxy CSV fetch failed, falling back to direct URLs...", proxyErr);
-    }
+    // Multi-tier fetch attempts (server proxy, direct export, gviz, public CORS proxies)
+    const fetchEndpoints = [
+      '/api/handymen-csv',
+      GOOGLE_SHEET_CSV_URL,
+      "https://docs.google.com/spreadsheets/d/1if4NKgBB7eCr1nKe0gtMNMWWKadg-drm6R7areIclSY/gviz/tq?tqx=out:csv",
+      `https://api.allorigins.win/raw?url=${encodeURIComponent(GOOGLE_SHEET_CSV_URL)}`,
+      `https://corsproxy.io/?url=${encodeURIComponent(GOOGLE_SHEET_CSV_URL)}`
+    ];
 
-    // Try 2: Direct fetch from Google Sheets CSV export URL if proxy is unavailable
-    if (!csvText || csvText.trim().length === 0) {
+    for (const endpoint of fetchEndpoints) {
+      if (csvText && csvText.trim().length > 0) break;
       try {
-        const resp = await fetch(GOOGLE_SHEET_CSV_URL, { cache: 'no-store' });
+        const resp = await fetch(endpoint, { cache: 'no-store' });
         if (resp.ok) {
           const text = await resp.text();
           if (text && !text.trim().startsWith('<!DOCTYPE') && !text.trim().startsWith('<html')) {
             csvText = text;
           }
         }
-      } catch (directErr) {
-        console.warn("Direct CSV fetch failed:", directErr);
-      }
-    }
-
-    // Try 3: Alternative gviz CSV endpoint
-    if (!csvText || csvText.trim().length === 0) {
-      try {
-        const gvizUrl = "https://docs.google.com/spreadsheets/d/1if4NKgBB7eCr1nKe0gtMNMWWKadg-drm6R7areIclSY/gviz/tq?tqx=out:csv";
-        const gvizResp = await fetch(gvizUrl, { cache: 'no-store' });
-        if (gvizResp.ok) {
-          const text = await gvizResp.text();
-          if (text && !text.trim().startsWith('<!DOCTYPE') && !text.trim().startsWith('<html')) {
-            csvText = text;
-          }
-        }
-      } catch (gvizErr) {
-        console.warn("Gviz CSV fetch failed:", gvizErr);
+      } catch (e) {
+        console.warn(`Fetch attempt from ${endpoint} failed:`, e);
       }
     }
 
@@ -136,60 +116,101 @@ export async function fetchHandymenData(): Promise<{ handymen: Handyman[]; total
       return { handymen: [], totalFetched: 0, error: "تعذر استجلاب البيانات من شيت جوجل، يرجى التحقق من الاتصال وإعادة المحاولة." };
     }
 
-    // Parse CSV using PapaParse
-    const parsed = Papa.parse<string[]>(csvText.trim(), {
+    const allHandymen: Handyman[] = [];
+
+    // Helper to safely extract column value by header keyword patterns
+    const getValueByPatterns = (rowObj: Record<string, any>, patterns: string[]): string => {
+      const keys = Object.keys(rowObj);
+      for (const p of patterns) {
+        const foundKey = keys.find(k => k.trim().toLowerCase().includes(p.toLowerCase()));
+        if (foundKey && rowObj[foundKey] !== undefined && rowObj[foundKey] !== null) {
+          return String(rowObj[foundKey]).trim();
+        }
+      }
+      return '';
+    };
+
+    // 1. Primary Attempt: Header-based parsing with PapaParse
+    const headerParsed = Papa.parse<Record<string, any>>(csvText.trim(), {
+      header: true,
       skipEmptyLines: true,
-      header: false,
     });
 
-    const rows = parsed.data;
-    if (!rows || rows.length === 0) {
-      return { handymen: [], totalFetched: 0, error: null };
-    }
+    if (headerParsed.data && headerParsed.data.length > 0) {
+      headerParsed.data.forEach((row, i) => {
+        const name = getValueByPatterns(row, ['اسم', 'name']);
+        if (!name) return;
 
-    const allHandymen: Handyman[] = [];
-    
-    // Detect header row or start from line 0
-    let startIdx = 0;
-    const firstRow = rows[0];
-    const isHeader = firstRow.some(cell => 
-      cell.includes('طابع') || cell.includes('الاسم') || cell.includes('التخصص') || cell.includes('Status')
-    );
+        const timestamp = getValueByPatterns(row, ['طابع', 'وقت', 'تاريخ', 'time', 'date']);
+        const profession = getValueByPatterns(row, ['تخصص', 'مهن', 'حرف', 'صنعة', 'prof']) || 'صنايعي';
+        const phoneRaw = getValueByPatterns(row, ['هاتف', 'تليفون', 'موبايل', 'جوال', 'phone']);
+        const whatsappRaw = getValueByPatterns(row, ['واتس', 'whatsapp', 'wa']) || phoneRaw;
+        const areas = getValueByPatterns(row, ['مناطق', 'منطق', 'محافظ', 'عنوان', 'مكان', 'area']) || 'جميع المحافظات والمناطق';
+        const imageUrl = getValueByPatterns(row, ['صور', 'معرض', 'image', 'photo']);
+        const statusRaw = getValueByPatterns(row, ['status', 'حالة', 'موافق']);
 
-    if (isHeader) {
-      startIdx = 1;
-    }
+        const isApproved = isStatusApproved(statusRaw);
 
-    for (let i = startIdx; i < rows.length; i++) {
-      const row = rows[i];
-      if (!row || row.length < 2) continue;
-
-      // Schema columns: [Timestamp, Name, Profession, Phone, WhatsApp, Areas, Image_URL, Status]
-      const timestamp = (row[0] || '').trim();
-      const name = (row[1] || '').trim();
-      const profession = (row[2] || '').trim();
-      const phoneRaw = (row[3] || '').trim();
-      const whatsappRaw = (row[4] || '').trim() || phoneRaw;
-      const areas = (row[5] || '').trim();
-      const imageUrl = (row[6] || '').trim();
-      const statusRaw = (row[7] || '').trim();
-
-      if (!name) continue;
-
-      const isApproved = isStatusApproved(statusRaw);
-
-      allHandymen.push({
-        id: `hm-${i}-${Date.now()}`,
-        timestamp,
-        name,
-        profession: profession || 'صنايعي',
-        phone: normalizePhone(phoneRaw),
-        whatsapp: normalizePhone(whatsappRaw),
-        areas: areas || 'جميع المحافظات والمناطق',
-        imageUrl: imageUrl.startsWith('http') ? imageUrl : undefined,
-        status: statusRaw,
-        isApproved
+        allHandymen.push({
+          id: `hm-${i}-${Date.now()}`,
+          timestamp,
+          name,
+          profession,
+          phone: normalizePhone(phoneRaw),
+          whatsapp: normalizePhone(whatsappRaw),
+          areas,
+          imageUrl: imageUrl.startsWith('http') ? imageUrl : undefined,
+          status: statusRaw,
+          isApproved
+        });
       });
+    }
+
+    // 2. Secondary Fallback Attempt: Position-indexed array parsing (if header-based returned 0 items)
+    if (allHandymen.length === 0) {
+      const parsedArray = Papa.parse<string[]>(csvText.trim(), {
+        header: false,
+        skipEmptyLines: true,
+      });
+
+      const rows = parsedArray.data;
+      if (rows && rows.length > 0) {
+        let startIdx = 0;
+        const firstRow = rows[0];
+        const isHeaderRow = firstRow.some(cell => 
+          cell.includes('طابع') || cell.includes('الاسم') || cell.includes('التخصص') || cell.includes('Status')
+        );
+        if (isHeaderRow) startIdx = 1;
+
+        for (let i = startIdx; i < rows.length; i++) {
+          const row = rows[i];
+          if (!row || row.length < 2) continue;
+
+          const timestamp = (row[0] || '').trim();
+          const name = (row[1] || '').trim();
+          const profession = (row[2] || '').trim();
+          const phoneRaw = (row[3] || '').trim();
+          const whatsappRaw = (row[4] || '').trim() || phoneRaw;
+          const areas = (row[5] || '').trim();
+          const imageUrl = (row[6] || '').trim();
+          const statusRaw = (row[7] || '').trim();
+
+          if (!name) continue;
+
+          allHandymen.push({
+            id: `hm-pos-${i}-${Date.now()}`,
+            timestamp,
+            name,
+            profession: profession || 'صنايعي',
+            phone: normalizePhone(phoneRaw),
+            whatsapp: normalizePhone(whatsappRaw),
+            areas: areas || 'جميع المحافظات والمناطق',
+            imageUrl: imageUrl.startsWith('http') ? imageUrl : undefined,
+            status: statusRaw,
+            isApproved: isStatusApproved(statusRaw)
+          });
+        }
+      }
     }
 
     // Filter CRITICAL: display ONLY approved handymen from Google Sheets
