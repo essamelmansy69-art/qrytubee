@@ -132,9 +132,7 @@ export default function App() {
     }
     setError(null);
     const result = await fetchHandymenData();
-    if (result.handymen && result.handymen.length > 0) {
-      setHandymen(result.handymen);
-    }
+    setHandymen(result.handymen || []);
     if (result.error) {
       setError(result.error);
     }

@@ -1,7 +1,7 @@
 import Papa from 'papaparse';
 import { Handyman } from '../types';
 
-export const HANDYMEN_CACHE_KEY = 'egypt_handymen_cache_v2';
+export const HANDYMEN_CACHE_KEY = 'egypt_handymen_cache_v3';
 
 export function getCachedHandymen(): Handyman[] | null {
   try {
@@ -9,7 +9,11 @@ export function getCachedHandymen(): Handyman[] | null {
     if (!cached) return null;
     const parsed = JSON.parse(cached);
     if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed;
+      // Clean out any legacy fallback items with 'fb-' ID
+      const realOnly = parsed.filter((item: Handyman) => item && item.id && !item.id.startsWith('fb-'));
+      if (realOnly.length > 0) {
+        return realOnly;
+      }
     }
   } catch (err) {
     console.warn("Failed to read handymen cache from localStorage:", err);
@@ -20,7 +24,15 @@ export function getCachedHandymen(): Handyman[] | null {
 export function setCachedHandymen(handymen: Handyman[]): void {
   try {
     if (handymen && handymen.length > 0) {
-      localStorage.setItem(HANDYMEN_CACHE_KEY, JSON.stringify(handymen));
+      // Never store any fallback items in cache
+      const cleanHandymen = handymen.filter((item) => item && item.id && !item.id.startsWith('fb-'));
+      if (cleanHandymen.length > 0) {
+        localStorage.setItem(HANDYMEN_CACHE_KEY, JSON.stringify(cleanHandymen));
+      } else {
+        localStorage.removeItem(HANDYMEN_CACHE_KEY);
+      }
+    } else {
+      localStorage.removeItem(HANDYMEN_CACHE_KEY);
     }
   } catch (err) {
     console.warn("Failed to save handymen cache to localStorage:", err);
@@ -29,69 +41,8 @@ export function setCachedHandymen(handymen: Handyman[]): void {
 export const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1if4NKgBB7eCr1nKe0gtMNMWWKadg-drm6R7areIclSY/export?format=csv";
 export const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSe1DdO1fgTi2C3atmqrszWCRn5vvb8R3NvF9-yhvv1qzR0Cqw/viewform?usp=publish-editor";
 
-// Default curated fallback handymen list in Egyptian Arabic (in case network fails or sheet is empty)
-export const FALLBACK_HANDYMEN: Handyman[] = [
-  {
-    id: 'fb-1',
-    timestamp: new Date().toISOString(),
-    name: 'عصام النمر',
-    profession: 'نقاش',
-    phone: '01558074563',
-    whatsapp: '01558074563',
-    areas: 'المطرية والشرابية وعين شمس',
-    imageUrl: '',
-    status: 'Approved',
-    isApproved: true
-  },
-  {
-    id: 'fb-2',
-    timestamp: new Date().toISOString(),
-    name: 'الأسطة أحمد الكهربائي',
-    profession: 'كهربائي',
-    phone: '01012345678',
-    whatsapp: '01012345678',
-    areas: 'المطرية، حلمية الزيتون، والنعام',
-    imageUrl: '',
-    status: 'نشط',
-    isApproved: true
-  },
-  {
-    id: 'fb-3',
-    timestamp: new Date().toISOString(),
-    name: 'معلم محمد السباك',
-    profession: 'سباك',
-    phone: '01123456789',
-    whatsapp: '01123456789',
-    areas: 'المطرية، الشجرة، والترعة البولاقية',
-    imageUrl: '',
-    status: 'Approved',
-    isApproved: true
-  },
-  {
-    id: 'fb-4',
-    timestamp: new Date().toISOString(),
-    name: 'الأسطة حسن النجار',
-    profession: 'نجار',
-    phone: '01234567890',
-    whatsapp: '01234567890',
-    areas: 'المطرية والزيتون',
-    imageUrl: '',
-    status: 'نشط',
-    isApproved: true
-  },
-  {
-    id: 'fb-5',
-    timestamp: new Date().toISOString(),
-    name: 'المهندس كريم فني التكييف',
-    profession: 'فني تكييف',
-    phone: '01511223344',
-    whatsapp: '01511223344',
-    areas: 'المطرية، عين شمس، ومصر الجديدة',
-    imageUrl: '',
-    status: 'Approved',
-    isApproved: true
-  }
-];
+// Empty fallback array (no fake handymen, display ONLY Google Sheet data)
+export const FALLBACK_HANDYMEN: Handyman[] = [];
 
 export function normalizePhone(phone: string): string {
   if (!phone) return '';
@@ -123,17 +74,13 @@ export function formatWhatsAppLink(phone: string): string {
 }
 
 export function isStatusApproved(statusRaw: string): boolean {
-  if (!statusRaw) return false;
+  // If status column is empty, approve by default unless explicitly marked rejected or pending
+  if (!statusRaw || statusRaw.trim() === '') return true;
   const s = statusRaw.toString().trim().toLowerCase();
-  return (
-    s === 'approved' ||
-    s === 'نشط' ||
-    s === 'موافق' ||
-    s === 'موافق عليه' ||
-    s === 'تمت الموافقة' ||
-    s === 'active' ||
-    s === 'ok'
-  );
+  if (s === 'rejected' || s === 'مرفوض' || s === 'غير موافق' || s === 'pending' || s === 'قيد المراجعة') {
+    return false;
+  }
+  return true;
 }
 
 export async function fetchHandymenData(): Promise<{ handymen: Handyman[]; totalFetched: number; error: string | null }> {
@@ -185,8 +132,8 @@ export async function fetchHandymenData(): Promise<{ handymen: Handyman[]; total
     }
 
     if (!csvText || csvText.trim().length === 0) {
-      console.warn("Using fallback handymen dataset.");
-      return { handymen: FALLBACK_HANDYMEN, totalFetched: FALLBACK_HANDYMEN.length, error: null };
+      console.warn("No CSV data retrieved from Google Sheets.");
+      return { handymen: [], totalFetched: 0, error: "تعذر استجلاب البيانات من شيت جوجل، يرجى التحقق من الاتصال وإعادة المحاولة." };
     }
 
     // Parse CSV using PapaParse
@@ -197,7 +144,7 @@ export async function fetchHandymenData(): Promise<{ handymen: Handyman[]; total
 
     const rows = parsed.data;
     if (!rows || rows.length === 0) {
-      return { handymen: FALLBACK_HANDYMEN, totalFetched: FALLBACK_HANDYMEN.length, error: null };
+      return { handymen: [], totalFetched: 0, error: null };
     }
 
     const allHandymen: Handyman[] = [];
@@ -245,17 +192,14 @@ export async function fetchHandymenData(): Promise<{ handymen: Handyman[]; total
       });
     }
 
-    // Filter CRITICAL: display ONLY approved handymen
+    // Filter CRITICAL: display ONLY approved handymen from Google Sheets
     const approvedOnly = allHandymen.filter(h => h.isApproved);
 
-    // If Google Sheet parsed 0 approved handymen (e.g. initial setup), include sample handymen merged with approved
-    const finalHandymen = approvedOnly.length > 0 ? approvedOnly : FALLBACK_HANDYMEN;
-
-    // Cache the result in localStorage for instant future page loads
-    setCachedHandymen(finalHandymen);
+    // Cache the result in localStorage
+    setCachedHandymen(approvedOnly);
 
     return {
-      handymen: finalHandymen,
+      handymen: approvedOnly,
       totalFetched: allHandymen.length,
       error: null
     };
@@ -263,9 +207,9 @@ export async function fetchHandymenData(): Promise<{ handymen: Handyman[]; total
   } catch (err: any) {
     console.error("Error in fetchHandymenData:", err);
     return {
-      handymen: FALLBACK_HANDYMEN,
-      totalFetched: FALLBACK_HANDYMEN.length,
-      error: "تعذر تحديث البيانات مباشرة من شيت جوجل، يتم عرض البيانات الاحتياطية المعتمدة."
+      handymen: [],
+      totalFetched: 0,
+      error: "تعذر تحديث البيانات مباشرة من شيت جوجل، يرجى إعادة المحاولة."
     };
   }
 }
