@@ -1,8 +1,28 @@
 import React from 'react';
-import { Wrench, Heart, Globe, PlusCircle, ExternalLink } from 'lucide-react';
+import { Wrench, Heart, PlusCircle, ExternalLink, ShieldCheck, FileText, Mail, Map, BookOpen } from 'lucide-react';
 import { GOOGLE_FORM_URL } from '../utils/handymanService';
+import { LegalTab } from './LegalPages';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  onOpenLegal?: (tab: LegalTab) => void;
+  onOpenArticles?: () => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onOpenLegal, onOpenArticles }) => {
+  const handleLegalClick = (e: React.MouseEvent, tab: LegalTab) => {
+    if (onOpenLegal) {
+      e.preventDefault();
+      onOpenLegal(tab);
+    }
+  };
+
+  const handleArticlesClick = (e: React.MouseEvent) => {
+    if (onOpenArticles) {
+      e.preventDefault();
+      onOpenArticles();
+    }
+  };
+
   return (
     <footer className="bg-slate-950 text-slate-400 py-10 border-t border-slate-800 mt-12 text-center text-sm">
       <div className="max-w-4xl mx-auto px-4 space-y-6">
@@ -29,15 +49,72 @@ export const Footer: React.FC = () => {
             </div>
           </div>
 
+          <div className="flex items-center gap-2">
+            {onOpenArticles && (
+              <button
+                onClick={handleArticlesClick}
+                className="inline-flex items-center gap-2 text-xs font-bold text-slate-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 px-4 py-2 rounded-xl transition-all shadow-md active:scale-95"
+                id="footer_articles_btn"
+              >
+                <BookOpen className="w-4 h-4 text-slate-950" />
+                <span>مقالات ودلائل الصيانة</span>
+              </button>
+            )}
+
+            <a
+              href={GOOGLE_FORM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-xs font-bold text-amber-400 hover:text-amber-300 bg-slate-900 border border-amber-500/30 px-4 py-2 rounded-xl transition-all"
+              id="footer_register_link"
+            >
+              <PlusCircle className="w-4 h-4" />
+              <span>تسجيل صنايعي جديد</span>
+            </a>
+          </div>
+        </div>
+
+        {/* Legal Pages Bar */}
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-semibold text-slate-300 border-b border-slate-800/80 pb-5">
+          {onOpenArticles && (
+            <button
+              onClick={handleArticlesClick}
+              className="hover:text-amber-400 transition-all flex items-center gap-1 py-1 text-amber-300 font-bold"
+              id="footer_seo_articles_link"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+              <span>مقالات التشطيب والديكور (SEO)</span>
+            </button>
+          )}
+
           <a
-            href={GOOGLE_FORM_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-xs font-bold text-amber-400 hover:text-amber-300 bg-slate-900 border border-amber-500/30 px-4 py-2 rounded-xl transition-all"
-            id="footer_register_link"
+            href="/privacy"
+            onClick={(e) => handleLegalClick(e, 'privacy')}
+            className="hover:text-amber-400 transition-all flex items-center gap-1 py-1"
+            id="footer_privacy_link"
           >
-            <PlusCircle className="w-4 h-4" />
-            <span>تسجيل صنايعي جديد في الدليل</span>
+            <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+            <span>سياسة الخصوصية</span>
+          </a>
+
+          <a
+            href="/terms"
+            onClick={(e) => handleLegalClick(e, 'terms')}
+            className="hover:text-amber-400 transition-all flex items-center gap-1 py-1"
+            id="footer_terms_link"
+          >
+            <FileText className="w-3.5 h-3.5 text-amber-400" />
+            <span>الشروط والأحكام</span>
+          </a>
+
+          <a
+            href="/contact"
+            onClick={(e) => handleLegalClick(e, 'contact')}
+            className="hover:text-amber-400 transition-all flex items-center gap-1 py-1"
+            id="footer_contact_link"
+          >
+            <Mail className="w-3.5 h-3.5 text-amber-400" />
+            <span>عن الدليل واتصل بنا</span>
           </a>
         </div>
 
@@ -54,3 +131,4 @@ export const Footer: React.FC = () => {
     </footer>
   );
 };
+

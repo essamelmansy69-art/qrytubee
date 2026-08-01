@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wrench, PhoneCall, ShieldCheck, PlusCircle, RefreshCw, Globe, ExternalLink } from 'lucide-react';
+import { Wrench, ShieldCheck, PlusCircle, RefreshCw, Globe, ExternalLink } from 'lucide-react';
 import { GOOGLE_FORM_URL } from '../utils/handymanService';
 
 interface HeaderProps {
@@ -53,19 +53,19 @@ export const Header: React.FC<HeaderProps> = ({ onRefresh, isLoading, approvedCo
                   دليل صنايعية مصر
                 </h1>
                 <p className="text-xs sm:text-sm text-slate-300 font-medium">
-                  تواصل مباشر وفوري مع أفضل السباكين، الكهربائية، والنقاشين في مصر
+                  برعاية موقع ديكورا — تواصل مباشر وفوري مع أفضل الفنيين والصنايعية الثقات مجاناً وبدون عمولات
                 </p>
               </div>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto shrink-0">
             <a
               href={GOOGLE_FORM_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-sm shadow-md shadow-amber-500/20 transition-all active:scale-95 text-center"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs sm:text-sm shadow-md shadow-amber-500/20 transition-all active:scale-95 text-center"
               id="header_register_btn"
             >
               <PlusCircle className="w-4 h-4 stroke-[2.5]" />
@@ -76,7 +76,7 @@ export const Header: React.FC<HeaderProps> = ({ onRefresh, isLoading, approvedCo
               onClick={onRefresh}
               disabled={isLoading}
               title="تحديث البيانات من جوجل شيت"
-              className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all active:scale-95 flex items-center justify-center"
+              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all active:scale-95 flex items-center justify-center"
               id="header_refresh_btn"
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-amber-400' : ''}`} />
@@ -87,3 +87,4 @@ export const Header: React.FC<HeaderProps> = ({ onRefresh, isLoading, approvedCo
     </header>
   );
 };
+

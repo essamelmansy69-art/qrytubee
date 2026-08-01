@@ -3,16 +3,74 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>دليل صنايعية مصر - برعاية موقع ديكورا | تواصل مباشر مع أفضل الفنيين</title>
-    <meta name="description" content="دليل صنايعية مصر - برعاية موقع ديكورا (dkora.online) للتواصل المباشر والسريع مع أفضل السباكين، الكهربائية، النقاشين، النجارين، وفنيي التكييف في جميع المحافظات." />
+    <title>دليل صنايعية مصر | خدمات صيانة وديكور برعاية موقع ديكورا</title>
+    <meta name="description" content="أكبر دليل رقمي يجمع أشطر صنايعية مصر في مكان واحد برعاية موقع ديكورا. تواصل مباشرة مع أفضل النقاشين، السباكين، والكهربائية الثقات مجاناً وبدون عمولات." />
+    <meta name="keywords" content="صنايعية مصر, دليل الصنايعية, سباك مصر, كهربائي منازل, نقاش مصر, فني تكييف, نجار مصر, تشطيبات وديكور, موقع ديكورا, dkora.online, صيانة منازل" />
+    <meta name="author" content="موقع ديكورا - dkora.online" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large" />
+    <meta name="theme-color" content="#0f172a" />
+    
+    <!-- Canonical Link -->
+    <link rel="canonical" href="https://dkora.online/" />
     
     <!-- Favicon Configuration -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛠️</text></svg>" />
     
-    <!-- Open Graph -->
+    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="دليل صنايعية مصر - محل حدايد وبويات" />
-    <meta property="og:description" content="تواصل مباشر مع أشطر الصنايعية والفنيين المعتمدين في القاهرة والمحافظات." />
+    <meta property="og:site_name" content="دليل صنايعية مصر" />
+    <meta property="og:title" content="دليل صنايعية مصر | خدمات صيانة وديكور برعاية موقع ديكورا" />
+    <meta property="og:description" content="أكبر دليل رقمي يجمع أشطر صنايعية مصر في مكان واحد برعاية موقع ديكورا. تواصل مباشرة مع أفضل النقاشين، السباكين، والكهربائية الثقات مجاناً وبدون عمولات." />
+    <meta property="og:url" content="https://dkora.online/" />
+    <meta property="og:locale" content="ar_EG" />
+
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="دليل صنايعية مصر | خدمات صيانة وديكور برعاية موقع ديكورا" />
+    <meta name="twitter:description" content="أكبر دليل رقمي يجمع أشطر صنايعية مصر في مكان واحد برعاية موقع ديكورا. تواصل مباشرة مع أفضل النقاشين والسباكين مجاناً." />
+
+    <!-- Schema.org Structured Data (JSON-LD for Google Search 2026) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://dkora.online/#website",
+          "url": "https://dkora.online/",
+          "name": "دليل صنايعية مصر",
+          "description": "أكبر دليل رقمي يجمع أشطر صنايعية مصر في مكان واحد برعاية موقع ديكورا.",
+          "inLanguage": "ar-EG",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://dkora.online/?search={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://dkora.online/#organization",
+          "name": "موقع ديكورا Dkora Online",
+          "url": "https://dkora.online",
+          "logo": "https://dkora.online/favicon.svg",
+          "sameAs": [
+            "https://dkora.online"
+          ]
+        },
+        {
+          "@type": "Directory",
+          "name": "دليل صنايعية وفنيي مصر",
+          "url": "https://dkora.online",
+          "description": "دليل اعتمادات وتواصل مباشر مع أفضل السباكين، الكهربائية، النقاشين، وفنيي التكييف والتشطيب في جميع محافظات جمهورية مصر العربية.",
+          "provider": {
+            "@type": "Organization",
+            "name": "موقع ديكورا"
+          }
+        }
+      ]
+    }
+    </script>
 
     <!-- Arabic Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -34,6 +92,28 @@
         min-height: 100vh;
       }
     </style>
+    <!-- Lazy loaded Google Analytics -->
+    <script>
+      function loadGA() {
+        if (window.gaLoaded) return;
+        window.gaLoaded = true;
+        
+        var script = document.createElement('script');
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-QWM83Z109Z';
+        script.async = true;
+        document.head.appendChild(script);
+
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-QWM83Z109Z');
+      }
+
+      // Trigger GA load on user interaction
+      ['mouseover', 'keydown', 'touchmove', 'scroll'].forEach(function(event) {
+        window.addEventListener(event, loadGA, { passive: true, once: true });
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>

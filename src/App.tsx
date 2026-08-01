@@ -4,9 +4,11 @@ import { SearchBarAndFilters } from './components/SearchBarAndFilters';
 import { HandymanCard } from './components/HandymanCard';
 import { SponsorBanner } from './components/SponsorBanner';
 import { Footer } from './components/Footer';
+import { LegalPages, LegalTab } from './components/LegalPages';
+import { ArticlesModal } from './components/ArticlesModal';
 import { Handyman } from './types';
 import { fetchHandymenData, getCachedHandymen, GOOGLE_FORM_URL } from './utils/handymanService';
-import { AlertTriangle, RefreshCw, PlusCircle, Wrench, ShieldCheck, CheckCircle2, PhoneCall, Loader2 } from 'lucide-react';
+import { AlertTriangle, RefreshCw, PlusCircle, Wrench, ShieldCheck, CheckCircle2, PhoneCall, Loader2, BookOpen } from 'lucide-react';
 
 export default function App() {
   // 1. Instant rendering: load from localStorage cache immediately if available
@@ -17,6 +19,28 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedProfession, setSelectedProfession] = useState<string>('الكل');
+
+  // Legal Modal State & Path Routing
+  const [legalModalOpen, setLegalModalOpen] = useState<boolean>(false);
+  const [legalTab, setLegalTab] = useState<LegalTab>('privacy');
+
+  // Articles Modal State & Path Routing
+  const [articlesModalOpen, setArticlesModalOpen] = useState<boolean>(false);
+  const [selectedArticleSlug, setSelectedArticleSlug] = useState<string | null>(null);
+
+  const openLegal = (tab: LegalTab) => {
+    setLegalTab(tab);
+    setLegalModalOpen(true);
+  };
+
+  const openArticles = (slug?: string) => {
+    if (slug) {
+      setSelectedArticleSlug(slug);
+    } else {
+      setSelectedArticleSlug(null);
+    }
+    setArticlesModalOpen(true);
+  };
 
   const loadData = async (showFullLoading: boolean = true) => {
     if (showFullLoading && handymen.length === 0) {
@@ -37,6 +61,25 @@ export default function App() {
   };
 
   useEffect(() => {
+    // Check if initial URL path or params request legal or articles directly (for SEO crawlers & direct links)
+    const path = window.location.pathname.toLowerCase();
+    const searchParams = new URLSearchParams(window.location.search);
+    const articleParam = searchParams.get('article');
+
+    if (articleParam) {
+      openArticles(articleParam);
+    } else if (path.includes('articles') || path.includes('blog')) {
+      openArticles();
+    } else if (path.includes('privacy')) {
+      openLegal('privacy');
+    } else if (path.includes('terms')) {
+      openLegal('terms');
+    } else if (path.includes('contact') || path.includes('about')) {
+      openLegal('contact');
+    } else if (path.includes('sitemap')) {
+      openLegal('sitemap');
+    }
+
     // If cache exists, load in background without blocking screen
     const hasCache = !!initialCache && initialCache.length > 0;
     loadData(!hasCache);
@@ -96,6 +139,23 @@ export default function App() {
           totalResults={filteredHandymen.length}
         />
 
+        {/* Quick SEO Articles Bar */}
+        <div className="my-3 bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 text-white rounded-2xl p-3 px-4 border border-slate-800 flex flex-wrap items-center justify-between gap-2 shadow-sm">
+          <div className="flex items-center gap-2 text-xs font-medium">
+            <BookOpen className="w-4 h-4 text-amber-400 shrink-0" />
+            <span className="text-slate-200">
+              <strong className="text-amber-300">جديد مقالات ديكورا:</strong> إرشادات وتكلفة سباكة، كهرباء، ونقاشة المنازل ٢٠٢٦
+            </span>
+          </div>
+          <button
+            onClick={() => openArticles()}
+            className="text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/30 px-3 py-1.5 rounded-xl transition-all mr-auto sm:mr-0 shrink-0"
+            id="quick_articles_bar_btn"
+          >
+            تصفح المقالات والدلائل ←
+          </button>
+        </div>
+
         {/* Error Notice (if any) */}
         {error && (
           <div className="mb-4 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 text-amber-900 text-sm">
@@ -105,7 +165,7 @@ export default function App() {
               <p className="text-xs text-amber-800 mt-0.5">{error}</p>
             </div>
             <button
-              onClick={loadData}
+              onClick={() => loadData(true)}
               className="text-xs font-bold bg-amber-600 text-white px-3 py-1.5 rounded-xl hover:bg-amber-700 transition-all shrink-0"
             >
               إعادة المحاولة
@@ -197,13 +257,31 @@ export default function App() {
           </div>
         )}
 
-        {/* Sponsor Banner (محل حدايد وبويات المطرية) */}
+        {/* Sponsor Banner (موقع ديكورا) */}
         <SponsorBanner />
 
       </main>
 
-      {/* Footer */}
-      <Footer />
+      {/* Footer with Legal & Articles triggers */}
+      <Footer onOpenLegal={openLegal} onOpenArticles={() => openArticles()} />
+
+      {/* Legal & Compliance Modal */}
+      <LegalPages
+        isOpen={legalModalOpen}
+        onClose={() => setLegalModalOpen(false)}
+        initialTab={legalTab}
+      />
+
+      {/* SEO Articles Modal */}
+      <ArticlesModal
+        isOpen={articlesModalOpen}
+        onClose={() => setArticlesModalOpen(false)}
+        selectedSlug={selectedArticleSlug}
+        onSelectProfessionFilter={(prof) => {
+          setSelectedProfession(prof);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
 
       {/* Floating Sticky Mobile Bottom Action Bar */}
       <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 p-3 shadow-2xl">
@@ -221,3 +299,4 @@ export default function App() {
     </div>
   );
 }
+
