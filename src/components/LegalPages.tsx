@@ -55,7 +55,7 @@ export const LegalPages: React.FC<LegalPagesProps> = ({ isOpen, onClose, initial
                 المركز القانوني ومعلومات الدليل
               </h2>
               <p className="text-xs text-slate-300">
-                برعاية موقع ديكورا — Dkora Online (dkora.online)
+                برعاية موقع qrytube.com
               </p>
             </div>
           </div>
@@ -133,8 +133,8 @@ export const LegalPages: React.FC<LegalPagesProps> = ({ isOpen, onClose, initial
               <div className="space-y-4 text-slate-700 leading-relaxed">
                 <p>
                   أهلاً بكم في <strong>دليل صنايعية مصر</strong>، المبادرة الرقمية الخدمية التي تعمل برعاية موقع 
-                  <a href="https://dkora.online" target="_blank" rel="noopener noreferrer" className="text-amber-600 font-bold mx-1 hover:underline">
-                    ديكورا (dkora.online)
+                  <a href="https://qrytube.com" target="_blank" rel="noopener noreferrer" className="text-amber-600 font-bold mx-1 hover:underline">
+                    qrytube.com
                   </a>. نولي أهمية قصوى لحماية خصوصية زوارنا ومستخدمينا وصنايعية مصر الكرام، وتوضح هذه الوثيقة نوعية المعلومات التي نجمعها وكيفية معالجتها واستخدامها لحماية حقوق الجميع.
                 </p>
 
@@ -215,7 +215,7 @@ export const LegalPages: React.FC<LegalPagesProps> = ({ isOpen, onClose, initial
                   <h4 className="font-bold text-slate-900 text-base">١. طبيعة الخدمة وإخلاء المسؤولية القانونية</h4>
                   <p className="text-xs text-slate-600 leading-relaxed">
                     دليل صنايعية مصر هو دليل خدمي رقمي مجاني ووسيط يهدف لتسهيل الوصول المباشر بين طالب الخدمة (العميل) ومقدمها (الصنايعي/الفني) بدون أي عمولات أو رسوم وساطة. 
-                    <strong> إن موقع ديكورا (dkora.online) وإدارة الدليل لا يعتبران طرفاً في أية عقود أو اتفاقات مالية أو تنفيذية تتم بين العميل والفني.</strong> تقع مسؤولية الاتفاق على المعاينة، الأسعار، جودة المواد، ومواعيد التسليم مباشرة على عاتق طرفي التعامل.
+                    <strong> إن موقع qrytube.com وإدارة الدليل لا يعتبران طرفاً في أية عقود أو اتفاقات مالية أو تنفيذية تتم بين العميل والفني.</strong> تقع مسؤولية الاتفاق على المعاينة، الأسعار، جودة المواد، ومواعيد التسليم مباشرة على عاتق طرفي التعامل.
                   </p>
                 </div>
 
@@ -229,8 +229,8 @@ export const LegalPages: React.FC<LegalPagesProps> = ({ isOpen, onClose, initial
                 <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2">
                   <h4 className="font-bold text-slate-900 text-base">٣. حقوق الملكية الفكرية</h4>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    جميع محتويات هذا الموقع من تصميمات، شعارات، برمجيات، وتنسيقات هي ملك لـ 
-                    <strong>موقع ديكورا (dkora.online)</strong> ومحمية بموجب قوانين الملكية الفكرية. يُحظر نسخ أو إعادة نشر قاعدة البيانات لأغراض تجارية دون الحصول على إذن كتابي مسبق.
+                     جميع محتويات هذا الموقع من تصميمات، شعارات، برمجيات، وتنسيقات هي ملك لـ 
+                    <strong>موقع (qrytube.com)</strong> ومحمية بموجب قوانين الملكية الفكرية. يُحظر نسخ أو إعادة نشر قاعدة البيانات لأغراض تجارية دون الحصول على إذن كتابي مسبق.
                   </p>
                 </div>
 
@@ -266,8 +266,8 @@ export const LegalPages: React.FC<LegalPagesProps> = ({ isOpen, onClose, initial
                   </div>
                   <p className="text-xs text-slate-300 leading-relaxed">
                     <strong>دليل صنايعية مصر</strong> هو منصة رقمية خدمية أُطلقت برعاية رسمية ومباشرة من 
-                    <a href="https://dkora.online" target="_blank" rel="noopener noreferrer" className="text-amber-300 underline font-bold mx-1">
-                      موقع ديكورا (dkora.online)
+                    <a href="https://qrytube.com" target="_blank" rel="noopener noreferrer" className="text-amber-300 underline font-bold mx-1">
+                      qrytube.com
                     </a>، بهدف تمكين المواطنين في جميع المحافظات من الوصول الفوري لأشطر وأجود الفنيين والصنايعية المعتمدين (سباكة، كهرباء، نقاشة، نجارة، تكييف، ألوميتال) مجاناً وبلا وسناء أو عمولات.
                   </p>
                   <div className="pt-2 border-t border-slate-800 space-y-2 text-xs text-slate-400">
@@ -377,8 +377,8 @@ export const LegalPages: React.FC<LegalPagesProps> = ({ isOpen, onClose, initial
             <span>حقوق الطبع والنشر © 2026</span>
             <span className="font-bold text-slate-700">دليل صنايعية مصر</span>
             <span>برعاية</span>
-            <a href="https://dkora.online" target="_blank" rel="noopener noreferrer" className="font-bold text-amber-600 hover:underline inline-flex items-center gap-0.5">
-              <span>موقع ديكورا</span>
+            <a href="https://qrytube.com" target="_blank" rel="noopener noreferrer" className="font-bold text-amber-600 hover:underline inline-flex items-center gap-0.5">
+              <span>qrytube.com</span>
               <ExternalLink className="w-3 h-3" />
             </a>
           </div>

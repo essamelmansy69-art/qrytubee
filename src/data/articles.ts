@@ -35,7 +35,7 @@ export const SEO_ARTICLES: Article[] = [
     professionFilter: 'سباك',
     readTime: '٥ دقائق',
     date: '٣١ يوليو ٢٠٢٦',
-    author: 'فريق ديكورا (Dkora.online)',
+    author: 'فريق qrytube.com',
     image: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?auto=format&fit=crop&w=1200&q=80',
     tags: ['سباكة', 'تأسيس شقة', 'صنايعية مصر', 'ديكورا', 'صيانة حمامات'],
     content: {

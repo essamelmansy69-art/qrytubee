@@ -55,7 +55,7 @@ export const ArticlesModal: React.FC<ArticlesModalProps> = ({
   };
 
   const handleShare = (article: Article) => {
-    const url = `https://dkora.online/article/${article.slug}`;
+    const url = `https://qrytube.com/article/${article.slug}`;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(url);
       setCopied(true);
