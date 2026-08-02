@@ -1,7 +1,7 @@
 import Papa from 'papaparse';
 import { Handyman } from '../types';
 
-export const HANDYMEN_CACHE_KEY = 'egypt_handymen_cache_v6';
+export const HANDYMEN_CACHE_KEY = 'egypt_handymen_cache_v5';
 
 // Check if string contains corrupted/garbled double-encoded characters
 function isGarbledText(str: string): boolean {
@@ -173,25 +173,6 @@ function parseGvizStructure(json: any): Handyman[] {
     const imageUrl = getValueByPatterns(cellValues, ['صور', 'معرض']) || cellValues[6] || '';
     const statusRaw = getValueByPatterns(cellValues, ['status', 'حالة', 'موافق']) || cellValues[7] || '';
 
-    const ratingRaw = getValueByPatterns(cellValues, ['average_rating', 'rating', 'متوسط التقييم', 'التقييم', 'تقييم']);
-    const countRaw = getValueByPatterns(cellValues, ['rating_count', 'count', 'عدد التقييمات', 'عدد_التقييمات', 'تقييمات']);
-
-    let averageRating = 4.8;
-    if (ratingRaw && !isNaN(parseFloat(ratingRaw))) {
-      averageRating = Math.min(5, Math.max(1, parseFloat(ratingRaw)));
-    } else {
-      const seed = (name.length * 7 + i * 3) % 4;
-      averageRating = [4.9, 4.8, 4.7, 4.9][seed];
-    }
-
-    let ratingCount = 15;
-    if (countRaw && !isNaN(parseInt(countRaw, 10))) {
-      ratingCount = Math.max(1, parseInt(countRaw, 10));
-    } else {
-      const seedCount = (name.length * 11 + i * 5) % 20;
-      ratingCount = 12 + seedCount;
-    }
-
     const isApproved = isStatusApproved(statusRaw);
 
     handymen.push({
@@ -204,9 +185,7 @@ function parseGvizStructure(json: any): Handyman[] {
       areas: isGarbledText(areas) ? 'جميع المحافظات والمناطق' : areas,
       imageUrl: imageUrl.startsWith('http') ? imageUrl : undefined,
       status: statusRaw,
-      isApproved,
-      averageRating,
-      ratingCount
+      isApproved
     });
   });
 
@@ -297,25 +276,6 @@ export async function fetchHandymenData(): Promise<{ handymen: Handyman[]; total
             const imageUrl = getValueByPatterns(row, ['صور', 'معرض']);
             const statusRaw = getValueByPatterns(row, ['status', 'حالة', 'موافق']);
 
-            const ratingRaw = getValueByPatterns(row, ['average_rating', 'rating', 'متوسط التقييم', 'التقييم', 'تقييم']);
-            const countRaw = getValueByPatterns(row, ['rating_count', 'count', 'عدد التقييمات', 'عدد_التقييمات', 'تقييمات']);
-
-            let averageRating = 4.8;
-            if (ratingRaw && !isNaN(parseFloat(ratingRaw))) {
-              averageRating = Math.min(5, Math.max(1, parseFloat(ratingRaw)));
-            } else {
-              const seed = (name.length * 7 + i * 3) % 4;
-              averageRating = [4.9, 4.8, 4.7, 4.9][seed];
-            }
-
-            let ratingCount = 15;
-            if (countRaw && !isNaN(parseInt(countRaw, 10))) {
-              ratingCount = Math.max(1, parseInt(countRaw, 10));
-            } else {
-              const seedCount = (name.length * 11 + i * 5) % 20;
-              ratingCount = 12 + seedCount;
-            }
-
             allHandymen.push({
               id: `hm-csv-${i}-${Date.now()}`,
               timestamp,
@@ -326,9 +286,7 @@ export async function fetchHandymenData(): Promise<{ handymen: Handyman[]; total
               areas: isGarbledText(areas) ? 'جميع المحافظات والمناطق' : areas,
               imageUrl: imageUrl.startsWith('http') ? imageUrl : undefined,
               status: statusRaw,
-              isApproved: isStatusApproved(statusRaw),
-              averageRating,
-              ratingCount
+              isApproved: isStatusApproved(statusRaw)
             });
           });
         }

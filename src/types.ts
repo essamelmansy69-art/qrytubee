@@ -9,8 +9,6 @@ export interface Handyman {
   imageUrl?: string;
   status: string;
   isApproved: boolean;
-  averageRating?: number;
-  ratingCount?: number;
 }
 
 export type ProfessionCategory = 
