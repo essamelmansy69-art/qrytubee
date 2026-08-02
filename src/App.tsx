@@ -212,23 +212,6 @@ export default function App() {
           totalResults={filteredHandymen.length}
         />
 
-        {/* Quick SEO Articles Bar */}
-        <div className="my-3 bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 text-white rounded-2xl p-3 px-4 border border-slate-800 flex flex-wrap items-center justify-between gap-2 shadow-sm">
-          <div className="flex items-center gap-2 text-xs font-medium">
-            <BookOpen className="w-4 h-4 text-amber-400 shrink-0" />
-            <span className="text-slate-200">
-              <strong className="text-amber-300">جديد مقالات ديكورا:</strong> إرشادات وتكلفة سباكة، كهرباء، ونقاشة المنازل ٢٠٢٦
-            </span>
-          </div>
-          <button
-            onClick={() => openArticles()}
-            className="text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/30 px-3 py-1.5 rounded-xl transition-all mr-auto sm:mr-0 shrink-0"
-            id="quick_articles_bar_btn"
-          >
-            تصفح المقالات والدلائل ←
-          </button>
-        </div>
-
         {/* Error Notice (if any) */}
         {error && (
           <div className="mb-4 bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3 text-amber-900 text-sm">

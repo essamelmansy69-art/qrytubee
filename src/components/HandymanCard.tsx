@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Phone, MessageCircle, MapPin, CheckCircle2, Copy, Check, Share2, Wrench, User } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Phone, MessageCircle, MapPin, CheckCircle2, Copy, Check, Share2, Wrench, Facebook, Send, X } from 'lucide-react';
 import { Handyman } from '../types';
 import { formatWhatsAppLink } from '../utils/handymanService';
 
@@ -9,6 +9,23 @@ interface HandymanCardProps {
 
 export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman }) => {
   const [copied, setCopied] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
+  const shareMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (shareMenuRef.current && !shareMenuRef.current.contains(event.target as Node)) {
+        setShowShareMenu(false);
+      }
+    };
+    if (showShareMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showShareMenu]);
 
   const handleCopyPhone = () => {
     if (handyman.phone) {
@@ -16,6 +33,46 @@ export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman }) => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
+  };
+
+  const shareText = `صنايعي معتمد: ${handyman.name} (${handyman.profession})\nالمناطق المخدومة: ${handyman.areas || 'القاهرة والمناطق المجاورة'}\nرقم الهاتف: ${handyman.phone || handyman.whatsapp}\nعبر دليل صنايعية مصر: ${typeof window !== 'undefined' ? window.location.origin : ''}`;
+
+  const handleNativeShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${handyman.name} - ${handyman.profession}`,
+          text: shareText,
+          url: window.location.href,
+        });
+        setShowShareMenu(false);
+        return;
+      } catch (err) {
+        // Fall back to menu if user cancelled or native share failed
+      }
+    }
+    setShowShareMenu(!showShareMenu);
+  };
+
+  const shareToWhatsApp = () => {
+    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
+    window.open(waUrl, '_blank', 'noopener,noreferrer');
+    setShowShareMenu(false);
+  };
+
+  const shareToFacebook = () => {
+    const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodeURIComponent(shareText)}`;
+    window.open(fbUrl, '_blank', 'noopener,noreferrer');
+    setShowShareMenu(false);
+  };
+
+  const copyShareText = () => {
+    navigator.clipboard.writeText(shareText);
+    setShareCopied(true);
+    setTimeout(() => {
+      setShareCopied(false);
+      setShowShareMenu(false);
+    }, 1800);
   };
 
   const getProfessionBadgeColor = (prof: string) => {
@@ -32,7 +89,7 @@ export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman }) => {
 
   return (
     <div 
-      className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col justify-between group"
+      className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between group relative"
       id={`handyman_card_${handyman.id}`}
     >
       <div className="p-4 sm:p-5">
@@ -49,7 +106,6 @@ export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman }) => {
                   decoding="async"
                   className="w-12 h-12 rounded-xl object-cover border border-slate-200 shadow-xs"
                   onError={(e) => {
-                    // Fallback to initial avatar if image fails loading
                     (e.target as HTMLElement).style.display = 'none';
                     const parent = (e.target as HTMLElement).parentElement;
                     if (parent) {
@@ -86,18 +142,89 @@ export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman }) => {
             </div>
           </div>
 
-          <button
-            onClick={handleCopyPhone}
-            title="نسخ رقم الهاتف"
-            className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all active:scale-95"
-            id={`copy_btn_${handyman.id}`}
-          >
-            {copied ? (
-              <Check className="w-4 h-4 text-emerald-600 stroke-[3]" />
-            ) : (
-              <Copy className="w-4 h-4" />
+          {/* Quick Actions (Copy & Share) */}
+          <div className="flex items-center gap-1 relative" ref={shareMenuRef}>
+            <button
+              onClick={() => setShowShareMenu(!showShareMenu)}
+              title="مشاركة بيانات الصنايعي"
+              className="p-2 rounded-lg text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-all active:scale-95 flex items-center gap-1 text-xs font-bold"
+              id={`share_btn_${handyman.id}`}
+            >
+              <Share2 className="w-4 h-4 text-amber-600" />
+            </button>
+
+            <button
+              onClick={handleCopyPhone}
+              title="نسخ رقم الهاتف"
+              className="p-2 rounded-lg text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 transition-all active:scale-95"
+              id={`copy_btn_${handyman.id}`}
+            >
+              {copied ? (
+                <Check className="w-4 h-4 text-emerald-600 stroke-[3]" />
+              ) : (
+                <Copy className="w-4 h-4" />
+              )}
+            </button>
+
+            {/* Social Share Dropdown */}
+            {showShareMenu && (
+              <div className="absolute top-10 left-0 z-50 w-52 bg-white rounded-2xl shadow-xl border border-slate-200 p-2 animate-in fade-in zoom-in-95 duration-150">
+                <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-slate-100 mb-1">
+                  <span className="text-xs font-bold text-slate-800">مشاركة الصنايعي</span>
+                  <button 
+                    onClick={() => setShowShareMenu(false)}
+                    className="text-slate-400 hover:text-slate-600 p-0.5 rounded-md"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                <div className="space-y-1">
+                  <button
+                    onClick={shareToWhatsApp}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-emerald-700 hover:bg-emerald-50 transition-colors text-right"
+                    id={`share_wa_${handyman.id}`}
+                  >
+                    <MessageCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>مشاركة عبر واتساب</span>
+                  </button>
+
+                  <button
+                    onClick={shareToFacebook}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-blue-700 hover:bg-blue-50 transition-colors text-right"
+                    id={`share_fb_${handyman.id}`}
+                  >
+                    <Facebook className="w-4 h-4 text-blue-600 shrink-0" />
+                    <span>مشاركة عبر فيسبوك</span>
+                  </button>
+
+                  {typeof navigator !== 'undefined' && 'share' in navigator && (
+                    <button
+                      onClick={handleNativeShare}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition-colors text-right"
+                      id={`share_native_${handyman.id}`}
+                    >
+                      <Share2 className="w-4 h-4 text-slate-600 shrink-0" />
+                      <span>مشاركة التطبيق الأصلي</span>
+                    </button>
+                  )}
+
+                  <button
+                    onClick={copyShareText}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition-colors text-right"
+                    id={`share_copy_text_${handyman.id}`}
+                  >
+                    {shareCopied ? (
+                      <Check className="w-4 h-4 text-emerald-600 shrink-0 stroke-[3]" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-slate-600 shrink-0" />
+                    )}
+                    <span>{shareCopied ? 'تم نسخ البيانات!' : 'نسخ نص البيانات'}</span>
+                  </button>
+                </div>
+              </div>
             )}
-          </button>
+          </div>
         </div>
 
         {/* Coverage Areas */}
@@ -137,3 +264,4 @@ export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman }) => {
     </div>
   );
 };
+
