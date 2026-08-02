@@ -167,9 +167,9 @@ export default function App() {
     return Array.from(set);
   }, [handymen]);
 
-  // Filter handymen by search query and profession filter
+  // Filter and sort handymen by search query, profession filter, and rating (highest rated first)
   const filteredHandymen = useMemo(() => {
-    return handymen.filter((h) => {
+    const list = handymen.filter((h) => {
       // 1. Profession filter
       if (selectedProfession !== 'الكل') {
         if (!h.profession.toLowerCase().includes(selectedProfession.toLowerCase())) {
@@ -187,6 +187,18 @@ export default function App() {
       }
 
       return true;
+    });
+
+    // Sort by Average Rating (highest first), then Rating Count (highest first)
+    return list.sort((a, b) => {
+      const ratingA = a.averageRating ?? 4.8;
+      const ratingB = b.averageRating ?? 4.8;
+      if (ratingB !== ratingA) {
+        return ratingB - ratingA;
+      }
+      const countA = a.ratingCount ?? 15;
+      const countB = b.ratingCount ?? 15;
+      return countB - countA;
     });
   }, [handymen, selectedProfession, searchQuery]);
 

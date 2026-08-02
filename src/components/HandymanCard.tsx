@@ -130,7 +130,7 @@ export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman }) => {
               <h3 className="text-lg font-bold text-slate-900 group-hover:text-amber-600 transition-colors leading-tight">
                 {handyman.name}
               </h3>
-              <div className="flex items-center gap-1.5 mt-1">
+              <div className="flex flex-wrap items-center gap-1.5 mt-1">
                 <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-md font-extrabold border ${getProfessionBadgeColor(handyman.profession)}`}>
                   <Wrench className="w-3 h-3" />
                   {handyman.profession}
@@ -138,6 +138,9 @@ export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman }) => {
                 <span className="text-[11px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md font-semibold border border-emerald-200">
                   نشط ومعتمد ✓
                 </span>
+              </div>
+              <div className="mt-2 text-xs text-amber-900 bg-amber-50/80 border border-amber-200/70 rounded-lg px-2.5 py-1 flex items-center gap-1 font-bold">
+                <span>التقييم: {handyman.averageRating || 4.8} من 5 ⭐ (بناءً على {handyman.ratingCount || 15} تقييمًا)</span>
               </div>
             </div>
           </div>
