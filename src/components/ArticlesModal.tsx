@@ -151,7 +151,11 @@ export const ArticlesModal: React.FC<ArticlesModalProps> = ({
                   src={activeArticle.image}
                   alt={activeArticle.title}
                   loading="lazy"
+                  referrerPolicy="no-referrer"
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1200&q=80';
+                  }}
                 />
               </div>
 
@@ -302,7 +306,11 @@ export const ArticlesModal: React.FC<ArticlesModalProps> = ({
                           src={article.image}
                           alt={article.title}
                           loading="lazy"
+                          referrerPolicy="no-referrer"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1200&q=80';
+                          }}
                         />
                         <span className="absolute top-3 right-3 bg-slate-900/80 backdrop-blur-md text-amber-300 text-[11px] font-bold px-2.5 py-1 rounded-lg">
                           {article.category}
