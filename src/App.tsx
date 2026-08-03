@@ -283,7 +283,7 @@ export default function App() {
               <h3 className="text-xl font-bold text-slate-800">
                 لم نجد صنايعي يطابق بحثك حالياً
               </h3>
-              <p className="text-sm text-slate-500 max-w-md mx-auto">
+              <p className="text-sm text-slate-600 max-w-md mx-auto">
                 {searchQuery || selectedProfession !== 'الكل'
                   ? 'جرب البحث بكلمات أخرى أو اختر "الكل" لعرض جميع الصنايعية المعتمدين.'
                   : 'جاري تحديث الدليل باستمرار مع الصنايعية الجدد المعتمدين.'}

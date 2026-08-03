@@ -120,11 +120,11 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegal, onOpenArticles }) =
           </a>
         </div>
 
-        <p className="text-xs text-slate-400 max-w-xl mx-auto leading-relaxed">
+        <p className="text-xs text-slate-300 max-w-xl mx-auto leading-relaxed">
           جميع البيانات الواردة في الدليل يتم جلبها مباشرة وتحديثها فورياً من استمارة التسجيل الرسمية، ويتم اعتماد الصنايعية والفنيين النشطين لحماية جودة الخدمة.
         </p>
 
-        <div className="flex items-center justify-center gap-1.5 text-xs text-slate-400">
+        <div className="flex items-center justify-center gap-1.5 text-xs text-slate-300">
           <span>صُنِع بـ</span>
           <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" />
           <span>لخدمة أهالي وصنايعية جمهورية مصر العربية © {new Date().getFullYear()}</span>

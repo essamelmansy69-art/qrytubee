@@ -46,15 +46,16 @@ export const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="ابحث باسم الصنايعي، المهنة، المنطقة أو المحافظة (مثال: سباك القاهرة، نقاش الجيزة...)"
-          className="w-full pl-10 pr-11 py-3.5 bg-white border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-400 text-sm sm:text-base font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 shadow-sm transition-all"
+          className="w-full pl-10 pr-11 py-3.5 bg-white border border-slate-200 rounded-2xl text-slate-900 placeholder-slate-500 text-sm sm:text-base font-medium focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 shadow-sm transition-all"
           id="search_handyman_input"
         />
 
         {searchQuery && (
           <button
             onClick={() => setSearchQuery('')}
-            className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 hover:text-slate-600"
+            className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500 hover:text-slate-700"
             id="clear_search_btn"
+            aria-label="مسح البحث"
           >
             <X className="w-4 h-4 bg-slate-100 rounded-full p-0.5" />
           </button>
@@ -64,11 +65,11 @@ export const SearchBarAndFilters: React.FC<SearchBarAndFiltersProps> = ({
       {/* Profession Quick Filter Chips */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <label className="text-xs font-bold text-slate-600 flex items-center gap-1.5 uppercase tracking-wider">
+          <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5 uppercase tracking-wider">
             <Filter className="w-3.5 h-3.5 text-amber-600" />
             <span>اختر التخصص المطلوب:</span>
           </label>
-          <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200">
+          <span className="text-xs font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-full border border-slate-200">
             العدد: {totalResults} صنايعي
           </span>
         </div>
