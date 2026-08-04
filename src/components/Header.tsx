@@ -16,31 +16,6 @@ export const Header: React.FC<HeaderProps> = ({ onRefresh, isLoading, approvedCo
       <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-4xl mx-auto px-4 py-5 sm:py-6 relative z-10">
-        {/* Top Announcement Bar with Stylish Link to dkora.online */}
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-4 bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-transparent border border-amber-500/30 rounded-full px-3.5 py-1.5 text-xs text-amber-300">
-          <div className="flex items-center gap-1.5 font-medium">
-            <Globe className="w-4 h-4 text-amber-400 shrink-0" />
-            <span>
-              برعاية{' '}
-              <a
-                href="https://dkora.online"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 font-bold text-amber-300 hover:text-white underline underline-offset-4 decoration-amber-400/60 hover:decoration-white transition-all bg-amber-500/20 px-2 py-0.5 rounded-md border border-amber-400/30 ml-1"
-                id="header_sponsor_link"
-              >
-                <span>موقع ديكورا (dkora.online)</span>
-                <ExternalLink className="w-3 h-3 text-amber-400" />
-              </a>
-              — دليل التشطيبات والديكور الأول في مصر
-            </span>
-          </div>
-          <div className="flex items-center gap-1 text-slate-300 text-[11px] mr-auto sm:mr-0">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <span>صنايعية معتمدين {approvedCount > 0 ? `(${approvedCount})` : ''}</span>
-          </div>
-        </div>
-
         {/* Main Header Content */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
@@ -81,6 +56,31 @@ export const Header: React.FC<HeaderProps> = ({ onRefresh, isLoading, approvedCo
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-amber-400' : ''}`} />
             </button>
+          </div>
+        </div>
+
+        {/* Announcement Bar with Stylish Link to dkora.online */}
+        <div className="flex flex-wrap items-center justify-between gap-2 mt-4 bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-transparent border border-amber-500/30 rounded-full px-3.5 py-1.5 text-xs text-amber-300">
+          <div className="flex items-center gap-1.5 font-medium">
+            <Globe className="w-4 h-4 text-amber-400 shrink-0" />
+            <span>
+              برعاية{' '}
+              <a
+                href="https://dkora.online"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 font-bold text-amber-300 hover:text-white underline underline-offset-4 decoration-amber-400/60 hover:decoration-white transition-all bg-amber-500/20 px-2 py-0.5 rounded-md border border-amber-400/30 ml-1"
+                id="header_sponsor_link"
+              >
+                <span>موقع ديكورا (dkora.online)</span>
+                <ExternalLink className="w-3 h-3 text-amber-400" />
+              </a>
+              — دليل التشطيبات والديكور الأول في مصر
+            </span>
+          </div>
+          <div className="flex items-center gap-1 text-slate-300 text-[11px] mr-auto sm:mr-0">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span>صنايعية معتمدين {approvedCount > 0 ? `(${approvedCount})` : ''}</span>
           </div>
         </div>
       </div>
