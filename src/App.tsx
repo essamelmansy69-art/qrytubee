@@ -6,14 +6,16 @@ import { SponsorBanner } from './components/SponsorBanner';
 import { Footer } from './components/Footer';
 import { LegalPages, LegalTab } from './components/LegalPages';
 import { ArticlesModal } from './components/ArticlesModal';
-import { Handyman } from './types';
+import { Handyman, Review } from './types';
 import { fetchHandymenData, getCachedHandymen, GOOGLE_FORM_URL } from './utils/handymanService';
+import { fetchAllReviews } from './utils/reviewsService';
 import { AlertTriangle, RefreshCw, PlusCircle, Wrench, ShieldCheck, CheckCircle2, PhoneCall, Loader2, BookOpen } from 'lucide-react';
 
 export default function App() {
   // 1. Instant rendering: load from localStorage cache immediately if available
   const initialCache = getCachedHandymen();
   const [handymen, setHandymen] = useState<Handyman[]>(initialCache || []);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(!initialCache);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -131,8 +133,16 @@ export default function App() {
       setIsRefreshing(true);
     }
     setError(null);
-    const result = await fetchHandymenData();
+
+    // Fetch handymen and reviews in parallel
+    const [result, revs] = await Promise.all([
+      fetchHandymenData(),
+      fetchAllReviews()
+    ]);
+
     setHandymen(result.handymen || []);
+    setReviews(revs || []);
+
     if (result.error) {
       setError(result.error);
     }
@@ -147,7 +157,13 @@ export default function App() {
       syncStateFromUrl();
     };
 
+    const handleLocalReviewAdded = async () => {
+      const revs = await fetchAllReviews();
+      setReviews(revs);
+    };
+
     window.addEventListener('popstate', onPopState);
+    window.addEventListener('local-review-added', handleLocalReviewAdded);
 
     // If cache exists, load in background without blocking screen
     const hasCache = !!initialCache && initialCache.length > 0;
@@ -155,6 +171,7 @@ export default function App() {
 
     return () => {
       window.removeEventListener('popstate', onPopState);
+      window.removeEventListener('local-review-added', handleLocalReviewAdded);
     };
   }, []);
 
@@ -270,7 +287,12 @@ export default function App() {
           /* Handyman Cards Grid */
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 my-4">
             {filteredHandymen.map((handyman) => (
-              <HandymanCard key={handyman.id} handyman={handyman} />
+              <HandymanCard 
+                key={handyman.id} 
+                handyman={handyman} 
+                allReviews={reviews}
+                onReviewSubmitted={() => loadData(false)}
+              />
             ))}
           </div>
         ) : (
