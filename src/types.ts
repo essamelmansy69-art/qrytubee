@@ -1,14 +1,3 @@
-export interface Review {
-  id: string;
-  timestamp: string;
-  handymanName: string;
-  customerName: string;
-  rating: number;
-  comment: string;
-  status: string;
-  isLocal?: boolean;
-}
-
 export interface Handyman {
   id: string;
   timestamp: string;
