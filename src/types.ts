@@ -1,3 +1,13 @@
+export interface ReviewComment {
+  id: string;
+  timestamp: string;      // Column A: طابع زمني
+  handymanName: string;   // Column B: اسم الصنايعى
+  reviewerName: string;   // Column C: اسمك الكريم
+  rating: number;         // Column D: تقييمك للصنايعي
+  comment: string;        // Column E: رأيك أو تعليقك
+  status: string;         // Column F: الـ Status
+}
+
 export interface Handyman {
   id: string;
   timestamp: string;
@@ -9,6 +19,10 @@ export interface Handyman {
   imageUrl?: string;
   status: string;
   isApproved: boolean;
+  // Rating and reviews calculated from Source 2 ("reviews" tab)
+  averageRating?: number;
+  totalReviews?: number;
+  approvedComments?: ReviewComment[];
 }
 
 export type ProfessionCategory = 
