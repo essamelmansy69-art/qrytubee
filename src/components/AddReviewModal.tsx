@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, Star, MessageSquarePlus, User, MessageSquare, CheckCircle2, Send, AlertCircle, Wrench } from 'lucide-react';
+import { X, Star, MessageSquarePlus, User, MessageSquare, CheckCircle2, Send, AlertCircle, Wrench, FileSpreadsheet, ExternalLink, Sparkles } from 'lucide-react';
 import { Handyman } from '../types';
+import { GOOGLE_SHEET_EDIT_URL } from '../utils/handymanService';
 
 interface AddReviewModalProps {
   isOpen: boolean;
@@ -17,6 +18,9 @@ export const AddReviewModal: React.FC<AddReviewModalProps> = ({
   initialHandymanId,
   onAddReview
 }) => {
+  const [activeTab, setActiveTab] = useState<'app' | 'google_form'>('app');
+  const [googleFormUrl, setGoogleFormUrl] = useState<string>(GOOGLE_SHEET_EDIT_URL);
+
   const [selectedId, setSelectedId] = useState<string>(initialHandymanId || '');
   const [reviewerName, setReviewerName] = useState('');
   const [rating, setRating] = useState<number>(5);
@@ -98,9 +102,74 @@ export const AddReviewModal: React.FC<AddReviewModalProps> = ({
           </button>
         </div>
 
-        {/* Content */}
+        {/* Tab Selection */}
+        <div className="bg-slate-100 p-2 border-b border-slate-200 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab('app')}
+            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              activeTab === 'app'
+                ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            <span>إضافة تقييم مباشر للموقع</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('google_form')}
+            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              activeTab === 'google_form'
+                ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+            <span>نموذج Google Form الرسمي</span>
+          </button>
+        </div>
+
+        {/* Content Body */}
         <div className="p-5 overflow-y-auto space-y-4 flex-1">
-          {submitted ? (
+          {activeTab === 'google_form' ? (
+            <div className="space-y-4 py-2">
+              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-emerald-900 space-y-3">
+                <div className="flex items-center gap-2 font-bold text-sm text-emerald-950">
+                  <FileSpreadsheet className="w-5 h-5 text-emerald-600 shrink-0" />
+                  <span>إرسال التقييم عبر نموذج Google Form الرسمي</span>
+                </div>
+                <p className="text-xs leading-relaxed text-emerald-800">
+                  عند التقييم باستخدام نموذج Google Form الرسمي، يتم توثيق تقييمك ورأيك مباشرة في جدول Google Sheets المعتمد الخاص بالموقع لضمان عدم الضياع.
+                </p>
+                <div className="pt-2">
+                  <a
+                    href={googleFormUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-all"
+                  >
+                    <span>فتح نموذج Google Form للتقييم</span>
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2">
+                <label className="block text-xs font-extrabold text-slate-700">
+                  رابط Google Form الخاص بك:
+                </label>
+                <input
+                  type="url"
+                  value={googleFormUrl}
+                  onChange={(e) => setGoogleFormUrl(e.target.value)}
+                  placeholder="https://docs.google.com/forms/d/e/.../viewform"
+                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono text-slate-800 dir-ltr text-left"
+                />
+              </div>
+            </div>
+          ) : submitted ? (
             <div className="text-center py-8 space-y-4">
               <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
                 <CheckCircle2 className="w-10 h-10 stroke-[2.5]" />

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, Wrench, User, Phone, MessageCircle, MapPin, Image, CheckCircle2, Send, AlertCircle } from 'lucide-react';
+import { X, Wrench, User, Phone, MessageCircle, MapPin, Image, CheckCircle2, Send, AlertCircle, FileSpreadsheet, ExternalLink, Sparkles } from 'lucide-react';
 import { Handyman } from '../types';
+import { GOOGLE_SHEET_EDIT_URL } from '../utils/handymanService';
 
 interface AddHandymanModalProps {
   isOpen: boolean;
@@ -28,6 +29,9 @@ export const AddHandymanModal: React.FC<AddHandymanModalProps> = ({
   onAddHandyman,
   availableProfessions
 }) => {
+  const [activeTab, setActiveTab] = useState<'app' | 'google_form'>('app');
+  const [googleFormUrl, setGoogleFormUrl] = useState<string>(GOOGLE_SHEET_EDIT_URL);
+
   const [name, setName] = useState('');
   const [profession, setProfession] = useState('');
   const [customProfession, setCustomProfession] = useState('');
@@ -41,7 +45,6 @@ export const AddHandymanModal: React.FC<AddHandymanModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Combine default professions with available ones from data
   const professionOptions = Array.from(new Set([...COMMON_PROFESSIONS, ...availableProfessions]));
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -106,7 +109,7 @@ export const AddHandymanModal: React.FC<AddHandymanModalProps> = ({
         <div className="bg-slate-900 text-white p-5 border-b border-amber-500/20 flex items-center justify-between relative">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-bold shrink-0 shadow-md">
-              <PlusIcon className="w-5 h-5 stroke-[2.5]" />
+              <Wrench className="w-5 h-5 stroke-[2.5]" />
             </div>
             <div>
               <h2 className="text-lg font-bold font-serif text-white">تسجيل صنايعي جديد</h2>
@@ -122,9 +125,74 @@ export const AddHandymanModal: React.FC<AddHandymanModalProps> = ({
           </button>
         </div>
 
-        {/* Content */}
+        {/* Tab Selection */}
+        <div className="bg-slate-100 p-2 border-b border-slate-200 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab('app')}
+            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              activeTab === 'app'
+                ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            <span>تسجيل مباشر في الموقع</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('google_form')}
+            className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              activeTab === 'google_form'
+                ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+            <span>نموذج Google Form الرسمي</span>
+          </button>
+        </div>
+
+        {/* Content Body */}
         <div className="p-5 overflow-y-auto space-y-4 flex-1">
-          {submitted ? (
+          {activeTab === 'google_form' ? (
+            <div className="space-y-4 py-2">
+              <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-emerald-900 space-y-3">
+                <div className="flex items-center gap-2 font-bold text-sm text-emerald-950">
+                  <FileSpreadsheet className="w-5 h-5 text-emerald-600 shrink-0" />
+                  <span>التسجيل عبر نموذج Google Form الرسمي</span>
+                </div>
+                <p className="text-xs leading-relaxed text-emerald-800">
+                  عند التسجيل باستخدام نموذج Google Form الرسمي، يتم حفظ كافة بياناتك مباشرة في قاعدة بيانات وجدول Google Sheets الخاص بموقع دليل صنايعية مصر بشكل دائم ومؤمن.
+                </p>
+                <div className="pt-2">
+                  <a
+                    href={googleFormUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-extrabold text-xs shadow-md flex items-center justify-center gap-2 transition-all"
+                  >
+                    <span>فتح نموذج Google Form للتسجيل</span>
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2">
+                <label className="block text-xs font-extrabold text-slate-700">
+                  رابط Google Form الخاص بك (يمكنك تعديل الرابط مباشرة):
+                </label>
+                <input
+                  type="url"
+                  value={googleFormUrl}
+                  onChange={(e) => setGoogleFormUrl(e.target.value)}
+                  placeholder="https://docs.google.com/forms/d/e/.../viewform"
+                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-mono text-slate-800 dir-ltr text-left"
+                />
+              </div>
+            </div>
+          ) : submitted ? (
             <div className="text-center py-8 space-y-4">
               <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
                 <CheckCircle2 className="w-10 h-10 stroke-[2.5]" />
@@ -306,7 +374,7 @@ export const AddHandymanModal: React.FC<AddHandymanModalProps> = ({
                   className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-extrabold text-sm shadow-md shadow-amber-500/20 transition-all active:scale-[0.99] flex items-center justify-center gap-2"
                 >
                   <Send className="w-4 h-4 stroke-[2.5]" />
-                  <span>تقديم طلب التسجيل مجاناً</span>
+                  <span>تقديم طلب التسجيل فوراً</span>
                 </button>
               </div>
             </form>
@@ -316,18 +384,3 @@ export const AddHandymanModal: React.FC<AddHandymanModalProps> = ({
     </div>
   );
 };
-
-// Internal icon component
-function PlusIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-    </svg>
-  );
-}
