@@ -5,9 +5,10 @@ import { formatWhatsAppLink, GOOGLE_FORM_URL } from '../utils/handymanService';
 
 interface HandymanCardProps {
   handyman: Handyman;
+  onOpenAddReview: (handymanId: string) => void;
 }
 
-export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman }) => {
+export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman, onOpenAddReview }) => {
   const [copied, setCopied] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
@@ -313,16 +314,14 @@ export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman }) => {
               )}
             </button>
 
-            <a
-              href={GOOGLE_FORM_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-2.5 py-1 rounded-lg transition-all"
+            <button
+              onClick={() => onOpenAddReview(handyman.id)}
+              className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-2.5 py-1 rounded-lg transition-all cursor-pointer"
               id={`add_review_btn_${handyman.id}`}
             >
               <MessageSquarePlus className="w-3.5 h-3.5 text-amber-600" />
               <span>أضف تقييمك</span>
-            </a>
+            </button>
           </div>
 
           {/* Expandable Comments List */}
@@ -367,14 +366,12 @@ export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman }) => {
               ) : (
                 <div className="bg-slate-50 rounded-xl p-3 text-center text-xs text-slate-500 border border-slate-100 space-y-2">
                   <p className="font-medium">لا توجد تعليقات معتمدة حتي الآن لهذا الصنايعي.</p>
-                  <a
-                    href={GOOGLE_FORM_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block font-bold text-amber-700 hover:underline"
+                  <button
+                    onClick={() => onOpenAddReview(handyman.id)}
+                    className="inline-block font-bold text-amber-700 hover:underline cursor-pointer"
                   >
-                    كن أول من يجرب ويدون تقييمه عبر النموذج الرسمي 👈
-                  </a>
+                    كن أول من يجرب ويدون تقييمه عبر النموذج المباشر 👈
+                  </button>
                 </div>
               )}
             </div>

@@ -6,9 +6,10 @@ interface HeaderProps {
   onRefresh: () => void;
   isLoading: boolean;
   approvedCount: number;
+  onOpenAddHandyman: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onRefresh, isLoading, approvedCount }) => {
+export const Header: React.FC<HeaderProps> = ({ onRefresh, isLoading, approvedCount, onOpenAddHandyman }) => {
   return (
     <header className="bg-slate-900 text-white relative overflow-hidden border-b border-amber-500/20 shadow-lg">
       {/* Decorative background ambient glow */}
@@ -36,16 +37,14 @@ export const Header: React.FC<HeaderProps> = ({ onRefresh, isLoading, approvedCo
 
           {/* Action Buttons */}
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto shrink-0">
-            <a
-              href={GOOGLE_FORM_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs sm:text-sm shadow-md shadow-amber-500/20 transition-all active:scale-95 text-center"
+            <button
+              onClick={onOpenAddHandyman}
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold text-xs sm:text-sm shadow-md shadow-amber-500/20 transition-all active:scale-95 text-center cursor-pointer"
               id="header_register_btn"
             >
               <PlusCircle className="w-4 h-4 stroke-[2.5]" />
               <span>سجل كصنايعي مجاناً</span>
-            </a>
+            </button>
 
             <button
               onClick={onRefresh}
