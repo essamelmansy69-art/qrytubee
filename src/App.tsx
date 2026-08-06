@@ -6,10 +6,8 @@ import { SponsorBanner } from './components/SponsorBanner';
 import { Footer } from './components/Footer';
 import { LegalPages, LegalTab } from './components/LegalPages';
 import { ArticlesModal } from './components/ArticlesModal';
-import { AddHandymanModal } from './components/AddHandymanModal';
-import { AddReviewModal } from './components/AddReviewModal';
 import { Handyman } from './types';
-import { fetchHandymenData, getCachedHandymen, HANDYMEN_CACHE_KEY } from './utils/handymanService';
+import { fetchHandymenData, getCachedHandymen, GOOGLE_FORM_URL } from './utils/handymanService';
 import { AlertTriangle, RefreshCw, PlusCircle, Wrench, ShieldCheck, CheckCircle2, PhoneCall, Loader2, BookOpen } from 'lucide-react';
 
 export default function App() {
@@ -21,86 +19,6 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedProfession, setSelectedProfession] = useState<string>('الكل');
-
-  // Modal States
-  const [addHandymanModalOpen, setAddHandymanModalOpen] = useState<boolean>(false);
-  const [addReviewModalOpen, setAddReviewModalOpen] = useState<boolean>(false);
-  const [selectedReviewHandymanId, setSelectedReviewHandymanId] = useState<string | undefined>(undefined);
-
-  // Handyman and Review submission handlers
-  const handleOpenAddHandyman = () => {
-    setAddHandymanModalOpen(true);
-  };
-
-  const handleOpenAddReview = (handymanId?: string) => {
-    setSelectedReviewHandymanId(handymanId);
-    setAddReviewModalOpen(true);
-  };
-
-  const handleAddHandymanSubmit = (newHandymanData: Partial<Handyman>) => {
-    const newHandyman: Handyman = {
-      id: `hm-user-${Date.now()}`,
-      timestamp: new Date().toLocaleDateString('ar-EG'),
-      name: newHandymanData.name || '',
-      profession: newHandymanData.profession || 'صنايعي',
-      phone: newHandymanData.phone || '',
-      whatsapp: newHandymanData.whatsapp || newHandymanData.phone || '',
-      areas: newHandymanData.areas || 'جميع المحافظات والمناطق',
-      imageUrl: newHandymanData.imageUrl,
-      status: 'نشط',
-      isApproved: true,
-      averageRating: 5.0,
-      totalReviews: 0,
-      approvedComments: []
-    };
-
-    const updatedList = [newHandyman, ...handymen];
-    setHandymen(updatedList);
-    try {
-      localStorage.setItem(HANDYMEN_CACHE_KEY, JSON.stringify(updatedList));
-    } catch (e) {
-      console.warn('Failed to cache new handyman to localStorage:', e);
-    }
-  };
-
-  const handleAddReviewSubmit = (handymanId: string, reviewerName: string, rating: number, comment: string) => {
-    const targetHandyman = handymen.find(h => h.id === handymanId);
-    const targetName = targetHandyman ? targetHandyman.name : '';
-
-    const updatedList = handymen.map((h) => {
-      if (h.id === handymanId) {
-        const existingComments = h.approvedComments || [];
-        const newComment = {
-          id: `rev-user-${Date.now()}`,
-          timestamp: new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' }),
-          handymanName: targetName,
-          reviewerName,
-          rating,
-          comment,
-          status: 'نشط'
-        };
-        const newComments = [newComment, ...existingComments];
-        const totalReviews = newComments.length;
-        const sumRating = newComments.reduce((acc, curr) => acc + curr.rating, 0);
-        const averageRating = totalReviews > 0 ? sumRating / totalReviews : rating;
-
-        return {
-          ...h,
-          totalReviews,
-          averageRating,
-          approvedComments: newComments
-        };
-      }
-      return h;
-    });
-
-    setHandymen(updatedList);
-    try {
-      localStorage.setItem(HANDYMEN_CACHE_KEY, JSON.stringify(updatedList));
-    } catch (e) {
-      console.warn('Failed to cache review update to localStorage:', e);
-    }
-  };
 
   // Legal Modal State & Path Routing
   const [legalModalOpen, setLegalModalOpen] = useState<boolean>(false);
@@ -279,7 +197,6 @@ export default function App() {
         onRefresh={loadData}
         isLoading={isLoading}
         approvedCount={handymen.length}
-        onOpenAddHandyman={handleOpenAddHandyman}
       />
 
       {/* Main Content Area */}
@@ -353,11 +270,7 @@ export default function App() {
           /* Handyman Cards Grid */
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 my-4">
             {filteredHandymen.map((handyman) => (
-              <HandymanCard
-                key={handyman.id}
-                handyman={handyman}
-                onOpenAddReview={handleOpenAddReview}
-              />
+              <HandymanCard key={handyman.id} handyman={handyman} />
             ))}
           </div>
         ) : (
@@ -383,17 +296,19 @@ export default function App() {
                     setSearchQuery('');
                     setSelectedProfession('الكل');
                   }}
-                  className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-200 transition-all cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-200 transition-all"
                 >
                   إعادة ضبط البحث
                 </button>
               )}
-              <button
-                onClick={handleOpenAddHandyman}
-                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 transition-all cursor-pointer"
+              <a
+                href={GOOGLE_FORM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/20 transition-all"
               >
                 سجل كصنايعي مجاناً الآن
-              </button>
+              </a>
             </div>
           </div>
         )}
@@ -426,33 +341,18 @@ export default function App() {
         }}
       />
 
-      {/* Add New Handyman Interactive Modal Form */}
-      <AddHandymanModal
-        isOpen={addHandymanModalOpen}
-        onClose={() => setAddHandymanModalOpen(false)}
-        onAddHandyman={handleAddHandymanSubmit}
-        availableProfessions={availableProfessions}
-      />
-
-      {/* Add Review Interactive Modal Form */}
-      <AddReviewModal
-        isOpen={addReviewModalOpen}
-        onClose={() => setAddReviewModalOpen(false)}
-        handymen={handymen}
-        initialHandymanId={selectedReviewHandymanId}
-        onAddReview={handleAddReviewSubmit}
-      />
-
       {/* Floating Sticky Mobile Bottom Action Bar */}
       <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 p-3 shadow-2xl">
-        <button
-          onClick={handleOpenAddHandyman}
-          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 active:from-amber-600 active:to-amber-700 text-slate-950 font-extrabold text-sm shadow-lg shadow-amber-500/20 cursor-pointer"
+        <a
+          href={GOOGLE_FORM_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 active:from-amber-600 active:to-amber-700 text-slate-950 font-extrabold text-sm shadow-lg shadow-amber-500/20"
           id="mobile_sticky_register_btn"
         >
           <PlusCircle className="w-4 h-4 stroke-[2.5]" />
           <span>سجل كصنايعي مجاناً في دليل مصر</span>
-        </button>
+        </a>
       </div>
     </div>
   );
