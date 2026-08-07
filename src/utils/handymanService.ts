@@ -151,8 +151,27 @@ export function isStatusApproved(statusRaw: string): boolean {
   return true;
 }
 
+// Discover all sheet GIDs (tab IDs) in a Google Sheet
+async function discoverSheetGids(sheetId: string): Promise<string[]> {
+  const candidateGids = ['913622856', '0', '793398405'];
+  try {
+    const res = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/htmlview`, { cache: 'no-store' });
+    if (res.ok) {
+      const html = await res.text();
+      const matches = html.match(/gid=([0-9]+)/g);
+      if (matches) {
+        const extracted = matches.map(m => m.replace('gid=', ''));
+        return Array.from(new Set([...candidateGids, ...extracted]));
+      }
+    }
+  } catch (e) {
+    console.warn("Could not discover sheet GIDs via htmlview:", e);
+  }
+  return candidateGids;
+}
+
 // JSONP loader for Google Sheets gviz API (works on live domains, bypasses CORS completely)
-function fetchGvizJsonp(sheetId: string = getActiveSheetId()): Promise<any> {
+function fetchGvizJsonp(sheetId: string = getActiveSheetId(), gid?: string): Promise<any> {
   return new Promise((resolve, reject) => {
     if (typeof window === 'undefined' || typeof document === 'undefined') {
       return reject(new Error("Window/Document not available"));
@@ -176,7 +195,8 @@ function fetchGvizJsonp(sheetId: string = getActiveSheetId()): Promise<any> {
 
     const script = document.createElement('script');
     script.id = callbackName;
-    script.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:${callbackName}`;
+    const gidParam = gid ? `&gid=${gid}` : '';
+    script.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:${callbackName}${gidParam}`;
     script.onerror = (err) => {
       clearTimeout(timeoutId);
       delete (window as any)[callbackName];
@@ -214,11 +234,15 @@ function parseGvizStructure(json: any): Handyman[] {
       return (cell.f !== undefined && cell.f !== null) ? String(cell.f) : String(cell.v);
     });
 
-    const name = getValueByPatterns(cellValues, ['اسم', 'name']) || cellValues[1] || '';
+    const name = (getValueByPatterns(cellValues, ['اسم', 'name']) || cellValues[1] || '').trim();
     if (!name || isGarbledText(name)) return;
+    // Skip header rows or formula error cells
+    if (name.includes('طابع') || name.includes('الاسم') || name === 'اسم الصنايعى' || name === '#REF!') return;
 
     const timestamp = getValueByPatterns(cellValues, ['طابع', 'وقت', 'تاريخ']) || cellValues[0] || '';
     const profession = getValueByPatterns(cellValues, ['تخصص', 'مهن', 'حرف', 'صنعة']) || cellValues[2] || 'صنايعي';
+    if (profession.includes('تخصص') || profession.includes('التخصص')) return;
+
     const phoneRaw = getValueByPatterns(cellValues, ['هاتف', 'تليفون', 'موبايل', 'جوال']) || cellValues[3] || '';
     const whatsappRaw = getValueByPatterns(cellValues, ['واتس', 'whatsapp', 'wa']) || cellValues[4] || phoneRaw;
     const areas = getValueByPatterns(cellValues, ['مناطق', 'منطق', 'محافظ', 'عنوان', 'مكان']) || cellValues[5] || 'جميع المحافظات والمناطق';
@@ -228,7 +252,7 @@ function parseGvizStructure(json: any): Handyman[] {
     const isApproved = isStatusApproved(statusRaw);
 
     handymen.push({
-      id: `hm-gviz-${i}-${Date.now()}`,
+      id: `hm-gviz-${i}-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       timestamp,
       name,
       profession: isGarbledText(profession) ? 'صنايعي' : profession,
@@ -247,44 +271,58 @@ function parseGvizStructure(json: any): Handyman[] {
 export async function fetchHandymenData(): Promise<{ handymen: Handyman[]; totalFetched: number; error: string | null }> {
   try {
     const activeSheetId = getActiveSheetId();
-    const gvizUrl = getSheetGvizUrl(activeSheetId);
-    const csvUrl = getSheetCsvUrl(activeSheetId);
+    const gids = await discoverSheetGids(activeSheetId);
 
-    let allHandymen: Handyman[] = [];
+    const handymenMap = new Map<string, Handyman>();
 
-    // 1. Attempt GVIZ JSON fetch directly
-    try {
-      const gvizRes = await fetch(gvizUrl, { cache: 'no-store' });
-      if (gvizRes.ok) {
-        const text = await gvizRes.text();
-        const start = text.indexOf('{');
-        const end = text.lastIndexOf('}');
-        if (start !== -1 && end !== -1) {
-          const jsonStr = text.substring(start, end + 1);
-          const json = JSON.parse(jsonStr);
-          allHandymen = parseGvizStructure(json);
+    // Try fetching each tab GID
+    for (const gid of gids) {
+      const gvizUrl = `https://docs.google.com/spreadsheets/d/${activeSheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
+      let tabHandymen: Handyman[] = [];
+
+      // 1. Direct GVIZ fetch
+      try {
+        const gvizRes = await fetch(gvizUrl, { cache: 'no-store' });
+        if (gvizRes.ok) {
+          const text = await gvizRes.text();
+          const start = text.indexOf('{');
+          const end = text.lastIndexOf('}');
+          if (start !== -1 && end !== -1) {
+            const jsonStr = text.substring(start, end + 1);
+            const json = JSON.parse(jsonStr);
+            tabHandymen = parseGvizStructure(json);
+          }
+        }
+      } catch (gvizErr) {
+        console.warn(`Direct GVIZ fetch failed for GID ${gid}, trying JSONP...`, gvizErr);
+      }
+
+      // 2. JSONP fallback
+      if (tabHandymen.length === 0) {
+        try {
+          const jsonpData = await fetchGvizJsonp(activeSheetId, gid);
+          tabHandymen = parseGvizStructure(jsonpData);
+        } catch (jsonpErr) {
+          console.warn(`JSONP GVIZ fetch failed for GID ${gid}...`, jsonpErr);
         }
       }
-    } catch (gvizErr) {
-      console.warn("Direct GVIZ fetch failed, trying JSONP fallback...", gvizErr);
-    }
 
-    // 2. Attempt JSONP fallback (guaranteed cross-origin delivery for live site)
-    if (allHandymen.length === 0) {
-      try {
-        const jsonpData = await fetchGvizJsonp(activeSheetId);
-        allHandymen = parseGvizStructure(jsonpData);
-      } catch (jsonpErr) {
-        console.warn("JSONP GVIZ fetch failed, trying CSV proxy/direct...", jsonpErr);
+      // Add to map
+      for (const h of tabHandymen) {
+        const key = `${h.name}_${h.phone}`;
+        if (!handymenMap.has(key)) {
+          handymenMap.set(key, h);
+        }
       }
     }
 
-    // 3. Attempt CSV endpoints (Proxy & Direct) if GVIZ did not populate
-    if (allHandymen.length === 0) {
+    // 3. Attempt CSV endpoints if no handymen found yet
+    if (handymenMap.size === 0) {
       let csvText = '';
       const csvEndpoints = [
+        `/api/handymen-csv?sheetId=${encodeURIComponent(activeSheetId)}&gid=913622856`,
         `/api/handymen-csv?sheetId=${encodeURIComponent(activeSheetId)}`,
-        csvUrl
+        getSheetCsvUrl(activeSheetId)
       ];
 
       for (const endpoint of csvEndpoints) {
@@ -321,19 +359,21 @@ export async function fetchHandymenData(): Promise<{ handymen: Handyman[]; total
 
         if (headerParsed.data && headerParsed.data.length > 0) {
           headerParsed.data.forEach((row, i) => {
-            const name = getValueByPatterns(row, ['اسم', 'name']);
-            if (!name || isGarbledText(name)) return;
+            const name = (getValueByPatterns(row, ['اسم', 'name']) || Object.values(row)[1] as string || '').trim();
+            if (!name || isGarbledText(name) || name.includes('طابع') || name.includes('الاسم') || name === 'اسم الصنايعى' || name === '#REF!') return;
 
             const timestamp = getValueByPatterns(row, ['طابع', 'وقت', 'تاريخ']);
             const profession = getValueByPatterns(row, ['تخصص', 'مهن', 'حرف', 'صنعة']) || 'صنايعي';
+            if (profession.includes('تخصص') || profession.includes('التخصص')) return;
+
             const phoneRaw = getValueByPatterns(row, ['هاتف', 'تليفون', 'موبايل', 'جوال']);
             const whatsappRaw = getValueByPatterns(row, ['واتس', 'whatsapp', 'wa']) || phoneRaw;
             const areas = getValueByPatterns(row, ['مناطق', 'منطق', 'محافظ', 'عنوان', 'مكان']) || 'جميع المحافظات والمناطق';
             const imageUrl = getValueByPatterns(row, ['صور', 'معرض']);
             const statusRaw = getValueByPatterns(row, ['status', 'حالة', 'موافق']);
 
-            allHandymen.push({
-              id: `hm-csv-${i}-${Date.now()}`,
+            const handymanObj: Handyman = {
+              id: `hm-csv-${i}-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
               timestamp,
               name,
               profession: isGarbledText(profession) ? 'صنايعي' : profession,
@@ -343,11 +383,18 @@ export async function fetchHandymenData(): Promise<{ handymen: Handyman[]; total
               imageUrl: imageUrl.startsWith('http') ? imageUrl : undefined,
               status: statusRaw,
               isApproved: isStatusApproved(statusRaw)
-            });
+            };
+
+            const key = `${handymanObj.name}_${handymanObj.phone}`;
+            if (!handymenMap.has(key)) {
+              handymenMap.set(key, handymanObj);
+            }
           });
         }
       }
     }
+
+    const allHandymen = Array.from(handymenMap.values());
 
     // Filter CRITICAL: display ONLY approved handymen from Google Sheets
     const approvedOnly = allHandymen.filter(h => h.isApproved);

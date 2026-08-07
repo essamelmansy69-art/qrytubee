@@ -35,10 +35,16 @@ async function startServer() {
       }
     }
 
-    const urls = [
-      `https://docs.google.com/spreadsheets/d/${cleanSheetId}/export?format=csv`,
-      `https://docs.google.com/spreadsheets/d/${cleanSheetId}/gviz/tq?tqx=out:csv`
-    ];
+    const requestedGid = (req.query.gid as string) || "";
+    const gidsToTry = requestedGid ? [requestedGid, "913622856", "0"] : ["913622856", "0", "793398405"];
+
+    const urls: string[] = [];
+    for (const gid of gidsToTry) {
+      urls.push(`https://docs.google.com/spreadsheets/d/${cleanSheetId}/export?format=csv&gid=${gid}`);
+      urls.push(`https://docs.google.com/spreadsheets/d/${cleanSheetId}/gviz/tq?tqx=out:csv&gid=${gid}`);
+    }
+    urls.push(`https://docs.google.com/spreadsheets/d/${cleanSheetId}/export?format=csv`);
+    urls.push(`https://docs.google.com/spreadsheets/d/${cleanSheetId}/gviz/tq?tqx=out:csv`);
 
     for (const url of urls) {
       try {
