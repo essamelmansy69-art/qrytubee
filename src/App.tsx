@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { Header } from './components/Header';
 import { SearchBarAndFilters } from './components/SearchBarAndFilters';
 import { HandymanCard } from './components/HandymanCard';
+import { Pagination } from './components/Pagination';
 import { SponsorBanner } from './components/SponsorBanner';
 import { Footer } from './components/Footer';
 import { LegalPages, LegalTab } from './components/LegalPages';
@@ -19,6 +20,10 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedProfession, setSelectedProfession] = useState<string>('الكل');
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
 
   // Legal Modal State & Path Routing
   const [legalModalOpen, setLegalModalOpen] = useState<boolean>(false);
@@ -190,6 +195,29 @@ export default function App() {
     });
   }, [handymen, selectedProfession, searchQuery]);
 
+  // Reset page to 1 whenever filters or page size change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedProfession, pageSize]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredHandymen.length / pageSize) || 1;
+
+  const paginatedHandymen = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredHandymen.slice(start, start + pageSize);
+  }, [filteredHandymen, currentPage, pageSize]);
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    const searchInput = document.getElementById('search_handyman_input');
+    if (searchInput) {
+      searchInput.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900 pb-20 sm:pb-8">
       {/* Top Header */}
@@ -267,12 +295,27 @@ export default function App() {
             </div>
           </div>
         ) : filteredHandymen.length > 0 ? (
-          /* Handyman Cards Grid */
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 my-4">
-            {filteredHandymen.map((handyman) => (
-              <HandymanCard key={handyman.id} handyman={handyman} />
-            ))}
-          </div>
+          <>
+            {/* Handyman Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 my-4">
+              {paginatedHandymen.map((handyman) => (
+                <HandymanCard key={handyman.id} handyman={handyman} />
+              ))}
+            </div>
+
+            {/* Pagination Control Bar */}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filteredHandymen.length}
+              pageSize={pageSize}
+              onPageChange={handlePageChange}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize);
+                setCurrentPage(1);
+              }}
+            />
+          </>
         ) : (
           /* Empty Search / No Results View */
           <div className="bg-white rounded-3xl p-8 border border-slate-200 text-center space-y-4 my-8 shadow-xs">
