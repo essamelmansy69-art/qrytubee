@@ -24,9 +24,20 @@ async function startServer() {
     res.setHeader("Pragma", "no-cache");
     res.setHeader("Expires", "0");
 
+    const rawSheetId = (req.query.sheetId as string) || "";
+    let cleanSheetId = "1if4NKgBB7eCr1nKe0gtMNMWWKadg-drm6R7areIclSY";
+    if (rawSheetId.trim()) {
+      const match = rawSheetId.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+      if (match && match[1]) {
+        cleanSheetId = match[1];
+      } else if (/^[a-zA-Z0-9-_]{20,}$/.test(rawSheetId.trim())) {
+        cleanSheetId = rawSheetId.trim();
+      }
+    }
+
     const urls = [
-      "https://docs.google.com/spreadsheets/d/1if4NKgBB7eCr1nKe0gtMNMWWKadg-drm6R7areIclSY/export?format=csv",
-      "https://docs.google.com/spreadsheets/d/1if4NKgBB7eCr1nKe0gtMNMWWKadg-drm6R7areIclSY/gviz/tq?tqx=out:csv"
+      `https://docs.google.com/spreadsheets/d/${cleanSheetId}/export?format=csv`,
+      `https://docs.google.com/spreadsheets/d/${cleanSheetId}/gviz/tq?tqx=out:csv`
     ];
 
     for (const url of urls) {

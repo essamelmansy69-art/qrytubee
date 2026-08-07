@@ -54,9 +54,61 @@ export function setCachedHandymen(handymen: Handyman[]): void {
   }
 }
 
-export const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1if4NKgBB7eCr1nKe0gtMNMWWKadg-drm6R7areIclSY/export?format=csv";
-export const GOOGLE_SHEET_GVIZ_URL = "https://docs.google.com/spreadsheets/d/1if4NKgBB7eCr1nKe0gtMNMWWKadg-drm6R7areIclSY/gviz/tq?tqx=out:json";
-export const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSe1DdO1fgTi2C3atmqrszWCRn5vvb8R3NvF9-yhvv1qzR0Cqw/viewform?usp=publish-editor";
+export const DEFAULT_SHEET_ID = "1if4NKgBB7eCr1nKe0gtMNMWWKadg-drm6R7areIclSY";
+
+export function extractSheetId(urlOrId: string): string {
+  if (!urlOrId) return '';
+  const trimmed = urlOrId.trim();
+  const match = trimmed.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+  if (match && match[1]) {
+    return match[1];
+  }
+  if (/^[a-zA-Z0-9-_]{20,}$/.test(trimmed)) {
+    return trimmed;
+  }
+  return trimmed;
+}
+
+export function getActiveSheetId(): string {
+  try {
+    const custom = localStorage.getItem('custom_google_sheet_id');
+    if (custom && custom.trim()) {
+      return custom.trim();
+    }
+  } catch (e) {
+    console.warn("Could not read custom_google_sheet_id from localStorage");
+  }
+  return DEFAULT_SHEET_ID;
+}
+
+export function setCustomSheetId(urlOrId: string): string {
+  const cleanId = extractSheetId(urlOrId);
+  try {
+    if (cleanId) {
+      localStorage.setItem('custom_google_sheet_id', cleanId);
+      // Clear cache when sheet ID changes to force new fetch
+      localStorage.removeItem(HANDYMEN_CACHE_KEY);
+    } else {
+      localStorage.removeItem('custom_google_sheet_id');
+      localStorage.removeItem(HANDYMEN_CACHE_KEY);
+    }
+  } catch (e) {
+    console.warn("Could not save custom_google_sheet_id to localStorage");
+  }
+  return cleanId || DEFAULT_SHEET_ID;
+}
+
+export function getSheetCsvUrl(sheetId: string = getActiveSheetId()): string {
+  return `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
+}
+
+export function getSheetGvizUrl(sheetId: string = getActiveSheetId()): string {
+  return `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+}
+
+export const GOOGLE_SHEET_CSV_URL = getSheetCsvUrl();
+export const GOOGLE_SHEET_GVIZ_URL = getSheetGvizUrl();
+export const GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSe1DdO1fgTi2C3atmqrszWCRn5vvb8R3NvF9-yhvv1qzR0Cqw/viewform?usp=header";
 
 // Empty fallback array (no fake handymen, display ONLY Google Sheet data)
 export const FALLBACK_HANDYMEN: Handyman[] = [];
@@ -100,7 +152,7 @@ export function isStatusApproved(statusRaw: string): boolean {
 }
 
 // JSONP loader for Google Sheets gviz API (works on live domains, bypasses CORS completely)
-function fetchGvizJsonp(): Promise<any> {
+function fetchGvizJsonp(sheetId: string = getActiveSheetId()): Promise<any> {
   return new Promise((resolve, reject) => {
     if (typeof window === 'undefined' || typeof document === 'undefined') {
       return reject(new Error("Window/Document not available"));
@@ -124,7 +176,7 @@ function fetchGvizJsonp(): Promise<any> {
 
     const script = document.createElement('script');
     script.id = callbackName;
-    script.src = `https://docs.google.com/spreadsheets/d/1if4NKgBB7eCr1nKe0gtMNMWWKadg-drm6R7areIclSY/gviz/tq?tqx=responseHandler:${callbackName}`;
+    script.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:${callbackName}`;
     script.onerror = (err) => {
       clearTimeout(timeoutId);
       delete (window as any)[callbackName];
@@ -194,11 +246,15 @@ function parseGvizStructure(json: any): Handyman[] {
 
 export async function fetchHandymenData(): Promise<{ handymen: Handyman[]; totalFetched: number; error: string | null }> {
   try {
+    const activeSheetId = getActiveSheetId();
+    const gvizUrl = getSheetGvizUrl(activeSheetId);
+    const csvUrl = getSheetCsvUrl(activeSheetId);
+
     let allHandymen: Handyman[] = [];
 
     // 1. Attempt GVIZ JSON fetch directly
     try {
-      const gvizRes = await fetch(GOOGLE_SHEET_GVIZ_URL, { cache: 'no-store' });
+      const gvizRes = await fetch(gvizUrl, { cache: 'no-store' });
       if (gvizRes.ok) {
         const text = await gvizRes.text();
         const start = text.indexOf('{');
@@ -216,7 +272,7 @@ export async function fetchHandymenData(): Promise<{ handymen: Handyman[]; total
     // 2. Attempt JSONP fallback (guaranteed cross-origin delivery for live site)
     if (allHandymen.length === 0) {
       try {
-        const jsonpData = await fetchGvizJsonp();
+        const jsonpData = await fetchGvizJsonp(activeSheetId);
         allHandymen = parseGvizStructure(jsonpData);
       } catch (jsonpErr) {
         console.warn("JSONP GVIZ fetch failed, trying CSV proxy/direct...", jsonpErr);
@@ -227,8 +283,8 @@ export async function fetchHandymenData(): Promise<{ handymen: Handyman[]; total
     if (allHandymen.length === 0) {
       let csvText = '';
       const csvEndpoints = [
-        '/api/handymen-csv',
-        GOOGLE_SHEET_CSV_URL
+        `/api/handymen-csv?sheetId=${encodeURIComponent(activeSheetId)}`,
+        csvUrl
       ];
 
       for (const endpoint of csvEndpoints) {
