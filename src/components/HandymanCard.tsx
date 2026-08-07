@@ -1,17 +1,24 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Phone, MessageCircle, MapPin, CheckCircle2, Copy, Check, Share2, Wrench, Facebook, Send, X } from 'lucide-react';
-import { Handyman } from '../types';
+import { Phone, MessageCircle, MapPin, CheckCircle2, Copy, Check, Share2, Wrench, Facebook, Send, X, Star, MessageSquare } from 'lucide-react';
+import { Handyman, Review } from '../types';
 import { formatWhatsAppLink } from '../utils/handymanService';
+import { ReviewModal } from './ReviewModal';
 
 interface HandymanCardProps {
   handyman: Handyman;
 }
 
-export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman }) => {
+export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman: initialHandyman }) => {
+  const [handyman, setHandyman] = useState<Handyman>(initialHandyman);
   const [copied, setCopied] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const shareMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setHandyman(initialHandyman);
+  }, [initialHandyman]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -87,6 +94,22 @@ export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman }) => {
   const waLink = formatWhatsAppLink(handyman.whatsapp || handyman.phone);
   const telLink = handyman.phone ? `tel:${handyman.phone}` : '#';
 
+  const handleReviewAdded = (newReview: Review) => {
+    const updatedReviews = [newReview, ...(handyman.reviews || [])];
+    const totalRating = updatedReviews.reduce((sum, r) => sum + r.rating, 0);
+    const avg = Math.round((totalRating / updatedReviews.length) * 10) / 10;
+    
+    setHandyman(prev => ({
+      ...prev,
+      reviews: updatedReviews,
+      averageRating: avg,
+      ratingCount: updatedReviews.length
+    }));
+  };
+
+  const reviewsCount = handyman.ratingCount || (handyman.reviews ? handyman.reviews.length : 0);
+  const avgRating = handyman.averageRating;
+
   return (
     <div 
       className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between group relative"
@@ -130,14 +153,23 @@ export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman }) => {
               <h2 className="text-lg font-bold text-slate-900 group-hover:text-amber-600 transition-colors leading-tight">
                 {handyman.name}
               </h2>
-              <div className="flex items-center gap-1.5 mt-1">
+              <div className="flex items-center flex-wrap gap-1.5 mt-1">
                 <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-md font-extrabold border ${getProfessionBadgeColor(handyman.profession)}`}>
                   <Wrench className="w-3 h-3" />
                   {handyman.profession}
                 </span>
-                <span className="text-[11px] text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md font-semibold border border-emerald-200">
-                  نشط ومعتمد ✓
-                </span>
+
+                {/* Rating Badge */}
+                <button
+                  onClick={() => setIsReviewModalOpen(true)}
+                  className="inline-flex items-center gap-1 text-[11px] font-extrabold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition-colors cursor-pointer"
+                  title="عرض التقييمات وإضافة تقييم"
+                  id={`rating_badge_${handyman.id}`}
+                >
+                  <Star className="w-3 h-3 fill-amber-400 text-amber-500" />
+                  <span>{avgRating ? `${avgRating}` : 'جديد'}</span>
+                  {reviewsCount > 0 && <span className="text-slate-500 font-semibold">({reviewsCount})</span>}
+                </button>
               </div>
             </div>
           </div>
@@ -238,6 +270,23 @@ export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman }) => {
             <strong className="text-slate-900">{handyman.areas || 'المطرية والمناطق المجاورة'}</strong>
           </div>
         </div>
+
+        {/* Reviews Bar */}
+        <button
+          onClick={() => setIsReviewModalOpen(true)}
+          className="w-full mt-2.5 py-2 px-3 bg-amber-50/60 hover:bg-amber-100/80 border border-amber-200/80 rounded-xl flex items-center justify-between text-xs transition-colors cursor-pointer"
+          id={`reviews_btn_${handyman.id}`}
+        >
+          <div className="flex items-center gap-1.5 font-bold text-slate-800">
+            <MessageSquare className="w-3.5 h-3.5 text-amber-600" />
+            <span>آراء وتقييمات العملاء</span>
+          </div>
+          <div className="flex items-center gap-1 font-bold text-amber-800">
+            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+            <span>{avgRating ? `${avgRating}` : 'إضافة تقييم'}</span>
+            {reviewsCount > 0 && <span className="text-slate-500 text-[11px]">({reviewsCount})</span>}
+          </div>
+        </button>
       </div>
 
       {/* Call Actions (2 Large Mobile-Friendly Touch Targets) */}
@@ -266,6 +315,14 @@ export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman }) => {
           <span>واتساب</span>
         </a>
       </div>
+
+      {/* Review Modal */}
+      <ReviewModal
+        handyman={handyman}
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        onReviewAdded={handleReviewAdded}
+      />
     </div>
   );
 };

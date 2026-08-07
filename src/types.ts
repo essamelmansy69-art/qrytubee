@@ -1,3 +1,13 @@
+export interface Review {
+  id: string;
+  handymanName: string;
+  reviewerName: string;
+  rating: number; // 1 to 5
+  comment: string;
+  timestamp: string;
+  isApproved?: boolean;
+}
+
 export interface Handyman {
   id: string;
   timestamp: string;
@@ -9,6 +19,9 @@ export interface Handyman {
   imageUrl?: string;
   status: string;
   isApproved: boolean;
+  averageRating?: number;
+  ratingCount?: number;
+  reviews?: Review[];
 }
 
 export type ProfessionCategory = 

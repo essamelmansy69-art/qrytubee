@@ -1,5 +1,107 @@
 import Papa from 'papaparse';
-import { Handyman } from '../types';
+import { Handyman, Review } from '../types';
+
+// Rating parser helper
+export function parseRatingValue(val: any): number {
+  if (!val) return 5;
+  const str = String(val).trim();
+  if (str.includes('⭐')) {
+    const count = (str.match(/⭐/g) || []).length;
+    return count > 0 ? count : 5;
+  }
+  const num = parseFloat(str.replace(/[^0-9.]/g, ''));
+  if (!isNaN(num) && num > 0) {
+    return Math.min(5, Math.max(1, Math.round(num)));
+  }
+  if (str.includes('ممتاز') || str.includes('جيد جدا')) return 5;
+  if (str.includes('جيد')) return 4;
+  if (str.includes('مقبول')) return 3;
+  return 5;
+}
+
+// Local storage key for reviews
+const LOCAL_REVIEWS_KEY = 'local_handyman_reviews_v1';
+
+export function getLocalReviews(): Review[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const stored = localStorage.getItem(LOCAL_REVIEWS_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export function saveUserReview(review: Omit<Review, 'id' | 'timestamp'>): Review {
+  const newReview: Review = {
+    ...review,
+    id: `rev-local-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+    timestamp: new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+    isApproved: true
+  };
+  const existing = getLocalReviews();
+  const updated = [newReview, ...existing];
+  try {
+    localStorage.setItem(LOCAL_REVIEWS_KEY, JSON.stringify(updated));
+  } catch (e) {
+    console.error("Failed to save review to localStorage:", e);
+  }
+  return newReview;
+}
+
+// Fetch all reviews from Google Sheets (GID 793398405 / sheet=reviews) + local storage
+export async function fetchReviewsData(): Promise<Review[]> {
+  const activeSheetId = getActiveSheetId();
+  const reviews: Review[] = [];
+
+  // 1. Fetch from Google Sheet GID 793398405 / sheet=reviews
+  try {
+    const gvizUrl = `https://docs.google.com/spreadsheets/d/${activeSheetId}/gviz/tq?tqx=out:json&gid=793398405`;
+    const res = await fetch(gvizUrl, { cache: 'no-store' });
+    if (res.ok) {
+      const text = await res.text();
+      const start = text.indexOf('{');
+      const end = text.lastIndexOf('}');
+      if (start !== -1 && end !== -1) {
+        const json = JSON.parse(text.substring(start, end + 1));
+        if (json?.table?.rows) {
+          json.table.rows.forEach((r: any, idx: number) => {
+            if (!r || !r.c) return;
+            const cellValues = r.c.map((cell: any) => {
+              if (!cell || cell.v === null || cell.v === undefined) return '';
+              return (cell.f !== undefined && cell.f !== null) ? String(cell.f) : String(cell.v);
+            });
+
+            const timestamp = cellValues[0] || '';
+            const handymanName = (cellValues[1] || '').trim();
+            const reviewerName = (cellValues[2] || '').trim() || 'عميل';
+            const ratingRaw = cellValues[3];
+            const comment = (cellValues[4] || '').trim();
+            const statusRaw = (cellValues[5] || '').trim();
+
+            if (!handymanName || handymanName.includes('اسم الصنايعى') || handymanName.includes('طابع')) return;
+
+            reviews.push({
+              id: `rev-sheet-${idx}-${Date.now()}`,
+              handymanName,
+              reviewerName,
+              rating: parseRatingValue(ratingRaw),
+              comment,
+              timestamp,
+              isApproved: statusRaw ? isStatusApproved(statusRaw) : true
+            });
+          });
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("Could not fetch reviews from Google Sheet:", e);
+  }
+
+  // 2. Combine with local reviews
+  const localReviews = getLocalReviews();
+  return [...localReviews, ...reviews];
+}
 
 export const HANDYMEN_CACHE_KEY = 'egypt_handymen_cache_v5';
 
@@ -398,6 +500,29 @@ export async function fetchHandymenData(): Promise<{ handymen: Handyman[]; total
 
     // Filter CRITICAL: display ONLY approved handymen from Google Sheets
     const approvedOnly = allHandymen.filter(h => h.isApproved);
+
+    // Fetch reviews from reviews sheet & local storage
+    try {
+      const allReviews = await fetchReviewsData();
+      approvedOnly.forEach(h => {
+        const handymanReviews = allReviews.filter(r => 
+          r.isApproved !== false && 
+          r.handymanName.trim().toLowerCase() === h.name.trim().toLowerCase()
+        );
+        if (handymanReviews.length > 0) {
+          const totalRating = handymanReviews.reduce((sum, r) => sum + r.rating, 0);
+          h.averageRating = Math.round((totalRating / handymanReviews.length) * 10) / 10;
+          h.ratingCount = handymanReviews.length;
+          h.reviews = handymanReviews;
+        } else {
+          h.averageRating = undefined;
+          h.ratingCount = 0;
+          h.reviews = [];
+        }
+      });
+    } catch (e) {
+      console.warn("Could not attach reviews to handymen:", e);
+    }
 
     // Cache clean data
     setCachedHandymen(approvedOnly);
