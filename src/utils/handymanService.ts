@@ -170,43 +170,6 @@ async function discoverSheetGids(sheetId: string): Promise<string[]> {
   return candidateGids;
 }
 
-// JSONP loader for Google Sheets gviz API (works on live domains, bypasses CORS completely)
-function fetchGvizJsonp(sheetId: string = getActiveSheetId(), gid?: string): Promise<any> {
-  return new Promise((resolve, reject) => {
-    if (typeof window === 'undefined' || typeof document === 'undefined') {
-      return reject(new Error("Window/Document not available"));
-    }
-
-    const callbackName = '__gviz_cb_' + Math.random().toString(36).substring(2, 9);
-    const timeoutId = setTimeout(() => {
-      delete (window as any)[callbackName];
-      const script = document.getElementById(callbackName);
-      if (script) script.remove();
-      reject(new Error("JSONP request timed out"));
-    }, 7000);
-
-    (window as any)[callbackName] = (data: any) => {
-      clearTimeout(timeoutId);
-      delete (window as any)[callbackName];
-      const script = document.getElementById(callbackName);
-      if (script) script.remove();
-      resolve(data);
-    };
-
-    const script = document.createElement('script');
-    script.id = callbackName;
-    const gidParam = gid ? `&gid=${gid}` : '';
-    script.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:${callbackName}${gidParam}`;
-    script.onerror = (err) => {
-      clearTimeout(timeoutId);
-      delete (window as any)[callbackName];
-      script.remove();
-      reject(err);
-    };
-    document.body.appendChild(script);
-  });
-}
-
 // Parse gviz JSON structure into Handyman[]
 function parseGvizStructure(json: any): Handyman[] {
   if (!json || !json.table || !json.table.cols || !json.table.rows) {
@@ -294,17 +257,7 @@ export async function fetchHandymenData(): Promise<{ handymen: Handyman[]; total
           }
         }
       } catch (gvizErr) {
-        console.warn(`Direct GVIZ fetch failed for GID ${gid}, trying JSONP...`, gvizErr);
-      }
-
-      // 2. JSONP fallback
-      if (tabHandymen.length === 0) {
-        try {
-          const jsonpData = await fetchGvizJsonp(activeSheetId, gid);
-          tabHandymen = parseGvizStructure(jsonpData);
-        } catch (jsonpErr) {
-          console.warn(`JSONP GVIZ fetch failed for GID ${gid}...`, jsonpErr);
-        }
+        console.warn(`Direct GVIZ fetch failed for GID ${gid}:`, gvizErr);
       }
 
       // Add to map
