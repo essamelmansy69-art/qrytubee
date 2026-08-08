@@ -3,7 +3,6 @@ import { Header } from './components/Header';
 import { SearchBarAndFilters } from './components/SearchBarAndFilters';
 import { HandymanCard } from './components/HandymanCard';
 import { Pagination } from './components/Pagination';
-import { SponsorBanner } from './components/SponsorBanner';
 import { Footer } from './components/Footer';
 import { LegalPages, LegalTab } from './components/LegalPages';
 import { ArticlesModal } from './components/ArticlesModal';
@@ -355,9 +354,6 @@ export default function App() {
             </div>
           </div>
         )}
-
-        {/* Sponsor Banner (موقع ديكورا) */}
-        <SponsorBanner />
 
       </main>
 

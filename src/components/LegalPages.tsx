@@ -291,7 +291,7 @@ export const LegalPages: React.FC<LegalPagesProps> = ({ isOpen, onClose, initial
                       </div>
                       <h4 className="font-bold text-slate-900 text-lg">تم استلام رسالتك بنجاح!</h4>
                       <p className="text-xs text-slate-600">
-                        شكراً لتواصلك معنا. سيقوم فريق دعم دليل صنايعية مصر وموقع ديكورا بالمراجعة والرد في أقرب وقت.
+                        شكراً لتواصلك معنا. سيقوم فريق دعم دليل صنايعية مصر بالمراجعة والرد في أقرب وقت.
                       </p>
                       <button
                         onClick={() => setContactSubmitted(false)}
@@ -302,7 +302,7 @@ export const LegalPages: React.FC<LegalPagesProps> = ({ isOpen, onClose, initial
                     </div>
                   ) : (
                     <form onSubmit={handleContactSubmit} className="space-y-3 text-xs">
-                      <h4 className="font-bold text-slate-900 text-base mb-1">راسل فريق الدعم والديكور</h4>
+                      <h4 className="font-bold text-slate-900 text-base mb-1">راسل فريق الدعم</h4>
 
                       <div>
                         <label className="block text-slate-700 font-bold mb-1">الاسم الكريم</label>

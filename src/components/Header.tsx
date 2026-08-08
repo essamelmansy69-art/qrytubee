@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wrench, ShieldCheck, PlusCircle, RefreshCw, Globe, ExternalLink } from 'lucide-react';
+import { Wrench, ShieldCheck, PlusCircle, RefreshCw } from 'lucide-react';
 import { GOOGLE_FORM_URL } from '../utils/handymanService';
 
 interface HeaderProps {
@@ -24,11 +24,19 @@ export const Header: React.FC<HeaderProps> = ({ onRefresh, isLoading, approvedCo
                 <Wrench className="w-6 h-6 stroke-[2.2]" />
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white font-serif leading-tight">
-                  دليل صنايعية مصر
-                </h1>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white font-serif leading-tight">
+                    دليل صنايعية مصر
+                  </h1>
+                  {approvedCount > 0 && (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      <span>{approvedCount} صنايعي معتمد</span>
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs sm:text-sm text-slate-300 font-medium">
-                  برعاية موقع ديكورا — تواصل مباشر وفوري مع أفضل الفنيين والصنايعية الثقات مجاناً وبدون عمولات
+                  تواصل مباشر وفوري مع أفضل الفنيين والصنايعية الثقات مجاناً وبدون عمولات
                 </p>
               </div>
             </div>
@@ -56,31 +64,6 @@ export const Header: React.FC<HeaderProps> = ({ onRefresh, isLoading, approvedCo
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-amber-400' : ''}`} />
             </button>
-          </div>
-        </div>
-
-        {/* Announcement Bar with Stylish Link to dkora.online */}
-        <div className="flex flex-wrap items-center justify-between gap-2 mt-4 bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-transparent border border-amber-500/30 rounded-full px-3.5 py-1.5 text-xs text-amber-300">
-          <div className="flex items-center gap-1.5 font-medium">
-            <Globe className="w-4 h-4 text-amber-400 shrink-0" />
-            <span>
-              برعاية{' '}
-              <a
-                href="https://dkora.online"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 font-bold text-amber-300 hover:text-white underline underline-offset-4 decoration-amber-400/60 hover:decoration-white transition-all bg-amber-500/20 px-2 py-0.5 rounded-md border border-amber-400/30 ml-1"
-                id="header_sponsor_link"
-              >
-                <span>موقع ديكورا (dkora.online)</span>
-                <ExternalLink className="w-3 h-3 text-amber-400" />
-              </a>
-              — دليل التشطيبات والديكور الأول في مصر
-            </span>
-          </div>
-          <div className="flex items-center gap-1 text-slate-300 text-[11px] mr-auto sm:mr-0">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <span>صنايعية معتمدين {approvedCount > 0 ? `(${approvedCount})` : ''}</span>
           </div>
         </div>
       </div>

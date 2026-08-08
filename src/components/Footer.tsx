@@ -33,18 +33,19 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLegal, onOpenArticles }) =
             </div>
             <div className="text-right">
               <span className="text-lg font-bold text-white block leading-tight font-serif">دليل صنايعية مصر</span>
-              <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
+              <span className="text-xs text-slate-400 font-medium flex flex-wrap items-center gap-1">
                 برعاية{' '}
                 <a
-                  href="https://qrytube.com"
+                  href="https://dkora.online"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-amber-400 hover:text-amber-300 font-bold underline decoration-amber-400/50 hover:decoration-amber-300 transition-all inline-flex items-center gap-0.5"
                   id="footer_sponsor_link"
                 >
-                  <span>qrytube.com</span>
+                  <span>موقع ديكورا (dkora.online)</span>
                   <ExternalLink className="w-3 h-3 text-amber-400" />
                 </a>
+                <span>— دليل التشطيبات والديكور الأول في مصر</span>
               </span>
             </div>
           </div>

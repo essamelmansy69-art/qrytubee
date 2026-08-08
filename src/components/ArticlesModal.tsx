@@ -85,7 +85,7 @@ export const ArticlesModal: React.FC<ArticlesModalProps> = ({
                 مقالات ودلائل صيانة وتأسيس المنازل
               </h2>
               <p className="text-xs text-amber-300 font-medium">
-                إرشادات ونصائح حصرية برعاية موقع ديكورا (dkora.online)
+                إرشادات ونصائح حصرية لتشطيب وصيانة بيتك بأعلى جودة
               </p>
             </div>
           </div>
@@ -347,10 +347,7 @@ export const ArticlesModal: React.FC<ArticlesModalProps> = ({
 
         {/* Footer info bar */}
         <div className="bg-slate-100 border-t border-slate-200 p-3 px-6 text-center text-xs text-slate-500 shrink-0">
-          جميع المقالات والدلائل مراجعة ومقدمة من مهندسي صيانة ونقاشي{' '}
-          <a href="https://dkora.online" target="_blank" rel="noopener noreferrer" className="font-bold text-amber-600 hover:underline">
-            موقع ديكورا (dkora.online)
-          </a>
+          جميع المقالات والدلائل مراجعة ومقدمة من مهندسي وفنيي دليل صنايعية مصر
         </div>
 
       </div>
