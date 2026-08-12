@@ -10,9 +10,15 @@ export function normalizeName(str: string): string {
   return str
     .trim()
     .toLowerCase()
-    .replace(/[أإآ]/g, 'ا')
-    .replace(/ى/g, 'ي')
+    // Remove Arabic tashkeel / harakat
+    .replace(/[\u064B-\u0652]/g, '')
+    // Standardize alef variations
+    .replace(/[أإآٱ]/g, 'ا')
+    // Standardize yaa / alef maqsura / hamza
+    .replace(/[ىئؤ]/g, 'ي')
+    // Standardize taa marbouta
     .replace(/ة/g, 'ه')
+    // Remove extra spaces and non-alphanumeric chars
     .replace(/[\s\-_]+/g, '')
     .replace(/[^\w\u0600-\u06FF]/g, '');
 }
@@ -77,9 +83,10 @@ export function setCachedRatings(reviews: HandymanReview[]): void {
 }
 
 export async function fetchAllRatings(): Promise<HandymanReview[]> {
+  const ts = Date.now();
   const endpoints = [
-    '/api/ratings-csv',
-    RATINGS_CSV_URL
+    `/api/ratings-csv?_t=${ts}`,
+    `${RATINGS_CSV_URL}&_t=${ts}`
   ];
 
   let rawCsv = '';
@@ -133,7 +140,26 @@ export async function fetchAllRatings(): Promise<HandymanReview[]> {
     const reviewerName = getValueByPattern(row, ['اسمك', 'العميل', 'المقيم', 'الاسم', 'name']) || 'عميل تقييم';
     const ratingRaw = getValueByPattern(row, ['تقييم', 'rating', 'نجوم', 'درجة']);
     const comment = getValueByPattern(row, ['رأيك', 'تعليق', 'ملاحظات', 'review', 'comment']);
-    const status = getValueByPattern(row, ['status', 'حالة']);
+    const status = getValueByPattern(row, ['status', 'حالة', 'موافقة', 'الحالة', 'approved', 'مقبول']);
+
+    // Case-insensitive status check with whitespace trimming
+    const statusClean = (status || '').trim().toLowerCase();
+
+    // Consider review valid/approved if status is empty OR explicitly contains approved keywords
+    const isApproved =
+      !statusClean ||
+      statusClean.includes('approved') ||
+      statusClean.includes('مقبول') ||
+      statusClean.includes('نعم') ||
+      statusClean.includes('yes') ||
+      statusClean.includes('ok') ||
+      statusClean === '1' ||
+      statusClean === 'true' ||
+      (!statusClean.includes('rejected') && !statusClean.includes('مرفوض') && !statusClean.includes('لا') && !statusClean.includes('pending'));
+
+    if (!isApproved) {
+      return; // Skip non-approved reviews
+    }
 
     const ratingVal = parseRatingNumber(ratingRaw);
 
@@ -144,7 +170,7 @@ export async function fetchAllRatings(): Promise<HandymanReview[]> {
       reviewerName: reviewerName.trim(),
       rating: ratingVal > 0 ? ratingVal : 5,
       comment: comment.trim(),
-      status: status ? status.trim() : 'مقبول'
+      status: statusClean || 'approved'
     });
   });
 
@@ -156,18 +182,35 @@ export function getHandymanRatingSummary(
   handyman: Handyman,
   allReviews: HandymanReview[]
 ): HandymanRatingSummary {
-  const normCardName = normalizeName(handyman.name);
-  const cardId = handyman.id ? handyman.id.toLowerCase() : '';
+  const rawCardName = (handyman.name || '').trim();
+  const normCardName = normalizeName(rawCardName);
+  const cardId = (handyman.id || '').trim().toLowerCase();
 
   const matched = allReviews.filter(rev => {
     if (!rev.handymanName) return false;
-    const normRevName = normalizeName(rev.handymanName);
-    
-    // Direct or normalized match
-    if (normRevName === normCardName) return true;
-    if (cardId && rev.handymanName.toLowerCase().includes(cardId)) return true;
+    const rawRevName = (rev.handymanName || '').trim();
+    const normRevName = normalizeName(rawRevName);
+
+    // 1. Direct raw match after trim (case-insensitive)
+    if (rawRevName.toLowerCase() === rawCardName.toLowerCase()) return true;
+
+    // 2. Normalized match (handles alef, yaa, taa marbouta, harakat)
+    if (normRevName && normCardName && normRevName === normCardName) return true;
+
+    // 3. ID match
+    if (cardId && rawRevName.toLowerCase().includes(cardId)) return true;
+
+    // 4. Substring containment
     if (normCardName.length > 3 && normRevName.includes(normCardName)) return true;
     if (normRevName.length > 3 && normCardName.includes(normRevName)) return true;
+
+    // 5. Word overlap (e.g., "أحمد علي" matches "احمد علي السيد")
+    const cardWords = rawCardName.split(/\s+/).map(w => normalizeName(w)).filter(w => w.length > 2);
+    const revWords = rawRevName.split(/\s+/).map(w => normalizeName(w)).filter(w => w.length > 2);
+    if (cardWords.length > 0 && revWords.length > 0) {
+      const matchCount = cardWords.filter(w => revWords.includes(w)).length;
+      if (matchCount >= Math.min(cardWords.length, 2)) return true;
+    }
 
     return false;
   });
@@ -189,3 +232,4 @@ export function getHandymanRatingSummary(
     reviews: matched
   };
 }
+

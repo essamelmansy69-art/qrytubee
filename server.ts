@@ -78,7 +78,7 @@ async function startServer() {
     res.setHeader("Pragma", "no-cache");
     res.setHeader("Expires", "0");
 
-    const ratingsUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRKzAMpQpS5kaE7phY0ueKaZhzcUvaoGv1hZ8q5hEHCpMHm4mxUHjyzCguxHKLpYJXKIwY7ZiIBiKV1/pub?gid=793398405&single=true&output=csv";
+    const ratingsUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vRKzAMpQpS5kaE7phY0ueKaZhzcUvaoGv1hZ8q5hEHCpMHm4mxUHjyzCguxHKLpYJXKIwY7ZiIBiKV1/pub?gid=793398405&single=true&output=csv&_t=${Date.now()}`;
 
     try {
       const response = await fetch(ratingsUrl, {
