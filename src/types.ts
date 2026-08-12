@@ -29,20 +29,3 @@ export interface ProfessionFilter {
   iconName: string;
   color: string;
 }
-
-export interface HandymanReview {
-  id: string;
-  timestamp: string;
-  handymanName: string;
-  reviewerName: string;
-  rating: number; // 1 to 5
-  comment: string;
-  status?: string;
-}
-
-export interface HandymanRatingSummary {
-  averageRating: number;
-  totalReviews: number;
-  reviews: HandymanReview[];
-}
-
