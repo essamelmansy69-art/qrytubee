@@ -70,6 +70,36 @@ async function startServer() {
     res.status(502).json({ error: "Could not retrieve CSV from Google Sheets" });
   });
 
+  // Proxy endpoint to fetch ratings CSV from Google Sheets without CORS issues
+  app.get("/api/ratings-csv", async (req, res) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+
+    const ratingsUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRKzAMpQpS5kaE7phY0ueKaZhzcUvaoGv1hZ8q5hEHCpMHm4mxUHjyzCguxHKLpYJXKIwY7ZiIBiKV1/pub?gid=793398405&single=true&output=csv";
+
+    try {
+      const response = await fetch(ratingsUrl, {
+        redirect: 'follow',
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "Accept": "text/csv,text/plain,*/*"
+        }
+      });
+      if (response.ok) {
+        const csvData = await response.text();
+        res.setHeader("Content-Type", "text/csv; charset=utf-8");
+        return res.send(csvData);
+      }
+    } catch (e: any) {
+      console.warn("Proxy ratings fetch failed:", e?.message || e);
+    }
+
+    res.status(502).json({ error: "Could not fetch ratings CSV" });
+  });
+
   // FRONTEND HANDLING / STATIC SERVING
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

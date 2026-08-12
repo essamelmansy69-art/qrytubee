@@ -1,17 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Phone, MessageCircle, MapPin, CheckCircle2, Copy, Check, Share2, Wrench, Facebook, Send, X } from 'lucide-react';
-import { Handyman } from '../types';
+import { Phone, MessageCircle, MapPin, CheckCircle2, Copy, Check, Share2, Wrench, Facebook, X, Star, StarHalf, MessageSquare, PlusCircle, ChevronDown, ChevronUp, Calendar, User } from 'lucide-react';
+import { Handyman, HandymanReview } from '../types';
 import { formatWhatsAppLink } from '../utils/handymanService';
+import { ADD_RATING_URL, getHandymanRatingSummary } from '../utils/ratingService';
 
 interface HandymanCardProps {
   handyman: Handyman;
+  reviews?: HandymanReview[];
 }
 
-export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman }) => {
+export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman, reviews = [] }) => {
   const [copied, setCopied] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
+  const [showReviewsSection, setShowReviewsSection] = useState(false);
   const shareMenuRef = useRef<HTMLDivElement>(null);
+
+  const ratingSummary = getHandymanRatingSummary(handyman, reviews);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -35,7 +40,21 @@ export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman }) => {
     }
   };
 
-  const shareText = `صنايعي معتمد: ${handyman.name} (${handyman.profession})\nالمناطق المخدومة: ${handyman.areas || 'القاهرة والمناطق المجاورة'}\nرقم الهاتف: ${handyman.phone || handyman.whatsapp}\nعبر دليل صنايعية مصر: ${typeof window !== 'undefined' ? window.location.origin : ''}`;
+  const renderStars = (rating: number) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      if (rating >= i) {
+        stars.push(<Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />);
+      } else if (rating >= i - 0.5) {
+        stars.push(<StarHalf key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400 shrink-0" />);
+      } else {
+        stars.push(<Star key={i} className="w-3.5 h-3.5 text-slate-300 shrink-0" />);
+      }
+    }
+    return <div className="flex items-center gap-0.5">{stars}</div>;
+  };
+
+  const shareText = `صنايعي معتمد: ${handyman.name} (${handyman.profession})\nالتقييم: ${ratingSummary.totalReviews > 0 ? `${ratingSummary.averageRating} من 5 (⭐)` : 'جديد'}\nالمناطق المخدومة: ${handyman.areas || 'القاهرة والمناطق المجاورة'}\nرقم الهاتف: ${handyman.phone || handyman.whatsapp}\nعبر دليل صنايعية مصر: ${typeof window !== 'undefined' ? window.location.origin : ''}`;
 
   const handleNativeShare = async () => {
     if (navigator.share) {
@@ -130,7 +149,7 @@ export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman }) => {
               <h2 className="text-lg font-bold text-slate-900 group-hover:text-amber-600 transition-colors leading-tight">
                 {handyman.name}
               </h2>
-              <div className="flex items-center gap-1.5 mt-1">
+              <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                 <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-md font-extrabold border ${getProfessionBadgeColor(handyman.profession)}`}>
                   <Wrench className="w-3 h-3" />
                   {handyman.profession}
@@ -230,13 +249,119 @@ export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman }) => {
           </div>
         </div>
 
+        {/* Rating Banner & Add Rating Action */}
+        <div className="mt-3 bg-amber-50/80 rounded-xl p-2.5 border border-amber-200/80 flex items-center justify-between gap-2 flex-wrap sm:flex-nowrap">
+          <div className="flex items-center gap-2">
+            {renderStars(ratingSummary.totalReviews > 0 ? ratingSummary.averageRating : 5)}
+            <div className="flex items-center gap-1">
+              <span className="text-xs font-extrabold text-amber-950 dir-ltr">
+                {ratingSummary.totalReviews > 0 ? ratingSummary.averageRating.toFixed(1) : '5.0'}
+              </span>
+              <span className="text-[11px] text-amber-800 font-medium">
+                {ratingSummary.totalReviews > 0 ? `(${ratingSummary.totalReviews} تقييم)` : '(جديد)'}
+              </span>
+            </div>
+          </div>
+
+          <a
+            href={ADD_RATING_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-extrabold text-amber-900 bg-amber-200/90 hover:bg-amber-300 border border-amber-300/80 transition-all active:scale-95 text-center shrink-0 shadow-2xs"
+            id={`add_rating_btn_${handyman.id}`}
+            title="أضف تقييمك لهذا الصنايعي"
+          >
+            <PlusCircle className="w-3.5 h-3.5 text-amber-800" />
+            <span>أضف تقييمك لهذا الصنايعي</span>
+          </a>
+        </div>
+
         {/* Coverage Areas */}
-        <div className="mt-3 bg-slate-50 rounded-xl p-2.5 border border-slate-100 flex items-start gap-2">
+        <div className="mt-2.5 bg-slate-50 rounded-xl p-2.5 border border-slate-100 flex items-start gap-2">
           <MapPin className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
           <div className="text-xs text-slate-700 font-medium leading-relaxed">
             <span className="text-slate-700 font-bold">المناطق المخدومة: </span>
-            <strong className="text-slate-900">{handyman.areas || 'المطرية والمناطق المجاورة'}</strong>
+            <strong className="text-slate-900">{handyman.areas || 'جميع المحافظات والمناطق'}</strong>
           </div>
+        </div>
+
+        {/* Reviews Toggle Button & Collapsible List */}
+        <div className="mt-2.5">
+          <button
+            onClick={() => setShowReviewsSection(!showReviewsSection)}
+            className="w-full flex items-center justify-between px-3 py-2 text-xs font-bold text-slate-700 bg-slate-100/90 hover:bg-slate-200/80 rounded-xl transition-colors border border-slate-200/60"
+            id={`toggle_reviews_btn_${handyman.id}`}
+          >
+            <span className="flex items-center gap-1.5">
+              <MessageSquare className="w-3.5 h-3.5 text-amber-600" />
+              <span>تقييمات وآراء العملاء</span>
+              <span className="bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded-full text-[10px] font-black">
+                {ratingSummary.totalReviews}
+              </span>
+            </span>
+            {showReviewsSection ? (
+              <ChevronUp className="w-4 h-4 text-slate-500" />
+            ) : (
+              <ChevronDown className="w-4 h-4 text-slate-500" />
+            )}
+          </button>
+
+          {/* Expanded Reviews Content */}
+          {showReviewsSection && (
+            <div className="mt-2 p-3 bg-slate-50/90 rounded-xl border border-slate-200/80 space-y-2.5 text-xs animate-in fade-in zoom-in-95 duration-150">
+              {ratingSummary.reviews.length > 0 ? (
+                ratingSummary.reviews.map((rev) => (
+                  <div 
+                    key={rev.id} 
+                    className="p-2.5 bg-white rounded-lg border border-slate-200/80 shadow-2xs space-y-1"
+                  >
+                    <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-1">
+                      <div className="flex items-center gap-1.5 font-bold text-slate-800">
+                        <User className="w-3.5 h-3.5 text-slate-400" />
+                        <span>{rev.reviewerName || 'عميل تقييم'}</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-[10px] text-slate-600">
+                        <Calendar className="w-3 h-3 text-slate-400" />
+                        <span>{rev.timestamp}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-0.5">
+                      <div className="flex items-center gap-1">
+                        {renderStars(rev.rating)}
+                        <span className="text-[11px] font-bold text-amber-700 mr-1">
+                          {rev.rating.toFixed(1)} / 5
+                        </span>
+                      </div>
+                    </div>
+
+                    {rev.comment ? (
+                      <p className="text-slate-700 text-[11px] font-medium leading-relaxed bg-slate-50 p-2 rounded-md border border-slate-100 italic">
+                        "{rev.comment}"
+                      </p>
+                    ) : (
+                      <p className="text-slate-500 text-[10px] italic">بدون تعليق مكتوب</p>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-3 space-y-2">
+                  <p className="text-slate-600 font-medium text-[11px]">
+                    لم يتلق هذا الصنايعي أي تقييمات مسجلة حتى الآن.
+                  </p>
+                  <a
+                    href={ADD_RATING_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-amber-900 bg-amber-200 hover:bg-amber-300 transition-all border border-amber-300"
+                  >
+                    <PlusCircle className="w-3.5 h-3.5" />
+                    <span>كن أول من يقيم هذا الصنايعي</span>
+                  </a>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -269,4 +394,5 @@ export const HandymanCard: React.FC<HandymanCardProps> = ({ handyman }) => {
     </div>
   );
 };
+
 

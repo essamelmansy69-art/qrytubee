@@ -6,14 +6,16 @@ import { Pagination } from './components/Pagination';
 import { Footer } from './components/Footer';
 import { LegalPages, LegalTab } from './components/LegalPages';
 import { ArticlesModal } from './components/ArticlesModal';
-import { Handyman } from './types';
+import { Handyman, HandymanReview } from './types';
 import { fetchHandymenData, getCachedHandymen, GOOGLE_FORM_URL } from './utils/handymanService';
+import { fetchAllRatings, getCachedRatings } from './utils/ratingService';
 import { AlertTriangle, RefreshCw, PlusCircle, Wrench, ShieldCheck, CheckCircle2, PhoneCall, Loader2, BookOpen } from 'lucide-react';
 
 export default function App() {
   // 1. Instant rendering: load from localStorage cache immediately if available
   const initialCache = getCachedHandymen();
   const [handymen, setHandymen] = useState<Handyman[]>(initialCache || []);
+  const [reviews, setReviews] = useState<HandymanReview[]>(getCachedRatings() || []);
   const [isLoading, setIsLoading] = useState<boolean>(!initialCache);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -135,13 +137,24 @@ export default function App() {
       setIsRefreshing(true);
     }
     setError(null);
-    const result = await fetchHandymenData();
-    setHandymen(result.handymen || []);
-    if (result.error) {
-      setError(result.error);
+    try {
+      const [result, ratingsData] = await Promise.all([
+        fetchHandymenData(),
+        fetchAllRatings()
+      ]);
+      setHandymen(result.handymen || []);
+      if (ratingsData) {
+        setReviews(ratingsData);
+      }
+      if (result.error) {
+        setError(result.error);
+      }
+    } catch (e) {
+      console.warn("Error loading data:", e);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
     }
-    setIsLoading(false);
-    setIsRefreshing(false);
   };
 
   useEffect(() => {
@@ -298,7 +311,7 @@ export default function App() {
             {/* Handyman Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 my-4">
               {paginatedHandymen.map((handyman) => (
-                <HandymanCard key={handyman.id} handyman={handyman} />
+                <HandymanCard key={handyman.id} handyman={handyman} reviews={reviews} />
               ))}
             </div>
 
