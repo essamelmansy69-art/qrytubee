@@ -2,7 +2,7 @@ import Papa from 'papaparse';
 import { Handyman, HandymanReview, HandymanRatingSummary } from '../types';
 
 export const RATINGS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRKzAMpQpS5kaE7phY0ueKaZhzcUvaoGv1hZ8q5hEHCpMHm4mxUHjyzCguxHKLpYJXKIwY7ZiIBiKV1/pub?gid=793398405&single=true&output=csv";
-export const ADD_RATING_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRKzAMpQpS5kaE7phY0ueKaZhzcUvaoGv1hZ8q5hEHCpMHm4mxUHjyzCguxHKLpYJXKIwY7ZiIBiKV1/pubhtml";
+export const ADD_RATING_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdL1O9iY7utpzWLmtkINYzAY9VGhTuXkLn-DTUmzBfeDWiDqg/viewform";
 export const RATINGS_CACHE_KEY = "egypt_handyman_ratings_cache_v1";
 
 export function normalizeName(str: string): string {
