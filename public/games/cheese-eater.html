@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>لعبة أكل الجبنة - أتاري</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+        body {
+            background-color: #090d16;
+            color: #f8fafc;
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 10px;
+            overflow: hidden;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        h1 {
+            font-size: 20px;
+            color: #fbbf24;
+            margin-bottom: 2px;
+            font-weight: 800;
+        }
+        #game-container {
+            background-color: #0f172a;
+            padding: 12px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid #1e293b;
+            max-width: 100%;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 360px;
+            margin-bottom: 10px;
+            background-color: #090d16;
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid #1e293b;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .stat-box span {
+            color: #fbbf24;
+        }
+        canvas {
+            border: 3px solid #f59e0b;
+            border-radius: 8px;
+            background-color: #020617;
+            display: block;
+            touch-action: none;
+        }
+        .dpad {
+            display: grid;
+            grid-template-columns: repeat(3, 50px);
+            grid-template-rows: repeat(3, 50px);
+            gap: 5px;
+            margin-top: 12px;
+        }
+        .dpad-btn {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            outline: none;
+        }
+        .dpad-btn:active {
+            background: #f59e0b;
+            color: #090d16;
+        }
+        .up { grid-column: 2; grid-row: 1; }
+        .left { grid-column: 1; grid-row: 2; }
+        .right { grid-column: 3; grid-row: 2; }
+        .down { grid-column: 2; grid-row: 3; }
+
+        .btn-action {
+            margin-top: 10px;
+            background-color: #f59e0b;
+            color: #090d16;
+            border: none;
+            padding: 8px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>🧀 لعبة أكل الجبنة (أتاري)</h1>
+</div>
+
+<div id="game-container">
+    <div class="stats">
+        <div class="stat-box">المستوى: <span id="level">1</span></div>
+        <div class="stat-box">النقاط: <span id="score">0</span></div>
+        <div class="stat-box">الأرواح: <span id="lives">3</span></div>
+    </div>
+    
+    <canvas id="canvas" width="360" height="360"></canvas>
+    
+    <div class="dpad">
+        <button class="dpad-btn up" onclick="setDir(0, -speed)">▲</button>
+        <button class="dpad-btn left" onclick="setDir(-speed, 0)">◄</button>
+        <button class="dpad-btn right" onclick="setDir(speed, 0)">►</button>
+        <button class="dpad-btn down" onclick="setDir(0, speed)">▼</button>
+    </div>
+
+    <button id="actionBtn" class="btn-action" onclick="handleAction()">التالي ➔</button>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const scoreEl = document.getElementById('score');
+const livesEl = document.getElementById('lives');
+const levelEl = document.getElementById('level');
+const actionBtn = document.getElementById('actionBtn');
+
+const tileSize = 36;
+let speed = 2;
+
+let score = 0;
+let lives = 3;
+let currentLevel = 1;
+let gameOver = false;
+let levelCleared = false;
+
+const maps = [
+    [
+        [1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,1,0,0,0,0,1,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,1,1,0,0,0,1],
+        [1,0,0,0,1,1,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,1,0,0,0,0,1,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1]
+    ],
+    [
+        [1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,0,0,1,1,0,1],
+        [1,0,1,0,0,0,0,1,0,1],
+        [1,0,0,0,1,1,0,0,0,1],
+        [1,0,0,0,1,1,0,0,0,1],
+        [1,0,1,0,0,0,0,1,0,1],
+        [1,0,1,1,0,0,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1]
+    ],
+    [
+        [1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,1,0,0,0,0,1],
+        [1,0,1,0,1,0,1,1,0,1],
+        [1,0,1,0,0,0,0,1,0,1],
+        [1,0,1,1,1,1,0,1,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,0,1,1,1,0,1],
+        [1,0,0,1,0,0,0,1,0,1],
+        [1,1,0,0,0,1,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1]
+    ],
+    [
+        [1,1,1,1,1,1,1,1,1,1],
+        [1,0,1,0,0,0,0,1,0,1],
+        [1,0,1,0,1,1,0,1,0,1],
+        [1,0,0,0,1,0,0,0,0,1],
+        [1,1,1,0,1,0,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,1,1,1,1,0,1],
+        [1,0,1,0,0,0,0,1,0,1],
+        [1,0,0,0,1,1,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1]
+    ],
+    [
+        [1,1,1,1,1,1,1,1,1,1],
+        [1,0,1,0,1,0,1,0,0,1],
+        [1,0,1,0,1,0,1,1,0,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,1,0,1,1,1,1,0,1,1],
+        [1,1,0,1,1,1,1,0,1,1],
+        [1,0,0,0,0,0,0,0,0,1],
+        [1,0,1,1,0,1,0,1,0,1],
+        [1,0,0,1,0,1,0,1,0,1],
+        [1,1,1,1,1,1,1,1,1,1]
+    ]
+];
+
+let map = [];
+
+const player = { 
+    x: 36, 
+    y: 36, 
+    dirX: 0, 
+    dirY: 0, 
+    nextDirX: 0, 
+    nextDirY: 0, 
+    angle: 0,
+    mouthAngle: 0.2,
+    mouthSpeed: 0.015
+};
+
+let enemies = [];
+
+let touchStartX = 0;
+let touchStartY = 0;
+
+canvas.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+});
+
+canvas.addEventListener('touchend', (e) => {
+    let diffX = e.changedTouches[0].clientX - touchStartX;
+    let diffY = e.changedTouches[0].clientY - touchStartY;
+    
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+        if (diffX > 20) setDir(speed, 0);
+        else if (diffX < -20) setDir(-speed, 0);
+    } else {
+        if (diffY > 20) setDir(0, speed);
+        else if (diffY < -20) setDir(0, -speed);
+    }
+});
+
+function setDir(dx, dy) {
+    player.nextDirX = dx;
+    player.nextDirY = dy;
+}
+
+window.addEventListener('keydown', (e) => {
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
+    if (e.key === 'ArrowUp') setDir(0, -speed);
+    if (e.key === 'ArrowDown') setDir(0, speed);
+    if (e.key === 'ArrowLeft') setDir(-speed, 0);
+    if (e.key === 'ArrowRight') setDir(speed, 0);
+});
+
+function initLevel() {
+    let mapIndex = (currentLevel - 1) % maps.length;
+    map = JSON.parse(JSON.stringify(maps[mapIndex]));
+    
+    player.x = 36;
+    player.y = 36;
+    player.dirX = 0;
+    player.dirY = 0;
+    player.nextDirX = 0;
+    player.nextDirY = 0;
+    player.mouthAngle = 0.2;
+
+    let enemyCount = Math.min(1 + Math.floor((currentLevel - 1) / 1.2), 4);
+    let enemyBaseSpeed = 1.2 + (currentLevel - 1) * 0.25;
+
+    enemies = [];
+    const positions = [
+        {x: 288, y: 288}, 
+        {x: 288, y: 36}, 
+        {x: 36, y: 288}, 
+        {x: 180, y: 180}
+    ];
+
+    for (let i = 0; i < enemyCount; i++) {
+        let behavior = 'random';
+        if (i === 0 && currentLevel >= 2) behavior = 'chaser';
+        if (i === 1 && currentLevel >= 4) behavior = 'ambusher';
+
+        enemies.push({
+            x: positions[i % positions.length].x,
+            y: positions[i % positions.length].y,
+            dirX: -enemyBaseSpeed,
+            dirY: 0,
+            speed: enemyBaseSpeed,
+            behavior: behavior
+        });
+    }
+
+    levelEl.textContent = currentLevel;
+    actionBtn.style.display = 'none';
+    gameOver = false;
+    levelCleared = false;
+}
+
+function canMove(x, y) {
+    const margin = 2;
+    const left = Math.floor((x + margin) / tileSize);
+    const right = Math.floor((x + tileSize - margin - 1) / tileSize);
+    const top = Math.floor((y + margin) / tileSize);
+    const bottom = Math.floor((y + tileSize - margin - 1) / tileSize);
+
+    return map[top][left] !== 1 &&
+           map[top][right] !== 1 &&
+           map[bottom][left] !== 1 &&
+           map[bottom][right] !== 1;
+}
+
+function checkWin() {
+    for (let r = 0; r < map.length; r++) {
+        for (let c = 0; c < map[r].length; c++) {
+            if (map[r][c] === 0) return false;
+        }
+    }
+    return true;
+}
+
+function update() {
+    if (gameOver || levelCleared) return;
+
+    if (player.nextDirX !== 0 || player.nextDirY !== 0) {
+        if (canMove(player.x + player.nextDirX, player.y + player.nextDirY)) {
+            player.dirX = player.nextDirX;
+            player.dirY = player.nextDirY;
+        }
+    }
+
+    const isMoving = canMove(player.x + player.dirX, player.y + player.dirY);
+    if (isMoving) {
+        player.x += player.dirX;
+        player.y += player.dirY;
+
+        player.mouthAngle += player.mouthSpeed;
+        if (player.mouthAngle >= 0.25 || player.mouthAngle <= 0.02) {
+            player.mouthSpeed = -player.mouthSpeed;
+        }
+    }
+
+    if (player.dirX > 0) player.angle = 0;
+    if (player.dirX < 0) player.angle = Math.PI;
+    if (player.dirY > 0) player.angle = Math.PI / 2;
+    if (player.dirY < 0) player.angle = -Math.PI / 2;
+
+    const gridX = Math.floor((player.x + tileSize / 2) / tileSize);
+    const gridY = Math.floor((player.y + tileSize / 2) / tileSize);
+
+    if (map[gridY][gridX] === 0) {
+        map[gridY][gridX] = 2;
+        score += 10;
+        scoreEl.textContent = score;
+
+        if (checkWin()) {
+            levelCleared = true;
+            actionBtn.textContent = "المرحلة التالية ➔";
+            actionBtn.style.display = 'block';
+        }
+    }
+
+    enemies.forEach(enemy => {
+        if (!canMove(enemy.x + enemy.dirX, enemy.y + enemy.dirY) || Math.random() < 0.02) {
+            const dirs = [
+                {x: enemy.speed, y: 0},
+                {x: -enemy.speed, y: 0},
+                {x: 0, y: enemy.speed},
+                {x: 0, y: -enemy.speed}
+            ];
+            const validDirs = dirs.filter(d => canMove(enemy.x + d.x, enemy.y + d.y));
+
+            if (validDirs.length > 0) {
+                if (enemy.behavior === 'chaser' && Math.random() < 0.7) {
+                    validDirs.sort((a, b) => {
+                        let distA = Math.hypot((enemy.x + a.x) - player.x, (enemy.y + a.y) - player.y);
+                        let distB = Math.hypot((enemy.x + b.x) - player.x, (enemy.y + b.y) - player.y);
+                        return distA - distB;
+                    });
+                    enemy.dirX = validDirs[0].x;
+                    enemy.dirY = validDirs[0].y;
+                } else {
+                    const randomDir = validDirs[Math.floor(Math.random() * validDirs.length)];
+                    enemy.dirX = randomDir.x;
+                    enemy.dirY = randomDir.y;
+                }
+            }
+        }
+        enemy.x += enemy.dirX;
+        enemy.y += enemy.dirY;
+
+        const dist = Math.hypot((player.x + 18) - (enemy.x + 18), (player.y + 18) - (enemy.y + 18));
+        if (dist < 18) {
+            lives--;
+            livesEl.textContent = lives;
+            if (lives === 0) {
+                gameOver = true;
+                actionBtn.textContent = "إعادة اللعب 🔄";
+                actionBtn.style.display = 'block';
+            } else {
+                player.x = 36;
+                player.y = 36;
+                player.dirX = 0;
+                player.dirY = 0;
+                player.nextDirX = 0;
+                player.nextDirY = 0;
+            }
+        }
+    });
+}
+
+function drawCheese(x, y) {
+    ctx.fillStyle = '#fbbf24';
+    ctx.beginPath();
+    ctx.arc(x + 18, y + 18, 4, 0, Math.PI * 2);
+    ctx.fill();
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let r = 0; r < map.length; r++) {
+        for (let c = 0; c < map[r].length; c++) {
+            if (map[r][c] === 1) {
+                ctx.fillStyle = '#1e3a8a';
+                ctx.fillRect(c * tileSize, r * tileSize, tileSize, tileSize);
+            } else if (map[r][c] === 0) {
+                drawCheese(c * tileSize, r * tileSize);
+            }
+        }
+    }
+
+    ctx.save();
+    ctx.translate(player.x + 18, player.y + 18);
+    ctx.rotate(player.angle);
+    ctx.fillStyle = '#facc15';
+    ctx.beginPath();
+    ctx.arc(0, 0, 14, player.mouthAngle * Math.PI, (2 - player.mouthAngle) * Math.PI);
+    ctx.lineTo(0, 0);
+    ctx.fill();
+    ctx.restore();
+
+    enemies.forEach((enemy) => {
+        let ghostColor = '#ef4444';
+        if (enemy.behavior === 'chaser') ghostColor = '#ec4899';
+        if (enemy.behavior === 'ambusher') ghostColor = '#06b6d4';
+
+        ctx.fillStyle = ghostColor;
+        ctx.beginPath();
+        ctx.arc(enemy.x + 18, enemy.y + 18, 14, 0, Math.PI * 2);
+        ctx.fill();
+    });
+}
+
+function handleAction() {
+    if (gameOver) {
+        score = 0;
+        lives = 3;
+        currentLevel = 1;
+        scoreEl.textContent = score;
+        livesEl.textContent = lives;
+    } else if (levelCleared) {
+        currentLevel++;
+    }
+    initLevel();
+}
+
+function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+initLevel();
+gameLoop();
+</script>
+</body>
+</html>
