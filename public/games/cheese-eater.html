@@ -58,9 +58,22 @@
             border: 1px solid #1e293b;
             font-size: 13px;
             font-weight: bold;
+            align-items: center;
         }
         .stat-box span {
             color: #fbbf24;
+        }
+        .mute-btn {
+            background: none;
+            border: none;
+            color: #fbbf24;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            outline: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
         canvas {
             border: 3px solid #f59e0b;
@@ -122,6 +135,7 @@
         <div class="stat-box">المستوى: <span id="level">1</span></div>
         <div class="stat-box">النقاط: <span id="score">0</span></div>
         <div class="stat-box">الأرواح: <span id="lives">3</span></div>
+        <button class="mute-btn" id="muteBtn" onclick="toggleMute()">🔊 الصوت</button>
     </div>
     
     <canvas id="canvas" width="360" height="360"></canvas>
@@ -253,12 +267,146 @@ canvas.addEventListener('touchend', (e) => {
     }
 });
 
+// Web Audio API Synthesizer for Retro 8-bit Sounds
+let audioCtx = null;
+let isMuted = false;
+
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+}
+
+function playSound(type) {
+    if (isMuted) return;
+    try {
+        initAudio();
+        if (!audioCtx) return;
+
+        const now = audioCtx.currentTime;
+
+        if (type === 'eat') {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(450, now);
+            osc.frequency.exponentialRampToValueAtTime(900, now + 0.08);
+
+            gain.gain.setValueAtTime(0.1, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+
+            osc.start(now);
+            osc.stop(now + 0.08);
+        } 
+        else if (type === 'die') {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(320, now);
+            osc.frequency.linearRampToValueAtTime(40, now + 0.4);
+
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+
+            osc.start(now);
+            osc.stop(now + 0.4);
+
+            // Noise layer for hit impact
+            const noiseOsc = audioCtx.createOscillator();
+            const noiseGain = audioCtx.createGain();
+            noiseOsc.connect(noiseGain);
+            noiseGain.connect(audioCtx.destination);
+            noiseOsc.type = 'square';
+            noiseOsc.frequency.setValueAtTime(150, now);
+            noiseOsc.frequency.linearRampToValueAtTime(10, now + 0.3);
+            noiseGain.gain.setValueAtTime(0.15, now);
+            noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            noiseOsc.start(now);
+            noiseOsc.stop(now + 0.3);
+        } 
+        else if (type === 'win') {
+            const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99]; // C4, E4, G4, C5, E5, G5
+            notes.forEach((freq, index) => {
+                const noteOsc = audioCtx.createOscillator();
+                const noteGain = audioCtx.createGain();
+                noteOsc.connect(noteGain);
+                noteGain.connect(audioCtx.destination);
+
+                noteOsc.type = 'square';
+                noteOsc.frequency.setValueAtTime(freq, now + index * 0.08);
+
+                noteGain.gain.setValueAtTime(0.08, now + index * 0.08);
+                noteGain.gain.exponentialRampToValueAtTime(0.01, now + index * 0.08 + 0.12);
+
+                noteOsc.start(now + index * 0.08);
+                noteOsc.stop(now + index * 0.08 + 0.12);
+            });
+        } 
+        else if (type === 'gameover') {
+            const notes = [220.00, 196.00, 174.61, 146.83, 110.00]; // A3, G3, F3, D3, A2
+            notes.forEach((freq, index) => {
+                const noteOsc = audioCtx.createOscillator();
+                const noteGain = audioCtx.createGain();
+                noteOsc.connect(noteGain);
+                noteGain.connect(audioCtx.destination);
+
+                noteOsc.type = 'sawtooth';
+                noteOsc.frequency.setValueAtTime(freq, now + index * 0.15);
+
+                noteGain.gain.setValueAtTime(0.12, now + index * 0.15);
+                noteGain.gain.exponentialRampToValueAtTime(0.01, now + index * 0.15 + 0.25);
+
+                noteOsc.start(now + index * 0.15);
+                noteOsc.stop(now + index * 0.15 + 0.25);
+            });
+        }
+        else if (type === 'start') {
+            const notes = [349.23, 392.00, 440.00, 523.25]; // F4, G4, A4, C5
+            notes.forEach((freq, index) => {
+                const noteOsc = audioCtx.createOscillator();
+                const noteGain = audioCtx.createGain();
+                noteOsc.connect(noteGain);
+                noteGain.connect(audioCtx.destination);
+
+                noteOsc.type = 'triangle';
+                noteOsc.frequency.setValueAtTime(freq, now + index * 0.07);
+
+                noteGain.gain.setValueAtTime(0.08, now + index * 0.07);
+                noteGain.gain.exponentialRampToValueAtTime(0.01, now + index * 0.07 + 0.1);
+
+                noteOsc.start(now + index * 0.07);
+                noteOsc.stop(now + index * 0.07 + 0.1);
+            });
+        }
+    } catch (e) {
+        console.error('Audio play error:', e);
+    }
+}
+
+function toggleMute() {
+    isMuted = !isMuted;
+    const muteBtn = document.getElementById('muteBtn');
+    muteBtn.textContent = isMuted ? '🔇 كتم' : '🔊 الصوت';
+    initAudio();
+}
+
 function setDir(dx, dy) {
+    initAudio();
     player.nextDirX = dx;
     player.nextDirY = dy;
 }
 
 window.addEventListener('keydown', (e) => {
+    initAudio();
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) e.preventDefault();
     if (e.key === 'ArrowUp') setDir(0, -speed);
     if (e.key === 'ArrowDown') setDir(0, speed);
@@ -308,6 +456,7 @@ function initLevel() {
     actionBtn.style.display = 'none';
     gameOver = false;
     levelCleared = false;
+    playSound('start');
 }
 
 function canMove(x, y) {
@@ -365,11 +514,13 @@ function update() {
         map[gridY][gridX] = 2;
         score += 10;
         scoreEl.textContent = score;
+        playSound('eat');
 
         if (checkWin()) {
             levelCleared = true;
             actionBtn.textContent = "المرحلة التالية ➔";
             actionBtn.style.display = 'block';
+            playSound('win');
         }
     }
 
@@ -410,7 +561,9 @@ function update() {
                 gameOver = true;
                 actionBtn.textContent = "إعادة اللعب 🔄";
                 actionBtn.style.display = 'block';
+                playSound('gameover');
             } else {
+                playSound('die');
                 player.x = 36;
                 player.y = 36;
                 player.dirX = 0;
