@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <!-- Home Page Arabic -->
+  <url>
+    <loc>https://essamelmansy.com/?lang=ar</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://essamelmansy.com/?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://essamelmansy.com/?lang=en" />
+  </url>
+  <!-- Home Page English -->
+  <url>
+    <loc>https://essamelmansy.com/?lang=en</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://essamelmansy.com/?lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://essamelmansy.com/?lang=en" />
+  </url>
+  <!-- Cheese Eater Game Arabic -->
+  <url>
+    <loc>https://essamelmansy.com/?game=game-cheese-eater&amp;lang=ar</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://essamelmansy.com/?game=game-cheese-eater&amp;lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://essamelmansy.com/?game=game-cheese-eater&amp;lang=en" />
+  </url>
+  <!-- Cheese Eater Game English -->
+  <url>
+    <loc>https://essamelmansy.com/?game=game-cheese-eater&amp;lang=en</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://essamelmansy.com/?game=game-cheese-eater&amp;lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://essamelmansy.com/?game=game-cheese-eater&amp;lang=en" />
+  </url>
+</urlset>
