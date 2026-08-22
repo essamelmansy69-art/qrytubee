@@ -70,6 +70,63 @@ async function startServer() {
     res.status(502).json({ error: "Could not retrieve CSV from Google Sheets" });
   });
 
+  // Dynamic XML Sitemap for Google SEO Indexing
+  app.get("/sitemap.xml", (req, res) => {
+    const host = req.get("host") || "ai.studio/build";
+    const protocol = req.secure ? "https" : "http";
+    const baseUrl = `${protocol}://${host}`;
+
+    // Dynamic game IDs
+    const gameIds = ["game-cheese-eater"];
+    const languages = ["ar", "en"];
+
+    let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">`;
+
+    // Add home links for each language
+    languages.forEach((lang) => {
+      const urlAr = `${baseUrl}/?lang=ar`;
+      const urlEn = `${baseUrl}/?lang=en`;
+      const currentUrl = `${baseUrl}/?lang=${lang}`;
+
+      sitemap += `
+  <url>
+    <loc>${currentUrl}</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="${urlAr}" />
+    <xhtml:link rel="alternate" hreflang="en" href="${urlEn}" />
+  </url>`;
+    });
+
+    // Add game links with language query parameters for separate SEO indexing
+    gameIds.forEach((gameId) => {
+      languages.forEach((lang) => {
+        const gameUrlAr = `${baseUrl}/?game=${gameId}&amp;lang=ar`;
+        const gameUrlEn = `${baseUrl}/?game=${gameId}&amp;lang=en`;
+        const currentGameUrl = `${baseUrl}/?game=${gameId}&amp;lang=${lang}`;
+
+        sitemap += `
+  <url>
+    <loc>${currentGameUrl}</loc>
+    <lastmod>2026-08-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="${gameUrlAr}" />
+    <xhtml:link rel="alternate" hreflang="en" href="${gameUrlEn}" />
+  </url>`;
+      });
+    });
+
+    sitemap += `
+</urlset>`;
+
+    res.header("Content-Type", "application/xml; charset=utf-8");
+    res.send(sitemap);
+  });
+
   // FRONTEND HANDLING / STATIC SERVING
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
@@ -97,7 +154,7 @@ async function startServer() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`[Handymen Directory Server] running on http://localhost:${PORT}`);
+    console.log(`[Atari Classic Gaming Platform] running on http://localhost:${PORT}`);
   });
 }
 

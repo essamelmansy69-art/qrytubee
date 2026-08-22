@@ -48,7 +48,7 @@ const TRANSLATIONS = {
     audioActive: "الصوت نشط",
     rated: "تقييم ممتاز",
     about: "نبذة عن اللعبة",
-    footerText: "أتاري هي منصة ترفيهية احترافية وبسيطة تمنحك وصولاً مباشراً لأقوى ألعاب المتصفح والـ HTML5 الكلاسيكية المفتوحة المصدر بجودة عالية، بدون اشتراك وبدون الحاجة للتحميل.",
+    footerText: "استمتع بأفضل العاب مجانية بدون تحميل! اكتشف تشكيلة ممتازة تشبه العاب بوكي والعاب ماهر، تشمل العاب بنات، العاب سيارات، العاب كمبيوتر، والعاب اطفال مميزة. العب العاب اليوم الآن!",
     rights: "جميع الحقوق محفوظة © ٢٠٢٦ منصة أتاري للألعاب الكلاسيكية.",
     langLabel: "English",
     themeToggle: "تغيير المظهر",
@@ -77,7 +77,7 @@ const TRANSLATIONS = {
     audioActive: "Audio Engaged",
     rated: "9.8 Top Rated",
     about: "About the Game",
-    footerText: "Atari is a premium, beautifully minimal web arcade offering direct, high-performance streaming of curated open-source HTML5 browser games with zero friction.",
+    footerText: "Enjoy the best free online games with no download required! Discover a premium collection similar to Poki and Maher games, featuring girls games, car games, computer games, and special kids games. Play today's games now!",
     rights: "All rights reserved © 2026 Atari Classic Gaming Platform.",
     langLabel: "العربية",
     themeToggle: "Toggle Appearance",
@@ -117,7 +117,7 @@ const GAME_DATABASE_LOCALIZED = [
     embedUrl: '/games/cheese-eater.html',
     title: { ar: 'أكل الجبنة', en: 'Cheese Eater' },
     description: {
-      ar: 'لعبة كلاسيكية ممتعة ومثيرة مستوحاة من باكمان الشهير! تحكّم بآكل الجبنة، وتفادَ الأشباح الشريرة، واجمع كل قطع الجبنة الصفراء اللذيذة للفوز بالمرتبة والمرحلة.',
+      ar: 'العب لعبه أكل الجبنه باكمان الكلاسيكية الممتعة والمثيرة مجاناً وبدون تحميل! تحكّم بآكل الجبنة السريع، وتفادَ الأشباح الشريرة، واجمع كل قطع الجبنة الصفراء اللذيذة للفوز بالمرتبة والمرحلة الآن.',
       en: 'A thrilling classic retro game inspired by Pacman! Control the cheese-eater, dodge the scary ghosts, and eat all delicious cheese pieces to clear levels.'
     },
     controls: {
@@ -128,8 +128,13 @@ const GAME_DATABASE_LOCALIZED = [
 ];
 
 export default function App() {
-  // Locale State: Arabic by default, with easy toggle
+  // Locale State: Arabic by default, synced with URL query param for different language links
   const [locale, setLocale] = useState<'ar' | 'en'>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const langParam = params.get('lang');
+    if (langParam === 'en' || langParam === 'ar') {
+      return langParam;
+    }
     const saved = localStorage.getItem('atari_locale');
     return saved === 'en' ? 'en' : 'ar';
   });
@@ -171,17 +176,101 @@ export default function App() {
     }
   }, [isDarkMode]);
 
-  // Sync state to local storage
+  // Sync state to URL and local storage
   useEffect(() => {
     localStorage.setItem('atari_locale', locale);
     // Sync document direction
     document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = locale;
+
+    // Update URL query parameter for Google indexing
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('lang') !== locale) {
+      params.set('lang', locale);
+      const newUrl = `${window.location.pathname}?${params.toString()}${window.location.hash}`;
+      window.history.replaceState({}, '', newUrl);
+    }
   }, [locale]);
 
   useEffect(() => {
     localStorage.setItem('atari_favorites', JSON.stringify(favorites));
   }, [favorites]);
+
+  // Load game from URL search parameters on startup
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const gameId = params.get('game');
+    if (gameId) {
+      const game = GAME_DATABASE_LOCALIZED.find(g => g.id === gameId);
+      if (game) {
+        setSelectedGame(game);
+        setIsIframeLoading(true);
+      }
+    }
+  }, []);
+
+  // Synchronize selected game with the URL query parameters
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (selectedGame) {
+      if (params.get('game') !== selectedGame.id) {
+        params.set('game', selectedGame.id);
+        const newUrl = `${window.location.pathname}?${params.toString()}${window.location.hash}`;
+        window.history.replaceState({}, '', newUrl);
+      }
+    } else {
+      if (params.has('game')) {
+        params.delete('game');
+        const newUrl = `${window.location.pathname}?${params.toString()}${window.location.hash}`;
+        window.history.replaceState({}, '', newUrl);
+      }
+    }
+  }, [selectedGame]);
+
+  // Dynamic SEO Metadata updater for Google indexing and social shares
+  useEffect(() => {
+    const metaDescription = document.querySelector('meta[name="description"]');
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    const ogDescription = document.querySelector('meta[property="og:description"]');
+
+    if (selectedGame) {
+      const isCheeseGame = selectedGame.id === 'game-cheese-eater';
+      let titleStr = '';
+      let descStr = '';
+
+      if (isCheeseGame) {
+        titleStr = locale === 'ar' 
+          ? 'لعبه أكل الجبنه باكمان - العب كلاسيك أركيد مجاناً | أتاري' 
+          : 'Cheese Eater Pacman Game - Play Retro Classic Arcade | Atari';
+        descStr = locale === 'ar'
+          ? 'العب لعبه أكل الجبنه باكمان الكلاسيكية الممتعة والمثيرة مجاناً وبدون تحميل! تحكّم بآكل الجبنة السريع، وتفادَ الأشباح الشريرة، واجمع كل قطع الجبنة الصفراء للفوز.'
+          : 'Play the thrilling Cheese Eater Pacman retro game for free without downloading! Dodge the ghosts and eat all cheese pieces now.';
+      } else {
+        titleStr = locale === 'ar'
+          ? `${selectedGame.title.ar} - العب الآن | أتاري`
+          : `${selectedGame.title.en} - Play Now | Atari`;
+        descStr = locale === 'ar' ? selectedGame.description.ar : selectedGame.description.en;
+      }
+
+      document.title = titleStr;
+      if (metaDescription) metaDescription.setAttribute('content', descStr);
+      if (ogTitle) ogTitle.setAttribute('content', titleStr);
+      if (ogDescription) ogDescription.setAttribute('content', descStr);
+    } else {
+      // Default website tags
+      const defaultTitle = locale === 'ar'
+        ? 'أتاري | العاب مجانية بدون تحميل - العب العاب اليوم الآن'
+        : 'Atari | Free Online Games, No Download - Play Today\'s Games';
+      const defaultDesc = locale === 'ar'
+        ? 'استمتع بأفضل العاب مجانية بدون تحميل! اكتشف تشكيلة ممتازة تشبه العاب بوكي والعاب ماهر، تشمل العاب بنات، العاب سيارات، العاب كمبيوتر، والعاب اطفال مميزة. العب العاب اليوم الآن!'
+        : 'Enjoy the best free online games with no download required! Discover a premium collection similar to Poki and Maher games, featuring girls games, car games, computer games, and special kids games. Play today\'s games now!';
+
+      document.title = defaultTitle;
+      if (metaDescription) metaDescription.setAttribute('content', defaultDesc);
+      if (ogTitle) ogTitle.setAttribute('content', defaultTitle);
+      if (ogDescription) ogDescription.setAttribute('content', defaultDesc);
+    }
+  }, [selectedGame, locale]);
 
   // Handle Fullscreen capability
   const toggleFullscreenMode = () => {
@@ -248,7 +337,7 @@ export default function App() {
   // Copy shareable link simulation
   const handleShareGame = (e: React.MouseEvent, gameTitle: string) => {
     e.stopPropagation();
-    const mockUrl = `${window.location.origin}/?game=${selectedGame?.id || 'atari'}`;
+    const mockUrl = `${window.location.origin}/?game=${selectedGame?.id || 'game-cheese-eater'}&lang=${locale}`;
     navigator.clipboard.writeText(mockUrl).then(() => {
       setCopiedNotification(true);
       setTimeout(() => setCopiedNotification(false), 2000);
@@ -296,14 +385,18 @@ export default function App() {
 
             {/* Mobile Actions: Language + Theme */}
             <div className="flex items-center gap-2 sm:hidden">
-              <button
-                onClick={() => setLocale(locale === 'ar' ? 'en' : 'ar')}
+              <a
+                href={`/?lang=${locale === 'ar' ? 'en' : 'ar'}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setLocale(locale === 'ar' ? 'en' : 'ar');
+                }}
                 className={`text-xs font-bold px-2.5 py-1.5 rounded-lg border transition-all ${
                   isDarkMode ? 'bg-[#131b2e] border-slate-800 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
                 }`}
               >
                 {t.langLabel}
-              </button>
+              </a>
               
               <button 
                 onClick={() => setIsDarkMode(!isDarkMode)}
@@ -345,8 +438,12 @@ export default function App() {
 
           {/* Desktop utility controls */}
           <div className="hidden sm:flex items-center gap-2.5">
-            <button
-              onClick={() => setLocale(locale === 'ar' ? 'en' : 'ar')}
+            <a
+              href={`/?lang=${locale === 'ar' ? 'en' : 'ar'}`}
+              onClick={(e) => {
+                e.preventDefault();
+                setLocale(locale === 'ar' ? 'en' : 'ar');
+              }}
               className={`text-xs font-bold px-3 py-2 rounded-xl border transition-all cursor-pointer ${
                 isDarkMode 
                   ? 'bg-[#131b2e] border-slate-800/80 hover:border-slate-700 text-slate-300' 
@@ -357,7 +454,7 @@ export default function App() {
                 <ArrowRightLeft className="w-3 h-3" />
                 <span>{t.langLabel}</span>
               </div>
-            </button>
+            </a>
 
             <button 
               onClick={playRandomGame}
