@@ -70,10 +70,26 @@ async function startServer() {
     res.status(502).json({ error: "Could not retrieve CSV from Google Sheets" });
   });
 
+  // Dynamic robots.txt for Google SEO Indexing
+  app.get("/robots.txt", (req, res) => {
+    const host = req.get("host") || "ai.studio/build";
+    const protocol = req.secure || req.headers["x-forwarded-proto"] === "https" ? "https" : "http";
+    const baseUrl = `${protocol}://${host}`;
+
+    const content = `User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: ${baseUrl}/sitemap.xml
+`;
+    res.header("Content-Type", "text/plain; charset=utf-8");
+    res.send(content);
+  });
+
   // Dynamic XML Sitemap for Google SEO Indexing
   app.get("/sitemap.xml", (req, res) => {
     const host = req.get("host") || "ai.studio/build";
-    const protocol = req.secure ? "https" : "http";
+    const protocol = req.secure || req.headers["x-forwarded-proto"] === "https" ? "https" : "http";
     const baseUrl = `${protocol}://${host}`;
 
     // Dynamic game IDs
