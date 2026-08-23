@@ -23,6 +23,7 @@ import {
   Share2
 } from 'lucide-react';
 import cheeseThumbnail from './assets/images/cheese_eater_thumbnail_1787373161126.jpg';
+import tetrisThumbnail from './assets/images/tetris_thumbnail_1787444248779.jpg';
 
 // Bilingual translations structure for premium localized design
 const TRANSLATIONS = {
@@ -123,6 +124,21 @@ const GAME_DATABASE_LOCALIZED = [
     controls: {
       ar: 'لوحة المفاتيح: استخدم أسهم الاتجاهات (فوق، تحت، يمين، يسار). على شاشات اللمس: استخدم أزرار التحكم الافتراضية (D-pad) المدمجة أو اسحب بإصبعك على شاشة اللعب.',
       en: 'Keyboard: Use Arrow keys to change direction. Mobile/Touch: Swipe on screen or use the built-in virtual D-pad buttons.'
+    }
+  },
+  {
+    id: 'game-tetris',
+    category: 'Puzzle' as const,
+    thumbnailUrl: tetrisThumbnail,
+    embedUrl: '/games/tetris.html',
+    title: { ar: 'لعبة تتريس اون لاين', en: 'Tetris Online' },
+    description: {
+      ar: 'العب لعبة تتريس اون لاين الكلاسيكية مجاناً وبدون تحميل! رتّب المكعبات المتساقطة، فكّك الصفوف الكاملة بمهارة وسرعة على الجوال والكمبيوتر لتحقيق أرقام قياسية جديدة.',
+      en: 'Play the classic Tetris online game for free with no download required! Control the falling blocks, align full rows with speed and skill to clear lines and score high.'
+    },
+    controls: {
+      ar: 'لوحة المفاتيح: أسهم الاتجاهات (يمين/يسار) للتحريك، سهم لأعلى للتدوير، سهم لأسفل للتسريع، مسطرة للإسقاط السريع. على الجوال: اسحب يميناً ويساراً للتحريك، انقر للتدوير، اسحب لأسفل للإسقاط الفوري، أو استخدم الأزرار السفلية المريحة.',
+      en: 'Keyboard: Arrow keys (Left/Right) to move, Up arrow to rotate, Down arrow to soft drop, Spacebar to hard drop. Touch/Mobile: Swipe left/right to move, tap to rotate, swipe down to hard drop, or use the convenient touch buttons below.'
     }
   }
 ];
@@ -235,6 +251,7 @@ export default function App() {
 
     if (selectedGame) {
       const isCheeseGame = selectedGame.id === 'game-cheese-eater';
+      const isTetrisGame = selectedGame.id === 'game-tetris';
       let titleStr = '';
       let descStr = '';
 
@@ -245,6 +262,13 @@ export default function App() {
         descStr = locale === 'ar'
           ? 'العب لعبه أكل الجبنه باكمان الكلاسيكية الممتعة والمثيرة مجاناً وبدون تحميل! تحكّم بآكل الجبنة السريع، وتفادَ الأشباح الشريرة، واجمع كل قطع الجبنة الصفراء للفوز.'
           : 'Play the thrilling Cheese Eater Pacman retro game for free without downloading! Dodge the ghosts and eat all cheese pieces now.';
+      } else if (isTetrisGame) {
+        titleStr = locale === 'ar' 
+          ? 'لعبة تتريس اون لاين - العب لعبة تتريس باللمس مجاناً وبدون تحميل | أتاري' 
+          : 'Tetris Online Game - Play Retro Classic Puzzle For Free | Atari';
+        descStr = locale === 'ar'
+          ? 'العب لعبة تتريس اون لاين الكلاسيكية الممتعة مجاناً وبدون تحميل! تحكّم بالمكعبات المتساقطة، رتّب الصفوف بدقة على الجوال والكمبيوتر لتحصل على أعلى النقاط.'
+          : 'Play the classic Tetris online game for free without downloading! Arrange the falling blocks on mobile or PC to clear lines and get the high score.';
       } else {
         titleStr = locale === 'ar'
           ? `${selectedGame.title.ar} - العب الآن | أتاري`
