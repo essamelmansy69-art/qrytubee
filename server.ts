@@ -93,7 +93,7 @@ Sitemap: ${baseUrl}/sitemap.xml
     const baseUrl = `${protocol}://${host}`;
 
     // Dynamic game IDs
-    const gameIds = ["game-cheese-eater", "game-tetris"];
+    const gameIds = ["game-cheese-eater", "game-tetris", "game-breakout"];
     const languages = ["ar", "en"];
 
     let sitemap = `<?xml version="1.0" encoding="UTF-8"?>

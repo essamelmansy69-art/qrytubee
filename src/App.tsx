@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import cheeseThumbnail from './assets/images/cheese_eater_thumbnail_1787373161126.jpg';
 import tetrisThumbnail from './assets/images/tetris_thumbnail_1787444248779.jpg';
+import breakoutThumbnail from './assets/images/breakout_thumbnail_1787511090254.jpg';
 
 // Bilingual translations structure for premium localized design
 const TRANSLATIONS = {
@@ -140,6 +141,21 @@ const GAME_DATABASE_LOCALIZED = [
       ar: 'لوحة المفاتيح: أسهم الاتجاهات (يمين/يسار) للتحريك، سهم لأعلى للتدوير، سهم لأسفل للتسريع، مسطرة للإسقاط السريع. على الجوال: اسحب يميناً ويساراً للتحريك، انقر للتدوير، اسحب لأسفل للإسقاط الفوري، أو استخدم الأزرار السفلية المريحة.',
       en: 'Keyboard: Arrow keys (Left/Right) to move, Up arrow to rotate, Down arrow to soft drop, Spacebar to hard drop. Touch/Mobile: Swipe left/right to move, tap to rotate, swipe down to hard drop, or use the convenient touch buttons below.'
     }
+  },
+  {
+    id: 'game-breakout',
+    category: 'Arcade' as const,
+    thumbnailUrl: breakoutThumbnail,
+    embedUrl: '/games/breakout.html',
+    title: { ar: 'لعبه هدم الجدران اتاري قديم بريك أوت ثلاثية الأبعاد', en: 'Atari Breakout 3D' },
+    description: {
+      ar: 'العب لعبه هدم الجدران اتاري قديم الكلاسيكية ثلاثية الأبعاد (Atari Breakout) مجاناً وبدون تحميل! دمّر الجدران من الطوب الملون بالمضرب والكرة، واجمع الهدايا كالمغناطيس والمضرب الكبير.',
+      en: 'Play the classic Atari Breakout 3D game for free online with no download required! Break the colorful brick walls, collect power-ups like Magnet and Wide paddle, and aim for the high score.'
+    },
+    controls: {
+      ar: 'لوحة المفاتيح: أسهم الاتجاهات أو مفاتيح A / D لتحريك المضرب يميناً ويساراً، ومفتاح المسافة لإطلاق الكرة الممسوكة بالمغناطيس. زر P للإيقاف المؤقت. على الجوال: اسحب المطلب بإصبعك يميناً ويساراً، ثم اسحب بسرعة أو انتظر لإطلاق الكرة الممسوكة.',
+      en: 'Keyboard: Left/Right Arrow keys or A/D keys to move the paddle, Spacebar to release magnetic ball. Press P to Pause. Mobile/Touch: Drag/swipe the paddle left and right, then swipe fast or wait to release the magnetic ball.'
+    }
   }
 ];
 
@@ -252,6 +268,7 @@ export default function App() {
     if (selectedGame) {
       const isCheeseGame = selectedGame.id === 'game-cheese-eater';
       const isTetrisGame = selectedGame.id === 'game-tetris';
+      const isBreakoutGame = selectedGame.id === 'game-breakout';
       let titleStr = '';
       let descStr = '';
 
@@ -269,6 +286,13 @@ export default function App() {
         descStr = locale === 'ar'
           ? 'العب لعبة تتريس اون لاين الكلاسيكية الممتعة مجاناً وبدون تحميل! تحكّم بالمكعبات المتساقطة، رتّب الصفوف بدقة على الجوال والكمبيوتر لتحصل على أعلى النقاط.'
           : 'Play the classic Tetris online game for free without downloading! Arrange the falling blocks on mobile or PC to clear lines and get the high score.';
+      } else if (isBreakoutGame) {
+        titleStr = locale === 'ar'
+          ? 'لعبه هدم الجدران اتاري قديم بريك أوت - العب أتاري بريك اوت مجاناً'
+          : 'Atari Breakout 3D Game - Play Free Brick Breaker Online | Atari';
+        descStr = locale === 'ar'
+          ? 'العب لعبه هدم الجدران اتاري قديم الكلاسيكية ثلاثية الأبعاد (Breakout) مجاناً وبدون تحميل! كسر جدار الطوب الملون بالمضرب، احصل على المغناطيس والتكبير، وحطم الرقم القياسي.'
+          : 'Play the classic Atari Breakout 3D brick breaker game online for free with no download! Smash the colorful brick wall with the ball and paddle, collect power-ups, and get high scores.';
       } else {
         titleStr = locale === 'ar'
           ? `${selectedGame.title.ar} - العب الآن | أتاري`

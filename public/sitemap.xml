@@ -55,4 +55,22 @@
     <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/?game=game-tetris&amp;lang=ar" />
     <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/?game=game-tetris&amp;lang=en" />
   </url>
+  <!-- Atari Breakout 3D Arabic -->
+  <url>
+    <loc>https://qrytube.com/?game=game-breakout&amp;lang=ar</loc>
+    <lastmod>2026-08-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/?game=game-breakout&amp;lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/?game=game-breakout&amp;lang=en" />
+  </url>
+  <!-- Atari Breakout 3D English -->
+  <url>
+    <loc>https://qrytube.com/?game=game-breakout&amp;lang=en</loc>
+    <lastmod>2026-08-23</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ar" href="https://qrytube.com/?game=game-breakout&amp;lang=ar" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://qrytube.com/?game=game-breakout&amp;lang=en" />
+  </url>
 </urlset>
