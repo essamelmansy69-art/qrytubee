@@ -92,9 +92,39 @@ Sitemap: ${baseUrl}/sitemap.xml
     const protocol = req.secure || req.headers["x-forwarded-proto"] === "https" ? "https" : "http";
     const baseUrl = `${protocol}://${host}`;
 
-    // Dynamic game IDs
-    const gameIds = ["game-cheese-eater", "game-tetris", "game-breakout", "game-candy-crush"];
+    // Read games dynamically from public/games directory to auto-index new pages on-the-fly
+    let gameIds: string[] = ["game-cheese-eater", "game-tetris", "game-breakout", "game-candy-crush"];
+    const gameDates: Record<string, string> = {};
     const languages = ["ar", "en"];
+    let latestDate = "2026-08-23";
+
+    try {
+      const gamesDir = path.join(process.cwd(), "public", "games");
+      if (fs.existsSync(gamesDir)) {
+        const files = fs.readdirSync(gamesDir);
+        files.forEach(file => {
+          if (file.endsWith(".html")) {
+            const id = `game-${file.replace(".html", "")}`;
+            if (!gameIds.includes(id)) {
+              gameIds.push(id);
+            }
+            // Get last modified date of the game file dynamically
+            try {
+              const stats = fs.statSync(path.join(gamesDir, file));
+              const mtimeStr = stats.mtime.toISOString().split("T")[0];
+              gameDates[id] = mtimeStr;
+              if (mtimeStr > latestDate) {
+                latestDate = mtimeStr;
+              }
+            } catch (e) {
+              gameDates[id] = "2026-08-23";
+            }
+          }
+        });
+      }
+    } catch (err) {
+      console.error("Error dynamically scanning games for sitemap:", err);
+    }
 
     let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
@@ -109,7 +139,7 @@ Sitemap: ${baseUrl}/sitemap.xml
       sitemap += `
   <url>
     <loc>${currentUrl}</loc>
-    <lastmod>2026-08-22</lastmod>
+    <lastmod>${latestDate}</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="ar" href="${urlAr}" />
@@ -119,6 +149,7 @@ Sitemap: ${baseUrl}/sitemap.xml
 
     // Add game links with language query parameters for separate SEO indexing
     gameIds.forEach((gameId) => {
+      const fileLastmod = gameDates[gameId] || "2026-08-23";
       languages.forEach((lang) => {
         const gameUrlAr = `${baseUrl}/?game=${gameId}&amp;lang=ar`;
         const gameUrlEn = `${baseUrl}/?game=${gameId}&amp;lang=en`;
@@ -127,7 +158,7 @@ Sitemap: ${baseUrl}/sitemap.xml
         sitemap += `
   <url>
     <loc>${currentGameUrl}</loc>
-    <lastmod>2026-08-22</lastmod>
+    <lastmod>${fileLastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="ar" href="${gameUrlAr}" />
