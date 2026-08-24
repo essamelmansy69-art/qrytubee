@@ -1465,6 +1465,85 @@ function spawnColorBombEffect(row, col, color) {
     });
 }
 
+function showMatchRewardNotification(type, bonusPoints) {
+    // Create elements
+    const notification = document.createElement("div");
+    notification.style.position = "absolute";
+    notification.style.top = "30%";
+    notification.style.left = "50%";
+    notification.style.transform = "translate(-50%, -50%) scale(0.5)";
+    notification.style.background = "linear-gradient(135deg, #ffde43 0%, #ff68b4 100%)";
+    notification.style.color = "#000";
+    notification.style.fontWeight = "900";
+    notification.style.fontSize = "22px";
+    notification.style.padding = "14px 28px";
+    notification.style.borderRadius = "30px";
+    notification.style.boxShadow = "0 10px 30px rgba(255, 104, 180, 0.6)";
+    notification.style.zIndex = "1000";
+    notification.style.pointerEvents = "none";
+    notification.style.opacity = "0";
+    notification.style.transition = "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+    notification.style.textAlign = "center";
+    notification.style.border = "3px solid #fff";
+    notification.style.textShadow = "0 1px 2px rgba(255,255,255,0.6)";
+    
+    // Check if Arabic direction
+    const isRtl = document.documentElement.dir === "rtl" || document.body.dir === "rtl" || (document.getElementById("label-instruction") && document.getElementById("label-instruction").textContent.includes("اسحب"));
+    
+    let title = "";
+    let desc = "";
+    if (type === "color-bomb") {
+        title = isRtl ? "💥 قنبلة الألوان الكونية! 💥" : "💥 COSMIC COLOR BOMB! 💥";
+        desc = isRtl ? `مكافأة +${bonusPoints} نقطة وقنبلة ألوان!` : `+${bonusPoints} Bonus & Color Bomb!`;
+    } else if (type === "wrapped") {
+        title = isRtl ? "🔮 فاكهة الفقاعة المتفجرة! 🔮" : "🔮 WRAPPED EXPLOSION! 🔮";
+        desc = isRtl ? `مكافأة +${bonusPoints} نقطة!` : `+${bonusPoints} Bonus Points!`;
+    } else if (type === "striped") {
+        title = isRtl ? "⚡ شعاع الليزر المخطط! ⚡" : "⚡ STRIPED LASER CANDY! ⚡";
+        desc = isRtl ? `مكافأة +${bonusPoints} نقطة!` : `+${bonusPoints} Bonus Points!`;
+    }
+    
+    notification.innerHTML = `<div style="font-size:24px; margin-bottom:4px;">${title}</div><div style="font-size:16px; font-weight: 700;">${desc}</div>`;
+    
+    const container = document.getElementById("game-container") || document.body;
+    container.appendChild(notification);
+    
+    // Animate in
+    setTimeout(() => {
+        notification.style.opacity = "1";
+        notification.style.transform = "translate(-50%, -50%) scale(1)";
+    }, 50);
+    
+    // Float and fade out
+    setTimeout(() => {
+        notification.style.top = "20%";
+        notification.style.opacity = "0";
+        notification.style.transform = "translate(-50%, -50%) scale(0.8)";
+    }, 1400);
+    
+    // Remove
+    setTimeout(() => {
+        notification.remove();
+    }, 1900);
+}
+
+function awardMatchSpecialReward(specialType) {
+    let bonus = 0;
+    if (specialType === "color-bomb") {
+        bonus = 2000;
+        triggerCameraShake(0.4);
+    } else if (specialType === "wrapped") {
+        bonus = 1000;
+        triggerCameraShake(0.25);
+    } else if (specialType === "striped") {
+        bonus = 500;
+        triggerCameraShake(0.15);
+    }
+    
+    score += bonus;
+    showMatchRewardNotification(specialType, bonus);
+}
+
 /* =========================================================
    MATCH PROCESSING & CASCADE ENGINE WITH SPECIAL BOMBS
 ========================================================= */
@@ -1511,6 +1590,7 @@ function processMatches() {
                     typeIndex: spawnTile.typeIndex,
                     specialType: "wrapped"
                 });
+                awardMatchSpecialReward("wrapped");
                 
                 hMatch.forEach(t => tilesToDestroy.add(t));
                 vMatch.forEach(t => tilesToDestroy.add(t));
@@ -1537,6 +1617,7 @@ function processMatches() {
                 typeIndex: spawnTile.typeIndex,
                 specialType: "color-bomb"
             });
+            awardMatchSpecialReward("color-bomb");
         } else if (match.length === 4) {
             // Match-4 horizontal spawns a Column Striper (Striped Col)
             let spawnTile = match.find(isSwapSource) || match[Math.floor(match.length / 2)];
@@ -1546,6 +1627,7 @@ function processMatches() {
                 typeIndex: spawnTile.typeIndex,
                 specialType: "striped-col"
             });
+            awardMatchSpecialReward("striped");
         }
     }
 
@@ -1565,6 +1647,7 @@ function processMatches() {
                 typeIndex: spawnTile.typeIndex,
                 specialType: "color-bomb"
             });
+            awardMatchSpecialReward("color-bomb");
         } else if (match.length === 4) {
             // Match-4 vertical spawns a Row Striper (Striped Row)
             let spawnTile = match.find(isSwapSource) || match[Math.floor(match.length / 2)];
@@ -1574,6 +1657,7 @@ function processMatches() {
                 typeIndex: spawnTile.typeIndex,
                 specialType: "striped-row"
             });
+            awardMatchSpecialReward("striped");
         }
     }
 
@@ -1748,6 +1832,11 @@ function dropFruits() {
    GAME ENGINE SCENE LOOP (ANIMATION THREAD)
 ========================================================= */
 let clock = new THREE.Clock();
+let shakeAmount = 0;
+
+function triggerCameraShake(amount = 0.25) {
+    shakeAmount = amount;
+}
 
 function animate() {
     requestAnimationFrame(animate);
@@ -1781,6 +1870,13 @@ function animate() {
     }
 
     if (renderer && scene && camera) {
+        if (shakeAmount > 0.01) {
+            camera.position.x = (Math.random() - 0.5) * shakeAmount;
+            camera.position.y = (Math.random() - 0.5) * shakeAmount;
+            shakeAmount *= 0.88; // decay
+        } else {
+            camera.position.set(0, 0, 10);
+        }
         renderer.render(scene, camera);
     }
 }
