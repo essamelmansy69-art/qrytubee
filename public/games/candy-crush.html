@@ -5,9 +5,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 
-<title>حلوى كاندي ماتش 3 - العب كاندي كراش مجاناً بدون تحميل</title>
-<meta name="description" content="العب لعبة حلوى كاندي كراش (Candy Match 3) الكلاسيكية مجاناً أون لاين! طابق الحلويات، حقق حركات مميزة، واصنع القنابل الملونة لإنهاء المستويات بأعلى النقاط." />
-<meta name="keywords" content="كاندي كراش, Candy Crush, لعبة مطابقة الحلويات, العاب كاندي مجانية, العاب ذكاء بدون تحميل" />
+<title>كاندى كراش اون لاين بالفواكه ثلاثية الأبعاد 3D - Candy Crush Online</title>
+<meta name="description" content="العب لعبة كاندى كراش اون لاين بنسختها الجديدة ثلاثية الأبعاد بالفواكه اللذيذة! طابق فواكه الصيف، اصنع قنابل الألوان، وفجر المستويات اللانهائية مجاناً وبدون تحميل." />
+<meta name="keywords" content="كاندى كراش اون لاين, كاندي كراش, العاب فواكه, مطابقة 3, Candy Crush Online, العاب ثلاثية الابعاد, العاب ذكاء بدون تحميل" />
+
+<!-- Three.js Library CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <style>
 * {
@@ -20,7 +23,7 @@ html, body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: radial-gradient(circle, #2a1140 0%, #11061e 100%);
+    background: radial-gradient(circle, #1a0b2e 0%, #08020f 100%);
     touch-action: none;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     user-select: none;
@@ -41,7 +44,7 @@ html, body {
 
 /* HUD Top Bar */
 #hud {
-    width: min(480px, 95vw);
+    width: min(500px, 95vw);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -49,10 +52,10 @@ html, body {
     padding: 12px 18px;
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 20px;
-    background: rgba(43, 17, 72, 0.85);
+    background: rgba(29, 13, 53, 0.85);
     backdrop-filter: blur(15px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    margin-bottom: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    margin-bottom: 10px;
     z-index: 10;
 }
 
@@ -71,24 +74,29 @@ html, body {
 }
 
 .stat b {
-    font-size: 20px;
+    font-size: 19px;
     font-weight: 800;
     color: #fff;
-    text-shadow: 0 0 10px rgba(255, 120, 240, 0.5);
+    text-shadow: 0 0 10px rgba(255, 120, 240, 0.4);
 }
 
 #score {
     color: #00ffd5;
-    text-shadow: 0 0 12px rgba(0, 255, 213, 0.6);
+    text-shadow: 0 0 12px rgba(0, 255, 213, 0.5);
 }
 
 #moves {
     color: #ffde43;
-    text-shadow: 0 0 12px rgba(255, 222, 67, 0.6);
+    text-shadow: 0 0 12px rgba(255, 222, 67, 0.5);
 }
 
 #target {
     color: #ff68b4;
+}
+
+#stage {
+    color: #b56cff;
+    text-shadow: 0 0 12px rgba(181, 108, 255, 0.5);
 }
 
 #controls {
@@ -96,367 +104,334 @@ html, body {
     gap: 8px;
 }
 
-.control-btn {
+.ctrl-btn {
     width: 38px;
     height: 38px;
     border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 50%;
+    border-radius: 12px;
     background: rgba(255, 255, 255, 0.08);
-    color: white;
+    color: #fff;
     font-size: 16px;
-    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-.control-btn:hover {
+.ctrl-btn:hover {
     background: rgba(255, 255, 255, 0.2);
     transform: scale(1.05);
 }
 
-/* Match-3 Board Area */
-#board-wrapper {
+/* Progress bar wrapper */
+#progress-container {
+    width: min(500px, 95vw);
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    z-index: 10;
+}
+
+#progress-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #ff68b4, #b56cff, #00ffd5);
+    transition: width 0.3s ease;
+}
+
+/* The Three.js Canvas Container */
+#canvas-container {
     position: relative;
     width: min(480px, 95vw);
-    height: min(480px, 95vw);
+    aspect-ratio: 1;
+    border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 24px;
-    background: rgba(24, 8, 43, 0.9);
-    border: 4px solid rgba(255, 100, 220, 0.3);
-    box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 0 30px rgba(255, 100, 220, 0.15);
-    padding: 8px;
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    grid-template-rows: repeat(8, 1fr);
-    gap: 4px;
+    background: rgba(14, 5, 27, 0.6);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 0 30px rgba(181, 108, 255, 0.1);
     overflow: hidden;
-}
-
-/* Individual Candy Style */
-.cell {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 8px;
-}
-
-.candy {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: grab;
-    transition: transform 0.15s ease, opacity 0.25s ease, top 0.22s cubic-bezier(0.25, 1, 0.5, 1), left 0.22s cubic-bezier(0.25, 1, 0.5, 1);
-    user-select: none;
-    -webkit-user-drag: none;
-}
-
-.candy-inner {
-    font-size: clamp(20px, 7.5vw, 38px);
-    transition: all 0.1s ease;
-    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
-
-.candy.selected .candy-inner {
-    transform: scale(1.15);
-    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.9)) saturate(1.4);
-    animation: bounceSelect 0.6s infinite alternate;
-}
-
-@keyframes bounceSelect {
-    0% { transform: scale(1.1); }
-    100% { transform: scale(1.22); }
-}
-
-/* Special indicators */
-.striped-row::after {
-    content: '↔️';
-    position: absolute;
-    font-size: 12px;
-    bottom: -2px;
-    right: -2px;
-    background: rgba(0,0,0,0.5);
-    border-radius: 50%;
-    padding: 2px;
-}
-.striped-col::after {
-    content: '↕️';
-    position: absolute;
-    font-size: 12px;
-    bottom: -2px;
-    right: -2px;
-    background: rgba(0,0,0,0.5);
-    border-radius: 50%;
-    padding: 2px;
-}
-.wrapped::after {
-    content: '💥';
-    position: absolute;
-    font-size: 12px;
-    bottom: -2px;
-    right: -2px;
-    background: rgba(0,0,0,0.5);
-    border-radius: 50%;
-    padding: 2px;
-}
-.color-bomb::after {
-    content: '🌟';
-    position: absolute;
-    font-size: 12px;
-    bottom: -2px;
-    right: -2px;
-    background: rgba(0,0,0,0.5);
-    border-radius: 50%;
-    padding: 2px;
-}
-
-/* Canvas Particle Layer */
-#particle-canvas {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
     z-index: 5;
+    cursor: grab;
 }
 
-/* Overlays */
-#overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 30;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(10px);
+#canvas-container:active {
+    cursor: grabbing;
 }
 
-.panel {
-    width: min(420px, 92vw);
-    padding: 35px 25px;
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Instructions HUD */
+#footer-hud {
+    width: min(500px, 95vw);
     text-align: center;
-    border-radius: 28px;
-    background: linear-gradient(145deg, #441865, #19082d);
-    border: 2px solid rgba(255, 120, 240, 0.3);
-    box-shadow: 0 25px 80px rgba(0,0,0,0.7);
+    margin-top: 15px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    line-height: 1.6;
+    z-index: 10;
 }
 
-.logo {
-    font-size: clamp(34px, 9vw, 50px);
-    font-weight: 900;
-    color: #fff;
-    text-shadow: 
-        0 0 10px #ff68b4,
-        0 0 25px rgba(255, 104, 180, 0.7);
-    margin-bottom: 12px;
-    letter-spacing: -1.5px;
+/* Stage selector bar */
+#stage-bar {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 8px;
+    z-index: 10;
 }
 
-.panel p {
-    color: #ebd5ff;
-    line-height: 1.7;
-    font-size: 14px;
-    margin: 12px 0;
-}
-
-.start-btn {
-    border: 0;
-    border-radius: 999px;
-    padding: 14px 40px;
-    background: linear-gradient(135deg, #ff68b4, #b42bdf);
-    color: #fff;
-    font-size: 18px;
-    font-weight: 900;
+.stage-dot {
+    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 11px;
+    font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 6px 20px rgba(255, 104, 180, 0.4);
-    transition: all 0.2s;
+    transition: all 0.2s ease;
 }
 
-.start-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(255, 104, 180, 0.6);
+.stage-dot.active {
+    background: linear-gradient(135deg, #b56cff, #ff68b4);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(181, 108, 255, 0.4);
 }
 
-.start-btn:active {
-    transform: translateY(0);
-}
-
-.tip {
-    color: #a48cb8 !important;
-    font-size: 11px !important;
-    margin-top: 15px !important;
-}
-
-.hidden {
-    display: none !important;
-}
-
-/* Pause Overlay */
-#pause-overlay {
+/* Modals & Overlays */
+.overlay {
     position: fixed;
     inset: 0;
-    z-index: 25;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(8px);
+    background: rgba(10, 3, 20, 0.85);
+    backdrop-filter: blur(12px);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    z-index: 100;
+    transition: opacity 0.3s ease;
 }
 
-#pause-overlay h2 {
-    font-size: 32px;
-    color: #ffde43;
-    text-shadow: 0 0 15px rgba(255, 222, 67, 0.5);
-    margin-bottom: 10px;
+.overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal {
+    width: min(400px, 90vw);
+    background: linear-gradient(135deg, #2c1252 0%, #17072e 100%);
+    border: 2px solid rgba(181, 108, 255, 0.3);
+    border-radius: 32px;
+    padding: 30px;
     text-align: center;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(181, 108, 255, 0.15);
 }
 
-#pause-overlay p {
-    color: #ebd3ff;
+.modal h2 {
+    font-size: 26px;
+    color: #fff;
+    margin-bottom: 12px;
+    text-shadow: 0 0 15px rgba(255, 120, 240, 0.6);
+}
+
+.modal p {
+    color: #e2b6ff;
     font-size: 14px;
-    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+.modal b {
+    color: #00ffd5;
+    font-size: 18px;
+}
+
+.primary-btn {
+    width: 100%;
+    padding: 15px 24px;
+    background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+    border: none;
+    border-radius: 18px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4);
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(236, 72, 153, 0.6);
+}
+
+.primary-btn:active {
+    transform: translateY(1px);
+}
+
+/* Float Animation */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+.floating-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+    display: inline-block;
+    animation: float 3s ease-in-out infinite;
+}
+
+/* Layout adjustments */
+html[dir="rtl"] .stage-dot {
+    direction: rtl;
 }
 </style>
 </head>
 
 <body>
 
-<div id="game-container">
+<div id="game-container" id="main-container">
     <!-- ================= HUD ================= -->
-    <div id="hud">
+    <div id="hud" id="hud-bar">
+        <div class="stat">
+            <small id="label-stage">المرحلة</small>
+            <b id="stage">1</b>
+        </div>
         <div class="stat">
             <small id="label-score">النقاط</small>
             <b id="score">0</b>
         </div>
         <div class="stat">
             <small id="label-target">الهدف</small>
-            <b id="target">5,000</b>
+            <b id="target">1,500</b>
         </div>
         <div class="stat">
             <small id="label-moves">الحركات</small>
             <b id="moves">25</b>
         </div>
         <div id="controls">
-            <button id="pause" class="control-btn" title="Pause / Resume">⏸️</button>
-            <button id="sound" class="control-btn" title="Mute / Unmute">🔊</button>
+            <button class="ctrl-btn" id="sound" title="كتم/تفعيل الصوت">🔊</button>
+            <button class="ctrl-btn" id="pause" title="إيقاف مؤقت">⏸️</button>
         </div>
     </div>
 
-    <!-- ================= BOARD AREA ================= -->
-    <div style="position: relative;">
-        <div id="board-wrapper"></div>
-        <canvas id="particle-canvas"></canvas>
+    <!-- Progress toward objective -->
+    <div id="progress-container">
+        <div id="progress-bar"></div>
+    </div>
+
+    <!-- ================= 3D BOARD CONTAINER ================= -->
+    <div id="canvas-container">
+        <!-- Three.js renders in here -->
+    </div>
+
+    <!-- Direct Stage selector console -->
+    <div id="stage-bar">
+        <div class="stage-dot active" data-stage="1" id="btn-st-1">مرحلة ١</div>
+        <div class="stage-dot" data-stage="2" id="btn-st-2">مرحلة ٢</div>
+        <div class="stage-dot" data-stage="3" id="btn-st-3">مرحلة ٣</div>
+        <div class="stage-dot" data-stage="4" id="btn-st-4">مرحلة ٤</div>
+        <div class="stage-dot" data-stage="5" id="btn-st-5">مرحلة ٥</div>
+    </div>
+
+    <!-- Instructions / Footer -->
+    <div id="footer-hud">
+        <p id="label-instruction">اسحب الفواكه الثلاثية الأبعاد أفقياً أو عمودياً لمطابقة 3 أو أكثر من نفس النوع!</p>
     </div>
 </div>
 
-<!-- ================= START/GAME OVER SCREEN ================= -->
-<div id="overlay">
-    <div class="panel">
-        <div class="logo" id="main-logo">CANDY MATCH 3</div>
-        
-        <p id="message">
-            🍭 طابق 3 قطع حلوى متطابقة أو أكثر لإزالتها من اللعبة.
-            <br>
-            🍬 اسحب أو اضغط لتبديل مكان قطعتين متجاورتين!
-        </p>
-
-        <p id="powers-info">
-            ✨ طابق 4 قطع لتصنع <b>حلوى مخططة</b> تفجر خطاً كاملاً!
-            <br>
-            💣 طابق 5 قطع لتصنع <b>قنبلة ملونة</b> تفجر لوناً كاملاً!
-        </p>
-
-        <button class="start-btn" id="start-btn">ابدأ اللعبة 🎮</button>
-
-        <p class="tip" id="device-info">تعمل على الجوال والتابلت والكمبيوتر</p>
+<!-- ================= START / STATUS OVERLAYS ================= -->
+<div class="overlay" id="overlay">
+    <div class="modal">
+        <span class="floating-icon" id="modal-icon">🍉</span>
+        <h2 id="main-logo">فواكه ماتش 3D</h2>
+        <p id="message">طابق فواكه الصيف اللذيذة لتحقيق الأهداف والانتقال عبر المراحل!</p>
+        <button class="primary-btn" id="start-btn">ابدأ اللعب 🎮</button>
     </div>
 </div>
 
-<!-- ================= PAUSE OVERLAY ================= -->
-<div id="pause-overlay" class="hidden">
-    <div>
-        <h2 id="pause-title">تم الإيقاف مؤقتاً</h2>
-        <p id="pause-subtitle">اضغط على زر الإيقاف مؤقتاً أو اضغط P للاستئناف</p>
+<div class="overlay hidden" id="pause-overlay">
+    <div class="modal">
+        <span class="floating-icon">⏸️</span>
+        <h2 id="pause-title">اللعبة متوقفة مؤقتاً</h2>
+        <p id="pause-message">اضغط على الزر أدناه لمواصلة اللعب الفاكهي اللذيذ.</p>
+        <button class="primary-btn" id="resume-btn">استئناف اللعب ➡️</button>
     </div>
 </div>
 
-<script type="module">
-
+<script>
 /* =========================================================
-   MULTILINGUAL SUPPORT
+   LOCALIZATION & PREFERENCES
 ========================================================= */
 const urlParams = new URLSearchParams(window.location.search);
 const lang = urlParams.get('lang') || 'ar';
 const isRtl = lang === 'ar';
-
-document.documentElement.lang = lang;
 document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
+document.documentElement.lang = lang;
 
 const LOCALIZATION = {
     ar: {
+        stage: "المرحلة",
         score: "النقاط",
         target: "الهدف",
         moves: "الحركات",
-        instructions: "🍭 طابق 3 قطع حلوى متطابقة أو أكثر لإزالتها.<br>🍬 اسحب أو انقر لتبديل مكان قطعتين متجاورتين!",
-        powers: "✨ طابق 4 قطع لتصنع <b>حلوى مخططة</b> تفجر صفاً كاملاً!<br>💣 طابق 5 قطع لتصنع <b>قنبلة ملونة</b> تفجر لوناً كاملاً!",
-        btnStart: "ابدأ اللعبة 🎮",
-        btnRestart: "إعادة اللعب 🔄",
-        tip: "تعمل على الجوال والتابلت والكمبيوتر",
-        gameOver: "انتهت الحركات!",
+        instruction: "اسحب الفواكه ثلاثية الأبعاد 3D لمطابقة 3 قطع أو أكثر من نفس النوع!",
+        gameTitle: "فواكه ماتش 3D",
+        gameDesc: "طابق فواكه الصيف اللذيذة لتحقيق الأهداف والانتقال عبر المراحل ميكانيكياً!",
+        startBtn: "ابدأ اللعب 🎮",
+        paused: "اللعبة متوقفة مؤقتاً",
+        pausedDesc: "اضغط على الزر أدناه لمواصلة مغامرة الفواكه اللذيذة.",
+        resumeBtn: "استئناف اللعب ➡️",
+        win: "أحسنت! فوز فاكهي 🌟",
+        lose: "انتهت الحركات! حاول مجدداً 💔",
         finalScore: "النتيجة النهائية: ",
-        beatenRecord: "لقد فزت! حققت الهدف المطلوب 🎉",
-        paused: "تم الإيقاف مؤقتاً",
-        resumeTip: "اضغط على زر الإيقاف مؤقتاً أو اضغط P للاستئناف",
-        win: "تهانينا! لقد فزت 🎉",
-        lose: "انتهت الحركات! حاول مجدداً 💔"
+        btnRestart: "إعادة المغامرة 🔄",
+        nextStage: "المرحلة التالية"
     },
     en: {
+        stage: "Stage",
         score: "Score",
         target: "Target",
         moves: "Moves",
-        instructions: "🍭 Match 3 or more sweet candies of the same type.<br>🍬 Drag or click to swap adjacent candies!",
-        powers: "✨ Match 4 to make a <b>Striped Candy</b> that clears a row/col!<br>💣 Match 5 to make a <b>Color Bomb</b> that clears all of one color!",
-        btnStart: "Start Sweet Adventure 🎮",
-        btnRestart: "Play Again 🔄",
-        tip: "Works on Mobile, Tablet & Desktop",
-        gameOver: "No Moves Left!",
+        instruction: "Swipe the 3D fruits to match 3 or more of the same type!",
+        gameTitle: "Fruit Match 3D",
+        gameDesc: "Match delicious summer fruits to reach goals and advance stages smoothly!",
+        startBtn: "Start Adventure 🎮",
+        paused: "Game Paused",
+        pausedDesc: "Tap below to resume your delicious fruit match adventure.",
+        resumeBtn: "Resume Game ➡️",
+        win: "Perfect! Fruitful Win 🌟",
+        lose: "Out of moves! Try again 💔",
         finalScore: "Final Score: ",
-        paused: "GAME PAUSED",
-        resumeTip: "Tap Pause or press P to resume",
-        win: "Congratulations! You Won! 🎉",
-        lose: "Out of Moves! Try Again! 💔"
+        btnRestart: "Restart Adventure 🔄",
+        nextStage: "Next Stage"
     }
 };
 
 const t = LOCALIZATION[lang] || LOCALIZATION.ar;
 
-// Apply translations
+// Apply initial translations
+document.getElementById('label-stage').textContent = t.stage;
 document.getElementById('label-score').textContent = t.score;
 document.getElementById('label-target').textContent = t.target;
 document.getElementById('label-moves').textContent = t.moves;
-document.getElementById('message').innerHTML = t.instructions;
-document.getElementById('powers-info').innerHTML = t.powers;
-document.getElementById('start-btn').textContent = t.btnStart;
-document.getElementById('device-info').textContent = t.tip;
+document.getElementById('label-instruction').textContent = t.instruction;
+document.getElementById('main-logo').textContent = t.gameTitle;
+document.getElementById('message').textContent = t.gameDesc;
+document.getElementById('start-btn').textContent = t.startBtn;
 document.getElementById('pause-title').textContent = t.paused;
-document.getElementById('pause-subtitle').textContent = t.resumeTip;
-
+document.getElementById('pause-message').textContent = t.pausedDesc;
+document.getElementById('resume-btn').textContent = t.resumeBtn;
 
 /* =========================================================
-   AUDIO ENGINE (Web Audio API)
+   WEB AUDIO RETRO SYNTHESIZER
 ========================================================= */
 let audioCtx = null;
 let audioEnabled = true;
@@ -466,41 +441,24 @@ function initAudio() {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
     if (audioCtx.state === "suspended") {
-        audioCtx.resume().catch(e => console.log("Audio resume blocked", e));
+        audioCtx.resume();
     }
 }
 
-// Global user-gesture listeners to forcefully activate the audio context on first interact
-function forceResumeAudio() {
-    initAudio();
-    // Play a silent buffer or tiny sound to register
-    playSound(1, 0.01, "sine", 0.01);
-    window.removeEventListener("click", forceResumeAudio);
-    window.removeEventListener("pointerdown", forceResumeAudio);
-    window.removeEventListener("touchstart", forceResumeAudio);
-}
-window.addEventListener("click", forceResumeAudio);
-window.addEventListener("pointerdown", forceResumeAudio);
-window.addEventListener("touchstart", forceResumeAudio);
-
-function playSound(freq, duration, type="sine", vol=0.15, freqEnd=null) {
+function playSound(freq, duration, type = "sine", volume = 0.1, slideToFreq = 0) {
     if (!audioEnabled) return;
     try {
         initAudio();
-        if (!audioCtx) return;
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
+
         osc.type = type;
         osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-
-        if (freqEnd) {
-            osc.frequency.exponentialRampToValueAtTime(
-                Math.max(20, freqEnd),
-                audioCtx.currentTime + duration
-            );
+        if (slideToFreq > 0) {
+            osc.frequency.exponentialRampToValueAtTime(slideToFreq, audioCtx.currentTime + duration);
         }
 
-        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.setValueAtTime(volume, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
 
         osc.connect(gain);
@@ -508,21 +466,23 @@ function playSound(freq, duration, type="sine", vol=0.15, freqEnd=null) {
 
         osc.start();
         osc.stop(audioCtx.currentTime + duration);
-    } catch(e) {}
+    } catch (e) {
+        console.warn("Audio Context block", e);
+    }
 }
 
 const sounds = {
-    click: () => playSound(600, 0.08, "sine", 0.12, 300),
-    swap: () => playSound(400, 0.12, "sine", 0.15, 500),
+    click: () => playSound(440, 0.08, "triangle", 0.1),
+    swap: () => playSound(300, 0.15, "sine", 0.12, 150),
     match: () => {
-        playSound(523.25, 0.18, "sine", 0.18, 1046.50); // C5 to C6
-        setTimeout(() => playSound(659.25, 0.22, "sine", 0.16, 1318.51), 50); // E5 to E6
+        playSound(523.25, 0.15, "sine", 0.15, 783.99);
+        setTimeout(() => playSound(659.25, 0.15, "sine", 0.15, 987.77), 80);
     },
     special: () => {
-        playSound(300, 0.3, "square", 0.15, 1200);
-        playSound(450, 0.25, "sawtooth", 0.12, 900);
+        playSound(150, 0.35, "sawtooth", 0.2, 600);
+        setTimeout(() => playSound(300, 0.25, "sine", 0.15, 900), 100);
     },
-    fall: () => playSound(200, 0.1, "triangle", 0.08, 100),
+    fall: () => playSound(180, 0.12, "sine", 0.05, 120),
     gameStart: () => {
         playSound(261.63, 0.18, "sine", 0.15, 523.25);
         setTimeout(() => playSound(329.63, 0.18, "sine", 0.15, 659.25), 100);
@@ -535,12 +495,12 @@ const sounds = {
         setTimeout(() => playSound(1046.50, 0.45, "sine", 0.25, 2093.00), 360);
     },
     lose: () => {
-        playSound(220, 0.4, "sawtooth", 0.2, 50);
-        setTimeout(() => playSound(180, 0.5, "sawtooth", 0.2, 40), 150);
+        playSound(220, 0.4, "sawtooth", 0.15, 50);
+        setTimeout(() => playSound(180, 0.5, "sawtooth", 0.15, 40), 150);
     }
 };
 
-/* Controls Mute / Unmute */
+/* Audio Switch Handler */
 const soundBtn = document.getElementById("sound");
 soundBtn.onclick = () => {
     audioEnabled = !audioEnabled;
@@ -555,696 +515,1385 @@ const pauseBtn = document.getElementById("pause");
 pauseBtn.onclick = () => togglePause();
 
 /* =========================================================
-   MATCH-3 CORE ENGINE VARIABLES
+   STAGE CONFIGURATIONS & METRICS
 ========================================================= */
 const GRID_SIZE = 8;
-const CANDY_TYPES = [
-    { emoji: "🍭", color: "#ff4da6" }, // Lollipop
-    { emoji: "🍬", color: "#4da6ff" }, // Candy
-    { emoji: "🍩", color: "#ffa31a" }, // Donut
-    { emoji: "🍫", color: "#b366ff" }, // Chocolate
-    { emoji: "🍪", color: "#4dff88" }, // Cookie
-    { emoji: "🍧", color: "#ff4d4d" }  // Ice Cream
+const FRUIT_TYPES = [
+    { name: "Watermelon", emoji: "🍉", color: 0x2e7d32 }, // Dark Green Striped
+    { name: "Apple", emoji: "🍎", color: 0xff3333 },       // Red
+    { name: "Orange", emoji: "🍊", color: 0xff8c00 },      // Orange
+    { name: "Banana", emoji: "🍌", color: 0xffd700 },      // Yellow
+    { name: "Grape", emoji: "🍇", color: 0x6a1b9a },       // Purple bunch
+    { name: "Strawberry", emoji: "🍓", color: 0xe53935 }   // Glossy Red Cone
 ];
 
 let score = 0;
 let moves = 25;
-const targetScore = 5000;
+let currentStage = 1;
+let targetScore = 1500;
 let isPlaying = false;
 let isPaused = false;
 let isAnimating = false;
 
-let board = []; // 2D array representation
-let boardWrapper = document.getElementById("board-wrapper");
+const STAGE_CONFIGS = {
+    1: { target: 1500, moves: 25, labelAr: "بداية حلوة", labelEn: "Sweet Start" },
+    2: { target: 3500, moves: 23, labelAr: "تحدي السكر", labelEn: "Sugar Quest" },
+    3: { target: 6500, moves: 20, labelAr: "منحدرات الكولا", labelEn: "Cola Cliffs" },
+    4: { target: 10000, moves: 18, labelAr: "دونات الجنون", labelEn: "Donut Mania" },
+    5: { target: 14000, moves: 15, labelAr: "تحدي الأساطير", labelEn: "Legendary Sweet" }
+};
 
-let selectedTile = null;
-
-// Sparkle Particle Animation Layer
-const canvas = document.getElementById("particle-canvas");
-const ctx = canvas.getContext("2d");
-let particles = [];
-
-function resizeCanvas() {
-    canvas.width = boardWrapper.clientWidth;
-    canvas.height = boardWrapper.clientHeight;
+function getStageConfig(stageNum) {
+    if (STAGE_CONFIGS[stageNum]) {
+        return STAGE_CONFIGS[stageNum];
+    }
+    // Dynamic progression for infinite levels
+    const target = 14000 + (stageNum - 5) * 3500;
+    const moves = Math.max(12, 15 - Math.floor((stageNum - 5) / 2));
+    return {
+        target: target,
+        moves: moves,
+        labelAr: `تحدي كوني ${stageNum}`,
+        labelEn: `Cosmic Level ${stageNum}`
+    };
 }
-window.addEventListener("resize", resizeCanvas);
+
+let board = []; // 2D grid containing FruitTile references
+let lastSwapR1 = -1, lastSwapC1 = -1, lastSwapR2 = -1, lastSwapC2 = -1;
+let activeSelectedTile = null;
 
 /* =========================================================
-   TILE & PIECE STRUCTS
+   THREE.JS 3D WORLD BUILDERS
 ========================================================= */
-class Tile {
+const canvasContainer = document.getElementById("canvas-container");
+let scene, camera, renderer;
+let boardGroup; // Container group for 3D meshes
+const SPACING = 1.15; // Grid cell scale padding
+
+// Initialize Three.js WebGL Sandbox
+function init3DWorld() {
+    scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x100522, 0.05);
+
+    // Setup Orthographic Camera for perfect parallel Match-3 aspect ratios
+    const aspect = canvasContainer.clientWidth / canvasContainer.clientHeight;
+    const viewSize = 10;
+    camera = new THREE.OrthographicCamera(
+        -viewSize * aspect / 2, viewSize * aspect / 2,
+        viewSize / 2, -viewSize / 2,
+        0.1, 1000
+    );
+    // Align camera centered directly in front of the match-3 field
+    camera.position.set(0, 0, 10);
+    camera.lookAt(0, 0, 0);
+
+    // Renderer setup with antialias & pixel ratio safety
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    
+    // Clear old canvases
+    canvasContainer.innerHTML = "";
+    canvasContainer.appendChild(renderer.domElement);
+
+    // Board container group
+    boardGroup = new THREE.Group();
+    scene.add(boardGroup);
+
+    // Ambient background lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
+    scene.add(ambientLight);
+
+    // Key directional light casting deep 3D drop-shadows
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
+    dirLight.position.set(3, 6, 8);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.width = 1024;
+    dirLight.shadow.mapSize.height = 1024;
+    scene.add(dirLight);
+
+    // Point highlight light for match glows
+    const pointLight = new THREE.PointLight(0xff68b4, 1.2, 15);
+    pointLight.position.set(0, 0, 3);
+    scene.add(pointLight);
+
+    // Floating background starry stardust
+    createBackgroundStars();
+
+    // Trigger window resize event safety
+    window.addEventListener("resize", onWindowResize);
+}
+
+// Generate starry stardust in background
+let backgroundStars;
+function createBackgroundStars() {
+    const starCount = 60;
+    const geom = new THREE.BufferGeometry();
+    const positions = new Float32Array(starCount * 3);
+    const colors = new Float32Array(starCount * 3);
+
+    for (let i = 0; i < starCount; i++) {
+        positions[i * 3] = (Math.random() - 0.5) * 20;
+        positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
+        positions[i * 3 + 2] = -5 - Math.random() * 5; // Deep behind board
+
+        // Pastel purple/magenta/cyan star colors
+        colors[i * 3] = 0.5 + Math.random() * 0.5;
+        colors[i * 3 + 1] = 0.2 + Math.random() * 0.4;
+        colors[i * 3 + 2] = 0.8 + Math.random() * 0.2;
+    }
+
+    geom.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geom.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+
+    // Star material texture mapping
+    const mat = new THREE.PointsMaterial({
+        size: 0.15,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending
+    });
+
+    backgroundStars = new THREE.Points(geom, mat);
+    scene.add(backgroundStars);
+}
+
+function onWindowResize() {
+    if (!renderer) return;
+    const width = canvasContainer.clientWidth;
+    const height = canvasContainer.clientHeight;
+    renderer.setSize(width, height);
+    
+    const aspect = width / height;
+    const viewSize = 10;
+    camera.left = -viewSize * aspect / 2;
+    camera.right = viewSize * aspect / 2;
+    camera.top = viewSize / 2;
+    camera.bottom = -viewSize / 2;
+    camera.updateProjectionMatrix();
+}
+
+/* =========================================================
+   PROCEDURAL 3D FRUIT MESH CONSTRUCTORS
+========================================================= */
+function createApple() {
+    const group = new THREE.Group();
+    const bodyGeom = new THREE.SphereGeometry(0.4, 32, 32);
+    bodyGeom.scale(1, 0.9, 1);
+    const bodyMat = new THREE.MeshStandardMaterial({
+        color: 0xff3333,
+        roughness: 0.15,
+        metalness: 0.1,
+        clearcoat: 1.0,
+        clearcoatRoughness: 0.1
+    });
+    const body = new THREE.Mesh(bodyGeom, bodyMat);
+    group.add(body);
+    
+    // Stem
+    const stemGeom = new THREE.CylinderGeometry(0.02, 0.02, 0.15, 8);
+    stemGeom.translate(0, 0.4, 0);
+    stemGeom.rotateZ(-0.2);
+    const stemMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.9 });
+    const stem = new THREE.Mesh(stemGeom, stemMat);
+    group.add(stem);
+    
+    // Leaf
+    const leafGeom = new THREE.ConeGeometry(0.06, 0.18, 8);
+    leafGeom.scale(1, 1, 0.2);
+    leafGeom.translate(0.05, 0.42, 0);
+    leafGeom.rotateZ(0.6);
+    const leafMat = new THREE.MeshStandardMaterial({ color: 0x228b22, roughness: 0.5 });
+    const leaf = new THREE.Mesh(leafGeom, leafMat);
+    group.add(leaf);
+    
+    return group;
+}
+
+function createOrange() {
+    const group = new THREE.Group();
+    const bodyGeom = new THREE.SphereGeometry(0.38, 32, 32);
+    const bodyMat = new THREE.MeshStandardMaterial({
+        color: 0xff8c00,
+        roughness: 0.4,
+        metalness: 0.1,
+        clearcoat: 0.5
+    });
+    const body = new THREE.Mesh(bodyGeom, bodyMat);
+    group.add(body);
+    
+    const stemGeom = new THREE.CylinderGeometry(0.015, 0.015, 0.08, 8);
+    stemGeom.translate(0, 0.38, 0);
+    const stemMat = new THREE.MeshStandardMaterial({ color: 0x3d2314, roughness: 0.9 });
+    const stem = new THREE.Mesh(stemGeom, stemMat);
+    group.add(stem);
+    
+    const leafGeom = new THREE.ConeGeometry(0.05, 0.15, 8);
+    leafGeom.scale(1, 1, 0.2);
+    leafGeom.translate(-0.04, 0.39, 0);
+    leafGeom.rotateZ(-0.6);
+    const leafMat = new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 0.6 });
+    const leaf = new THREE.Mesh(leafGeom, leafMat);
+    group.add(leaf);
+    
+    return group;
+}
+
+function createWatermelon() {
+    const group = new THREE.Group();
+    const bodyGeom = new THREE.SphereGeometry(0.42, 32, 32);
+    bodyGeom.scale(1, 1.25, 0.85);
+    bodyGeom.rotateZ(0.3);
+    
+    // Procedural striped canvas texture
+    const canvas = document.createElement("canvas");
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#2e7d32";
+    ctx.fillRect(0, 0, 128, 128);
+    ctx.fillStyle = "#1b5e20";
+    for (let i = 0; i < 6; i++) {
+        ctx.fillRect(i * 22, 0, 8, 128);
+    }
+    const texture = new THREE.CanvasTexture(canvas);
+    
+    const bodyMat = new THREE.MeshStandardMaterial({
+        map: texture,
+        roughness: 0.2,
+        metalness: 0.1
+    });
+    const body = new THREE.Mesh(bodyGeom, bodyMat);
+    group.add(body);
+    
+    return group;
+}
+
+function createBanana() {
+    const group = new THREE.Group();
+    const curve = new THREE.QuadraticBezierCurve3(
+        new THREE.Vector3(-0.25, 0.25, 0),
+        new THREE.Vector3(0, -0.3, 0),
+        new THREE.Vector3(0.25, 0.25, 0)
+    );
+    const bodyGeom = new THREE.TubeGeometry(curve, 20, 0.08, 8, false);
+    const bodyMat = new THREE.MeshStandardMaterial({
+        color: 0xffd700,
+        roughness: 0.3,
+        metalness: 0.1
+    });
+    const body = new THREE.Mesh(bodyGeom, bodyMat);
+    group.add(body);
+    
+    const tipGeom = new THREE.SphereGeometry(0.085, 8, 8);
+    tipGeom.translate(0.25, 0.25, 0);
+    const tipMat = new THREE.MeshStandardMaterial({ color: 0x4e3629, roughness: 0.8 });
+    const tip = new THREE.Mesh(tipGeom, tipMat);
+    group.add(tip);
+    
+    return group;
+}
+
+function createGrape() {
+    const group = new THREE.Group();
+    const grapeMat = new THREE.MeshStandardMaterial({
+        color: 0x6a1b9a,
+        roughness: 0.1,
+        metalness: 0.1,
+        clearcoat: 0.8
+    });
+    
+    const grapeGeom = new THREE.SphereGeometry(0.14, 16, 16);
+    
+    const positions = [
+        [0, 0.18, 0],
+        [-0.12, 0.06, 0],
+        [0.12, 0.06, 0],
+        [0, -0.06, 0],
+        [-0.08, -0.16, 0],
+        [0.08, -0.16, 0],
+        [0, -0.26, 0]
+    ];
+    
+    positions.forEach(pos => {
+        const mesh = new THREE.Mesh(grapeGeom, grapeMat);
+        mesh.position.set(pos[0], pos[1], pos[2]);
+        group.add(mesh);
+    });
+    
+    const stemGeom = new THREE.CylinderGeometry(0.015, 0.015, 0.1, 8);
+    stemGeom.translate(0, 0.26, 0);
+    const stemMat = new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 0.9 });
+    const stem = new THREE.Mesh(stemGeom, stemMat);
+    group.add(stem);
+    
+    return group;
+}
+
+function createStrawberry() {
+    const group = new THREE.Group();
+    const bodyGeom = new THREE.ConeGeometry(0.28, 0.6, 24);
+    bodyGeom.rotateX(Math.PI);
+    bodyGeom.scale(1.1, 1, 0.9);
+    
+    const bodyMat = new THREE.MeshStandardMaterial({
+        color: 0xe53935,
+        roughness: 0.15,
+        metalness: 0.1,
+        clearcoat: 0.8
+    });
+    const body = new THREE.Mesh(bodyGeom, bodyMat);
+    group.add(body);
+    
+    const capGeom = new THREE.CylinderGeometry(0.18, 0.01, 0.05, 8);
+    capGeom.translate(0, 0.3, 0);
+    const capMat = new THREE.MeshStandardMaterial({ color: 0x43a047, roughness: 0.7 });
+    const cap = new THREE.Mesh(capGeom, capMat);
+    group.add(cap);
+    
+    return group;
+}
+
+// Master generator linking geometry with types
+function createFruitMesh(index) {
+    let meshGroup;
+    switch(index) {
+        case 0: meshGroup = createWatermelon(); break;
+        case 1: meshGroup = createApple(); break;
+        case 2: meshGroup = createOrange(); break;
+        case 3: meshGroup = createBanana(); break;
+        case 4: meshGroup = createGrape(); break;
+        case 5: meshGroup = createStrawberry(); break;
+        default: meshGroup = createApple();
+    }
+    return meshGroup;
+}
+
+/* =========================================================
+   BOARD METRICS TRANSLATION (COORDINATES ENGINE)
+========================================================= */
+function getBoardX(col) {
+    return (col - (GRID_SIZE - 1) / 2) * SPACING;
+}
+
+function getBoardY(row) {
+    return (((GRID_SIZE - 1) / 2) - row) * SPACING;
+}
+
+/* =========================================================
+   CUSTOM SECURE TWEENING/ANIMATION ENGINE
+========================================================= */
+let activeTweens = [];
+
+function addTween(object, property, targetValue, duration, onComplete = null) {
+    activeTweens.push({
+        object,
+        property,
+        startValue: object[property],
+        targetValue,
+        duration,
+        elapsed: 0,
+        onComplete
+    });
+}
+
+function updateTweens(dt) {
+    for (let i = activeTweens.length - 1; i >= 0; i--) {
+        const t = activeTweens[i];
+        t.elapsed += dt;
+        let progress = Math.min(t.elapsed / t.duration, 1);
+        
+        // Custom Cubic Ease-Out
+        let ease = 1 - Math.pow(1 - progress, 3);
+        
+        t.object[t.property] = t.startValue + (t.targetValue - t.startValue) * ease;
+        
+        if (progress >= 1) {
+            if (t.onComplete) t.onComplete();
+            activeTweens.splice(i, 1);
+        }
+    }
+}
+
+function animatePosition(mesh, x, y, z, duration, onComplete = null) {
+    addTween(mesh.position, "x", x, duration);
+    addTween(mesh.position, "y", y, duration);
+    addTween(mesh.position, "z", z, duration, onComplete);
+}
+
+/* =========================================================
+   PARTICLE HIT ENGINE (COLOR SPLASH PARTICLES)
+========================================================= */
+let activeParticles = [];
+
+function spawnParticles(x, y, colorCode, count = 12) {
+    const geom = new THREE.SphereGeometry(0.06, 8, 8);
+    const mat = new THREE.MeshBasicMaterial({
+        color: colorCode,
+        transparent: true,
+        opacity: 0.9
+    });
+
+    for (let i = 0; i < count; i++) {
+        const pMesh = new THREE.Mesh(geom, mat);
+        pMesh.position.set(x, y, 0.2);
+        
+        scene.add(pMesh);
+
+        // Exploding physics values
+        activeParticles.push({
+            mesh: pMesh,
+            vx: (Math.random() - 0.5) * 5,
+            vy: (Math.random() - 0.5) * 5 + 2, // Slight upward boost
+            vz: (Math.random() - 0.5) * 3,
+            gravity: -12, // strong falling gravitational acceleration
+            life: Math.random() * 0.4 + 0.3,
+            elapsed: 0
+        });
+    }
+}
+
+function updateParticles(dt) {
+    for (let i = activeParticles.length - 1; i >= 0; i--) {
+        const p = activeParticles[i];
+        p.elapsed += dt;
+        
+        // Physics update
+        p.vy += p.gravity * dt;
+        p.mesh.position.x += p.vx * dt;
+        p.mesh.position.y += p.vy * dt;
+        p.mesh.position.z += p.vz * dt;
+        
+        // Shrink & fade out
+        const ratio = Math.max(0, 1 - (p.elapsed / p.life));
+        p.mesh.scale.set(ratio, ratio, ratio);
+        p.mesh.material.opacity = ratio;
+
+        if (p.elapsed >= p.life) {
+            scene.remove(p.mesh);
+            p.mesh.geometry.dispose();
+            p.mesh.material.dispose();
+            activeParticles.splice(i, 1);
+        }
+    }
+}
+
+/* =========================================================
+   3D FRUIT GRID TILE CLASS
+========================================================= */
+class FruitTile {
     constructor(row, col, typeIndex) {
         this.row = row;
         this.col = col;
         this.typeIndex = typeIndex;
-        this.isStripedRow = false; // special match-4 horizontally
-        this.isStripedCol = false; // special match-4 vertically
-        this.isWrapped = false;    // special T/L match-5
-        this.isColorBomb = false;  // special Match-5 row/col
         
-        this.element = document.createElement("div");
-        this.element.className = "candy";
-        
-        this.inner = document.createElement("div");
-        this.inner.className = "candy-inner";
-        this.inner.textContent = CANDY_TYPES[typeIndex].emoji;
-        this.element.appendChild(this.inner);
-        
-        this.updatePosition();
-    }
+        this.mesh = createFruitMesh(typeIndex);
+        boardGroup.add(this.mesh);
 
-    updatePosition() {
-        // Pure absolute positioning based on grid coordinates
-        this.element.style.left = `${(this.col * 100) / GRID_SIZE}%`;
-        this.element.style.top = `${(this.row * 100) / GRID_SIZE}%`;
-        this.element.style.width = `${100 / GRID_SIZE}%`;
-        this.element.style.height = `${100 / GRID_SIZE}%`;
-    }
+        // Initial entry position above board
+        this.mesh.position.set(getBoardX(col), 6, 0);
+        this.mesh.scale.set(0, 0, 0);
 
-    setType(index) {
-        this.typeIndex = index;
-        this.inner.textContent = CANDY_TYPES[index].emoji;
-        
-        // Remove special classes
-        this.element.classList.remove("striped-row", "striped-col", "wrapped", "color-bomb");
+        // Bounce-In scaling
+        addTween(this.mesh.scale, "x", 1.0, 0.35);
+        addTween(this.mesh.scale, "y", 1.0, 0.35);
+        addTween(this.mesh.scale, "z", 1.0, 0.35);
+
+        // Special Match states
         this.isStripedRow = false;
         this.isStripedCol = false;
         this.isWrapped = false;
         this.isColorBomb = false;
     }
 
+    updateGridPosition(duration = 0.32, onComplete = null) {
+        animatePosition(this.mesh, getBoardX(this.col), getBoardY(this.row), 0, duration, onComplete);
+    }
+
     makeSpecial(type) {
         if (type === "striped-row") {
             this.isStripedRow = true;
-            this.element.classList.add("striped-row");
-            this.inner.textContent = "🍬"; // distinct special emoji/design
+            // Add a glowing ring around fruit
+            const ringGeom = new THREE.TorusGeometry(0.48, 0.05, 8, 24);
+            ringGeom.rotateX(Math.PI / 2);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8 });
+            const ring = new THREE.Mesh(ringGeom, ringMat);
+            this.mesh.add(ring);
         } else if (type === "striped-col") {
             this.isStripedCol = true;
-            this.element.classList.add("striped-col");
-            this.inner.textContent = "🍭";
+            const ringGeom = new THREE.TorusGeometry(0.48, 0.05, 8, 24);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8 });
+            const ring = new THREE.Mesh(ringGeom, ringMat);
+            this.mesh.add(ring);
         } else if (type === "wrapped") {
             this.isWrapped = true;
-            this.element.classList.add("wrapped");
-            this.inner.textContent = "🍩";
+            // Add a transparent glowing bubble envelope
+            const sphereGeom = new THREE.SphereGeometry(0.55, 16, 16);
+            const sphereMat = new THREE.MeshPhongMaterial({
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.25,
+                shininess: 100
+            });
+            const bubble = new THREE.Mesh(sphereGeom, sphereMat);
+            this.mesh.add(bubble);
         } else if (type === "color-bomb") {
             this.isColorBomb = true;
-            this.element.classList.add("color-bomb");
-            this.inner.textContent = "🌟"; // color bomb explodes whole matching type index
+            // Glow stars
+            const starsGroup = new THREE.Group();
+            const geom = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+            const mat = new THREE.MeshBasicMaterial({ color: 0xffde43 });
+            for (let i = 0; i < 4; i++) {
+                const star = new THREE.Mesh(geom, mat);
+                star.position.set((Math.random() - 0.5) * 0.9, (Math.random() - 0.5) * 0.9, (Math.random() - 0.5) * 0.9);
+                starsGroup.add(star);
+            }
+            this.mesh.add(starsGroup);
         }
     }
 }
 
 /* =========================================================
-   BOARD INIT & GENERATION
+   BOARD STYLING & GENERATION
 ========================================================= */
 function createBoard() {
-    boardWrapper.innerHTML = "";
+    // Clear old elements from three.js group
+    while (boardGroup.children.length > 0) {
+        boardGroup.remove(boardGroup.children[0]);
+    }
     board = [];
+
+    // Draw background wooden board frame
+    drawBoardTiles();
 
     for (let r = 0; r < GRID_SIZE; r++) {
         board[r] = [];
         for (let c = 0; c < GRID_SIZE; c++) {
-            // Create a background cell
-            const bgCell = document.createElement("div");
-            bgCell.className = "cell";
-            boardWrapper.appendChild(bgCell);
-
-            // Spawn unique tile making sure no initial match-3
             let typeIndex;
+            // Loop until we find a fruit type that doesn't form an initial match
             do {
-                typeIndex = Math.floor(Math.random() * CANDY_TYPES.length);
+                typeIndex = Math.floor(Math.random() * FRUIT_TYPES.length);
             } while (
                 (c >= 2 && board[r][c - 1].typeIndex === typeIndex && board[r][c - 2].typeIndex === typeIndex) ||
                 (r >= 2 && board[r - 1][c].typeIndex === typeIndex && board[r - 2][c].typeIndex === typeIndex)
             );
 
-            const tile = new Tile(r, c, typeIndex);
+            const tile = new FruitTile(r, c, typeIndex);
             board[r][c] = tile;
-            boardWrapper.appendChild(tile.element);
+            tile.updateGridPosition(0.4);
+        }
+    }
+}
 
-            // Setup interaction handlers
-            setupDragEvents(tile);
+// Render background visual tiles
+function drawBoardTiles() {
+    // Elegant dark rounded purple backing plate for contrast
+    const boardBackGeom = new THREE.BoxGeometry(GRID_SIZE * SPACING + 0.3, GRID_SIZE * SPACING + 0.3, 0.1);
+    const boardBackMat = new THREE.MeshStandardMaterial({
+        color: 0x1d0f3a,
+        roughness: 0.8,
+        metalness: 0.1
+    });
+    const backing = new THREE.Mesh(boardBackGeom, boardBackMat);
+    backing.position.set(0, 0, -0.3);
+    boardGroup.add(backing);
+
+    // Grid Cells
+    const tileGeom = new THREE.BoxGeometry(0.95, 0.95, 0.05);
+    const tileMatDark = new THREE.MeshStandardMaterial({ color: 0x120626, roughness: 0.9 });
+    const tileMatLight = new THREE.MeshStandardMaterial({ color: 0x1a0b36, roughness: 0.9 });
+
+    for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+            const isDark = (r + c) % 2 === 0;
+            const tileCell = new THREE.Mesh(tileGeom, isDark ? tileMatDark : tileMatLight);
+            tileCell.position.set(getBoardX(c), getBoardY(r), -0.15);
+            boardGroup.add(tileCell);
         }
     }
 }
 
 /* =========================================================
-   SWAPPING & INTERACTION LAW
+   SWIPING & 3D INTERACTION RAYCASTING
 ========================================================= */
-let startX, startY;
-let isDragging = false;
+let isSwiping = false;
+let startX = 0, startY = 0;
 
-function setupDragEvents(tile) {
-    const el = tile.element;
+function setupGestures() {
+    const el = canvasContainer;
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
 
-    const onStart = (clientX, clientY) => {
+    const handleStart = (clientX, clientY) => {
+        // Unlock sound on any click or touch
+        initAudio();
+        
         if (!isPlaying || isPaused || isAnimating) return;
-        
-        // Select tile
-        if (selectedTile) {
-            selectedTile.element.classList.remove("selected");
-        }
-        
-        selectedTile = tile;
-        tile.element.classList.add("selected");
-        sounds.click();
 
-        startX = clientX;
-        startY = clientY;
-        isDragging = true;
+        // Calculate container relative coordinates
+        const rect = el.getBoundingClientRect();
+        const x = ((clientX - rect.left) / el.clientWidth) * 2 - 1;
+        const y = -((clientY - rect.top) / el.clientHeight) * 2 + 1;
+
+        mouse.set(x, y);
+        raycaster.setFromCamera(mouse, camera);
+
+        // Find intersecting fruit meshes
+        const intersects = raycaster.intersectObjects(boardGroup.children, true);
+        if (intersects.length > 0) {
+            // Find which FruitTile owns this intersected object
+            let hitObj = intersects[0].object;
+            while (hitObj.parent && hitObj.parent !== boardGroup) {
+                hitObj = hitObj.parent;
+            }
+
+            // Find match on our board 2D array
+            let clickedTile = null;
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    const tile = board[r][c];
+                    if (tile && tile.mesh === hitObj) {
+                        clickedTile = tile;
+                        break;
+                    }
+                }
+            }
+
+            if (clickedTile) {
+                sounds.click();
+
+                // Tap-to-Swap: If we already have a selected tile and click an adjacent one
+                if (activeSelectedTile && activeSelectedTile !== clickedTile) {
+                    const rDiff = Math.abs(activeSelectedTile.row - clickedTile.row);
+                    const cDiff = Math.abs(activeSelectedTile.col - clickedTile.col);
+                    if ((rDiff === 1 && cDiff === 0) || (rDiff === 0 && cDiff === 1)) {
+                        // Adjacent! Swap them
+                        const r1 = activeSelectedTile.row;
+                        const c1 = activeSelectedTile.col;
+                        const r2 = clickedTile.row;
+                        const c2 = clickedTile.col;
+
+                        // Restore original scale
+                        if (activeSelectedTile.mesh) {
+                            activeSelectedTile.mesh.scale.set(1, 1, 1);
+                        }
+                        activeSelectedTile = null;
+
+                        trySwap(r1, c1, r2, c2);
+                        isSwiping = false;
+                        return;
+                    }
+                }
+
+                // If not adjacent or no previous selection, select this one
+                if (activeSelectedTile && activeSelectedTile.mesh) {
+                    activeSelectedTile.mesh.scale.set(1, 1, 1);
+                }
+
+                activeSelectedTile = clickedTile;
+                // Highlight selection by pulsing/scaling up
+                activeSelectedTile.mesh.scale.set(1.25, 1.25, 1.25);
+
+                startX = clientX;
+                startY = clientY;
+                isSwiping = true;
+            }
+        } else {
+            // Clicked empty board background, clear selection
+            if (activeSelectedTile && activeSelectedTile.mesh) {
+                activeSelectedTile.mesh.scale.set(1, 1, 1);
+            }
+            activeSelectedTile = null;
+        }
     };
 
-    const onMove = (clientX, clientY) => {
-        if (!isDragging || !selectedTile || isAnimating || isPaused || !isPlaying) return;
+    const handleMove = (clientX, clientY) => {
+        if (!isSwiping || !activeSelectedTile || isAnimating) return;
 
         const diffX = clientX - startX;
         const diffY = clientY - startY;
-        const minSwipeDist = 25; // pixels to swipe
+        const threshold = 25; // responsive swipe limit
 
-        if (Math.abs(diffX) > minSwipeDist || Math.abs(diffY) > minSwipeDist) {
-            isDragging = false;
-            let targetRow = selectedTile.row;
-            let targetCol = selectedTile.col;
+        if (Math.abs(diffX) > threshold || Math.abs(diffY) > threshold) {
+            isSwiping = false;
+
+            let targetRow = activeSelectedTile.row;
+            let targetCol = activeSelectedTile.col;
 
             if (Math.abs(diffX) > Math.abs(diffY)) {
-                targetCol += diffX > 0 ? 1 : -1;
+                // Horizontal Swipe
+                targetCol += (diffX > 0) ? 1 : -1;
             } else {
-                targetRow += diffY > 0 ? 1 : -1;
+                // Vertical Swipe
+                targetRow += (diffY > 0) ? 1 : -1; // Correct vertical swipe mapping (drag down goes to higher index)
             }
 
-            // Perform swap
-            trySwap(selectedTile.row, selectedTile.col, targetRow, targetCol);
+            // Restore scale of selected tile
+            if (activeSelectedTile.mesh) {
+                activeSelectedTile.mesh.scale.set(1, 1, 1);
+            }
+
+            if (targetRow >= 0 && targetRow < GRID_SIZE && targetCol >= 0 && targetCol < GRID_SIZE) {
+                const r1 = activeSelectedTile.row;
+                const c1 = activeSelectedTile.col;
+                activeSelectedTile = null;
+                trySwap(r1, c1, targetRow, targetCol);
+            } else {
+                activeSelectedTile = null;
+            }
         }
     };
 
+    const handleEnd = () => {
+        isSwiping = false;
+        // Do NOT reset activeSelectedTile here to allow tap-to-swap click matching!
+    };
+
+    // Pointer events for modern touch & mouse support
     el.addEventListener("pointerdown", e => {
-        el.setPointerCapture(e.pointerId);
-        onStart(e.clientX, e.clientY);
+        handleStart(e.clientX, e.clientY);
     });
-
     el.addEventListener("pointermove", e => {
-        onMove(e.clientX, e.clientY);
+        handleMove(e.clientX, e.clientY);
     });
+    el.addEventListener("pointerup", handleEnd);
+    el.addEventListener("pointercancel", handleEnd);
 
-    el.addEventListener("pointerup", e => {
-        isDragging = false;
-        el.releasePointerCapture(e.pointerId);
-    });
+    // Prevent viewport scrolling on touchscreens
+    el.addEventListener("touchstart", e => {
+        if (e.touches.length > 0) {
+            handleStart(e.touches[0].clientX, e.touches[0].clientY);
+        }
+    }, { passive: true });
+
+    el.addEventListener("touchmove", e => {
+        if (isSwiping && e.touches.length > 0) {
+            handleMove(e.touches[0].clientX, e.touches[0].clientY);
+        }
+    }, { passive: true });
+
+    el.addEventListener("touchend", handleEnd);
 }
 
+// SWAP ALGORITHM
 function trySwap(r1, c1, r2, c2) {
-    // Check boundaries & adjacency
-    if (isAnimating || isPaused || !isPlaying) return;
-    if (r2 < 0 || r2 >= GRID_SIZE || c2 < 0 || c2 >= GRID_SIZE) {
-        return;
-    }
-    const dist = Math.abs(r1 - r2) + Math.abs(c1 - c2);
-    if (dist !== 1) return;
-
     isAnimating = true;
     sounds.swap();
 
-    // Visual animation swap
     const t1 = board[r1][c1];
     const t2 = board[r2][c2];
 
-    // Swap indices
+    // Swap indexes
     t1.row = r2; t1.col = c2;
     t2.row = r1; t2.col = c1;
 
     board[r1][c1] = t2;
     board[r2][c2] = t1;
 
-    t1.updatePosition();
-    t2.updatePosition();
+    // Track coordinates of swap for spawning special reward fruits
+    lastSwapR1 = r1; lastSwapC1 = c1;
+    lastSwapR2 = r2; lastSwapC2 = c2;
 
-    if (t1.element.classList.contains("selected")) t1.element.classList.remove("selected");
-    if (t2.element.classList.contains("selected")) t2.element.classList.remove("selected");
-    selectedTile = null;
-
-    setTimeout(() => {
-        // Check for matches or color bombs
-        let isSpecialSwapMatched = handleSpecialSwaps(t1, t2);
-        let matches = checkMatches();
-
-        if (matches.length > 0 || isSpecialSwapMatched) {
+    // Animate meshes swap
+    t1.updateGridPosition(0.28);
+    t2.updateGridPosition(0.28, () => {
+        // Detect matches
+        const matches = checkMatches();
+        if (matches.length > 0) {
             moves--;
             updateHUD();
             processMatches();
         } else {
-            // Revert swap
+            // Revert swap if no matches
             sounds.swap();
             t1.row = r1; t1.col = c1;
             t2.row = r2; t2.col = c2;
-
             board[r1][c1] = t1;
             board[r2][c2] = t2;
-
-            t1.updatePosition();
-            t2.updatePosition();
-            setTimeout(() => {
+            t1.updateGridPosition(0.25);
+            t2.updateGridPosition(0.25, () => {
                 isAnimating = false;
-            }, 150);
+            });
         }
-    }, 150);
-}
-
-/* Color Bomb or Striped double swap trigger logic */
-function handleSpecialSwaps(t1, t2) {
-    let triggered = false;
-
-    // 1. Color bomb swapped with anything
-    if (t1.isColorBomb || t2.isColorBomb) {
-        triggered = true;
-        let colorBombTile = t1.isColorBomb ? t1 : t2;
-        let targetTile = t1.isColorBomb ? t2 : t1;
-        
-        let matchColorIndex = targetTile.typeIndex;
-        // Explode color bomb
-        explodeColor(matchColorIndex, colorBombTile);
-    }
-    // 2. Double striped candy swapped together
-    else if ((t1.isStripedRow || t1.isStripedCol) && (t2.isStripedRow || t2.isStripedCol)) {
-        triggered = true;
-        explodeRow(t1.row);
-        explodeCol(t1.col);
-    }
-
-    return triggered;
+    });
 }
 
 /* =========================================================
-   MATCH DETECTION LAW (Horizontal and Vertical)
+   MATCH-3 MATRIX PARSER (MATCH DETECTION)
 ========================================================= */
-function checkMatches() {
-    let matchSet = new Set();
+function findMatches() {
+    let horizontalMatches = [];
+    let verticalMatches = [];
 
-    // 1. Horizontal Matches
+    // Find horizontal matches
     for (let r = 0; r < GRID_SIZE; r++) {
-        let matchCount = 1;
-        for (let c = 1; c <= GRID_SIZE; c++) {
-            if (c < GRID_SIZE && 
-                board[r][c] && board[r][c - 1] &&
-                board[r][c].typeIndex !== undefined && 
-                board[r][c - 1].typeIndex !== undefined &&
-                board[r][c].typeIndex === board[r][c - 1].typeIndex && 
-                !board[r][c].isColorBomb && !board[r][c - 1].isColorBomb) {
-                matchCount++;
+        let c = 0;
+        while (c < GRID_SIZE) {
+            if (!board[r][c]) {
+                c++;
+                continue;
+            }
+            let match = [board[r][c]];
+            let nextC = c + 1;
+            while (nextC < GRID_SIZE && board[r][nextC] && board[r][nextC].typeIndex === board[r][c].typeIndex) {
+                match.push(board[r][nextC]);
+                nextC++;
+            }
+            if (match.length >= 3) {
+                horizontalMatches.push(match);
+                c = nextC;
             } else {
-                if (matchCount >= 3) {
-                    for (let i = 1; i <= matchCount; i++) {
-                        matchSet.add(board[r][c - i]);
-                    }
-                }
-                matchCount = 1;
+                c++;
             }
         }
     }
 
-    // 2. Vertical Matches
+    // Find vertical matches
     for (let c = 0; c < GRID_SIZE; c++) {
-        let matchCount = 1;
-        for (let r = 1; r <= GRID_SIZE; r++) {
-            if (r < GRID_SIZE && 
-                board[r][c] && board[r - 1][c] &&
-                board[r][c].typeIndex !== undefined && 
-                board[r - 1][c].typeIndex !== undefined &&
-                board[r][c].typeIndex === board[r - 1][c].typeIndex && 
-                !board[r][c].isColorBomb && !board[r - 1][c].isColorBomb) {
-                matchCount++;
+        let r = 0;
+        while (r < GRID_SIZE) {
+            if (!board[r][c]) {
+                r++;
+                continue;
+            }
+            let match = [board[r][c]];
+            let nextR = r + 1;
+            while (nextR < GRID_SIZE && board[nextR][c] && board[nextR][c].typeIndex === board[r][c].typeIndex) {
+                match.push(board[nextR][c]);
+                nextR++;
+            }
+            if (match.length >= 3) {
+                verticalMatches.push(match);
+                r = nextR;
             } else {
-                if (matchCount >= 3) {
-                    for (let i = 1; i <= matchCount; i++) {
-                        matchSet.add(board[r - i][c]);
-                    }
-                }
-                matchCount = 1;
+                r++;
             }
         }
     }
 
+    return { horizontalMatches, verticalMatches };
+}
+
+function checkMatches() {
+    const { horizontalMatches, verticalMatches } = findMatches();
+    let matchSet = new Set();
+    horizontalMatches.forEach(m => m.forEach(t => matchSet.add(t)));
+    verticalMatches.forEach(m => m.forEach(t => matchSet.add(t)));
     return Array.from(matchSet);
 }
 
 /* =========================================================
-   CANDY DESTRUCTION & SPECIAL SPAWNS
+   SPECIAL VFX RENDERERS
+========================================================= */
+function spawnLaserEffect(index, direction) {
+    const laserGeom = direction === "row" 
+        ? new THREE.BoxGeometry(10, 0.15, 0.15) 
+        : new THREE.BoxGeometry(0.15, 10, 0.15);
+    const laserMat = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.95
+    });
+    const laser = new THREE.Mesh(laserGeom, laserMat);
+    if (direction === "row") {
+        laser.position.set(0, getBoardY(index), 0.3);
+    } else {
+        laser.position.set(getBoardX(index), 0, 0.3);
+    }
+    scene.add(laser);
+    
+    // Fade out laser
+    addTween(laser.material, "opacity", 0, 0.35, () => {
+        scene.remove(laser);
+        laserGeom.dispose();
+        laserMat.dispose();
+    });
+}
+
+function spawnExplosionEffect(row, col) {
+    const x = getBoardX(col);
+    const y = getBoardY(row);
+    // Radial expansion ring
+    const ringGeom = new THREE.RingGeometry(0.1, 1.5, 32);
+    const ringMat = new THREE.MeshBasicMaterial({
+        color: 0xffaa44,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.8
+    });
+    const ring = new THREE.Mesh(ringGeom, ringMat);
+    ring.position.set(x, y, 0.25);
+    scene.add(ring);
+    
+    addTween(ring.scale, "x", 1.8, 0.3);
+    addTween(ring.scale, "y", 1.8, 0.3);
+    addTween(ring.material, "opacity", 0, 0.3, () => {
+        scene.remove(ring);
+        ringGeom.dispose();
+        ringMat.dispose();
+    });
+    
+    // Extra sparkle explosion particles
+    spawnParticles(x, y, 0xffaa44, 25);
+}
+
+function spawnColorBombEffect(row, col, color) {
+    const x = getBoardX(col);
+    const y = getBoardY(row);
+    spawnParticles(x, y, color, 30);
+    // Mega shockwave ring
+    const ringGeom = new THREE.RingGeometry(0.1, 2.0, 32);
+    const ringMat = new THREE.MeshBasicMaterial({
+        color: color,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.8
+    });
+    const ring = new THREE.Mesh(ringGeom, ringMat);
+    ring.position.set(x, y, 0.25);
+    scene.add(ring);
+    
+    addTween(ring.scale, "x", 2.2, 0.4);
+    addTween(ring.scale, "y", 2.2, 0.4);
+    addTween(ring.material, "opacity", 0, 0.4, () => {
+        scene.remove(ring);
+        ringGeom.dispose();
+        ringMat.dispose();
+    });
+}
+
+/* =========================================================
+   MATCH PROCESSING & CASCADE ENGINE WITH SPECIAL BOMBS
 ========================================================= */
 function processMatches() {
-    let matches = checkMatches();
-    if (matches.length === 0) {
+    const { horizontalMatches, verticalMatches } = findMatches();
+    if (horizontalMatches.length === 0 && verticalMatches.length === 0) {
         isAnimating = false;
         checkGameOver();
         return;
     }
 
+    isAnimating = true;
     sounds.match();
 
-    // Check for Match-4 or Match-5 for special candy generation
-    // Group matches by row and column to check sequence sizes
-    let hGroups = {};
-    let vGroups = {};
+    // Set of all tiles to destroy
+    let tilesToDestroy = new Set();
+    
+    // We want to identify if there are any special creations
+    let specialsToSpawn = []; // Array of { r, c, typeIndex, specialType }
 
-    matches.forEach(t => {
-        if (!hGroups[t.row]) hGroups[t.row] = [];
-        hGroups[t.row].push(t);
+    // Helper to check if a tile is the swap source
+    function isSwapSource(tile) {
+        return (tile.row === lastSwapR1 && tile.col === lastSwapC1) || 
+               (tile.row === lastSwapR2 && tile.col === lastSwapC2);
+    }
 
-        if (!vGroups[t.col]) vGroups[t.col] = [];
-        vGroups[t.col].push(t);
-    });
+    // 1. Check for T/L shapes (intersection of horizontal and vertical matches)
+    let processedH = new Set();
+    let processedV = new Set();
 
-    let specialToSpawn = []; // List of custom spawns
-
-    // Match-5 -> Color Bomb
-    Object.keys(hGroups).forEach(r => {
-        if (hGroups[r].length >= 5) {
-            let middleTile = hGroups[r][Math.floor(hGroups[r].length / 2)];
-            specialToSpawn.push({ tile: middleTile, type: "color-bomb" });
-        } else if (hGroups[r].length === 4) {
-            // Match-4 -> Striped Row
-            let middleTile = hGroups[r][1];
-            specialToSpawn.push({ tile: middleTile, type: "striped-row" });
-        }
-    });
-
-    Object.keys(vGroups).forEach(c => {
-        if (vGroups[c].length >= 5) {
-            let middleTile = vGroups[c][Math.floor(vGroups[c].length / 2)];
-            // Make sure not already processed
-            if (!specialToSpawn.some(s => s.tile === middleTile)) {
-                specialToSpawn.push({ tile: middleTile, type: "color-bomb" });
+    for (let hIdx = 0; hIdx < horizontalMatches.length; hIdx++) {
+        const hMatch = horizontalMatches[hIdx];
+        for (let vIdx = 0; vIdx < verticalMatches.length; vIdx++) {
+            const vMatch = verticalMatches[vIdx];
+            
+            // Find intersection
+            const intersection = hMatch.find(hTile => vMatch.some(vTile => vTile.row === hTile.row && vTile.col === hTile.col));
+            if (intersection) {
+                // T or L Match! Spawns a WRAPPED candy at intersection or swap source
+                let spawnTile = hMatch.find(isSwapSource) || vMatch.find(isSwapSource) || intersection;
+                specialsToSpawn.push({
+                    row: spawnTile.row,
+                    col: spawnTile.col,
+                    typeIndex: spawnTile.typeIndex,
+                    specialType: "wrapped"
+                });
+                
+                hMatch.forEach(t => tilesToDestroy.add(t));
+                vMatch.forEach(t => tilesToDestroy.add(t));
+                
+                processedH.add(hIdx);
+                processedV.add(vIdx);
             }
-        } else if (vGroups[c].length === 4) {
-            let middleTile = vGroups[c][1];
-            if (!specialToSpawn.some(s => s.tile === middleTile)) {
-                specialToSpawn.push({ tile: middleTile, type: "striped-col" });
+        }
+    }
+
+    // 2. Check remaining horizontal matches
+    for (let i = 0; i < horizontalMatches.length; i++) {
+        if (processedH.has(i)) continue;
+        const match = horizontalMatches[i];
+        
+        match.forEach(t => tilesToDestroy.add(t));
+
+        if (match.length >= 5) {
+            // Spawn a COLOR BOMB
+            let spawnTile = match.find(isSwapSource) || match[Math.floor(match.length / 2)];
+            specialsToSpawn.push({
+                row: spawnTile.row,
+                col: spawnTile.col,
+                typeIndex: spawnTile.typeIndex,
+                specialType: "color-bomb"
+            });
+        } else if (match.length === 4) {
+            // Match-4 horizontal spawns a Column Striper (Striped Col)
+            let spawnTile = match.find(isSwapSource) || match[Math.floor(match.length / 2)];
+            specialsToSpawn.push({
+                row: spawnTile.row,
+                col: spawnTile.col,
+                typeIndex: spawnTile.typeIndex,
+                specialType: "striped-col"
+            });
+        }
+    }
+
+    // 3. Check remaining vertical matches
+    for (let i = 0; i < verticalMatches.length; i++) {
+        if (processedV.has(i)) continue;
+        const match = verticalMatches[i];
+        
+        match.forEach(t => tilesToDestroy.add(t));
+
+        if (match.length >= 5) {
+            // Spawn a COLOR BOMB
+            let spawnTile = match.find(isSwapSource) || match[Math.floor(match.length / 2)];
+            specialsToSpawn.push({
+                row: spawnTile.row,
+                col: spawnTile.col,
+                typeIndex: spawnTile.typeIndex,
+                specialType: "color-bomb"
+            });
+        } else if (match.length === 4) {
+            // Match-4 vertical spawns a Row Striper (Striped Row)
+            let spawnTile = match.find(isSwapSource) || match[Math.floor(match.length / 2)];
+            specialsToSpawn.push({
+                row: spawnTile.row,
+                col: spawnTile.col,
+                typeIndex: spawnTile.typeIndex,
+                specialType: "striped-row"
+            });
+        }
+    }
+
+    // Reset swap variables
+    lastSwapR1 = -1; lastSwapC1 = -1;
+    lastSwapR2 = -1; lastSwapC2 = -1;
+
+    // Chain Reaction Explosion Queue!
+    let listToProcess = Array.from(tilesToDestroy);
+    let fullyExploded = new Set();
+
+    while (listToProcess.length > 0) {
+        let nextBatch = [];
+        for (let tile of listToProcess) {
+            if (fullyExploded.has(tile)) continue;
+            fullyExploded.add(tile);
+
+            if (tile.isStripedRow) {
+                // Clear the row
+                sounds.special();
+                spawnLaserEffect(tile.row, "row");
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    const target = board[tile.row][c];
+                    if (target && !tilesToDestroy.has(target)) {
+                        tilesToDestroy.add(target);
+                        nextBatch.push(target);
+                    }
+                }
             }
-        }
-    });
-
-    // Match-T or Match-L (combo horizontal & vertical) -> Wrapped Candy
-    matches.forEach(t => {
-        let isH = hGroups[t.row] && hGroups[t.row].length >= 3;
-        let isV = vGroups[t.col] && vGroups[t.col].length >= 3;
-        if (isH && isV) {
-            specialToSpawn.push({ tile: t, type: "wrapped" });
-        }
-    });
-
-    // Explode tiles and award score
-    let explodedTiles = new Set();
-
-    matches.forEach(tile => {
-        if (explodedTiles.has(tile)) return;
-        triggerTileExplosion(tile, explodedTiles);
-    });
-
-    // Perform Special spawns
-    specialToSpawn.forEach(spawn => {
-        let tile = spawn.tile;
-        tile.setType(Math.floor(Math.random() * CANDY_TYPES.length)); // re-seed index so it can match later
-        tile.makeSpecial(spawn.type);
-        tile.element.style.opacity = 1;
-        tile.element.style.transform = "scale(1)";
-        tile.element.visible = true;
-        // Revive in board
-        board[tile.row][tile.col] = tile;
-        explodedTiles.delete(tile);
-    });
-
-    // Score updating
-    score += explodedTiles.size * 60;
-    updateHUD();
-
-    // After fadeout, drop tiles
-    setTimeout(() => {
-        dropTiles();
-    }, 250);
-}
-
-function triggerTileExplosion(tile, explodedSet) {
-    if (explodedSet.has(tile)) return;
-    explodedSet.add(tile);
-
-    // Spawn Particles
-    spawnCandyParticles(tile);
-
-    tile.element.style.opacity = 0;
-    tile.element.style.transform = "scale(0.3)";
-
-    // Handle special candy chain reaction
-    if (tile.isStripedRow) {
-        sounds.special();
-        explodeRow(tile.row, explodedSet);
-    } 
-    else if (tile.isStripedCol) {
-        sounds.special();
-        explodeCol(tile.col, explodedSet);
-    }
-    else if (tile.isWrapped) {
-        sounds.special();
-        explodeRadius(tile.row, tile.col, explodedSet);
-    }
-}
-
-/* Chain Exploders */
-function explodeRow(row, explodedSet = new Set()) {
-    for (let c = 0; c < GRID_SIZE; c++) {
-        let tile = board[row][c];
-        if (tile && !explodedSet.has(tile)) {
-            triggerTileExplosion(tile, explodedSet);
-        }
-    }
-}
-
-function explodeCol(col, explodedSet = new Set()) {
-    for (let r = 0; r < GRID_SIZE; r++) {
-        let tile = board[r][col];
-        if (tile && !explodedSet.has(tile)) {
-            triggerTileExplosion(tile, explodedSet);
-        }
-    }
-}
-
-function explodeRadius(row, col, explodedSet = new Set()) {
-    for (let r = row - 1; r <= row + 1; r++) {
-        for (let c = col - 1; c <= col + 1; c++) {
-            if (r >= 0 && r < GRID_SIZE && c >= 0 && c < GRID_SIZE) {
-                let tile = board[r][c];
-                if (tile && !explodedSet.has(tile)) {
-                    triggerTileExplosion(tile, explodedSet);
+            if (tile.isStripedCol) {
+                // Clear the column
+                sounds.special();
+                spawnLaserEffect(tile.col, "col");
+                for (let r = 0; r < GRID_SIZE; r++) {
+                    const target = board[r][tile.col];
+                    if (target && !tilesToDestroy.has(target)) {
+                        tilesToDestroy.add(target);
+                        nextBatch.push(target);
+                    }
+                }
+            }
+            if (tile.isWrapped) {
+                // Explode in 3x3 surrounding radius
+                sounds.special();
+                spawnExplosionEffect(tile.row, tile.col);
+                for (let r = Math.max(0, tile.row - 1); r <= Math.min(GRID_SIZE - 1, tile.row + 1); r++) {
+                    for (let c = Math.max(0, tile.col - 1); c <= Math.min(GRID_SIZE - 1, tile.col + 1); c++) {
+                        const target = board[r][c];
+                        if (target && !tilesToDestroy.has(target)) {
+                            tilesToDestroy.add(target);
+                            nextBatch.push(target);
+                        }
+                    }
+                }
+            }
+            if (tile.isColorBomb) {
+                // Clear all candies of the color that triggered it
+                sounds.special();
+                const targetColorIndex = tile.typeIndex;
+                spawnColorBombEffect(tile.row, tile.col, FRUIT_TYPES[targetColorIndex].color);
+                for (let r = 0; r < GRID_SIZE; r++) {
+                    for (let c = 0; c < GRID_SIZE; c++) {
+                        const target = board[r][c];
+                        if (target && target.typeIndex === targetColorIndex && !tilesToDestroy.has(target)) {
+                            tilesToDestroy.add(target);
+                            nextBatch.push(target);
+                        }
+                    }
                 }
             }
         }
+        listToProcess = nextBatch;
     }
-}
 
-function explodeColor(typeIndex, bombTile) {
-    sounds.special();
-    let explodedSet = new Set();
-    explodedSet.add(bombTile);
-    bombTile.element.style.opacity = 0;
+    // Execute final destruction of everything in tilesToDestroy Set
+    const finalDestructionList = Array.from(tilesToDestroy);
+    finalDestructionList.forEach(tile => {
+        const x = getBoardX(tile.col);
+        const y = getBoardY(tile.row);
+        const color = FRUIT_TYPES[tile.typeIndex].color;
+        
+        spawnParticles(x, y, color, (tile.isColorBomb || tile.isWrapped) ? 28 : 14);
 
-    for (let r = 0; r < GRID_SIZE; r++) {
-        for (let c = 0; c < GRID_SIZE; c++) {
-            let tile = board[r][c];
-            if (tile && tile.typeIndex === typeIndex) {
-                triggerTileExplosion(tile, explodedSet);
-            }
+        if (tile.mesh) {
+            addTween(tile.mesh.scale, "x", 0.0, 0.22);
+            addTween(tile.mesh.scale, "y", 0.0, 0.22);
+            addTween(tile.mesh.scale, "z", 0.0, 0.22, () => {
+                boardGroup.remove(tile.mesh);
+            });
         }
-    }
+        board[tile.row][tile.col] = null;
+    });
 
-    score += explodedSet.size * 80;
+    // Score points and scale with bigger combinations
+    score += finalDestructionList.length * 60;
+    if (finalDestructionList.length > 3) {
+        score += (finalDestructionList.length - 3) * 40; // combo bonuses
+    }
     updateHUD();
 
+    // Spawn special candies at designated vacant spots
     setTimeout(() => {
-        dropTiles();
+        specialsToSpawn.forEach(spec => {
+            const tile = new FruitTile(spec.row, spec.col, spec.typeIndex);
+            tile.makeSpecial(spec.specialType);
+            board[spec.row][spec.col] = tile;
+            
+            tile.mesh.scale.set(0, 0, 0);
+            addTween(tile.mesh.scale, "x", 1.0, 0.3);
+            addTween(tile.mesh.scale, "y", 1.0, 0.3);
+            addTween(tile.mesh.scale, "z", 1.0, 0.3);
+            tile.updateGridPosition(0.1);
+        });
+
+        dropFruits();
     }, 250);
 }
 
 /* =========================================================
-   GRAVITY, FALLING, AND CASCADE
+   GRAVITY CASCADE (FALLING IN 3D)
 ========================================================= */
-function dropTiles() {
+function dropFruits() {
     let shifted = false;
 
-    // Loop through each column from bottom to top
     for (let c = 0; c < GRID_SIZE; c++) {
         let emptySpaces = 0;
+
+        // Loop column upwards
         for (let r = GRID_SIZE - 1; r >= 0; r--) {
-            if (board[r][c].element.style.opacity === "0") {
+            if (board[r][c] === null) {
                 emptySpaces++;
             } else if (emptySpaces > 0) {
-                // Shift candy down
-                let tile = board[r][c];
-                let targetRow = r + emptySpaces;
-
-                board[targetRow][c] = tile;
-                tile.row = targetRow;
-                tile.updatePosition();
-
-                // Create placeholder empty tile
-                board[r][c] = { element: { style: { opacity: "0" } } };
+                // Fall existing tile down
+                const tile = board[r][c];
+                board[r + emptySpaces][c] = tile;
+                board[r][c] = null;
+                tile.row = r + emptySpaces;
+                
+                // Falling physics animation
+                tile.updateGridPosition(0.35);
                 shifted = true;
             }
         }
 
-        // Fill top empty spaces with new candies
+        // Fill empty top spaces with fresh fruits
         for (let r = 0; r < emptySpaces; r++) {
-            let newType = Math.floor(Math.random() * CANDY_TYPES.length);
-            const tile = new Tile(-1 - r, c, newType); // Start just above board for entry slide
-            boardWrapper.appendChild(tile.element);
-            setupDragEvents(tile);
-
-            // Animate fall to position
-            setTimeout(() => {
-                tile.row = r;
-                tile.updatePosition();
-            }, 50);
-
+            const newType = Math.floor(Math.random() * FRUIT_TYPES.length);
+            const tile = new FruitTile(r - emptySpaces - 1, c, newType); // start way above
+            
             board[r][c] = tile;
+            tile.row = r;
+            tile.updateGridPosition(0.42);
             shifted = true;
         }
     }
 
     sounds.fall();
 
-    // Clean up DOM of dead nodes (tiles that have zero opacity)
-    const deadCandies = Array.from(boardWrapper.querySelectorAll(".candy")).filter(el => {
-        return el.style.opacity === "0" || parseFloat(el.style.top) < -50;
-    });
-    deadCandies.forEach(el => el.remove());
-
-    // Recheck matches
+    // Recheck matches cascade recursive loop
     setTimeout(() => {
-        let cascadeMatches = checkMatches();
-        if (cascadeMatches.length > 0) {
+        const chainMatches = checkMatches();
+        if (chainMatches.length > 0) {
             processMatches();
         } else {
             isAnimating = false;
             checkGameOver();
         }
-    }, 300);
+    }, 450);
 }
 
 /* =========================================================
-   PHYSICS SPARKLE PARTICLES
+   GAME ENGINE SCENE LOOP (ANIMATION THREAD)
 ========================================================= */
-let isParticleLoopRunning = false;
+let clock = new THREE.Clock();
 
-function spawnCandyParticles(tile) {
-    const rect = tile.element.getBoundingClientRect();
-    const wrapperRect = boardWrapper.getBoundingClientRect();
+function animate() {
+    requestAnimationFrame(animate);
 
-    const x = rect.left - wrapperRect.left + rect.width / 2;
-    const y = rect.top - wrapperRect.top + rect.height / 2;
+    const dt = clock.getDelta();
 
-    const color = (CANDY_TYPES[tile.typeIndex] && CANDY_TYPES[tile.typeIndex].color) || "#ff68b4";
+    // Update tweens
+    updateTweens(dt);
 
-    for (let i = 0; i < 10; i++) {
-        particles.push({
-            x: x,
-            y: y,
-            vx: (Math.random() - 0.5) * 6,
-            vy: (Math.random() - 0.5) * 6,
-            radius: Math.random() * 4 + 2,
-            color: color,
-            alpha: 1,
-            life: Math.random() * 0.4 + 0.3
-        });
-    }
+    // Update physics particles
+    updateParticles(dt);
 
-    if (!isParticleLoopRunning && particles.length > 0) {
-        isParticleLoopRunning = true;
-        requestAnimationFrame(updateParticles);
-    }
-}
-
-function updateParticles() {
-    if (particles.length === 0) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        isParticleLoopRunning = false;
-        return;
-    }
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.15; // simple gravity simulation
-        p.life -= 0.016;
-
-        ctx.fillStyle = p.color;
-        ctx.globalAlpha = Math.max(0, p.life * 2);
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fill();
-
-        if (p.life <= 0) {
-            particles.splice(i, 1);
+    // Gently float and rotate idle fruit meshes to breathe life into the 3D board
+    if (isPlaying && !isPaused && boardGroup) {
+        const time = clock.getElapsedTime();
+        for (let r = 0; r < GRID_SIZE; r++) {
+            for (let c = 0; c < GRID_SIZE; c++) {
+                const tile = board[r][c];
+                if (tile && tile.mesh) {
+                    // Small idle organic sine wave rotation and levitation
+                    tile.mesh.rotation.y = Math.sin(time + r * 0.4 + c * 0.2) * 0.12;
+                    tile.mesh.position.z = Math.sin(time * 1.5 + r * 0.5 + c * 0.3) * 0.04;
+                }
+            }
         }
     }
-    ctx.globalAlpha = 1;
 
-    if (particles.length > 0) {
-        requestAnimationFrame(updateParticles);
-    } else {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        isParticleLoopRunning = false;
+    // Slowly spin starry background
+    if (backgroundStars) {
+        backgroundStars.rotation.z += 0.015 * dt;
+    }
+
+    if (renderer && scene && camera) {
+        renderer.render(scene, camera);
     }
 }
-// Removed autostart of updateParticles, it triggers dynamically on spawn!
 
 /* =========================================================
-   GAME UTILS & SCENE FLOW
+   HUD ENGINE (UPDATE SYSTEM)
 ========================================================= */
 function updateHUD() {
     document.getElementById("score").textContent = score.toLocaleString();
     document.getElementById("moves").textContent = moves;
+    document.getElementById("stage").textContent = currentStage;
+    document.getElementById("target").textContent = targetScore.toLocaleString();
+
+    // Update Progress bar percentage
+    const percent = Math.min(100, (score / targetScore) * 100);
+    document.getElementById("progress-bar").style.width = `${percent}%`;
+
+    // Dynamically render 5 stage dots centered on currentStage (minimum starting at 1)
+    const stageBar = document.getElementById("stage-bar");
+    if (stageBar) {
+        let startIdx = Math.max(1, currentStage - 2);
+        let html = "";
+        for (let i = startIdx; i < startIdx + 5; i++) {
+            const isActive = (i === currentStage) ? "active" : "";
+            const label = isRtl ? `مرحلة ${i}` : `Stage ${i}`;
+            html += `<div class="stage-dot ${isActive}" data-stage="${i}" id="btn-st-${i}" onclick="selectStage(${i})">${label}</div>`;
+        }
+        stageBar.innerHTML = html;
+    }
 }
 
 function togglePause() {
     if (!isPlaying) return;
     isPaused = !isPaused;
-    const pauseOverlay = document.getElementById("pause-overlay");
     if (isPaused) {
-        pauseOverlay.classList.remove("hidden");
+        document.getElementById("pause-overlay").classList.remove("hidden");
         document.getElementById("pause").textContent = "▶️";
     } else {
-        pauseOverlay.classList.add("hidden");
+        document.getElementById("pause-overlay").classList.add("hidden");
         document.getElementById("pause").textContent = "⏸️";
     }
 }
 
-function checkGameOver() {
-    if (moves <= 0 || score >= targetScore) {
-        isPlaying = false;
-        
-        const isWin = score >= targetScore;
-        if (isWin) {
-            sounds.win();
-        } else {
-            sounds.lose();
-        }
+document.getElementById("resume-btn").addEventListener("click", () => {
+    togglePause();
+});
 
+/* =========================================================
+   GAME OVER EVALUATION & STATE MACHINE
+========================================================= */
+function checkGameOver() {
+    // Win Condition
+    if (score >= targetScore) {
+        endGame(true);
+    }
+    // Lose Condition
+    else if (moves <= 0) {
+        endGame(false);
+    }
+}
+
+function endGame(isWin) {
+    isPlaying = false;
+    isAnimating = false;
+
+    if (isWin) {
+        sounds.win();
         document.getElementById("overlay").classList.remove("hidden");
-        document.getElementById("main-logo").textContent = isWin ? t.win : t.lose;
+        document.getElementById("main-logo").textContent = t.win;
+        document.getElementById("modal-icon").textContent = "🏆";
+
+        const nextStage = currentStage + 1;
+        const nextConfig = getStageConfig(nextStage);
+        const stageName = isRtl ? nextConfig.labelAr : nextConfig.labelEn;
         document.getElementById("message").innerHTML = 
-            t.finalScore + "<b>" + score.toLocaleString() + "</b> / " + targetScore.toLocaleString() + "<br><br>" + (isWin ? "ممتاز! لقد اجتزت التحدي بنجاح." : "حاول مجدداً للوصول للمجموع المطلوب.");
-        document.getElementById("start-btn").textContent = t.btnRestart;
+            t.finalScore + "<b>" + score.toLocaleString() + "</b> / " + targetScore.toLocaleString() + "<br><br>" +
+            (isRtl 
+              ? `✨ ممتاز! لقد هزمت المرحلة ${currentStage}! المستويات تزداد صعوبة، هل أنت مستعد للمرحلة ${nextStage} (${stageName})؟`
+              : `✨ Perfect! You beat Stage ${currentStage}! Ready for Stage ${nextStage} (${stageName})?`);
+        document.getElementById("start-btn").textContent = isRtl ? `المرحلة التالية ${nextStage} ➡️` : `Next Stage ${nextStage} ➡️`;
+        
+        // Advance state
+        currentStage = nextStage;
+    } else {
+        sounds.lose();
+        document.getElementById("overlay").classList.remove("hidden");
+        document.getElementById("main-logo").textContent = t.lose;
+        document.getElementById("modal-icon").textContent = "💔";
+
+        const currentConfig = getStageConfig(currentStage);
+        const stageName = isRtl ? currentConfig.labelAr : currentConfig.labelEn;
+        document.getElementById("message").innerHTML = 
+            t.finalScore + "<b>" + score.toLocaleString() + "</b> / " + targetScore.toLocaleString() + "<br><br>" +
+            (isRtl
+              ? `المرحلة ${currentStage} (${stageName}): لقد نفذت حركاتك. حاول مجدداً للوصول للمجموع المطلق!`
+              : `Stage ${currentStage} (${stageName}): Out of moves. Retry this stage to meet the sweet goal!`);
+        document.getElementById("start-btn").textContent = isRtl ? `إعادة محاولة المرحلة ${currentStage} 🔄` : `Retry Stage ${currentStage} 🔄`;
     }
 }
 
 /* =========================================================
-   START / RESET SYSTEM
+   START / LOAD ENGINE HANDLER
 ========================================================= */
 document.getElementById("start-btn").addEventListener("click", () => {
     initAudio();
     sounds.gameStart();
 
+    // Load configs dynamically
+    const config = getStageConfig(currentStage);
+    targetScore = config.target;
+    moves = config.moves;
     score = 0;
-    moves = 25;
+
     isPlaying = true;
     isPaused = false;
     isAnimating = false;
@@ -1253,12 +1902,36 @@ document.getElementById("start-btn").addEventListener("click", () => {
     document.getElementById("pause").textContent = "⏸️";
     document.getElementById("overlay").classList.add("hidden");
 
-    resizeCanvas();
+    onWindowResize();
     createBoard();
     updateHUD();
 });
 
-// Keyboard hotkeys
+// Setup dynamic level selection callback
+window.selectStage = function(stageNum) {
+    if (isAnimating) return;
+    initAudio();
+    sounds.click();
+    currentStage = stageNum;
+    
+    const config = getStageConfig(stageNum);
+    targetScore = config.target;
+    moves = config.moves;
+    score = 0;
+
+    isPlaying = true;
+    isPaused = false;
+    isAnimating = false;
+
+    document.getElementById("pause-overlay").classList.add("hidden");
+    document.getElementById("pause").textContent = "⏸️";
+    document.getElementById("overlay").classList.add("hidden");
+
+    createBoard();
+    updateHUD();
+};
+
+// Keyboards Controls
 window.addEventListener("keydown", event => {
     if (event.key === "p" || event.key === "P") {
         event.preventDefault();
@@ -1266,8 +1939,12 @@ window.addEventListener("keydown", event => {
     }
 });
 
-// Init
-resizeCanvas();
+/* =========================================================
+   INIT SYSTEM BOOTSTRAPER
+========================================================= */
+init3DWorld();
+setupGestures();
+animate();
 
 </script>
 
