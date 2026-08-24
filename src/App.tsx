@@ -25,6 +25,7 @@ import {
 import cheeseThumbnail from './assets/images/cheese_eater_thumbnail_1787373161126.jpg';
 import tetrisThumbnail from './assets/images/tetris_thumbnail_1787444248779.jpg';
 import breakoutThumbnail from './assets/images/breakout_thumbnail_1787511090254.jpg';
+import candyCrushThumbnail from './assets/images/candy_crush_thumbnail_1787541332465.jpg';
 
 // Bilingual translations structure for premium localized design
 const TRANSLATIONS = {
@@ -155,6 +156,21 @@ const GAME_DATABASE_LOCALIZED = [
     controls: {
       ar: 'لوحة المفاتيح: أسهم الاتجاهات أو مفاتيح A / D لتحريك المضرب يميناً ويساراً، ومفتاح المسافة لإطلاق الكرة الممسوكة بالمغناطيس. زر P للإيقاف المؤقت. على الجوال: اسحب المطلب بإصبعك يميناً ويساراً، ثم اسحب بسرعة أو انتظر لإطلاق الكرة الممسوكة.',
       en: 'Keyboard: Left/Right Arrow keys or A/D keys to move the paddle, Spacebar to release magnetic ball. Press P to Pause. Mobile/Touch: Drag/swipe the paddle left and right, then swipe fast or wait to release the magnetic ball.'
+    }
+  },
+  {
+    id: 'game-candy-crush',
+    category: 'Arcade' as const,
+    thumbnailUrl: candyCrushThumbnail,
+    embedUrl: '/games/candy-crush.html',
+    title: { ar: 'لعبة حلوى كاندي كراش ماتش 3', en: 'Candy Crush Match 3' },
+    description: {
+      ar: 'العب لعبة حلوى كاندي كراش (Candy Match 3) الممتعة مجاناً أون لاين وبدون تحميل! طابق 3 قطع حلوى متطابقة أو أكثر، اصنع القنابل والحلوى المخططة المميزة وفجّر الجدران اللذيذة لتحقيق أعلى النقاط قبل انتهاء حركاتك.',
+      en: 'Play the sweet classic Candy Crush Match 3 game online for free with no download required! Swap and match 3 or more sweet candies, create striped sweets and color bomb powerups to clear the board.'
+    },
+    controls: {
+      ar: 'لوحة المفاتيح والماوس: اسحب قطعة الحلوى أو انقر عليها ثم انقر على القطعة المجاورة لتبديل مكانها. زر P للإيقاف المؤقت. على الجوال: اسحب الحلوى بإصبعك إلى الاتجاه المجاور لمطابقتها.',
+      en: 'Mouse/Keyboard: Drag candies with your mouse or click a candy and click an adjacent one to swap them. Press P to Pause. Touch/Mobile: Swipe candies left, right, up, or down to match.'
     }
   }
 ];
@@ -293,6 +309,13 @@ export default function App() {
         descStr = locale === 'ar'
           ? 'العب لعبه هدم الجدران اتاري قديم الكلاسيكية ثلاثية الأبعاد (Breakout) مجاناً وبدون تحميل! كسر جدار الطوب الملون بالمضرب، احصل على المغناطيس والتكبير، وحطم الرقم القياسي.'
           : 'Play the classic Atari Breakout 3D brick breaker game online for free with no download! Smash the colorful brick wall with the ball and paddle, collect power-ups, and get high scores.';
+      } else if (selectedGame.id === 'game-candy-crush') {
+        titleStr = locale === 'ar'
+          ? 'لعبة كاندي كراش اون لاين مجاناً - لعبة حلوى كاندي ماتش 3'
+          : 'Candy Crush Match 3 Game - Play Free Sweet Puzzle Online | Candy';
+        descStr = locale === 'ar'
+          ? 'العب لعبة كاندي كراش (Candy Match 3) الكلاسيكية الممتعة مجاناً أون لاين وبدون تحميل! طابق قطع الحلوى، اصنع القنابل الملونة والحلوى المخططة المميزة لتحقيق أعلى النقاط.'
+          : 'Play the classic Candy Crush Match 3 game online for free with no download! Match tasty sweet candies, create delicious color bomb and striped power-ups to smash the board.';
       } else {
         titleStr = locale === 'ar'
           ? `${selectedGame.title.ar} - العب الآن | أتاري`

@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+
+<title>حلوى كاندي ماتش 3 - العب كاندي كراش مجاناً بدون تحميل</title>
+<meta name="description" content="العب لعبة حلوى كاندي كراش (Candy Match 3) الكلاسيكية مجاناً أون لاين! طابق الحلويات، حقق حركات مميزة، واصنع القنابل الملونة لإنهاء المستويات بأعلى النقاط." />
+<meta name="keywords" content="كاندي كراش, Candy Crush, لعبة مطابقة الحلويات, العاب كاندي مجانية, العاب ذكاء بدون تحميل" />
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: radial-gradient(circle, #2a1140 0%, #11061e 100%);
+    touch-action: none;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#game-container {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+}
+
+/* HUD Top Bar */
+#hud {
+    width: min(480px, 95vw);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    background: rgba(43, 17, 72, 0.85);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    margin-bottom: 12px;
+    z-index: 10;
+}
+
+.stat {
+    text-align: center;
+    flex: 1;
+}
+
+.stat small {
+    display: block;
+    color: #e2b6ff;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.stat b {
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 120, 240, 0.5);
+}
+
+#score {
+    color: #00ffd5;
+    text-shadow: 0 0 12px rgba(0, 255, 213, 0.6);
+}
+
+#moves {
+    color: #ffde43;
+    text-shadow: 0 0 12px rgba(255, 222, 67, 0.6);
+}
+
+#target {
+    color: #ff68b4;
+}
+
+#controls {
+    display: flex;
+    gap: 8px;
+}
+
+.control-btn {
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.control-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+/* Match-3 Board Area */
+#board-wrapper {
+    position: relative;
+    width: min(480px, 95vw);
+    height: min(480px, 95vw);
+    border-radius: 24px;
+    background: rgba(24, 8, 43, 0.9);
+    border: 4px solid rgba(255, 100, 220, 0.3);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6), inset 0 0 30px rgba(255, 100, 220, 0.15);
+    padding: 8px;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    gap: 4px;
+    overflow: hidden;
+}
+
+/* Individual Candy Style */
+.cell {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+}
+
+.candy {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    transition: transform 0.15s ease, opacity 0.25s ease, top 0.22s cubic-bezier(0.25, 1, 0.5, 1), left 0.22s cubic-bezier(0.25, 1, 0.5, 1);
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.candy-inner {
+    font-size: clamp(20px, 7.5vw, 38px);
+    transition: all 0.1s ease;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.candy.selected .candy-inner {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.9)) saturate(1.4);
+    animation: bounceSelect 0.6s infinite alternate;
+}
+
+@keyframes bounceSelect {
+    0% { transform: scale(1.1); }
+    100% { transform: scale(1.22); }
+}
+
+/* Special indicators */
+.striped-row::after {
+    content: '↔️';
+    position: absolute;
+    font-size: 12px;
+    bottom: -2px;
+    right: -2px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    padding: 2px;
+}
+.striped-col::after {
+    content: '↕️';
+    position: absolute;
+    font-size: 12px;
+    bottom: -2px;
+    right: -2px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    padding: 2px;
+}
+.wrapped::after {
+    content: '💥';
+    position: absolute;
+    font-size: 12px;
+    bottom: -2px;
+    right: -2px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    padding: 2px;
+}
+.color-bomb::after {
+    content: '🌟';
+    position: absolute;
+    font-size: 12px;
+    bottom: -2px;
+    right: -2px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    padding: 2px;
+}
+
+/* Canvas Particle Layer */
+#particle-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* Overlays */
+#overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+}
+
+.panel {
+    width: min(420px, 92vw);
+    padding: 35px 25px;
+    text-align: center;
+    border-radius: 28px;
+    background: linear-gradient(145deg, #441865, #19082d);
+    border: 2px solid rgba(255, 120, 240, 0.3);
+    box-shadow: 0 25px 80px rgba(0,0,0,0.7);
+}
+
+.logo {
+    font-size: clamp(34px, 9vw, 50px);
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 
+        0 0 10px #ff68b4,
+        0 0 25px rgba(255, 104, 180, 0.7);
+    margin-bottom: 12px;
+    letter-spacing: -1.5px;
+}
+
+.panel p {
+    color: #ebd5ff;
+    line-height: 1.7;
+    font-size: 14px;
+    margin: 12px 0;
+}
+
+.start-btn {
+    border: 0;
+    border-radius: 999px;
+    padding: 14px 40px;
+    background: linear-gradient(135deg, #ff68b4, #b42bdf);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(255, 104, 180, 0.4);
+    transition: all 0.2s;
+}
+
+.start-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 104, 180, 0.6);
+}
+
+.start-btn:active {
+    transform: translateY(0);
+}
+
+.tip {
+    color: #a48cb8 !important;
+    font-size: 11px !important;
+    margin-top: 15px !important;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Pause Overlay */
+#pause-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 25;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+#pause-overlay h2 {
+    font-size: 32px;
+    color: #ffde43;
+    text-shadow: 0 0 15px rgba(255, 222, 67, 0.5);
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+#pause-overlay p {
+    color: #ebd3ff;
+    font-size: 14px;
+    text-align: center;
+}
+</style>
+</head>
+
+<body>
+
+<div id="game-container">
+    <!-- ================= HUD ================= -->
+    <div id="hud">
+        <div class="stat">
+            <small id="label-score">النقاط</small>
+            <b id="score">0</b>
+        </div>
+        <div class="stat">
+            <small id="label-target">الهدف</small>
+            <b id="target">5,000</b>
+        </div>
+        <div class="stat">
+            <small id="label-moves">الحركات</small>
+            <b id="moves">25</b>
+        </div>
+        <div id="controls">
+            <button id="pause" class="control-btn" title="Pause / Resume">⏸️</button>
+            <button id="sound" class="control-btn" title="Mute / Unmute">🔊</button>
+        </div>
+    </div>
+
+    <!-- ================= BOARD AREA ================= -->
+    <div style="position: relative;">
+        <div id="board-wrapper"></div>
+        <canvas id="particle-canvas"></canvas>
+    </div>
+</div>
+
+<!-- ================= START/GAME OVER SCREEN ================= -->
+<div id="overlay">
+    <div class="panel">
+        <div class="logo" id="main-logo">CANDY MATCH 3</div>
+        
+        <p id="message">
+            🍭 طابق 3 قطع حلوى متطابقة أو أكثر لإزالتها من اللعبة.
+            <br>
+            🍬 اسحب أو اضغط لتبديل مكان قطعتين متجاورتين!
+        </p>
+
+        <p id="powers-info">
+            ✨ طابق 4 قطع لتصنع <b>حلوى مخططة</b> تفجر خطاً كاملاً!
+            <br>
+            💣 طابق 5 قطع لتصنع <b>قنبلة ملونة</b> تفجر لوناً كاملاً!
+        </p>
+
+        <button class="start-btn" id="start-btn">ابدأ اللعبة 🎮</button>
+
+        <p class="tip" id="device-info">تعمل على الجوال والتابلت والكمبيوتر</p>
+    </div>
+</div>
+
+<!-- ================= PAUSE OVERLAY ================= -->
+<div id="pause-overlay" class="hidden">
+    <div>
+        <h2 id="pause-title">تم الإيقاف مؤقتاً</h2>
+        <p id="pause-subtitle">اضغط على زر الإيقاف مؤقتاً أو اضغط P للاستئناف</p>
+    </div>
+</div>
+
+<script type="module">
+
+/* =========================================================
+   MULTILINGUAL SUPPORT
+========================================================= */
+const urlParams = new URLSearchParams(window.location.search);
+const lang = urlParams.get('lang') || 'ar';
+const isRtl = lang === 'ar';
+
+document.documentElement.lang = lang;
+document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
+
+const LOCALIZATION = {
+    ar: {
+        score: "النقاط",
+        target: "الهدف",
+        moves: "الحركات",
+        instructions: "🍭 طابق 3 قطع حلوى متطابقة أو أكثر لإزالتها.<br>🍬 اسحب أو انقر لتبديل مكان قطعتين متجاورتين!",
+        powers: "✨ طابق 4 قطع لتصنع <b>حلوى مخططة</b> تفجر صفاً كاملاً!<br>💣 طابق 5 قطع لتصنع <b>قنبلة ملونة</b> تفجر لوناً كاملاً!",
+        btnStart: "ابدأ اللعبة 🎮",
+        btnRestart: "إعادة اللعب 🔄",
+        tip: "تعمل على الجوال والتابلت والكمبيوتر",
+        gameOver: "انتهت الحركات!",
+        finalScore: "النتيجة النهائية: ",
+        beatenRecord: "لقد فزت! حققت الهدف المطلوب 🎉",
+        paused: "تم الإيقاف مؤقتاً",
+        resumeTip: "اضغط على زر الإيقاف مؤقتاً أو اضغط P للاستئناف",
+        win: "تهانينا! لقد فزت 🎉",
+        lose: "انتهت الحركات! حاول مجدداً 💔"
+    },
+    en: {
+        score: "Score",
+        target: "Target",
+        moves: "Moves",
+        instructions: "🍭 Match 3 or more sweet candies of the same type.<br>🍬 Drag or click to swap adjacent candies!",
+        powers: "✨ Match 4 to make a <b>Striped Candy</b> that clears a row/col!<br>💣 Match 5 to make a <b>Color Bomb</b> that clears all of one color!",
+        btnStart: "Start Sweet Adventure 🎮",
+        btnRestart: "Play Again 🔄",
+        tip: "Works on Mobile, Tablet & Desktop",
+        gameOver: "No Moves Left!",
+        finalScore: "Final Score: ",
+        paused: "GAME PAUSED",
+        resumeTip: "Tap Pause or press P to resume",
+        win: "Congratulations! You Won! 🎉",
+        lose: "Out of Moves! Try Again! 💔"
+    }
+};
+
+const t = LOCALIZATION[lang] || LOCALIZATION.ar;
+
+// Apply translations
+document.getElementById('label-score').textContent = t.score;
+document.getElementById('label-target').textContent = t.target;
+document.getElementById('label-moves').textContent = t.moves;
+document.getElementById('message').innerHTML = t.instructions;
+document.getElementById('powers-info').innerHTML = t.powers;
+document.getElementById('start-btn').textContent = t.btnStart;
+document.getElementById('device-info').textContent = t.tip;
+document.getElementById('pause-title').textContent = t.paused;
+document.getElementById('pause-subtitle').textContent = t.resumeTip;
+
+
+/* =========================================================
+   AUDIO ENGINE (Web Audio API)
+========================================================= */
+let audioCtx = null;
+let audioEnabled = true;
+
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === "suspended") {
+        audioCtx.resume().catch(e => console.log("Audio resume blocked", e));
+    }
+}
+
+// Global user-gesture listeners to forcefully activate the audio context on first interact
+function forceResumeAudio() {
+    initAudio();
+    // Play a silent buffer or tiny sound to register
+    playSound(1, 0.01, "sine", 0.01);
+    window.removeEventListener("click", forceResumeAudio);
+    window.removeEventListener("pointerdown", forceResumeAudio);
+    window.removeEventListener("touchstart", forceResumeAudio);
+}
+window.addEventListener("click", forceResumeAudio);
+window.addEventListener("pointerdown", forceResumeAudio);
+window.addEventListener("touchstart", forceResumeAudio);
+
+function playSound(freq, duration, type="sine", vol=0.15, freqEnd=null) {
+    if (!audioEnabled) return;
+    try {
+        initAudio();
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+        if (freqEnd) {
+            osc.frequency.exponentialRampToValueAtTime(
+                Math.max(20, freqEnd),
+                audioCtx.currentTime + duration
+            );
+        }
+
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    } catch(e) {}
+}
+
+const sounds = {
+    click: () => playSound(600, 0.08, "sine", 0.12, 300),
+    swap: () => playSound(400, 0.12, "sine", 0.15, 500),
+    match: () => {
+        playSound(523.25, 0.18, "sine", 0.18, 1046.50); // C5 to C6
+        setTimeout(() => playSound(659.25, 0.22, "sine", 0.16, 1318.51), 50); // E5 to E6
+    },
+    special: () => {
+        playSound(300, 0.3, "square", 0.15, 1200);
+        playSound(450, 0.25, "sawtooth", 0.12, 900);
+    },
+    fall: () => playSound(200, 0.1, "triangle", 0.08, 100),
+    gameStart: () => {
+        playSound(261.63, 0.18, "sine", 0.15, 523.25);
+        setTimeout(() => playSound(329.63, 0.18, "sine", 0.15, 659.25), 100);
+        setTimeout(() => playSound(392.00, 0.22, "sine", 0.18, 783.99), 200);
+    },
+    win: () => {
+        playSound(523.25, 0.25, "sine", 0.2, 1046.50);
+        setTimeout(() => playSound(659.25, 0.25, "sine", 0.2, 1318.51), 120);
+        setTimeout(() => playSound(783.99, 0.25, "sine", 0.2, 1567.98), 240);
+        setTimeout(() => playSound(1046.50, 0.45, "sine", 0.25, 2093.00), 360);
+    },
+    lose: () => {
+        playSound(220, 0.4, "sawtooth", 0.2, 50);
+        setTimeout(() => playSound(180, 0.5, "sawtooth", 0.2, 40), 150);
+    }
+};
+
+/* Controls Mute / Unmute */
+const soundBtn = document.getElementById("sound");
+soundBtn.onclick = () => {
+    audioEnabled = !audioEnabled;
+    soundBtn.textContent = audioEnabled ? "🔊" : "🔇";
+    if (audioEnabled) {
+        initAudio();
+        sounds.gameStart();
+    }
+};
+
+const pauseBtn = document.getElementById("pause");
+pauseBtn.onclick = () => togglePause();
+
+/* =========================================================
+   MATCH-3 CORE ENGINE VARIABLES
+========================================================= */
+const GRID_SIZE = 8;
+const CANDY_TYPES = [
+    { emoji: "🍭", color: "#ff4da6" }, // Lollipop
+    { emoji: "🍬", color: "#4da6ff" }, // Candy
+    { emoji: "🍩", color: "#ffa31a" }, // Donut
+    { emoji: "🍫", color: "#b366ff" }, // Chocolate
+    { emoji: "🍪", color: "#4dff88" }, // Cookie
+    { emoji: "🍧", color: "#ff4d4d" }  // Ice Cream
+];
+
+let score = 0;
+let moves = 25;
+const targetScore = 5000;
+let isPlaying = false;
+let isPaused = false;
+let isAnimating = false;
+
+let board = []; // 2D array representation
+let boardWrapper = document.getElementById("board-wrapper");
+
+let selectedTile = null;
+
+// Sparkle Particle Animation Layer
+const canvas = document.getElementById("particle-canvas");
+const ctx = canvas.getContext("2d");
+let particles = [];
+
+function resizeCanvas() {
+    canvas.width = boardWrapper.clientWidth;
+    canvas.height = boardWrapper.clientHeight;
+}
+window.addEventListener("resize", resizeCanvas);
+
+/* =========================================================
+   TILE & PIECE STRUCTS
+========================================================= */
+class Tile {
+    constructor(row, col, typeIndex) {
+        this.row = row;
+        this.col = col;
+        this.typeIndex = typeIndex;
+        this.isStripedRow = false; // special match-4 horizontally
+        this.isStripedCol = false; // special match-4 vertically
+        this.isWrapped = false;    // special T/L match-5
+        this.isColorBomb = false;  // special Match-5 row/col
+        
+        this.element = document.createElement("div");
+        this.element.className = "candy";
+        
+        this.inner = document.createElement("div");
+        this.inner.className = "candy-inner";
+        this.inner.textContent = CANDY_TYPES[typeIndex].emoji;
+        this.element.appendChild(this.inner);
+        
+        this.updatePosition();
+    }
+
+    updatePosition() {
+        // Pure absolute positioning based on grid coordinates
+        this.element.style.left = `${(this.col * 100) / GRID_SIZE}%`;
+        this.element.style.top = `${(this.row * 100) / GRID_SIZE}%`;
+        this.element.style.width = `${100 / GRID_SIZE}%`;
+        this.element.style.height = `${100 / GRID_SIZE}%`;
+    }
+
+    setType(index) {
+        this.typeIndex = index;
+        this.inner.textContent = CANDY_TYPES[index].emoji;
+        
+        // Remove special classes
+        this.element.classList.remove("striped-row", "striped-col", "wrapped", "color-bomb");
+        this.isStripedRow = false;
+        this.isStripedCol = false;
+        this.isWrapped = false;
+        this.isColorBomb = false;
+    }
+
+    makeSpecial(type) {
+        if (type === "striped-row") {
+            this.isStripedRow = true;
+            this.element.classList.add("striped-row");
+            this.inner.textContent = "🍬"; // distinct special emoji/design
+        } else if (type === "striped-col") {
+            this.isStripedCol = true;
+            this.element.classList.add("striped-col");
+            this.inner.textContent = "🍭";
+        } else if (type === "wrapped") {
+            this.isWrapped = true;
+            this.element.classList.add("wrapped");
+            this.inner.textContent = "🍩";
+        } else if (type === "color-bomb") {
+            this.isColorBomb = true;
+            this.element.classList.add("color-bomb");
+            this.inner.textContent = "🌟"; // color bomb explodes whole matching type index
+        }
+    }
+}
+
+/* =========================================================
+   BOARD INIT & GENERATION
+========================================================= */
+function createBoard() {
+    boardWrapper.innerHTML = "";
+    board = [];
+
+    for (let r = 0; r < GRID_SIZE; r++) {
+        board[r] = [];
+        for (let c = 0; c < GRID_SIZE; c++) {
+            // Create a background cell
+            const bgCell = document.createElement("div");
+            bgCell.className = "cell";
+            boardWrapper.appendChild(bgCell);
+
+            // Spawn unique tile making sure no initial match-3
+            let typeIndex;
+            do {
+                typeIndex = Math.floor(Math.random() * CANDY_TYPES.length);
+            } while (
+                (c >= 2 && board[r][c - 1].typeIndex === typeIndex && board[r][c - 2].typeIndex === typeIndex) ||
+                (r >= 2 && board[r - 1][c].typeIndex === typeIndex && board[r - 2][c].typeIndex === typeIndex)
+            );
+
+            const tile = new Tile(r, c, typeIndex);
+            board[r][c] = tile;
+            boardWrapper.appendChild(tile.element);
+
+            // Setup interaction handlers
+            setupDragEvents(tile);
+        }
+    }
+}
+
+/* =========================================================
+   SWAPPING & INTERACTION LAW
+========================================================= */
+let startX, startY;
+let isDragging = false;
+
+function setupDragEvents(tile) {
+    const el = tile.element;
+
+    const onStart = (clientX, clientY) => {
+        if (!isPlaying || isPaused || isAnimating) return;
+        
+        // Select tile
+        if (selectedTile) {
+            selectedTile.element.classList.remove("selected");
+        }
+        
+        selectedTile = tile;
+        tile.element.classList.add("selected");
+        sounds.click();
+
+        startX = clientX;
+        startY = clientY;
+        isDragging = true;
+    };
+
+    const onMove = (clientX, clientY) => {
+        if (!isDragging || !selectedTile || isAnimating || isPaused || !isPlaying) return;
+
+        const diffX = clientX - startX;
+        const diffY = clientY - startY;
+        const minSwipeDist = 25; // pixels to swipe
+
+        if (Math.abs(diffX) > minSwipeDist || Math.abs(diffY) > minSwipeDist) {
+            isDragging = false;
+            let targetRow = selectedTile.row;
+            let targetCol = selectedTile.col;
+
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                targetCol += diffX > 0 ? 1 : -1;
+            } else {
+                targetRow += diffY > 0 ? 1 : -1;
+            }
+
+            // Perform swap
+            trySwap(selectedTile.row, selectedTile.col, targetRow, targetCol);
+        }
+    };
+
+    el.addEventListener("pointerdown", e => {
+        el.setPointerCapture(e.pointerId);
+        onStart(e.clientX, e.clientY);
+    });
+
+    el.addEventListener("pointermove", e => {
+        onMove(e.clientX, e.clientY);
+    });
+
+    el.addEventListener("pointerup", e => {
+        isDragging = false;
+        el.releasePointerCapture(e.pointerId);
+    });
+}
+
+function trySwap(r1, c1, r2, c2) {
+    // Check boundaries & adjacency
+    if (isAnimating || isPaused || !isPlaying) return;
+    if (r2 < 0 || r2 >= GRID_SIZE || c2 < 0 || c2 >= GRID_SIZE) {
+        return;
+    }
+    const dist = Math.abs(r1 - r2) + Math.abs(c1 - c2);
+    if (dist !== 1) return;
+
+    isAnimating = true;
+    sounds.swap();
+
+    // Visual animation swap
+    const t1 = board[r1][c1];
+    const t2 = board[r2][c2];
+
+    // Swap indices
+    t1.row = r2; t1.col = c2;
+    t2.row = r1; t2.col = c1;
+
+    board[r1][c1] = t2;
+    board[r2][c2] = t1;
+
+    t1.updatePosition();
+    t2.updatePosition();
+
+    if (t1.element.classList.contains("selected")) t1.element.classList.remove("selected");
+    if (t2.element.classList.contains("selected")) t2.element.classList.remove("selected");
+    selectedTile = null;
+
+    setTimeout(() => {
+        // Check for matches or color bombs
+        let isSpecialSwapMatched = handleSpecialSwaps(t1, t2);
+        let matches = checkMatches();
+
+        if (matches.length > 0 || isSpecialSwapMatched) {
+            moves--;
+            updateHUD();
+            processMatches();
+        } else {
+            // Revert swap
+            sounds.swap();
+            t1.row = r1; t1.col = c1;
+            t2.row = r2; t2.col = c2;
+
+            board[r1][c1] = t1;
+            board[r2][c2] = t2;
+
+            t1.updatePosition();
+            t2.updatePosition();
+            setTimeout(() => {
+                isAnimating = false;
+            }, 150);
+        }
+    }, 150);
+}
+
+/* Color Bomb or Striped double swap trigger logic */
+function handleSpecialSwaps(t1, t2) {
+    let triggered = false;
+
+    // 1. Color bomb swapped with anything
+    if (t1.isColorBomb || t2.isColorBomb) {
+        triggered = true;
+        let colorBombTile = t1.isColorBomb ? t1 : t2;
+        let targetTile = t1.isColorBomb ? t2 : t1;
+        
+        let matchColorIndex = targetTile.typeIndex;
+        // Explode color bomb
+        explodeColor(matchColorIndex, colorBombTile);
+    }
+    // 2. Double striped candy swapped together
+    else if ((t1.isStripedRow || t1.isStripedCol) && (t2.isStripedRow || t2.isStripedCol)) {
+        triggered = true;
+        explodeRow(t1.row);
+        explodeCol(t1.col);
+    }
+
+    return triggered;
+}
+
+/* =========================================================
+   MATCH DETECTION LAW (Horizontal and Vertical)
+========================================================= */
+function checkMatches() {
+    let matchSet = new Set();
+
+    // 1. Horizontal Matches
+    for (let r = 0; r < GRID_SIZE; r++) {
+        let matchCount = 1;
+        for (let c = 1; c <= GRID_SIZE; c++) {
+            if (c < GRID_SIZE && 
+                board[r][c] && board[r][c - 1] &&
+                board[r][c].typeIndex !== undefined && 
+                board[r][c - 1].typeIndex !== undefined &&
+                board[r][c].typeIndex === board[r][c - 1].typeIndex && 
+                !board[r][c].isColorBomb && !board[r][c - 1].isColorBomb) {
+                matchCount++;
+            } else {
+                if (matchCount >= 3) {
+                    for (let i = 1; i <= matchCount; i++) {
+                        matchSet.add(board[r][c - i]);
+                    }
+                }
+                matchCount = 1;
+            }
+        }
+    }
+
+    // 2. Vertical Matches
+    for (let c = 0; c < GRID_SIZE; c++) {
+        let matchCount = 1;
+        for (let r = 1; r <= GRID_SIZE; r++) {
+            if (r < GRID_SIZE && 
+                board[r][c] && board[r - 1][c] &&
+                board[r][c].typeIndex !== undefined && 
+                board[r - 1][c].typeIndex !== undefined &&
+                board[r][c].typeIndex === board[r - 1][c].typeIndex && 
+                !board[r][c].isColorBomb && !board[r - 1][c].isColorBomb) {
+                matchCount++;
+            } else {
+                if (matchCount >= 3) {
+                    for (let i = 1; i <= matchCount; i++) {
+                        matchSet.add(board[r - i][c]);
+                    }
+                }
+                matchCount = 1;
+            }
+        }
+    }
+
+    return Array.from(matchSet);
+}
+
+/* =========================================================
+   CANDY DESTRUCTION & SPECIAL SPAWNS
+========================================================= */
+function processMatches() {
+    let matches = checkMatches();
+    if (matches.length === 0) {
+        isAnimating = false;
+        checkGameOver();
+        return;
+    }
+
+    sounds.match();
+
+    // Check for Match-4 or Match-5 for special candy generation
+    // Group matches by row and column to check sequence sizes
+    let hGroups = {};
+    let vGroups = {};
+
+    matches.forEach(t => {
+        if (!hGroups[t.row]) hGroups[t.row] = [];
+        hGroups[t.row].push(t);
+
+        if (!vGroups[t.col]) vGroups[t.col] = [];
+        vGroups[t.col].push(t);
+    });
+
+    let specialToSpawn = []; // List of custom spawns
+
+    // Match-5 -> Color Bomb
+    Object.keys(hGroups).forEach(r => {
+        if (hGroups[r].length >= 5) {
+            let middleTile = hGroups[r][Math.floor(hGroups[r].length / 2)];
+            specialToSpawn.push({ tile: middleTile, type: "color-bomb" });
+        } else if (hGroups[r].length === 4) {
+            // Match-4 -> Striped Row
+            let middleTile = hGroups[r][1];
+            specialToSpawn.push({ tile: middleTile, type: "striped-row" });
+        }
+    });
+
+    Object.keys(vGroups).forEach(c => {
+        if (vGroups[c].length >= 5) {
+            let middleTile = vGroups[c][Math.floor(vGroups[c].length / 2)];
+            // Make sure not already processed
+            if (!specialToSpawn.some(s => s.tile === middleTile)) {
+                specialToSpawn.push({ tile: middleTile, type: "color-bomb" });
+            }
+        } else if (vGroups[c].length === 4) {
+            let middleTile = vGroups[c][1];
+            if (!specialToSpawn.some(s => s.tile === middleTile)) {
+                specialToSpawn.push({ tile: middleTile, type: "striped-col" });
+            }
+        }
+    });
+
+    // Match-T or Match-L (combo horizontal & vertical) -> Wrapped Candy
+    matches.forEach(t => {
+        let isH = hGroups[t.row] && hGroups[t.row].length >= 3;
+        let isV = vGroups[t.col] && vGroups[t.col].length >= 3;
+        if (isH && isV) {
+            specialToSpawn.push({ tile: t, type: "wrapped" });
+        }
+    });
+
+    // Explode tiles and award score
+    let explodedTiles = new Set();
+
+    matches.forEach(tile => {
+        if (explodedTiles.has(tile)) return;
+        triggerTileExplosion(tile, explodedTiles);
+    });
+
+    // Perform Special spawns
+    specialToSpawn.forEach(spawn => {
+        let tile = spawn.tile;
+        tile.setType(Math.floor(Math.random() * CANDY_TYPES.length)); // re-seed index so it can match later
+        tile.makeSpecial(spawn.type);
+        tile.element.style.opacity = 1;
+        tile.element.style.transform = "scale(1)";
+        tile.element.visible = true;
+        // Revive in board
+        board[tile.row][tile.col] = tile;
+        explodedTiles.delete(tile);
+    });
+
+    // Score updating
+    score += explodedTiles.size * 60;
+    updateHUD();
+
+    // After fadeout, drop tiles
+    setTimeout(() => {
+        dropTiles();
+    }, 250);
+}
+
+function triggerTileExplosion(tile, explodedSet) {
+    if (explodedSet.has(tile)) return;
+    explodedSet.add(tile);
+
+    // Spawn Particles
+    spawnCandyParticles(tile);
+
+    tile.element.style.opacity = 0;
+    tile.element.style.transform = "scale(0.3)";
+
+    // Handle special candy chain reaction
+    if (tile.isStripedRow) {
+        sounds.special();
+        explodeRow(tile.row, explodedSet);
+    } 
+    else if (tile.isStripedCol) {
+        sounds.special();
+        explodeCol(tile.col, explodedSet);
+    }
+    else if (tile.isWrapped) {
+        sounds.special();
+        explodeRadius(tile.row, tile.col, explodedSet);
+    }
+}
+
+/* Chain Exploders */
+function explodeRow(row, explodedSet = new Set()) {
+    for (let c = 0; c < GRID_SIZE; c++) {
+        let tile = board[row][c];
+        if (tile && !explodedSet.has(tile)) {
+            triggerTileExplosion(tile, explodedSet);
+        }
+    }
+}
+
+function explodeCol(col, explodedSet = new Set()) {
+    for (let r = 0; r < GRID_SIZE; r++) {
+        let tile = board[r][col];
+        if (tile && !explodedSet.has(tile)) {
+            triggerTileExplosion(tile, explodedSet);
+        }
+    }
+}
+
+function explodeRadius(row, col, explodedSet = new Set()) {
+    for (let r = row - 1; r <= row + 1; r++) {
+        for (let c = col - 1; c <= col + 1; c++) {
+            if (r >= 0 && r < GRID_SIZE && c >= 0 && c < GRID_SIZE) {
+                let tile = board[r][c];
+                if (tile && !explodedSet.has(tile)) {
+                    triggerTileExplosion(tile, explodedSet);
+                }
+            }
+        }
+    }
+}
+
+function explodeColor(typeIndex, bombTile) {
+    sounds.special();
+    let explodedSet = new Set();
+    explodedSet.add(bombTile);
+    bombTile.element.style.opacity = 0;
+
+    for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+            let tile = board[r][c];
+            if (tile && tile.typeIndex === typeIndex) {
+                triggerTileExplosion(tile, explodedSet);
+            }
+        }
+    }
+
+    score += explodedSet.size * 80;
+    updateHUD();
+
+    setTimeout(() => {
+        dropTiles();
+    }, 250);
+}
+
+/* =========================================================
+   GRAVITY, FALLING, AND CASCADE
+========================================================= */
+function dropTiles() {
+    let shifted = false;
+
+    // Loop through each column from bottom to top
+    for (let c = 0; c < GRID_SIZE; c++) {
+        let emptySpaces = 0;
+        for (let r = GRID_SIZE - 1; r >= 0; r--) {
+            if (board[r][c].element.style.opacity === "0") {
+                emptySpaces++;
+            } else if (emptySpaces > 0) {
+                // Shift candy down
+                let tile = board[r][c];
+                let targetRow = r + emptySpaces;
+
+                board[targetRow][c] = tile;
+                tile.row = targetRow;
+                tile.updatePosition();
+
+                // Create placeholder empty tile
+                board[r][c] = { element: { style: { opacity: "0" } } };
+                shifted = true;
+            }
+        }
+
+        // Fill top empty spaces with new candies
+        for (let r = 0; r < emptySpaces; r++) {
+            let newType = Math.floor(Math.random() * CANDY_TYPES.length);
+            const tile = new Tile(-1 - r, c, newType); // Start just above board for entry slide
+            boardWrapper.appendChild(tile.element);
+            setupDragEvents(tile);
+
+            // Animate fall to position
+            setTimeout(() => {
+                tile.row = r;
+                tile.updatePosition();
+            }, 50);
+
+            board[r][c] = tile;
+            shifted = true;
+        }
+    }
+
+    sounds.fall();
+
+    // Clean up DOM of dead nodes (tiles that have zero opacity)
+    const deadCandies = Array.from(boardWrapper.querySelectorAll(".candy")).filter(el => {
+        return el.style.opacity === "0" || parseFloat(el.style.top) < -50;
+    });
+    deadCandies.forEach(el => el.remove());
+
+    // Recheck matches
+    setTimeout(() => {
+        let cascadeMatches = checkMatches();
+        if (cascadeMatches.length > 0) {
+            processMatches();
+        } else {
+            isAnimating = false;
+            checkGameOver();
+        }
+    }, 300);
+}
+
+/* =========================================================
+   PHYSICS SPARKLE PARTICLES
+========================================================= */
+let isParticleLoopRunning = false;
+
+function spawnCandyParticles(tile) {
+    const rect = tile.element.getBoundingClientRect();
+    const wrapperRect = boardWrapper.getBoundingClientRect();
+
+    const x = rect.left - wrapperRect.left + rect.width / 2;
+    const y = rect.top - wrapperRect.top + rect.height / 2;
+
+    const color = (CANDY_TYPES[tile.typeIndex] && CANDY_TYPES[tile.typeIndex].color) || "#ff68b4";
+
+    for (let i = 0; i < 10; i++) {
+        particles.push({
+            x: x,
+            y: y,
+            vx: (Math.random() - 0.5) * 6,
+            vy: (Math.random() - 0.5) * 6,
+            radius: Math.random() * 4 + 2,
+            color: color,
+            alpha: 1,
+            life: Math.random() * 0.4 + 0.3
+        });
+    }
+
+    if (!isParticleLoopRunning && particles.length > 0) {
+        isParticleLoopRunning = true;
+        requestAnimationFrame(updateParticles);
+    }
+}
+
+function updateParticles() {
+    if (particles.length === 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        isParticleLoopRunning = false;
+        return;
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.15; // simple gravity simulation
+        p.life -= 0.016;
+
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = Math.max(0, p.life * 2);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (p.life <= 0) {
+            particles.splice(i, 1);
+        }
+    }
+    ctx.globalAlpha = 1;
+
+    if (particles.length > 0) {
+        requestAnimationFrame(updateParticles);
+    } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        isParticleLoopRunning = false;
+    }
+}
+// Removed autostart of updateParticles, it triggers dynamically on spawn!
+
+/* =========================================================
+   GAME UTILS & SCENE FLOW
+========================================================= */
+function updateHUD() {
+    document.getElementById("score").textContent = score.toLocaleString();
+    document.getElementById("moves").textContent = moves;
+}
+
+function togglePause() {
+    if (!isPlaying) return;
+    isPaused = !isPaused;
+    const pauseOverlay = document.getElementById("pause-overlay");
+    if (isPaused) {
+        pauseOverlay.classList.remove("hidden");
+        document.getElementById("pause").textContent = "▶️";
+    } else {
+        pauseOverlay.classList.add("hidden");
+        document.getElementById("pause").textContent = "⏸️";
+    }
+}
+
+function checkGameOver() {
+    if (moves <= 0 || score >= targetScore) {
+        isPlaying = false;
+        
+        const isWin = score >= targetScore;
+        if (isWin) {
+            sounds.win();
+        } else {
+            sounds.lose();
+        }
+
+        document.getElementById("overlay").classList.remove("hidden");
+        document.getElementById("main-logo").textContent = isWin ? t.win : t.lose;
+        document.getElementById("message").innerHTML = 
+            t.finalScore + "<b>" + score.toLocaleString() + "</b> / " + targetScore.toLocaleString() + "<br><br>" + (isWin ? "ممتاز! لقد اجتزت التحدي بنجاح." : "حاول مجدداً للوصول للمجموع المطلوب.");
+        document.getElementById("start-btn").textContent = t.btnRestart;
+    }
+}
+
+/* =========================================================
+   START / RESET SYSTEM
+========================================================= */
+document.getElementById("start-btn").addEventListener("click", () => {
+    initAudio();
+    sounds.gameStart();
+
+    score = 0;
+    moves = 25;
+    isPlaying = true;
+    isPaused = false;
+    isAnimating = false;
+
+    document.getElementById("pause-overlay").classList.add("hidden");
+    document.getElementById("pause").textContent = "⏸️";
+    document.getElementById("overlay").classList.add("hidden");
+
+    resizeCanvas();
+    createBoard();
+    updateHUD();
+});
+
+// Keyboard hotkeys
+window.addEventListener("keydown", event => {
+    if (event.key === "p" || event.key === "P") {
+        event.preventDefault();
+        togglePause();
+    }
+});
+
+// Init
+resizeCanvas();
+
+</script>
+
+</body>
+</html>
