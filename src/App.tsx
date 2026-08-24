@@ -26,6 +26,7 @@ import cheeseThumbnail from './assets/images/cheese_eater_thumbnail_178737316112
 import tetrisThumbnail from './assets/images/tetris_thumbnail_1787444248779.jpg';
 import breakoutThumbnail from './assets/images/breakout_thumbnail_1787511090254.jpg';
 import candyCrushThumbnail from './assets/images/candy_crush_thumbnail_1787541332465.jpg';
+import carRacingThumbnail from './assets/images/car_racing_thumbnail_1787601761728.jpg';
 
 // Bilingual translations structure for premium localized design
 const TRANSLATIONS = {
@@ -171,6 +172,21 @@ const GAME_DATABASE_LOCALIZED = [
     controls: {
       ar: 'لوحة المفاتيح والماوس: اسحب قطعة الحلوى أو انقر عليها ثم انقر على القطعة المجاورة لتبديل مكانها. زر P للإيقاف المؤقت. على الجوال: اسحب الحلوى بإصبعك إلى الاتجاه المجاور لمطابقتها.',
       en: 'Mouse/Keyboard: Drag candies with your mouse or click a candy and click an adjacent one to swap them. Press P to Pause. Touch/Mobile: Swipe candies left, right, up, or down to match.'
+    }
+  },
+  {
+    id: 'game-car-racing',
+    category: 'Racing' as const,
+    thumbnailUrl: carRacingThumbnail,
+    embedUrl: '/games/car-racing.html',
+    title: { ar: 'لعبه سباق السيارات ثلاثية الأبعاد نيون', en: 'Neon Highway Racer 3D' },
+    description: {
+      ar: 'العب لعبه سباق السيارات ثلاثية الابعاد اون لاين بنمط السنبثوايف الأسطوري والمثالي مجاناً وبدون تحميل! تسابق على طول الطريق السريع النيوني المتلألئ، تفادى سيارات الخصوم والعقبات المتتالية، واجمع كرات الشحن والنيترو للسرعات الخارقة.',
+      en: 'Drive and sprint in a professional high-speed 3D Cyberpunk Neon Car Racing game for free online with no download! Navigate the glowing futuristic lanes, dodge traffic, gather gold coins, and activate nitrous shields.'
+    },
+    controls: {
+      ar: 'لوحة المفاتيح: استخدم أسهم الاتجاهات لليمين واليسار (◀ ▶) أو مفاتيح A / D للتوجيه، وسهم لأعلى (▲) أو W لزيادة السرعة والنيترو، وسهم لأسفل (▼) أو S للفرامل. زر P للإيقاف المؤقت. على الجوال: اضغط على الأزرار الظاهرة للتوجيه، والبنزين والفرامل.',
+      en: 'Keyboard: Left/Right arrows or A/D keys to steer, Up arrow or W key to accelerate and engage nitro, Down arrow or S key to brake. Press P to Pause. Touch/Mobile: Use the intuitive glowing left/right steer buttons and gas/brake pedals.'
     }
   }
 ];
