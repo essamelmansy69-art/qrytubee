@@ -620,7 +620,7 @@
                 <!-- CAR MODEL SELECTOR -->
                 <div style="background: rgba(255,255,255,0.02); border: 1.5px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px; margin-bottom: 16px; text-align: center; box-shadow: inset 0 0 15px rgba(255,255,255,0.01);">
                     <div style="font-weight: 900; font-size: 13px; color: var(--neon-blue); margin-bottom: 12px; text-shadow: 0 0 10px rgba(0, 240, 255, 0.3); text-transform: uppercase;" id="lbl-car-model-title">🏎️ جراج اختيار الطراز - SELECT CAR MODEL</div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px;">
                         <!-- Mercedes -->
                         <button onclick="selectCarModel('mercedes')" id="model-mercedes" style="background: rgba(255,255,255,0.03); border: 1.5px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px; cursor: pointer; transition: all 0.25s ease; text-align: center; color: white;">
                             <div style="font-size: 20px; margin-bottom: 4px;">🇩🇪</div>
@@ -639,6 +639,11 @@
                             <div style="font-weight: 900; font-size: 11px;">Lamborghini SV</div>
                             <div style="font-size: 8px; color: #8c88a8; margin-top: 4px; font-weight: 600;" id="lbl-model-l-desc">⚡ سرعة قصوى +15%</div>
                         </button>
+                    </div>
+
+                    <!-- DYNAMIC CAR IMAGE SHOWCASE -->
+                    <div style="border-radius: 10px; overflow: hidden; border: 1.5px solid rgba(255, 255, 255, 0.08); position: relative; aspect-ratio: 16/9; background: #050505; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+                        <img id="img-car-preview" src="mercedes_amg_silver_1787624176960.jpg" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease, filter 0.3s ease;" referrerPolicy="no-referrer" alt="Car Preview" />
                     </div>
                 </div>
 
@@ -2301,6 +2306,18 @@
                     }
                 }
             });
+
+            // Update the live image preview of the selected model
+            const previewImg = document.getElementById("img-car-preview");
+            if (previewImg) {
+                if (selectedCarModel === "mercedes") {
+                    previewImg.src = "mercedes_amg_silver_1787624176960.jpg";
+                } else if (selectedCarModel === "bmw") {
+                    previewImg.src = "green_bmw_m4_1787624137937.jpg";
+                } else if (selectedCarModel === "lamborghini") {
+                    previewImg.src = "lamborghini_sv_orange_1787624193011.jpg";
+                }
+            }
 
             // Engine Upgrade UI
             renderPips("pips-engine", upgradeEngine);
