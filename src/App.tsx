@@ -27,6 +27,7 @@ import tetrisThumbnail from './assets/images/tetris_thumbnail_1787444248779.jpg'
 import breakoutThumbnail from './assets/images/breakout_thumbnail_1787511090254.jpg';
 import candyCrushThumbnail from './assets/images/candy_crush_thumbnail_1787541332465.jpg';
 import carRacingThumbnail from './assets/images/car_racing_thumbnail_1787601761728.jpg';
+import planeShooterThumbnail from './assets/images/plane_shooter_thumb_1787712159818.jpg';
 
 // Bilingual translations structure for premium localized design
 const TRANSLATIONS = {
@@ -187,6 +188,21 @@ const GAME_DATABASE_LOCALIZED = [
     controls: {
       ar: 'لوحة المفاتيح: استخدم أسهم الاتجاهات لليمين واليسار (◀ ▶) أو مفاتيح A / D للتوجيه، وسهم لأعلى (▲) أو W لزيادة السرعة والنيترو، وسهم لأسفل (▼) أو S للفرامل. زر P للإيقاف المؤقت. على الجوال: اضغط على الأزرار الظاهرة للتوجيه، والبنزين والفرامل.',
       en: 'Keyboard: Left/Right arrows or A/D keys to steer, Up arrow or W key to accelerate and engage nitro, Down arrow or S key to brake. Press P to Pause. Touch/Mobile: Use the intuitive glowing left/right steer buttons and gas/brake pedals.'
+    }
+  },
+  {
+    id: 'game-plane-shooter',
+    category: 'Action' as const,
+    thumbnailUrl: planeShooterThumbnail,
+    embedUrl: '/games/plane-shooter.html',
+    title: { ar: 'لعبة غارة الطائرات أتاري كلاسيك', en: 'Atari River Raid Flight' },
+    description: {
+      ar: 'العب لعبة غارة الطائرات الأتاري الكلاسيكية أون لاين مجاناً وبدون تحميل! اختر مقاتلتك النفاثة المفضلة (F-16 Falcon أو مدمرة الدروع A-10 Thunderbolt أو SR-71 Stealth السريعة)، وتفادَ الحواجز الصخرية الصعبة وعقبات مجرى النهر، وأطلق النار والصواريخ لتدمير حصون الأعداء، واجمع براميل الوقود للبقاء محلقاً لأعلى النقاط!',
+      en: 'Play the legendary classic Atari River Raid scrolling airplane shooter game online for free! Choose your favorite fighter jet (F-16 Falcon, heavily armored A-10 Thunderbolt, or rapid-fire SR-71 Stealth), dodge treacherous river cliffs, shoot down hostile gun turrets, and catch fuel canisters to survive!'
+    },
+    controls: {
+      ar: 'لوحة المفاتيح: استخدم أسهم الاتجاهات (◀ ▶ ▲ ▼) أو مفاتيح A / S / D / W للتوجيه والتحكم بالسرعة، ومفتاح المسافة (Spacebar) أو مفتاح F لإطلاق النار والصواريخ. على شاشات الجوال: استخدم لوحة الاتجاهات (D-pad) وأزرار الإطلاق التفاعلية الظاهرة أسفل اللعبة.',
+      en: 'Keyboard: Use Arrow keys or A/S/D/W keys to steer and accelerate/decelerate, and Spacebar or F key to fire missiles. Touch/Mobile: Use the on-screen glowing direction D-pad and red FIRE action button.'
     }
   }
 ];

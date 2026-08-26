@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>أتاري طائرات - حرب الطائرات الكلاسيكية | Atari Retro Plane</title>
+    <meta name="description" content="العب لعبة حرب الطائرات الأتاري الكلاسيكية أون لاين مجاناً! تحكم بالطائرة، دمر الحواجز، واضرب الأعداء بالصواريخ." />
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+        :root {
+            --neon-green: #10b981;
+            --neon-red: #ef4444;
+            --neon-blue: #3b82f6;
+            --amber-glow: #fbbf24;
+            --cyber-bg: #090d16;
+        }
+        body {
+            background-color: var(--cyber-bg);
+            color: #f8fafc;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 10px;
+            overflow: hidden;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 6px;
+        }
+        h1 {
+            font-size: 18px;
+            color: var(--amber-glow);
+            text-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+        #game-container {
+            background-color: #0f172a;
+            padding: 10px;
+            border-radius: 16px;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1.5px solid rgba(255,255,255,0.08);
+            max-width: 100%;
+            width: 380px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            width: 100%;
+            margin-bottom: 8px;
+            background-color: #040811;
+            padding: 8px;
+            border-radius: 10px;
+            border: 1.5px solid rgba(255,255,255,0.05);
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .stat-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .stat-box span {
+            color: var(--amber-glow);
+            font-weight: 900;
+        }
+        .progress-bar-container {
+            grid-column: span 2;
+            background-color: #1e293b;
+            border-radius: 6px;
+            height: 10px;
+            overflow: hidden;
+            position: relative;
+            margin-top: 2px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981);
+            width: 100%;
+            transition: width 0.1s linear;
+        }
+        .progress-label {
+            position: absolute;
+            font-size: 7px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: 900;
+            text-shadow: 0 0 2px black;
+        }
+        canvas {
+            border: 2px solid var(--amber-glow);
+            border-radius: 10px;
+            background-color: #020617;
+            display: block;
+            touch-action: none;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+        }
+        
+        /* Aircraft Selector Panel */
+        .selector-panel {
+            width: 100%;
+            margin-bottom: 8px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+        }
+        .selector-btn {
+            background: rgba(255,255,255,0.03);
+            border: 1.5px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 6px;
+            color: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.25s ease;
+        }
+        .selector-btn.active {
+            border-color: var(--amber-glow);
+            background: rgba(251, 191, 36, 0.1);
+            box-shadow: 0 0 8px rgba(251, 191, 36, 0.25);
+            transform: scale(1.02);
+        }
+        .selector-btn div.icon {
+            font-size: 16px;
+            margin-bottom: 2px;
+        }
+        .selector-btn div.name {
+            font-size: 9px;
+            font-weight: 900;
+        }
+        .selector-btn div.desc {
+            font-size: 7px;
+            color: #8c88a8;
+            margin-top: 2px;
+        }
+
+        /* Controls Area */
+        .controls-wrapper {
+            width: 100%;
+            margin-top: 8px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .joy-panel {
+            display: grid;
+            grid-template-columns: 45px 45px 45px;
+            grid-template-rows: 40px 40px;
+            gap: 4px;
+        }
+        .ctrl-btn {
+            background: #1e293b;
+            border: 1.5px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            outline: none;
+            transition: background 0.1s;
+        }
+        .ctrl-btn:active {
+            background: var(--amber-glow);
+            color: #090d16;
+            border-color: var(--amber-glow);
+        }
+        .ctrl-btn.btn-left { grid-column: 1; grid-row: 2; }
+        .ctrl-btn.btn-right { grid-column: 3; grid-row: 2; }
+        .ctrl-btn.btn-up { grid-column: 2; grid-row: 1; }
+        .ctrl-btn.btn-down { grid-column: 2; grid-row: 2; }
+
+        .fire-wrapper {
+            flex-1: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            gap: 4px;
+        }
+        .fire-btn {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ef4444, #b91c1c);
+            border: 3px solid rgba(255,255,255,0.3);
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
+            color: white;
+            font-size: 13px;
+            font-weight: 900;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            outline: none;
+            transition: transform 0.05s, box-shadow 0.1s;
+        }
+        .fire-btn:active {
+            transform: scale(0.92);
+            box-shadow: 0 2px 5px rgba(239, 68, 68, 0.2);
+            background: radial-gradient(circle, #f87171, #ef4444);
+        }
+
+        /* Language Toggle Button & Sound Button */
+        .utility-row {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 8px;
+        }
+        .utility-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #94a3b8;
+            padding: 5px 12px;
+            font-size: 10px;
+            cursor: pointer;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+        .utility-btn:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Overlay views */
+        .overlay-screen {
+            position: absolute;
+            background: rgba(9, 13, 22, 0.95);
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+            z-index: 10;
+            border-radius: 10px;
+        }
+        .overlay-title {
+            font-size: 20px;
+            color: var(--amber-glow);
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+        .overlay-subtitle {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        .overlay-btn {
+            background: linear-gradient(135deg, var(--amber-glow), #f59e0b);
+            color: #090d16;
+            border: none;
+            padding: 10px 24px;
+            font-size: 13px;
+            font-weight: 900;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+            transition: transform 0.2s;
+        }
+        .overlay-btn:hover {
+            transform: scale(1.05);
+        }
+        .relative-canvas-wrapper {
+            position: relative;
+            width: 360px;
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1 id="app-title">🚀 غارة الطائرات - ATARI RIVER RAID</h1>
+</div>
+
+<div id="game-container">
+    
+    <!-- Aircraft Selection Panel -->
+    <div class="selector-panel">
+        <button class="selector-btn active" id="ship-f16" onclick="selectPlane('f16')">
+            <div class="icon">⚡</div>
+            <div class="name" id="f16-name">F-16 Falcon</div>
+            <div class="desc" id="f16-desc">متوازنة وسريعة</div>
+        </button>
+        <button class="selector-btn" id="ship-a10" onclick="selectPlane('a10')">
+            <div class="icon">🛡️</div>
+            <div class="name" id="a10-name">A-10 Thunderbolt</div>
+            <div class="desc" id="a10-desc">درع مضاعف + نيران</div>
+        </button>
+        <button class="selector-btn" id="ship-sr71" onclick="selectPlane('sr71')">
+            <div class="icon">🔥</div>
+            <div class="name" id="sr71-name">SR-71 Stealth</div>
+            <div class="desc" id="sr71-desc">إطلاق خارق سريع</div>
+        </button>
+    </div>
+
+    <!-- Live Stats -->
+    <div class="stats">
+        <div class="stat-box">
+            <span id="lbl-score">النقاط:</span>
+            <span id="score-val">0</span>
+        </div>
+        <div class="stat-box">
+            <span id="lbl-high">الرقم القياسي:</span>
+            <span id="high-val">0</span>
+        </div>
+        <div class="stat-box" style="grid-column: span 2; display: flex; justify-content: space-between; margin-top: 4px;">
+            <span id="lbl-lives">المستوى / الأرواح:</span>
+            <span id="lives-level-val">Lvl 1 - ❤️❤️❤️</span>
+        </div>
+        
+        <!-- Fuel Energy Gauge -->
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="fuel-gauge"></div>
+            <div class="progress-label" id="fuel-label">FUEL: 100%</div>
+        </div>
+    </div>
+
+    <!-- Game Canvas wrapped with absolute overlays -->
+    <div class="relative-canvas-wrapper">
+        <canvas id="gameCanvas" width="360" height="400"></canvas>
+
+        <!-- Start Game Screen -->
+        <div class="overlay-screen" id="start-screen">
+            <div class="overlay-title" id="start-title">غارة نهر الأتاري الكلاسيكي</div>
+            <div class="overlay-subtitle" id="start-desc">تفادى العقبات والحواجز الحجرية، أطلق الصواريخ لتدمير حصون الأعداء، واجمع براميل الوقود للبقاء في الجو!</div>
+            <button class="overlay-btn" id="start-btn" onclick="startGame()">ابدأ المعركة ➔</button>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div class="overlay-screen" id="game-over-screen" style="display: none;">
+            <div class="overlay-title" style="color: var(--neon-red);" id="over-title">انتهت اللعبة!</div>
+            <div class="overlay-subtitle" id="over-desc">لقد اصطدمت طائرتك أو نفد وقودك بالكامل في مجرى النهر.</div>
+            <div style="font-size: 16px; font-weight: bold; margin-bottom: 16px; color: var(--amber-glow);" id="over-score-lbl">النقاط المحققة: <span id="final-score">0</span></div>
+            <button class="overlay-btn" id="restart-btn" onclick="startGame()">أعد المحاولة ↻</button>
+        </div>
+    </div>
+
+    <!-- Tactile Controls Layout for mobile touch devices -->
+    <div class="controls-wrapper">
+        <div class="joy-panel">
+            <button class="ctrl-btn btn-up" id="btn-touch-up">▲</button>
+            <button class="ctrl-btn btn-left" id="btn-touch-left">◄</button>
+            <button class="ctrl-btn btn-right" id="btn-touch-right">►</button>
+            <button class="ctrl-btn btn-down" id="btn-touch-down">▼</button>
+        </div>
+        <div class="fire-wrapper">
+            <button class="fire-btn" id="btn-touch-fire">🔥 إطلاق</button>
+        </div>
+    </div>
+
+    <!-- Language & Audio Utility Menu -->
+    <div class="utility-row">
+        <button class="utility-btn" onclick="toggleLanguage()" id="btn-lang">🌐 English</button>
+        <button class="utility-btn" onclick="toggleMute()" id="btn-mute">🔊 كتم الصوت</button>
+    </div>
+
+</div>
+
+<script>
+    // ----------------------------------------------------
+    // TRANSLATIONS DATA
+    // ----------------------------------------------------
+    const LOCALE_STRINGS = {
+        ar: {
+            appTitle: "🚀 غارة الطائرات - ATARI RIVER RAID",
+            f16Desc: "متوازنة وسريعة",
+            a10Name: "A-10 مدمرة",
+            a10Desc: "درع مضاعف + نيران عريضة",
+            sr71Desc: "إطلاق سريع وحجم صغير",
+            lblScore: "النقاط:",
+            lblHigh: "الرقم القياسي:",
+            lblLives: "المستوى / الأرواح:",
+            startTitle: "غارة الطائرات الأتاري الكلاسيكية",
+            startDesc: "اسحب إصبعك على الشاشة لتوجيه الطائرة وتفادي العقبات بحرية تامة، أطلق النيران والصواريخ لتدمير الأعداء وحصون النهر، واجمع براميل الوقود لتبقى في الجو!",
+            startBtn: "ابدأ المعركة ➔",
+            overTitle: "انتهت اللعبة!",
+            overDesc: "لقد تحطمت طائرتك بالكامل أو نفد وقودك في غارة النهر.",
+            overScore: "النقاط المحققة: ",
+            restartBtn: "إعادة المحاولة ↻",
+            fireBtn: "🔥 إطلاق",
+            btnMute: "🔊 كتم الصوت",
+            btnUnmute: "🔇 تشغيل الصوت",
+            langLabel: "🌐 English",
+            levelStr: "المستوى"
+        },
+        en: {
+            appTitle: "🚀 ATARI RIVER RAID FLIGHT",
+            f16Desc: "Balanced & Speedy",
+            a10Name: "A-10 Warthog",
+            a10Desc: "Double Armor + Wide Shot",
+            sr71Desc: "Stealth Size + Rapid Fire",
+            lblScore: "Score:",
+            lblHigh: "High Score:",
+            lblLives: "Level / Lives:",
+            startTitle: "Atari Retro Plane Raid",
+            startDesc: "Drag your finger anywhere on the screen to smoothly steer your aircraft and dodge obstacles. Fire missiles to blow up barriers, and collect fuel!",
+            startBtn: "Start Battle ➔",
+            overTitle: "Game Over!",
+            overDesc: "Your aircraft has crashed or completely run out of energy fuel in the river canyon.",
+            overScore: "Final Score: ",
+            restartBtn: "Play Again ↻",
+            fireBtn: "🔥 FIRE",
+            btnMute: "🔊 Mute",
+            btnUnmute: "🔇 Unmute",
+            langLabel: "🌐 العربية",
+            levelStr: "Level"
+        }
+    };
+
+    let activeLang = "ar";
+
+    function updateLanguageUI() {
+        const t = LOCALE_STRINGS[activeLang];
+        document.getElementById("app-title").textContent = t.appTitle;
+        document.getElementById("f16-desc").textContent = t.f16Desc;
+        document.getElementById("a10-name").textContent = t.a10Name;
+        document.getElementById("a10-desc").textContent = t.a10Desc;
+        document.getElementById("sr71-desc").textContent = t.sr71Desc;
+        document.getElementById("lbl-score").textContent = t.lblScore;
+        document.getElementById("lbl-high").textContent = t.lblHigh;
+        document.getElementById("lbl-lives").textContent = t.lblLives;
+        
+        document.getElementById("start-title").textContent = t.startTitle;
+        document.getElementById("start-desc").textContent = t.startDesc;
+        document.getElementById("start-btn").textContent = t.startBtn;
+
+        document.getElementById("over-title").textContent = t.overTitle;
+        document.getElementById("over-desc").textContent = t.overDesc;
+        document.getElementById("restart-btn").textContent = t.restartBtn;
+
+        document.getElementById("btn-touch-fire").textContent = t.fireBtn;
+        document.getElementById("btn-lang").textContent = t.langLabel;
+        
+        const isMuted = audioContext ? audioContext.state === 'suspended' : false;
+        document.getElementById("btn-mute").textContent = isMuted ? t.btnUnmute : t.btnMute;
+
+        updateStatDisplay();
+    }
+
+    function toggleLanguage() {
+        activeLang = (activeLang === "ar") ? "en" : "ar";
+        document.documentElement.dir = (activeLang === "ar") ? "rtl" : "ltr";
+        document.documentElement.lang = activeLang;
+        updateLanguageUI();
+    }
+
+    // ----------------------------------------------------
+    // AUDIO SYNTHESIZER ENGINE (Web Audio API Retro Synth)
+    // ----------------------------------------------------
+    let audioContext = null;
+    let isMuted = false;
+
+    function initAudio() {
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+    }
+
+    function playLaserSound() {
+        if (isMuted || !audioContext) return;
+        initAudio();
+        
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(440, audioContext.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(110, audioContext.currentTime + 0.15);
+
+        gain.gain.setValueAtTime(0.12, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+
+        osc.start();
+        osc.stop(audioContext.currentTime + 0.15);
+    }
+
+    function playExplosionSound() {
+        if (isMuted || !audioContext) return;
+        initAudio();
+
+        // White noise for arcade explosion
+        const bufferSize = audioContext.sampleRate * 0.35;
+        const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+        }
+
+        const noise = audioContext.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = audioContext.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(1000, audioContext.currentTime);
+        filter.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.35);
+
+        const gain = audioContext.createGain();
+        gain.gain.setValueAtTime(0.25, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.35);
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioContext.destination);
+
+        noise.start();
+    }
+
+    function playPowerupSound() {
+        if (isMuted || !audioContext) return;
+        initAudio();
+
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+
+        osc.type = "square";
+        osc.frequency.setValueAtTime(250, audioContext.currentTime);
+        osc.frequency.setValueAtTime(500, audioContext.currentTime + 0.08);
+        osc.frequency.setValueAtTime(1000, audioContext.currentTime + 0.16);
+
+        gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.25);
+
+        osc.start();
+        osc.stop(audioContext.currentTime + 0.25);
+    }
+
+    function playHurtSound() {
+        if (isMuted || !audioContext) return;
+        initAudio();
+
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(180, audioContext.currentTime);
+        osc.frequency.linearRampToValueAtTime(60, audioContext.currentTime + 0.2);
+
+        gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+
+        osc.start();
+        osc.stop(audioContext.currentTime + 0.25);
+    }
+
+    function toggleMute() {
+        initAudio();
+        isMuted = !isMuted;
+        if (isMuted) {
+            audioContext.suspend();
+        } else {
+            audioContext.resume();
+        }
+        updateLanguageUI();
+    }
+
+
+    // ----------------------------------------------------
+    // GAMEPLAY SYSTEM
+    // ----------------------------------------------------
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // Dimensions
+    const WIDTH = 360;
+    const HEIGHT = 400;
+
+    // Aircraft Selection State
+    let selectedPlaneType = "f16";
+    let planeConfig = {
+        speed: 4,
+        maxLives: 3,
+        doubleShot: false,
+        width: 32,
+        height: 32,
+        bulletDelay: 280,
+        color: "#fbbf24",
+        symbol: "⚡"
+    };
+
+    function selectPlane(type) {
+        if (gameRunning && !gameOver) return; // Prevent change mid-run
+        selectedPlaneType = type;
+        
+        // Remove active class from all
+        document.getElementById("ship-f16").classList.remove("active");
+        document.getElementById("ship-a10").classList.remove("active");
+        document.getElementById("ship-sr71").classList.remove("active");
+
+        document.getElementById(`ship-${type}`).classList.add("active");
+
+        // Set configuration
+        if (type === "f16") {
+            planeConfig = {
+                speed: 4.5,
+                maxLives: 3,
+                doubleShot: false,
+                width: 30,
+                height: 30,
+                bulletDelay: 250,
+                color: "#06b6d4", // Cyan
+                symbol: "⚡"
+            };
+        } else if (type === "a10") {
+            planeConfig = {
+                speed: 3.5,
+                maxLives: 4,
+                doubleShot: true, // shoots double blasts
+                width: 36,
+                height: 34,
+                bulletDelay: 320,
+                color: "#10b981", // Green
+                symbol: "🛡️"
+            };
+        } else if (type === "sr71") {
+            planeConfig = {
+                speed: 5.5,
+                maxLives: 2,
+                doubleShot: false,
+                width: 26,
+                height: 32,
+                bulletDelay: 150, // Rapid
+                color: "#ef4444", // Red
+                symbol: "🔥"
+            };
+        }
+
+        // Draw preview on Canvas immediately
+        drawPreview();
+    }
+
+    // High Score tracking
+    let highScore = parseInt(localStorage.getItem("retro_plane_high") || "0");
+    document.getElementById("high-val").textContent = highScore.toLocaleString();
+
+    // Game Core State
+    let gameRunning = false;
+    let gameOver = false;
+    let score = 0;
+    let currentLevel = 1;
+    let lives = 3;
+    let fuel = 100;
+
+    // Entity lists
+    let player = {
+        x: WIDTH / 2 - 15,
+        y: HEIGHT - 70,
+        width: 30,
+        height: 30,
+        targetX: WIDTH / 2 - 15,
+        targetY: HEIGHT - 70,
+        shieldActive: 0 // remaining frame count
+    };
+
+    let bullets = [];
+    let enemies = [];
+    let obstacles = [];
+    let fuelItems = [];
+    let particles = [];
+
+    // Continuous road/river scrolling parameters
+    let scrollY = 0;
+    let scrollSpeed = 2;
+
+    // Keys state
+    let keys = {};
+
+    // Touch controls state
+    let touchState = {
+        up: false,
+        down: false,
+        left: false,
+        right: false,
+        fire: false
+    };
+
+    // Last shot stamp
+    let lastShotTime = 0;
+
+    // River banks coordinates (left & right widths)
+    // Procedurally generated per level segment
+    let riverCanyon = [];
+
+    function generateRiverSegment() {
+        const lastLeft = riverCanyon.length > 0 ? riverCanyon[riverCanyon.length - 1].left : 40;
+        const lastRight = riverCanyon.length > 0 ? riverCanyon[riverCanyon.length - 1].right : 40;
+        
+        // Random drift
+        const changeL = (Math.random() - 0.5) * 16;
+        const changeR = (Math.random() - 0.5) * 16;
+
+        let left = Math.max(25, Math.min(90, lastLeft + changeL));
+        let right = Math.max(25, Math.min(90, lastRight + changeR));
+
+        // Periodically narrow down for "Atari" obstacles
+        if (Math.random() < 0.05) {
+            left += 20;
+            right += 20;
+        }
+
+        return { left, right };
+    }
+
+    function initRiverCanyon() {
+        riverCanyon = [];
+        for (let y = 0; y < HEIGHT + 40; y += 10) {
+            riverCanyon.push({
+                y: y,
+                left: 45,
+                right: 45
+            });
+        }
+    }
+
+    function updateRiverCanyon() {
+        // Move segments down
+        const step = scrollSpeed;
+        for (let i = 0; i < riverCanyon.length; i++) {
+            riverCanyon[i].y += step;
+        }
+
+        // Add new segment at top if needed
+        if (riverCanyon[0].y >= 0) {
+            const nextSeg = generateRiverSegment();
+            riverCanyon.unshift({
+                y: -10,
+                left: nextSeg.left,
+                right: nextSeg.right
+            });
+        }
+
+        // Remove off-screen bottom ones
+        if (riverCanyon[riverCanyon.length - 1].y > HEIGHT + 15) {
+            riverCanyon.pop();
+        }
+    }
+
+    // Listen to keypresses
+    window.addEventListener("keydown", (e) => {
+        keys[e.key.toLowerCase()] = true;
+        if (e.key === " " || e.key.toLowerCase() === "f") {
+            e.preventDefault(); // prevent scroll
+        }
+    });
+    window.addEventListener("keyup", (e) => {
+        keys[e.key.toLowerCase()] = false;
+    });
+
+    // Mobile button handlers
+    function setupTouchButton(id, stateKey) {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        
+        const setOn = (e) => {
+            e.preventDefault();
+            touchState[stateKey] = true;
+            initAudio();
+        };
+        const setOff = (e) => {
+            e.preventDefault();
+            touchState[stateKey] = false;
+        };
+
+        btn.addEventListener("touchstart", setOn);
+        btn.addEventListener("touchend", setOff);
+        btn.addEventListener("mousedown", setOn);
+        btn.addEventListener("mouseup", setOff);
+        btn.addEventListener("mouseleave", setOff);
+    }
+
+    setupTouchButton("btn-touch-up", "up");
+    setupTouchButton("btn-touch-down", "down");
+    setupTouchButton("btn-touch-left", "left");
+    setupTouchButton("btn-touch-right", "right");
+    setupTouchButton("btn-touch-fire", "fire");
+
+    // ----------------------------------------------------
+    // REAL-TIME CANVAS TOUCH & DRAG STEERING
+    // ----------------------------------------------------
+    let isDragging = false;
+
+    function getCanvasCoords(e) {
+        const rect = canvas.getBoundingClientRect();
+        // Support both single touch and mouse click events
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        
+        // Scale to match internally used 360x400 coordinate system
+        const x = (clientX - rect.left) * (WIDTH / rect.width);
+        const y = (clientY - rect.top) * (HEIGHT / rect.height);
+        return { x, y };
+    }
+
+    function handleDragStart(e) {
+        if (!gameRunning || gameOver) return;
+        initAudio();
+        isDragging = true;
+        const coords = getCanvasCoords(e);
+        player.targetX = coords.x;
+        player.targetY = coords.y;
+    }
+
+    function handleDragMove(e) {
+        if (!isDragging || !gameRunning || gameOver) return;
+        const coords = getCanvasCoords(e);
+        player.targetX = coords.x;
+        player.targetY = coords.y;
+        
+        // Prevent default browser scrolling and bouncing gestures on mobile
+        if (e.cancelable) {
+            e.preventDefault();
+        }
+    }
+
+    function handleDragEnd() {
+        isDragging = false;
+    }
+
+    // Direct touch event registrations
+    canvas.addEventListener("touchstart", (e) => {
+        handleDragStart(e);
+    }, { passive: false });
+
+    canvas.addEventListener("touchmove", (e) => {
+        handleDragMove(e);
+    }, { passive: false });
+
+    canvas.addEventListener("touchend", handleDragEnd);
+
+    // Mouse steering drag registrations for desktop ease-of-use
+    canvas.addEventListener("mousedown", handleDragStart);
+    canvas.addEventListener("mousemove", handleDragMove);
+    canvas.addEventListener("mouseup", handleDragEnd);
+    canvas.addEventListener("mouseleave", handleDragEnd);
+
+    // ----------------------------------------------------
+    // LAUNCH OR RESET GAMEPLAY
+    // ----------------------------------------------------
+    function startGame() {
+        initAudio();
+        
+        // Hide overlay screens
+        document.getElementById("start-screen").style.display = "none";
+        document.getElementById("game-over-screen").style.display = "none";
+
+        // Initialize state
+        score = 0;
+        currentLevel = 1;
+        lives = planeConfig.maxLives;
+        fuel = 100;
+        gameOver = false;
+        gameRunning = true;
+        scrollSpeed = 2;
+
+        // Reset positions
+        player.x = WIDTH / 2 - planeConfig.width / 2;
+        player.y = HEIGHT - 70;
+        player.targetX = player.x;
+        player.targetY = player.y;
+        player.shieldActive = 90; // invincibility at start
+
+        bullets = [];
+        enemies = [];
+        obstacles = [];
+        fuelItems = [];
+        particles = [];
+
+        initRiverCanyon();
+        updateStatDisplay();
+        
+        // Start main loops
+        requestAnimationFrame(gameLoop);
+    }
+
+    function triggerGameOver() {
+        gameOver = true;
+        gameRunning = false;
+        playExplosionSound();
+
+        // Update highscore
+        if (score > highScore) {
+            highScore = score;
+            localStorage.setItem("retro_plane_high", highScore);
+        }
+
+        // Show Game Over menu
+        document.getElementById("game-over-screen").style.display = "flex";
+        document.getElementById("final-score").textContent = score.toLocaleString();
+        document.getElementById("high-val").textContent = highScore.toLocaleString();
+    }
+
+    function updateStatDisplay() {
+        document.getElementById("score-val").textContent = score.toLocaleString();
+        
+        let hearts = "❤️".repeat(Math.max(0, lives));
+        const t = LOCALE_STRINGS[activeLang];
+        document.getElementById("lives-level-val").textContent = `${t.levelStr} ${currentLevel} - ${hearts}`;
+        
+        // Fuel progress bar
+        const fuelGauge = document.getElementById("fuel-gauge");
+        if (fuelGauge) {
+            fuelGauge.style.width = `${Math.max(0, Math.min(100, fuel))}%`;
+            document.getElementById("fuel-label").textContent = `FUEL: ${Math.round(fuel)}%`;
+            
+            if (fuel < 30) {
+                fuelGauge.style.background = "#ef4444"; // Pulsing warning
+            } else if (fuel < 60) {
+                fuelGauge.style.background = "#f59e0b";
+            } else {
+                fuelGauge.style.background = "linear-gradient(90deg, #ef4444, #f59e0b, #10b981)";
+            }
+        }
+    }
+
+    // ----------------------------------------------------
+    // PROCEDURAL LEVEL SCALING & SPY GENERATOR
+    // ----------------------------------------------------
+    let obstacleSpawnTimer = 0;
+    let enemySpawnTimer = 0;
+    let fuelSpawnTimer = 0;
+
+    function handleSpawns() {
+        obstacleSpawnTimer++;
+        enemySpawnTimer++;
+        fuelSpawnTimer++;
+
+        // Get canyon width around middle screen to place item safely
+        const canyonWidth = 180;
+
+        // Spawn Fuel canisters periodically
+        if (fuelSpawnTimer > 180) {
+            fuelSpawnTimer = 0;
+            fuelItems.push({
+                x: 60 + Math.random() * (WIDTH - 120),
+                y: -30,
+                width: 20,
+                height: 24,
+                glow: 0
+            });
+        }
+
+        // Spawn River Blockades / Obstacles
+        if (obstacleSpawnTimer > Math.max(90, 160 - currentLevel * 10)) {
+            obstacleSpawnTimer = 0;
+            // Place a block in the mid-river
+            obstacles.push({
+                x: 80 + Math.random() * (WIDTH - 160),
+                y: -40,
+                width: 35 + Math.random() * 40,
+                height: 25,
+                color: (Math.random() < 0.5) ? "#64748b" : "#475569" // Atari Gray Rocks
+            });
+        }
+
+        // Spawn Enemy Fighter Planes or Turrets
+        if (enemySpawnTimer > Math.max(120, 200 - currentLevel * 15)) {
+            enemySpawnTimer = 0;
+            const isTurret = Math.random() < 0.4;
+            
+            enemies.push({
+                x: 60 + Math.random() * (WIDTH - 120),
+                y: -35,
+                width: isTurret ? 24 : 28,
+                height: isTurret ? 24 : 26,
+                isTurret: isTurret,
+                shootCooldown: Math.random() * 60,
+                vx: isTurret ? 0 : (Math.random() - 0.5) * 3, // moving planes
+                vy: isTurret ? 0 : 1 + Math.random() * 1.5,
+                color: isTurret ? "#ef4444" : "#ec4899"
+            });
+        }
+    }
+
+    // ----------------------------------------------------
+    // PHYSICS GAME LOOP
+    // ----------------------------------------------------
+    function gameLoop(timestamp) {
+        if (!gameRunning) return;
+
+        updateRiverCanyon();
+        handleSpawns();
+
+        // 1. Fuel consumption based on flight speed
+        const speedMultiplier = (keys["arrowup"] || keys["w"] || touchState.up) ? 1.4 : 1.0;
+        fuel -= 0.045 * speedMultiplier;
+        if (fuel <= 0) {
+            fuel = 0;
+            triggerGameOver();
+            return;
+        }
+
+        // 2. Adjust scrolling pace
+        scrollSpeed = 2 + (currentLevel * 0.4);
+        if (keys["arrowup"] || keys["w"] || touchState.up) {
+            scrollSpeed += 1.8;
+        } else if (keys["arrowdown"] || keys["s"] || touchState.down) {
+            scrollSpeed = Math.max(1.2, scrollSpeed - 1.2);
+        }
+
+         // 3. Player movements
+         const pSpeed = planeConfig.speed;
+         if (isDragging) {
+             // Smoothly interpolate towards the dragged touch/mouse position
+             const dx = player.targetX - (player.x + planeConfig.width / 2);
+             const dy = player.targetY - (player.y + planeConfig.height / 2);
+             
+             // Speed limit step ratio so it remains balanced and doesn't warp through items
+             const dist = Math.sqrt(dx * dx + dy * dy);
+             const maxStep = pSpeed * 2.2; // faster tracking speed for finger-drag responsiveness
+             if (dist > maxStep) {
+                 player.x += (dx / dist) * maxStep;
+                 player.y += (dy / dist) * maxStep;
+             } else {
+                 player.x += dx;
+                 player.y += dy;
+             }
+             
+             // Clamp player inside top boundary to keep the action moving
+             player.y = Math.max(HEIGHT / 2, Math.min(HEIGHT - 45, player.y));
+         } else {
+             if (keys["arrowleft"] || keys["a"] || touchState.left) {
+                 player.x -= pSpeed;
+             }
+             if (keys["arrowright"] || keys["d"] || touchState.right) {
+                 player.x += pSpeed;
+             }
+             if (keys["arrowup"] || keys["w"] || touchState.up) {
+                 player.y = Math.max(HEIGHT / 2, player.y - pSpeed * 0.6);
+             }
+             if (keys["arrowdown"] || keys["s"] || touchState.down) {
+                 player.y = Math.min(HEIGHT - 45, player.y + pSpeed * 0.6);
+             }
+         }
+
+        // Clamp inside River limits dynamically
+        // Match player with river banks on current horizontal row
+        const approxSegIndex = Math.floor((player.y) / 10);
+        let leftLimit = 40;
+        let rightLimit = WIDTH - 40;
+        
+        // Find segment close to player's current vertical Y
+        const matchingSeg = riverCanyon.find(seg => Math.abs(seg.y - player.y) < 15);
+        if (matchingSeg) {
+            leftLimit = matchingSeg.left + 5;
+            rightLimit = WIDTH - matchingSeg.right - 5;
+        }
+
+        if (player.x < leftLimit) {
+            player.x = leftLimit;
+            // Take dynamic light damage if scratching wall without shield
+            if (player.shieldActive <= 0) {
+                player.shieldActive = 30; // brief immunity
+                lives--;
+                playHurtSound();
+                createExplosion(player.x, player.y, "#ef4444", 8);
+                if (lives <= 0) {
+                    triggerGameOver();
+                    return;
+                }
+            }
+        }
+        if (player.x > rightLimit - planeConfig.width) {
+            player.x = rightLimit - planeConfig.width;
+            if (player.shieldActive <= 0) {
+                player.shieldActive = 30;
+                lives--;
+                playHurtSound();
+                createExplosion(player.x + 10, player.y, "#ef4444", 8);
+                if (lives <= 0) {
+                    triggerGameOver();
+                    return;
+                }
+            }
+        }
+
+        // Decrement shield
+        if (player.shieldActive > 0) player.shieldActive--;
+
+        // 4. Shoots System
+        if ((keys[" "] || keys["f"] || touchState.fire) && (timestamp - lastShotTime > planeConfig.bulletDelay)) {
+            lastShotTime = timestamp;
+            playLaserSound();
+
+            const bulletY = player.y - 6;
+            if (planeConfig.doubleShot) {
+                // Shoot two parallel laser beams
+                bullets.push({ x: player.x + 4, y: bulletY, vy: -7, color: "#38bdf8" });
+                bullets.push({ x: player.x + planeConfig.width - 8, y: bulletY, vy: -7, color: "#38bdf8" });
+            } else {
+                // Single central laser beam
+                bullets.push({ x: player.x + planeConfig.width / 2 - 2, y: bulletY, vy: -7, color: "#facc15" });
+            }
+        }
+
+        // 5. Physics: Laser Bullets
+        for (let i = bullets.length - 1; i >= 0; i--) {
+            const b = bullets[i];
+            b.y += b.vy;
+
+            // Remove out-of-bounds lasers
+            if (b.y < -10 || b.y > HEIGHT + 10) {
+                bullets.splice(i, 1);
+                continue;
+            }
+
+            // Collide laser with obstacles
+            let bulletRemoved = false;
+            for (let j = obstacles.length - 1; j >= 0; j--) {
+                const o = obstacles[j];
+                if (b.x > o.x && b.x < o.x + o.width && b.y > o.y && b.y < o.y + o.height) {
+                    // Destroy target obstacle
+                    createExplosion(o.x + o.width/2, o.y + o.height/2, o.color, 12);
+                    obstacles.splice(j, 1);
+                    score += 50;
+                    playExplosionSound();
+                    bulletRemoved = true;
+                    break;
+                }
+            }
+
+            if (bulletRemoved) {
+                bullets.splice(i, 1);
+                continue;
+            }
+
+            // Collide laser with Enemies
+            for (let k = enemies.length - 1; k >= 0; k--) {
+                const e = enemies[k];
+                if (b.x > e.x && b.x < e.x + e.width && b.y > e.y && b.y < e.y + e.height) {
+                    // Destroy enemy plane/turret
+                    createExplosion(e.x + e.width/2, e.y + e.height/2, e.color, 15);
+                    enemies.splice(k, 1);
+                    score += e.isTurret ? 150 : 100;
+                    playExplosionSound();
+                    bulletRemoved = true;
+                    break;
+                }
+            }
+
+            if (bulletRemoved) {
+                bullets.splice(i, 1);
+            }
+        }
+
+        // 6. Physics: Enemies
+        for (let i = enemies.length - 1; i >= 0; i--) {
+            const e = enemies[i];
+            e.y += e.vy + (scrollSpeed * 0.5); // scroll rate + self velocity
+            e.x += e.vx;
+
+            // Reverse velocity at river banks
+            if (e.x < 45 || e.x > WIDTH - 45 - e.width) {
+                e.vx *= -1;
+            }
+
+            // Remove offscreen
+            if (e.y > HEIGHT + 40) {
+                enemies.splice(i, 1);
+                continue;
+            }
+
+            // Turret shooting logic (fires downward lasers)
+            if (e.isTurret) {
+                e.shootCooldown++;
+                if (e.shootCooldown > 110) {
+                    e.shootCooldown = 0;
+                    bullets.push({
+                        x: e.x + e.width / 2,
+                        y: e.y + e.height,
+                        vy: 4.5,
+                        color: "#ef4444" // Hostile red laser
+                    });
+                }
+            }
+
+            // Direct Collide with Player
+            if (player.shieldActive <= 0 && 
+                player.x < e.x + e.width && player.x + planeConfig.width > e.x &&
+                player.y < e.y + e.height && player.y + planeConfig.height > e.y) {
+                
+                // Explode and decrement life
+                createExplosion(e.x + e.width/2, e.y + e.height/2, e.color, 16);
+                enemies.splice(i, 1);
+                lives--;
+                playHurtSound();
+                player.shieldActive = 60; // temporary shield
+
+                if (lives <= 0) {
+                    triggerGameOver();
+                    return;
+                }
+            }
+        }
+
+        // 7. Physics: Obstacles & Blocks
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+            const o = obstacles[i];
+            o.y += scrollSpeed;
+
+            if (o.y > HEIGHT + 40) {
+                obstacles.splice(i, 1);
+                continue;
+            }
+
+            // Collide with Player
+            if (player.shieldActive <= 0 &&
+                player.x < o.x + o.width && player.x + planeConfig.width > o.x &&
+                player.y < o.y + o.height && player.y + planeConfig.height > o.y) {
+                
+                lives--;
+                playHurtSound();
+                createExplosion(o.x + o.width/2, o.y + o.height/2, o.color, 16);
+                obstacles.splice(i, 1);
+                player.shieldActive = 60;
+
+                if (lives <= 0) {
+                    triggerGameOver();
+                    return;
+                }
+            }
+        }
+
+        // 8. Physics: Fuel items
+        for (let i = fuelItems.length - 1; i >= 0; i--) {
+            const f = fuelItems[i];
+            f.y += scrollSpeed;
+
+            if (f.y > HEIGHT + 40) {
+                fuelItems.splice(i, 1);
+                continue;
+            }
+
+            // Player grabs Fuel canister!
+            if (player.x < f.x + f.width && player.x + planeConfig.width > f.x &&
+                player.y < f.y + f.height && player.y + planeConfig.height > f.y) {
+                
+                playPowerupSound();
+                fuel = Math.min(100, fuel + 30);
+                score += 25;
+                
+                // Visual spark particles
+                for (let k = 0; k < 8; k++) {
+                    particles.push({
+                        x: f.x + f.width/2,
+                        y: f.y + f.height/2,
+                        vx: (Math.random() - 0.5) * 6,
+                        vy: (Math.random() - 0.5) * 6,
+                        radius: 2 + Math.random() * 3,
+                        color: "#fbbf24",
+                        life: 1
+                    });
+                }
+
+                fuelItems.splice(i, 1);
+            }
+        }
+
+        // 9. Particles physics
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life -= 0.035;
+
+            if (p.life <= 0) {
+                particles.splice(i, 1);
+            }
+        }
+
+        // 10. Increment level with score
+        const nextLvlGoal = currentLevel * 1500;
+        if (score >= nextLvlGoal) {
+            currentLevel++;
+            playPowerupSound();
+            // flash effect
+            ctx.fillStyle = "rgba(255,255,255,0.2)";
+            ctx.fillRect(0, 0, WIDTH, HEIGHT);
+        }
+
+        // Render Frame
+        drawFrame();
+        updateStatDisplay();
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    // Particle factory
+    function createExplosion(x, y, color, count) {
+        for (let i = 0; i < count; i++) {
+            particles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 8,
+                vy: (Math.random() - 0.5) * 8,
+                radius: 2 + Math.random() * 4,
+                color: color || "#f59e0b",
+                life: 1.0
+            });
+        }
+    }
+
+    // ----------------------------------------------------
+    // RENDERING MECHANICS (Arcade Look & Feel)
+    // ----------------------------------------------------
+    function drawFrame() {
+        // Clear Canvas with sleek cyber glow backdrop
+        ctx.fillStyle = "#020617";
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+        // A. Draw Scrolling River Banks / Canyon Sides
+        ctx.fillStyle = "#1e3a8a"; // Dark blue retro Atari water
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+        // Draw left and right dry river canyons
+        ctx.fillStyle = "#16a34a"; // Green dry lands (Atari Style)
+        for (let i = 0; i < riverCanyon.length; i++) {
+            const seg = riverCanyon[i];
+            // Left bank
+            ctx.fillRect(0, seg.y, seg.left, 10);
+            // Right bank
+            ctx.fillRect(WIDTH - seg.right, seg.y, seg.right, 10);
+
+            // Draw brown shoreline border
+            ctx.fillStyle = "#854d0e";
+            ctx.fillRect(seg.left - 2, seg.y, 3, 10);
+            ctx.fillRect(WIDTH - seg.right, seg.y, 3, 10);
+            ctx.fillStyle = "#16a34a"; // reset
+        }
+
+        // B. Draw Obstacles / Blocks
+        obstacles.forEach(o => {
+            ctx.fillStyle = o.color;
+            ctx.beginPath();
+            ctx.roundRect(o.x, o.y, o.width, o.height, 4);
+            ctx.fill();
+
+            // Draw simple inner retro shadow/border
+            ctx.strokeStyle = "rgba(255,255,255,0.25)";
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+        });
+
+        // C. Draw Fuel Canisters
+        fuelItems.forEach(f => {
+            // Canister body
+            ctx.fillStyle = "#f59e0b"; // Yellow
+            ctx.fillRect(f.x, f.y + 4, f.width, f.height - 4);
+            
+            // Fuel Cap
+            ctx.fillStyle = "#ef4444"; // Red cap
+            ctx.fillRect(f.x + f.width/2 - 4, f.y, 8, 4);
+
+            // Text tag 'F'
+            ctx.fillStyle = "black";
+            ctx.font = "bold 11px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("F", f.x + f.width/2, f.y + f.height - 6);
+        });
+
+        // D. Draw Enemy Planes & Turrets
+        enemies.forEach(e => {
+            if (e.isTurret) {
+                // Draw stationary radar turret box
+                ctx.fillStyle = "#ef4444";
+                ctx.fillRect(e.x, e.y, e.width, e.height);
+                
+                // Draw satellite dish circle
+                ctx.fillStyle = "white";
+                ctx.beginPath();
+                ctx.arc(e.x + e.width/2, e.y + e.height/2, 6, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                // Draw retro hostile aircraft (V-wing down)
+                ctx.fillStyle = e.color;
+                ctx.beginPath();
+                ctx.moveTo(e.x + e.width / 2, e.y + e.height); // Nose down
+                ctx.lineTo(e.x, e.y); // Wing Left
+                ctx.lineTo(e.x + 8, e.y + 6);
+                ctx.lineTo(e.x + e.width - 8, e.y + 6);
+                ctx.lineTo(e.x + e.width, e.y); // Wing Right
+                ctx.closePath();
+                ctx.fill();
+
+                // Draw red laser engines
+                ctx.fillStyle = "#ef4444";
+                ctx.fillRect(e.x + 6, e.y - 2, 4, 3);
+                ctx.fillRect(e.x + e.width - 10, e.y - 2, 4, 3);
+            }
+        });
+
+        // E. Draw Laser Bullets
+        bullets.forEach(b => {
+            ctx.fillStyle = b.color;
+            ctx.fillRect(b.x, b.y, 4, 10);
+            
+            // Neon spark glow
+            ctx.shadowColor = b.color;
+            ctx.shadowBlur = 8;
+            ctx.fillRect(b.x - 1, b.y, 6, 10);
+            ctx.shadowBlur = 0; // Reset
+        });
+
+        // F. Draw Particles
+        particles.forEach(p => {
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = p.life;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1.0; // reset
+        });
+
+        // G. Draw Player's Aircraft Fighter
+        ctx.save();
+        // Nose pointer (pointed upward)
+        ctx.fillStyle = planeConfig.color;
+        ctx.beginPath();
+        ctx.moveTo(player.x + planeConfig.width / 2, player.y); // Nose pointing up
+        ctx.lineTo(player.x, player.y + planeConfig.height); // Bottom Left Wing
+        ctx.lineTo(player.x + 8, player.y + planeConfig.height - 6);
+        ctx.lineTo(player.x + planeConfig.width - 8, player.y + planeConfig.height - 6);
+        ctx.lineTo(player.x + planeConfig.width, player.y + planeConfig.height); // Bottom Right Wing
+        ctx.closePath();
+        ctx.fill();
+
+        // Draw cockpit dome
+        ctx.fillStyle = "white";
+        ctx.beginPath();
+        ctx.arc(player.x + planeConfig.width/2, player.y + 14, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Engine fire trails
+        if (Math.random() < 0.7) {
+            ctx.fillStyle = "#ef4444";
+            ctx.fillRect(player.x + 10, player.y + planeConfig.height - 3, 3, 5 + Math.random() * 8);
+            ctx.fillRect(player.x + planeConfig.width - 13, player.y + planeConfig.height - 3, 3, 5 + Math.random() * 8);
+        }
+
+        // Draw active energy shield if immune
+        if (player.shieldActive > 0) {
+            ctx.strokeStyle = "rgba(0, 240, 255, 0.8)";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(player.x + planeConfig.width/2, player.y + planeConfig.height/2, 22, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Add custom blinking shield icon indicator
+            ctx.fillStyle = "rgba(0, 240, 255, 0.4)";
+            ctx.beginPath();
+            ctx.arc(player.x + planeConfig.width/2, player.y + planeConfig.height/2, 22, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.restore();
+    }
+
+    function drawPreview() {
+        // Clear canvas with deep space blue
+        ctx.fillStyle = "#020617";
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+        // Draw standard canyon preview
+        ctx.fillStyle = "#16a34a";
+        ctx.fillRect(0, 0, 45, HEIGHT);
+        ctx.fillRect(WIDTH - 45, 0, 45, HEIGHT);
+
+        ctx.fillStyle = "#1e3a8a";
+        ctx.fillRect(45, 0, WIDTH - 90, HEIGHT);
+
+        // Draw Selected Fighter Plane centered
+        const px = WIDTH / 2 - planeConfig.width / 2;
+        const py = HEIGHT / 2 - planeConfig.height / 2;
+
+        ctx.fillStyle = planeConfig.color;
+        ctx.beginPath();
+        ctx.moveTo(px + planeConfig.width / 2, py);
+        ctx.lineTo(px, py + planeConfig.height);
+        ctx.lineTo(px + 8, py + planeConfig.height - 6);
+        ctx.lineTo(px + planeConfig.width - 8, py + planeConfig.height - 6);
+        ctx.lineTo(px + planeConfig.width, py + planeConfig.height);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = "white";
+        ctx.beginPath();
+        ctx.arc(px + planeConfig.width/2, py + 14, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Render glowing label
+        ctx.fillStyle = "white";
+        ctx.font = "bold 13px sans-serif";
+        ctx.textAlign = "center";
+        
+        const isAr = (activeLang === "ar");
+        const previewLbl = isAr ? `طائرة ${selectedPlaneType.toUpperCase()} جاهزة!` : `PLANE ${selectedPlaneType.toUpperCase()} READY!`;
+        const startInstructLbl = isAr ? "اضغط على زر (ابدأ المعركة) للتحليق!" : "Tap (Start Battle) to take off!";
+        
+        ctx.fillText(previewLbl, WIDTH / 2, HEIGHT / 2 + 50);
+        ctx.fillStyle = varColor("--amber-glow");
+        ctx.font = "11px sans-serif";
+        ctx.fillText(startInstructLbl, WIDTH / 2, HEIGHT / 2 + 75);
+    }
+
+    function varColor(variable) {
+        return getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
+    }
+
+    // Initial setup call
+    selectPlane("f16");
+    updateLanguageUI();
+
+</script>
+</body>
+</html>
