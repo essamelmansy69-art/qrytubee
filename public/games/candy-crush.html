@@ -1,2046 +1,1240 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>حلوى ماتش ٣ الكلاسيكية - كاندي نيون | Retro Candy Match 3</title>
+    <meta name="description" content="العب لعبة حلوى ماتش ٣ الكلاسيكية أون لاين مجاناً! طابق نجوم وقلوب الحلوى الملونة، فجر الأشكال اللذيذة باللمس أو السحب، وحقق أرقاماً قياسية في ٢٠ حركة." />
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+        :root {
+            --neon-pink: #ec4899;
+            --neon-purple: #a855f7;
+            --neon-blue: #06b6d4;
+            --neon-yellow: #facc15;
+            --cyber-bg: #0b0717;
+            --card-bg: rgba(20, 11, 38, 0.85);
+        }
+        body {
+            background: radial-gradient(circle at center, #1b0f33 0%, var(--cyber-bg) 100%);
+            color: #f8fafc;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 10px;
+            overflow: hidden;
+        }
+        #game-container {
+            width: 100%;
+            max-width: 420px;
+            background: var(--card-bg);
+            border-radius: 24px;
+            border: 1.5px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(168, 85, 247, 0.1);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 12px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 18px;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(236, 72, 153, 0.5);
+            font-weight: 900;
+            margin-bottom: 4px;
+        }
+        /* Top Status Indicators */
+        .stats-hud {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            width: 100%;
+            margin-bottom: 12px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .stat-box {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .stat-box small {
+            font-size: 10px;
+            color: #c084fc;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+        .stat-box b {
+            font-size: 18px;
+            font-weight: 900;
+            color: #ffffff;
+        }
+        #hud-score { color: #22c55e; text-shadow: 0 0 8px rgba(34, 197, 94, 0.3); }
+        #hud-moves { color: #eab308; text-shadow: 0 0 8px rgba(234, 179, 8, 0.3); }
+        #hud-level { color: #3b82f6; text-shadow: 0 0 8px rgba(59, 130, 246, 0.3); }
 
-<title>كاندى كراش اون لاين بالفواكه ثلاثية الأبعاد 3D - Candy Crush Online</title>
-<meta name="description" content="العب لعبة كاندى كراش اون لاين بنسختها الجديدة ثلاثية الأبعاد بالفواكه اللذيذة! طابق فواكه الصيف، اصنع قنابل الألوان، وفجر المستويات اللانهائية مجاناً وبدون تحميل." />
-<meta name="keywords" content="كاندى كراش اون لاين, كاندي كراش, العاب فواكه, مطابقة 3, Candy Crush Online, العاب ثلاثية الابعاد, العاب ذكاء بدون تحميل" />
+        /* Progress Bar towards level target */
+        .progress-wrapper {
+            width: 100%;
+            background-color: #1e1b4b;
+            border-radius: 20px;
+            height: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 14px;
+            position: relative;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--neon-pink), var(--neon-purple), var(--neon-blue));
+            box-shadow: 0 0 8px var(--neon-pink);
+            transition: width 0.3s cubic-bezier(0.1, 0.8, 0.3, 1);
+        }
 
-<!-- Three.js Library CDN -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+        /* Responsive Match-3 Canvas */
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            background-color: rgba(9, 5, 20, 0.9);
+            border-radius: 16px;
+            border: 2px solid rgba(168, 85, 247, 0.25);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
 
-<style>
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+        /* Bottom Controls Row */
+        .bottom-actions {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 14px;
+            gap: 10px;
+        }
+        .action-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #94a3b8;
+            padding: 8px 14px;
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: 800;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .action-btn:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
 
-html, body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: radial-gradient(circle, #1a0b2e 0%, #08020f 100%);
-    touch-action: none;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    user-select: none;
-    -webkit-user-select: none;
-}
-
-#game-container {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    padding: 10px;
-}
-
-/* HUD Top Bar */
-#hud {
-    width: min(500px, 95vw);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 18px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 20px;
-    background: rgba(29, 13, 53, 0.85);
-    backdrop-filter: blur(15px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-    margin-bottom: 10px;
-    z-index: 10;
-}
-
-.stat {
-    text-align: center;
-    flex: 1;
-}
-
-.stat small {
-    display: block;
-    color: #e2b6ff;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 2px;
-}
-
-.stat b {
-    font-size: 19px;
-    font-weight: 800;
-    color: #fff;
-    text-shadow: 0 0 10px rgba(255, 120, 240, 0.4);
-}
-
-#score {
-    color: #00ffd5;
-    text-shadow: 0 0 12px rgba(0, 255, 213, 0.5);
-}
-
-#moves {
-    color: #ffde43;
-    text-shadow: 0 0 12px rgba(255, 222, 67, 0.5);
-}
-
-#target {
-    color: #ff68b4;
-}
-
-#stage {
-    color: #b56cff;
-    text-shadow: 0 0 12px rgba(181, 108, 255, 0.5);
-}
-
-#controls {
-    display: flex;
-    gap: 8px;
-}
-
-.ctrl-btn {
-    width: 38px;
-    height: 38px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.ctrl-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: scale(1.05);
-}
-
-/* Progress bar wrapper */
-#progress-container {
-    width: min(500px, 95vw);
-    height: 6px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
-    overflow: hidden;
-    margin-bottom: 12px;
-    z-index: 10;
-}
-
-#progress-bar {
-    width: 0%;
-    height: 100%;
-    background: linear-gradient(90deg, #ff68b4, #b56cff, #00ffd5);
-    transition: width 0.3s ease;
-}
-
-/* The Three.js Canvas Container */
-#canvas-container {
-    position: relative;
-    width: min(480px, 95vw);
-    aspect-ratio: 1;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 24px;
-    background: rgba(14, 5, 27, 0.6);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 0 30px rgba(181, 108, 255, 0.1);
-    overflow: hidden;
-    z-index: 5;
-    cursor: grab;
-}
-
-#canvas-container:active {
-    cursor: grabbing;
-}
-
-canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-}
-
-/* Instructions HUD */
-#footer-hud {
-    width: min(500px, 95vw);
-    text-align: center;
-    margin-top: 15px;
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 12px;
-    line-height: 1.6;
-    z-index: 10;
-}
-
-/* Stage selector bar */
-#stage-bar {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    margin-top: 8px;
-    z-index: 10;
-}
-
-.stage-dot {
-    padding: 4px 10px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 11px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.stage-dot.active {
-    background: linear-gradient(135deg, #b56cff, #ff68b4);
-    border-color: transparent;
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(181, 108, 255, 0.4);
-}
-
-/* Modals & Overlays */
-.overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(10, 3, 20, 0.85);
-    backdrop-filter: blur(12px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-    transition: opacity 0.3s ease;
-}
-
-.overlay.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
-
-.modal {
-    width: min(400px, 90vw);
-    background: linear-gradient(135deg, #2c1252 0%, #17072e 100%);
-    border: 2px solid rgba(181, 108, 255, 0.3);
-    border-radius: 32px;
-    padding: 30px;
-    text-align: center;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(181, 108, 255, 0.15);
-}
-
-.modal h2 {
-    font-size: 26px;
-    color: #fff;
-    margin-bottom: 12px;
-    text-shadow: 0 0 15px rgba(255, 120, 240, 0.6);
-}
-
-.modal p {
-    color: #e2b6ff;
-    font-size: 14px;
-    line-height: 1.6;
-    margin-bottom: 25px;
-}
-
-.modal b {
-    color: #00ffd5;
-    font-size: 18px;
-}
-
-.primary-btn {
-    width: 100%;
-    padding: 15px 24px;
-    background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
-    border: none;
-    border-radius: 18px;
-    color: #fff;
-    font-size: 16px;
-    font-weight: 800;
-    cursor: pointer;
-    box-shadow: 0 8px 24px rgba(236, 72, 153, 0.4);
-    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.primary-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 30px rgba(236, 72, 153, 0.6);
-}
-
-.primary-btn:active {
-    transform: translateY(1px);
-}
-
-/* Float Animation */
-@keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
-}
-
-.floating-icon {
-    font-size: 48px;
-    margin-bottom: 15px;
-    display: inline-block;
-    animation: float 3s ease-in-out infinite;
-}
-
-/* Layout adjustments */
-html[dir="rtl"] .stage-dot {
-    direction: rtl;
-}
-</style>
+        /* Overlay modals */
+        .screen-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(11, 7, 23, 0.96);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            text-align: center;
+            z-index: 20;
+            transition: opacity 0.3s ease;
+        }
+        .overlay-title {
+            font-size: 24px;
+            color: var(--neon-pink);
+            font-weight: 900;
+            margin-bottom: 8px;
+            text-shadow: 0 0 10px rgba(236, 72, 153, 0.4);
+        }
+        .overlay-subtitle {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .overlay-btn {
+            background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 14px;
+            font-weight: 900;
+            border-radius: 14px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(236, 72, 153, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .overlay-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(236, 72, 153, 0.6);
+        }
+        .floating-candy-art {
+            font-size: 42px;
+            margin-bottom: 12px;
+            animation: bounce 2s infinite ease-in-out;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
 </head>
-
 <body>
 
-<div id="game-container" id="main-container">
-    <!-- ================= HUD ================= -->
-    <div id="hud" id="hud-bar">
-        <div class="stat">
-            <small id="label-stage">المرحلة</small>
-            <b id="stage">1</b>
+<div id="game-container">
+    
+    <!-- Header -->
+    <div class="header">
+        <h1 id="lbl-title">🍭 كاندي نيون - لعبة طائرات اتارى الحلوة</h1>
+    </div>
+
+    <!-- Status Indicators HUD -->
+    <div class="stats-hud">
+        <div class="stat-box">
+            <small id="txt-score-lbl">النقاط</small>
+            <b id="hud-score">0</b>
         </div>
-        <div class="stat">
-            <small id="label-score">النقاط</small>
-            <b id="score">0</b>
+        <div class="stat-box">
+            <small id="txt-target-lbl">الهدف</small>
+            <b id="hud-target">1000</b>
         </div>
-        <div class="stat">
-            <small id="label-target">الهدف</small>
-            <b id="target">1,500</b>
-        </div>
-        <div class="stat">
-            <small id="label-moves">الحركات</small>
-            <b id="moves">25</b>
-        </div>
-        <div id="controls">
-            <button class="ctrl-btn" id="sound" title="كتم/تفعيل الصوت">🔊</button>
-            <button class="ctrl-btn" id="pause" title="إيقاف مؤقت">⏸️</button>
+        <div class="stat-box">
+            <small id="txt-moves-lbl">الحركات</small>
+            <b id="hud-moves">20</b>
         </div>
     </div>
 
-    <!-- Progress toward objective -->
-    <div id="progress-container">
-        <div id="progress-bar"></div>
+    <!-- Progress slider -->
+    <div class="progress-wrapper">
+        <div class="progress-fill" id="progress-bar-fill"></div>
     </div>
 
-    <!-- ================= 3D BOARD CONTAINER ================= -->
-    <div id="canvas-container">
-        <!-- Three.js renders in here -->
+    <!-- Main Canvas Frame with overlays -->
+    <div class="canvas-wrapper">
+        <canvas id="matchCanvas" width="360" height="360"></canvas>
+
+        <!-- Start Screen -->
+        <div class="screen-overlay" id="start-screen">
+            <div class="floating-candy-art">🍬</div>
+            <div class="overlay-title" id="start-title">ماتش كاندي نيون</div>
+            <div class="overlay-subtitle" id="start-desc">طابق ٣ قطع حلوى ملونة متتالية بسحبها أفقياً أو عمودياً! حقق الهدف قبل انتهاء الحركات المحددة.</div>
+            <button class="overlay-btn" onclick="initAndStartGame()" id="start-btn">ابدأ التحدي ➔</button>
+        </div>
+
+        <!-- Win Screen -->
+        <div class="screen-overlay" id="win-screen" style="display: none;">
+            <div class="floating-candy-art">🏆</div>
+            <div class="overlay-title" style="color: #22c55e;" id="win-title">فوز رائع!</div>
+            <div class="overlay-subtitle" id="win-desc">لقد حققت الهدف بنجاح! جاهز للانتقال للمستوى التالي؟</div>
+            <div style="font-size: 14px; margin-bottom: 16px; color: var(--neon-yellow);" id="win-score-info">النقاط: <span id="win-score-val">0</span></div>
+            <button class="overlay-btn" onclick="nextLevel()" id="win-btn">المستوى التالي ➔</button>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div class="screen-overlay" id="over-screen" style="display: none;">
+            <div class="floating-candy-art">💔</div>
+            <div class="overlay-title" style="color: #ef4444;" id="over-title">انتهت الحركات!</div>
+            <div class="overlay-subtitle" id="over-desc">نفدت حركاتك بالكامل دون إحراز هدف المستوى.</div>
+            <div style="font-size: 14px; margin-bottom: 16px; color: var(--neon-yellow);" id="over-score-info">نقاطك: <span id="over-score-val">0</span></div>
+            <button class="overlay-btn" onclick="initAndStartGame()" id="over-btn">أعد المحاولة ↻</button>
+        </div>
     </div>
 
-    <!-- Direct Stage selector console -->
-    <div id="stage-bar">
-        <div class="stage-dot active" data-stage="1" id="btn-st-1">مرحلة ١</div>
-        <div class="stage-dot" data-stage="2" id="btn-st-2">مرحلة ٢</div>
-        <div class="stage-dot" data-stage="3" id="btn-st-3">مرحلة ٣</div>
-        <div class="stage-dot" data-stage="4" id="btn-st-4">مرحلة ٤</div>
-        <div class="stage-dot" data-stage="5" id="btn-st-5">مرحلة ٥</div>
+    <!-- Utilities panel -->
+    <div class="bottom-actions">
+        <button class="action-btn" onclick="toggleLanguage()" id="btn-lang">🌐 English</button>
+        <button class="action-btn" onclick="toggleMute()" id="btn-mute">🔊 كتم الصوت</button>
     </div>
 
-    <!-- Instructions / Footer -->
-    <div id="footer-hud">
-        <p id="label-instruction">اسحب الفواكه الثلاثية الأبعاد أفقياً أو عمودياً لمطابقة 3 أو أكثر من نفس النوع!</p>
-    </div>
-</div>
-
-<!-- ================= START / STATUS OVERLAYS ================= -->
-<div class="overlay" id="overlay">
-    <div class="modal">
-        <span class="floating-icon" id="modal-icon">🍉</span>
-        <h2 id="main-logo">فواكه ماتش 3D</h2>
-        <p id="message">طابق فواكه الصيف اللذيذة لتحقيق الأهداف والانتقال عبر المراحل!</p>
-        <button class="primary-btn" id="start-btn">ابدأ اللعب 🎮</button>
-    </div>
-</div>
-
-<div class="overlay hidden" id="pause-overlay">
-    <div class="modal">
-        <span class="floating-icon">⏸️</span>
-        <h2 id="pause-title">اللعبة متوقفة مؤقتاً</h2>
-        <p id="pause-message">اضغط على الزر أدناه لمواصلة اللعب الفاكهي اللذيذ.</p>
-        <button class="primary-btn" id="resume-btn">استئناف اللعب ➡️</button>
-    </div>
 </div>
 
 <script>
-/* =========================================================
-   LOCALIZATION & PREFERENCES
-========================================================= */
-const urlParams = new URLSearchParams(window.location.search);
-const lang = urlParams.get('lang') || 'ar';
-const isRtl = lang === 'ar';
-document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
-document.documentElement.lang = lang;
+    // ----------------------------------------------------
+    // LOCALIZATION
+    // ----------------------------------------------------
+    const STRINGS = {
+        ar: {
+            title: "🍭 كاندي نيون - لعبة طائرات اتارى الحلوة",
+            score: "النقاط",
+            target: "الهدف",
+            moves: "الحركات",
+            startTitle: "ماتش كاندي نيون",
+            startDesc: "طابق ٣ قطع حلوى ملونة متتالية بسحبها أفقياً أو عمودياً! حقق الهدف قبل انتهاء الحركات المحددة.",
+            startBtn: "ابدأ التحدي ➔",
+            winTitle: "فوز رائع! 🎉",
+            winDesc: "لقد حققت هدف المستوى بنجاح! هل أنت جاهز للتحدي القادم؟",
+            winBtn: "المستوى التالي ➔",
+            overTitle: "انتهت الحركات! 💔",
+            overDesc: "نفدت حركاتك الـ ٢٠ بالكامل قبل إحراز نقاط الهدف المطلوب.",
+            overBtn: "أعد المحاولة ↻",
+            btnMute: "🔊 كتم الصوت",
+            btnUnmute: "🔇 تشغيل الصوت",
+            langLabel: "🌐 English"
+        },
+        en: {
+            title: "🍭 Neon Candy Match 3 Retro",
+            score: "Score",
+            target: "Target",
+            moves: "Moves",
+            startTitle: "Neon Candy Match",
+            startDesc: "Drag or swipe candy blocks to align 3 or more of the same design! Reach the level target before running out of moves.",
+            startBtn: "Start Match ➔",
+            winTitle: "Sweet Victory! 🎉",
+            winDesc: "Excellent! You successfully smashed the level target. Ready for more?",
+            winBtn: "Next Level ➔",
+            overTitle: "Out of Moves! 💔",
+            overDesc: "You used all your 20 strategic moves without hitting the score objective.",
+            overBtn: "Try Again ↻",
+            btnMute: "🔊 Mute",
+            btnUnmute: "🔇 Unmute",
+            langLabel: "🌐 العربية"
+        }
+    };
 
-const LOCALIZATION = {
-    ar: {
-        stage: "المرحلة",
-        score: "النقاط",
-        target: "الهدف",
-        moves: "الحركات",
-        instruction: "اسحب الفواكه ثلاثية الأبعاد 3D لمطابقة 3 قطع أو أكثر من نفس النوع!",
-        gameTitle: "فواكه ماتش 3D",
-        gameDesc: "طابق فواكه الصيف اللذيذة لتحقيق الأهداف والانتقال عبر المراحل ميكانيكياً!",
-        startBtn: "ابدأ اللعب 🎮",
-        paused: "اللعبة متوقفة مؤقتاً",
-        pausedDesc: "اضغط على الزر أدناه لمواصلة مغامرة الفواكه اللذيذة.",
-        resumeBtn: "استئناف اللعب ➡️",
-        win: "أحسنت! فوز فاكهي 🌟",
-        lose: "انتهت الحركات! حاول مجدداً 💔",
-        finalScore: "النتيجة النهائية: ",
-        btnRestart: "إعادة المغامرة 🔄",
-        nextStage: "المرحلة التالية"
-    },
-    en: {
-        stage: "Stage",
-        score: "Score",
-        target: "Target",
-        moves: "Moves",
-        instruction: "Swipe the 3D fruits to match 3 or more of the same type!",
-        gameTitle: "Fruit Match 3D",
-        gameDesc: "Match delicious summer fruits to reach goals and advance stages smoothly!",
-        startBtn: "Start Adventure 🎮",
-        paused: "Game Paused",
-        pausedDesc: "Tap below to resume your delicious fruit match adventure.",
-        resumeBtn: "Resume Game ➡️",
-        win: "Perfect! Fruitful Win 🌟",
-        lose: "Out of moves! Try again 💔",
-        finalScore: "Final Score: ",
-        btnRestart: "Restart Adventure 🔄",
-        nextStage: "Next Stage"
+    let activeLang = "ar";
+
+    function updateUIStrings() {
+        const t = STRINGS[activeLang];
+        document.getElementById("lbl-title").textContent = t.title;
+        document.getElementById("txt-score-lbl").textContent = t.score;
+        document.getElementById("txt-target-lbl").textContent = t.target;
+        document.getElementById("txt-moves-lbl").textContent = t.moves;
+        
+        document.getElementById("start-title").textContent = t.startTitle;
+        document.getElementById("start-desc").textContent = t.startDesc;
+        document.getElementById("start-btn").textContent = t.startBtn;
+
+        document.getElementById("win-title").textContent = t.winTitle;
+        document.getElementById("win-desc").textContent = t.winDesc;
+        document.getElementById("win-btn").textContent = t.winBtn;
+
+        document.getElementById("over-title").textContent = t.overTitle;
+        document.getElementById("over-desc").textContent = t.overDesc;
+        document.getElementById("over-btn").textContent = t.overBtn;
+
+        document.getElementById("btn-lang").textContent = t.langLabel;
+        document.getElementById("btn-mute").textContent = isMuted ? t.btnUnmute : t.btnMute;
     }
-};
 
-const t = LOCALIZATION[lang] || LOCALIZATION.ar;
-
-// Apply initial translations
-document.getElementById('label-stage').textContent = t.stage;
-document.getElementById('label-score').textContent = t.score;
-document.getElementById('label-target').textContent = t.target;
-document.getElementById('label-moves').textContent = t.moves;
-document.getElementById('label-instruction').textContent = t.instruction;
-document.getElementById('main-logo').textContent = t.gameTitle;
-document.getElementById('message').textContent = t.gameDesc;
-document.getElementById('start-btn').textContent = t.startBtn;
-document.getElementById('pause-title').textContent = t.paused;
-document.getElementById('pause-message').textContent = t.pausedDesc;
-document.getElementById('resume-btn').textContent = t.resumeBtn;
-
-/* =========================================================
-   WEB AUDIO RETRO SYNTHESIZER
-========================================================= */
-let audioCtx = null;
-let audioEnabled = true;
-
-function initAudio() {
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function toggleLanguage() {
+        activeLang = (activeLang === "ar") ? "en" : "ar";
+        document.documentElement.dir = (activeLang === "ar") ? "rtl" : "ltr";
+        document.documentElement.lang = activeLang;
+        updateUIStrings();
     }
-    if (audioCtx.state === "suspended") {
-        audioCtx.resume();
-    }
-}
 
-function playSound(freq, duration, type = "sine", volume = 0.1, slideToFreq = 0) {
-    if (!audioEnabled) return;
-    try {
+    // ----------------------------------------------------
+    // RETRO AUDIO GENERATOR (Web Audio API)
+    // ----------------------------------------------------
+    let audioCtx = null;
+    let isMuted = false;
+
+    function initAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
+
+    function playMatchSound() {
+        if (isMuted || !audioCtx) return;
         initAudio();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        if (slideToFreq > 0) {
-            osc.frequency.exponentialRampToValueAtTime(slideToFreq, audioCtx.currentTime + duration);
-        }
-
-        gain.gain.setValueAtTime(volume, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-
         osc.connect(gain);
         gain.connect(audioCtx.destination);
 
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(320, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
+
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+
         osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-    } catch (e) {
-        console.warn("Audio Context block", e);
+        osc.stop(audioCtx.currentTime + 0.15);
     }
-}
 
-const sounds = {
-    click: () => playSound(440, 0.08, "triangle", 0.1),
-    swap: () => playSound(300, 0.15, "sine", 0.12, 150),
-    match: () => {
-        playSound(523.25, 0.15, "sine", 0.15, 783.99);
-        setTimeout(() => playSound(659.25, 0.15, "sine", 0.15, 987.77), 80);
-    },
-    special: () => {
-        playSound(150, 0.35, "sawtooth", 0.2, 600);
-        setTimeout(() => playSound(300, 0.25, "sine", 0.15, 900), 100);
-    },
-    fall: () => playSound(180, 0.12, "sine", 0.05, 120),
-    gameStart: () => {
-        playSound(261.63, 0.18, "sine", 0.15, 523.25);
-        setTimeout(() => playSound(329.63, 0.18, "sine", 0.15, 659.25), 100);
-        setTimeout(() => playSound(392.00, 0.22, "sine", 0.18, 783.99), 200);
-    },
-    win: () => {
-        playSound(523.25, 0.25, "sine", 0.2, 1046.50);
-        setTimeout(() => playSound(659.25, 0.25, "sine", 0.2, 1318.51), 120);
-        setTimeout(() => playSound(783.99, 0.25, "sine", 0.2, 1567.98), 240);
-        setTimeout(() => playSound(1046.50, 0.45, "sine", 0.25, 2093.00), 360);
-    },
-    lose: () => {
-        playSound(220, 0.4, "sawtooth", 0.15, 50);
-        setTimeout(() => playSound(180, 0.5, "sawtooth", 0.15, 40), 150);
-    }
-};
-
-/* Audio Switch Handler */
-const soundBtn = document.getElementById("sound");
-soundBtn.onclick = () => {
-    audioEnabled = !audioEnabled;
-    soundBtn.textContent = audioEnabled ? "🔊" : "🔇";
-    if (audioEnabled) {
+    function playSlideSound() {
+        if (isMuted || !audioCtx) return;
         initAudio();
-        sounds.gameStart();
-    }
-};
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
 
-const pauseBtn = document.getElementById("pause");
-pauseBtn.onclick = () => togglePause();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+        osc.frequency.linearRampToValueAtTime(250, audioCtx.currentTime + 0.1);
 
-/* =========================================================
-   STAGE CONFIGURATIONS & METRICS
-========================================================= */
-const GRID_SIZE = 8;
-const FRUIT_TYPES = [
-    { name: "Watermelon", emoji: "🍉", color: 0x2e7d32 }, // Dark Green Striped
-    { name: "Apple", emoji: "🍎", color: 0xff3333 },       // Red
-    { name: "Orange", emoji: "🍊", color: 0xff8c00 },      // Orange
-    { name: "Banana", emoji: "🍌", color: 0xffd700 },      // Yellow
-    { name: "Grape", emoji: "🍇", color: 0x6a1b9a },       // Purple bunch
-    { name: "Strawberry", emoji: "🍓", color: 0xe53935 }   // Glossy Red Cone
-];
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
 
-let score = 0;
-let moves = 25;
-let currentStage = 1;
-let targetScore = 1500;
-let isPlaying = false;
-let isPaused = false;
-let isAnimating = false;
-
-const STAGE_CONFIGS = {
-    1: { target: 1500, moves: 25, labelAr: "بداية حلوة", labelEn: "Sweet Start" },
-    2: { target: 3500, moves: 23, labelAr: "تحدي السكر", labelEn: "Sugar Quest" },
-    3: { target: 6500, moves: 20, labelAr: "منحدرات الكولا", labelEn: "Cola Cliffs" },
-    4: { target: 10000, moves: 18, labelAr: "دونات الجنون", labelEn: "Donut Mania" },
-    5: { target: 14000, moves: 15, labelAr: "تحدي الأساطير", labelEn: "Legendary Sweet" }
-};
-
-function getStageConfig(stageNum) {
-    if (STAGE_CONFIGS[stageNum]) {
-        return STAGE_CONFIGS[stageNum];
-    }
-    // Dynamic progression for infinite levels
-    const target = 14000 + (stageNum - 5) * 3500;
-    const moves = Math.max(12, 15 - Math.floor((stageNum - 5) / 2));
-    return {
-        target: target,
-        moves: moves,
-        labelAr: `تحدي كوني ${stageNum}`,
-        labelEn: `Cosmic Level ${stageNum}`
-    };
-}
-
-let board = []; // 2D grid containing FruitTile references
-let lastSwapR1 = -1, lastSwapC1 = -1, lastSwapR2 = -1, lastSwapC2 = -1;
-let activeSelectedTile = null;
-
-/* =========================================================
-   THREE.JS 3D WORLD BUILDERS
-========================================================= */
-const canvasContainer = document.getElementById("canvas-container");
-let scene, camera, renderer;
-let boardGroup; // Container group for 3D meshes
-const SPACING = 1.15; // Grid cell scale padding
-
-// Initialize Three.js WebGL Sandbox
-function init3DWorld() {
-    scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x100522, 0.05);
-
-    // Setup Orthographic Camera for perfect parallel Match-3 aspect ratios
-    const aspect = canvasContainer.clientWidth / canvasContainer.clientHeight;
-    const viewSize = 10;
-    camera = new THREE.OrthographicCamera(
-        -viewSize * aspect / 2, viewSize * aspect / 2,
-        viewSize / 2, -viewSize / 2,
-        0.1, 1000
-    );
-    // Align camera centered directly in front of the match-3 field
-    camera.position.set(0, 0, 10);
-    camera.lookAt(0, 0, 0);
-
-    // Renderer setup with antialias & pixel ratio safety
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(canvasContainer.clientWidth, canvasContainer.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    
-    // Clear old canvases
-    canvasContainer.innerHTML = "";
-    canvasContainer.appendChild(renderer.domElement);
-
-    // Board container group
-    boardGroup = new THREE.Group();
-    scene.add(boardGroup);
-
-    // Ambient background lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.55);
-    scene.add(ambientLight);
-
-    // Key directional light casting deep 3D drop-shadows
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.85);
-    dirLight.position.set(3, 6, 8);
-    dirLight.castShadow = true;
-    dirLight.shadow.mapSize.width = 1024;
-    dirLight.shadow.mapSize.height = 1024;
-    scene.add(dirLight);
-
-    // Point highlight light for match glows
-    const pointLight = new THREE.PointLight(0xff68b4, 1.2, 15);
-    pointLight.position.set(0, 0, 3);
-    scene.add(pointLight);
-
-    // Floating background starry stardust
-    createBackgroundStars();
-
-    // Trigger window resize event safety
-    window.addEventListener("resize", onWindowResize);
-}
-
-// Generate starry stardust in background
-let backgroundStars;
-function createBackgroundStars() {
-    const starCount = 60;
-    const geom = new THREE.BufferGeometry();
-    const positions = new Float32Array(starCount * 3);
-    const colors = new Float32Array(starCount * 3);
-
-    for (let i = 0; i < starCount; i++) {
-        positions[i * 3] = (Math.random() - 0.5) * 20;
-        positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
-        positions[i * 3 + 2] = -5 - Math.random() * 5; // Deep behind board
-
-        // Pastel purple/magenta/cyan star colors
-        colors[i * 3] = 0.5 + Math.random() * 0.5;
-        colors[i * 3 + 1] = 0.2 + Math.random() * 0.4;
-        colors[i * 3 + 2] = 0.8 + Math.random() * 0.2;
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.1);
     }
 
-    geom.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    geom.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+    function playFailSound() {
+        if (isMuted || !audioCtx) return;
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
 
-    // Star material texture mapping
-    const mat = new THREE.PointsMaterial({
-        size: 0.15,
-        vertexColors: true,
-        transparent: true,
-        opacity: 0.8,
-        blending: THREE.AdditiveBlending
-    });
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(140, audioCtx.currentTime + 0.1);
 
-    backgroundStars = new THREE.Points(geom, mat);
-    scene.add(backgroundStars);
-}
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
 
-function onWindowResize() {
-    if (!renderer) return;
-    const width = canvasContainer.clientWidth;
-    const height = canvasContainer.clientHeight;
-    renderer.setSize(width, height);
-    
-    const aspect = width / height;
-    const viewSize = 10;
-    camera.left = -viewSize * aspect / 2;
-    camera.right = viewSize * aspect / 2;
-    camera.top = viewSize / 2;
-    camera.bottom = -viewSize / 2;
-    camera.updateProjectionMatrix();
-}
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.2);
+    }
 
-/* =========================================================
-   PROCEDURAL 3D FRUIT MESH CONSTRUCTORS
-========================================================= */
-function createApple() {
-    const group = new THREE.Group();
-    const bodyGeom = new THREE.SphereGeometry(0.4, 32, 32);
-    bodyGeom.scale(1, 0.9, 1);
-    const bodyMat = new THREE.MeshStandardMaterial({
-        color: 0xff3333,
-        roughness: 0.15,
-        metalness: 0.1,
-        clearcoat: 1.0,
-        clearcoatRoughness: 0.1
-    });
-    const body = new THREE.Mesh(bodyGeom, bodyMat);
-    group.add(body);
-    
-    // Stem
-    const stemGeom = new THREE.CylinderGeometry(0.02, 0.02, 0.15, 8);
-    stemGeom.translate(0, 0.4, 0);
-    stemGeom.rotateZ(-0.2);
-    const stemMat = new THREE.MeshStandardMaterial({ color: 0x5c4033, roughness: 0.9 });
-    const stem = new THREE.Mesh(stemGeom, stemMat);
-    group.add(stem);
-    
-    // Leaf
-    const leafGeom = new THREE.ConeGeometry(0.06, 0.18, 8);
-    leafGeom.scale(1, 1, 0.2);
-    leafGeom.translate(0.05, 0.42, 0);
-    leafGeom.rotateZ(0.6);
-    const leafMat = new THREE.MeshStandardMaterial({ color: 0x228b22, roughness: 0.5 });
-    const leaf = new THREE.Mesh(leafGeom, leafMat);
-    group.add(leaf);
-    
-    return group;
-}
+    function playLevelUpSound() {
+        if (isMuted || !audioCtx) return;
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
 
-function createOrange() {
-    const group = new THREE.Group();
-    const bodyGeom = new THREE.SphereGeometry(0.38, 32, 32);
-    const bodyMat = new THREE.MeshStandardMaterial({
-        color: 0xff8c00,
-        roughness: 0.4,
-        metalness: 0.1,
-        clearcoat: 0.5
-    });
-    const body = new THREE.Mesh(bodyGeom, bodyMat);
-    group.add(body);
-    
-    const stemGeom = new THREE.CylinderGeometry(0.015, 0.015, 0.08, 8);
-    stemGeom.translate(0, 0.38, 0);
-    const stemMat = new THREE.MeshStandardMaterial({ color: 0x3d2314, roughness: 0.9 });
-    const stem = new THREE.Mesh(stemGeom, stemMat);
-    group.add(stem);
-    
-    const leafGeom = new THREE.ConeGeometry(0.05, 0.15, 8);
-    leafGeom.scale(1, 1, 0.2);
-    leafGeom.translate(-0.04, 0.39, 0);
-    leafGeom.rotateZ(-0.6);
-    const leafMat = new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 0.6 });
-    const leaf = new THREE.Mesh(leafGeom, leafMat);
-    group.add(leaf);
-    
-    return group;
-}
+        osc.type = "square";
+        osc.frequency.setValueAtTime(261, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(329, audioCtx.currentTime + 0.08);
+        osc.frequency.setValueAtTime(392, audioCtx.currentTime + 0.16);
+        osc.frequency.setValueAtTime(523, audioCtx.currentTime + 0.24);
 
-function createWatermelon() {
-    const group = new THREE.Group();
-    const bodyGeom = new THREE.SphereGeometry(0.42, 32, 32);
-    bodyGeom.scale(1, 1.25, 0.85);
-    bodyGeom.rotateZ(0.3);
-    
-    // Procedural striped canvas texture
-    const canvas = document.createElement("canvas");
-    canvas.width = 128;
-    canvas.height = 128;
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.4);
+    }
+
+    function toggleMute() {
+        initAudio();
+        isMuted = !isMuted;
+        if (isMuted) {
+            if (audioCtx) audioCtx.suspend();
+        } else {
+            if (audioCtx) audioCtx.resume();
+        }
+        updateUIStrings();
+    }
+
+
+    // ----------------------------------------------------
+    // MATCH-3 GAME ENGINE
+    // ----------------------------------------------------
+    const canvas = document.getElementById("matchCanvas");
     const ctx = canvas.getContext("2d");
-    ctx.fillStyle = "#2e7d32";
-    ctx.fillRect(0, 0, 128, 128);
-    ctx.fillStyle = "#1b5e20";
-    for (let i = 0; i < 6; i++) {
-        ctx.fillRect(i * 22, 0, 8, 128);
-    }
-    const texture = new THREE.CanvasTexture(canvas);
-    
-    const bodyMat = new THREE.MeshStandardMaterial({
-        map: texture,
-        roughness: 0.2,
-        metalness: 0.1
-    });
-    const body = new THREE.Mesh(bodyGeom, bodyMat);
-    group.add(body);
-    
-    return group;
-}
 
-function createBanana() {
-    const group = new THREE.Group();
-    const curve = new THREE.QuadraticBezierCurve3(
-        new THREE.Vector3(-0.25, 0.25, 0),
-        new THREE.Vector3(0, -0.3, 0),
-        new THREE.Vector3(0.25, 0.25, 0)
-    );
-    const bodyGeom = new THREE.TubeGeometry(curve, 20, 0.08, 8, false);
-    const bodyMat = new THREE.MeshStandardMaterial({
-        color: 0xffd700,
-        roughness: 0.3,
-        metalness: 0.1
-    });
-    const body = new THREE.Mesh(bodyGeom, bodyMat);
-    group.add(body);
-    
-    const tipGeom = new THREE.SphereGeometry(0.085, 8, 8);
-    tipGeom.translate(0.25, 0.25, 0);
-    const tipMat = new THREE.MeshStandardMaterial({ color: 0x4e3629, roughness: 0.8 });
-    const tip = new THREE.Mesh(tipGeom, tipMat);
-    group.add(tip);
-    
-    return group;
-}
+    const GRID_SIZE = 8;
+    const CELL_SIZE = 360 / GRID_SIZE; // 45px per candy item on 360x360 canvas
+    const CANVAS_WIDTH = 360;
+    const CANVAS_HEIGHT = 360;
 
-function createGrape() {
-    const group = new THREE.Group();
-    const grapeMat = new THREE.MeshStandardMaterial({
-        color: 0x6a1b9a,
-        roughness: 0.1,
-        metalness: 0.1,
-        clearcoat: 0.8
-    });
-    
-    const grapeGeom = new THREE.SphereGeometry(0.14, 16, 16);
-    
-    const positions = [
-        [0, 0.18, 0],
-        [-0.12, 0.06, 0],
-        [0.12, 0.06, 0],
-        [0, -0.06, 0],
-        [-0.08, -0.16, 0],
-        [0.08, -0.16, 0],
-        [0, -0.26, 0]
+    // Game state parameters
+    let score = 0;
+    let targetScore = 1000;
+    let movesLeft = 20;
+    let currentLevel = 1;
+    let isProcessing = false; // block inputs during animations/gravity falls
+    let activeGame = false;
+
+    // Grid representing candy types (0 to 5)
+    let grid = [];
+
+    // Particle pool for eye-catching match explosions
+    let particles = [];
+
+    // Animation coordinates state
+    let fallingOffsets = []; // 2D array of pixel falling offsets to animate gravity smoothly
+    let swapAnimation = null; // metadata for current swapping block animation
+
+    // Selection indicators
+    let selectedCell = null; // {r, c}
+    let dragStartCoords = null; // screen pixel location {x, y}
+
+    // Candy colors and programmatic drawings
+    const CANDY_TYPES = [
+        { name: "heart", color: "#ec4899", glow: "rgba(236, 72, 153, 0.45)" },   // Pink Heart
+        { name: "star", color: "#facc15", glow: "rgba(250, 204, 21, 0.45)" },   // Yellow Star
+        { name: "diamond", color: "#06b6d4", glow: "rgba(6, 182, 212, 0.45)" }, // Cyan Diamond
+        { name: "moon", color: "#a855f7", glow: "rgba(168, 85, 247, 0.45)" },    // Purple Moon
+        { name: "clover", color: "#22c55e", glow: "rgba(34, 197, 94, 0.45)" },  // Green Clover/Triangle
+        { name: "donut", color: "#f97316", glow: "rgba(249, 115, 22, 0.45)" }    // Orange Ring
     ];
-    
-    positions.forEach(pos => {
-        const mesh = new THREE.Mesh(grapeGeom, grapeMat);
-        mesh.position.set(pos[0], pos[1], pos[2]);
-        group.add(mesh);
-    });
-    
-    const stemGeom = new THREE.CylinderGeometry(0.015, 0.015, 0.1, 8);
-    stemGeom.translate(0, 0.26, 0);
-    const stemMat = new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 0.9 });
-    const stem = new THREE.Mesh(stemGeom, stemMat);
-    group.add(stem);
-    
-    return group;
-}
 
-function createStrawberry() {
-    const group = new THREE.Group();
-    const bodyGeom = new THREE.ConeGeometry(0.28, 0.6, 24);
-    bodyGeom.rotateX(Math.PI);
-    bodyGeom.scale(1.1, 1, 0.9);
-    
-    const bodyMat = new THREE.MeshStandardMaterial({
-        color: 0xe53935,
-        roughness: 0.15,
-        metalness: 0.1,
-        clearcoat: 0.8
-    });
-    const body = new THREE.Mesh(bodyGeom, bodyMat);
-    group.add(body);
-    
-    const capGeom = new THREE.CylinderGeometry(0.18, 0.01, 0.05, 8);
-    capGeom.translate(0, 0.3, 0);
-    const capMat = new THREE.MeshStandardMaterial({ color: 0x43a047, roughness: 0.7 });
-    const cap = new THREE.Mesh(capGeom, capMat);
-    group.add(cap);
-    
-    return group;
-}
-
-// Master generator linking geometry with types
-function createFruitMesh(index) {
-    let meshGroup;
-    switch(index) {
-        case 0: meshGroup = createWatermelon(); break;
-        case 1: meshGroup = createApple(); break;
-        case 2: meshGroup = createOrange(); break;
-        case 3: meshGroup = createBanana(); break;
-        case 4: meshGroup = createGrape(); break;
-        case 5: meshGroup = createStrawberry(); break;
-        default: meshGroup = createApple();
-    }
-    return meshGroup;
-}
-
-/* =========================================================
-   BOARD METRICS TRANSLATION (COORDINATES ENGINE)
-========================================================= */
-function getBoardX(col) {
-    return (col - (GRID_SIZE - 1) / 2) * SPACING;
-}
-
-function getBoardY(row) {
-    return (((GRID_SIZE - 1) / 2) - row) * SPACING;
-}
-
-/* =========================================================
-   CUSTOM SECURE TWEENING/ANIMATION ENGINE
-========================================================= */
-let activeTweens = [];
-
-function addTween(object, property, targetValue, duration, onComplete = null) {
-    activeTweens.push({
-        object,
-        property,
-        startValue: object[property],
-        targetValue,
-        duration,
-        elapsed: 0,
-        onComplete
-    });
-}
-
-function updateTweens(dt) {
-    for (let i = activeTweens.length - 1; i >= 0; i--) {
-        const t = activeTweens[i];
-        t.elapsed += dt;
-        let progress = Math.min(t.elapsed / t.duration, 1);
-        
-        // Custom Cubic Ease-Out
-        let ease = 1 - Math.pow(1 - progress, 3);
-        
-        t.object[t.property] = t.startValue + (t.targetValue - t.startValue) * ease;
-        
-        if (progress >= 1) {
-            if (t.onComplete) t.onComplete();
-            activeTweens.splice(i, 1);
-        }
-    }
-}
-
-function animatePosition(mesh, x, y, z, duration, onComplete = null) {
-    addTween(mesh.position, "x", x, duration);
-    addTween(mesh.position, "y", y, duration);
-    addTween(mesh.position, "z", z, duration, onComplete);
-}
-
-/* =========================================================
-   PARTICLE HIT ENGINE (COLOR SPLASH PARTICLES)
-========================================================= */
-let activeParticles = [];
-
-function spawnParticles(x, y, colorCode, count = 12) {
-    const geom = new THREE.SphereGeometry(0.06, 8, 8);
-    const mat = new THREE.MeshBasicMaterial({
-        color: colorCode,
-        transparent: true,
-        opacity: 0.9
-    });
-
-    for (let i = 0; i < count; i++) {
-        const pMesh = new THREE.Mesh(geom, mat);
-        pMesh.position.set(x, y, 0.2);
-        
-        scene.add(pMesh);
-
-        // Exploding physics values
-        activeParticles.push({
-            mesh: pMesh,
-            vx: (Math.random() - 0.5) * 5,
-            vy: (Math.random() - 0.5) * 5 + 2, // Slight upward boost
-            vz: (Math.random() - 0.5) * 3,
-            gravity: -12, // strong falling gravitational acceleration
-            life: Math.random() * 0.4 + 0.3,
-            elapsed: 0
-        });
-    }
-}
-
-function updateParticles(dt) {
-    for (let i = activeParticles.length - 1; i >= 0; i--) {
-        const p = activeParticles[i];
-        p.elapsed += dt;
-        
-        // Physics update
-        p.vy += p.gravity * dt;
-        p.mesh.position.x += p.vx * dt;
-        p.mesh.position.y += p.vy * dt;
-        p.mesh.position.z += p.vz * dt;
-        
-        // Shrink & fade out
-        const ratio = Math.max(0, 1 - (p.elapsed / p.life));
-        p.mesh.scale.set(ratio, ratio, ratio);
-        p.mesh.material.opacity = ratio;
-
-        if (p.elapsed >= p.life) {
-            scene.remove(p.mesh);
-            p.mesh.geometry.dispose();
-            p.mesh.material.dispose();
-            activeParticles.splice(i, 1);
-        }
-    }
-}
-
-/* =========================================================
-   3D FRUIT GRID TILE CLASS
-========================================================= */
-class FruitTile {
-    constructor(row, col, typeIndex) {
-        this.row = row;
-        this.col = col;
-        this.typeIndex = typeIndex;
-        
-        this.mesh = createFruitMesh(typeIndex);
-        boardGroup.add(this.mesh);
-
-        // Initial entry position above board
-        this.mesh.position.set(getBoardX(col), 6, 0);
-        this.mesh.scale.set(0, 0, 0);
-
-        // Bounce-In scaling
-        addTween(this.mesh.scale, "x", 1.0, 0.35);
-        addTween(this.mesh.scale, "y", 1.0, 0.35);
-        addTween(this.mesh.scale, "z", 1.0, 0.35);
-
-        // Special Match states
-        this.isStripedRow = false;
-        this.isStripedCol = false;
-        this.isWrapped = false;
-        this.isColorBomb = false;
-    }
-
-    updateGridPosition(duration = 0.32, onComplete = null) {
-        animatePosition(this.mesh, getBoardX(this.col), getBoardY(this.row), 0, duration, onComplete);
-    }
-
-    makeSpecial(type) {
-        if (type === "striped-row") {
-            this.isStripedRow = true;
-            // Add a glowing ring around fruit
-            const ringGeom = new THREE.TorusGeometry(0.48, 0.05, 8, 24);
-            ringGeom.rotateX(Math.PI / 2);
-            const ringMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8 });
-            const ring = new THREE.Mesh(ringGeom, ringMat);
-            this.mesh.add(ring);
-        } else if (type === "striped-col") {
-            this.isStripedCol = true;
-            const ringGeom = new THREE.TorusGeometry(0.48, 0.05, 8, 24);
-            const ringMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8 });
-            const ring = new THREE.Mesh(ringGeom, ringMat);
-            this.mesh.add(ring);
-        } else if (type === "wrapped") {
-            this.isWrapped = true;
-            // Add a transparent glowing bubble envelope
-            const sphereGeom = new THREE.SphereGeometry(0.55, 16, 16);
-            const sphereMat = new THREE.MeshPhongMaterial({
-                color: 0xffffff,
-                transparent: true,
-                opacity: 0.25,
-                shininess: 100
-            });
-            const bubble = new THREE.Mesh(sphereGeom, sphereMat);
-            this.mesh.add(bubble);
-        } else if (type === "color-bomb") {
-            this.isColorBomb = true;
-            // Glow stars
-            const starsGroup = new THREE.Group();
-            const geom = new THREE.BoxGeometry(0.1, 0.1, 0.1);
-            const mat = new THREE.MeshBasicMaterial({ color: 0xffde43 });
-            for (let i = 0; i < 4; i++) {
-                const star = new THREE.Mesh(geom, mat);
-                star.position.set((Math.random() - 0.5) * 0.9, (Math.random() - 0.5) * 0.9, (Math.random() - 0.5) * 0.9);
-                starsGroup.add(star);
-            }
-            this.mesh.add(starsGroup);
-        }
-    }
-}
-
-/* =========================================================
-   BOARD STYLING & GENERATION
-========================================================= */
-function createBoard() {
-    // Clear old elements from three.js group
-    while (boardGroup.children.length > 0) {
-        boardGroup.remove(boardGroup.children[0]);
-    }
-    board = [];
-
-    // Draw background wooden board frame
-    drawBoardTiles();
-
-    for (let r = 0; r < GRID_SIZE; r++) {
-        board[r] = [];
-        for (let c = 0; c < GRID_SIZE; c++) {
-            let typeIndex;
-            // Loop until we find a fruit type that doesn't form an initial match
-            do {
-                typeIndex = Math.floor(Math.random() * FRUIT_TYPES.length);
-            } while (
-                (c >= 2 && board[r][c - 1].typeIndex === typeIndex && board[r][c - 2].typeIndex === typeIndex) ||
-                (r >= 2 && board[r - 1][c].typeIndex === typeIndex && board[r - 2][c].typeIndex === typeIndex)
-            );
-
-            const tile = new FruitTile(r, c, typeIndex);
-            board[r][c] = tile;
-            tile.updateGridPosition(0.4);
-        }
-    }
-}
-
-// Render background visual tiles
-function drawBoardTiles() {
-    // Elegant dark rounded purple backing plate for contrast
-    const boardBackGeom = new THREE.BoxGeometry(GRID_SIZE * SPACING + 0.3, GRID_SIZE * SPACING + 0.3, 0.1);
-    const boardBackMat = new THREE.MeshStandardMaterial({
-        color: 0x1d0f3a,
-        roughness: 0.8,
-        metalness: 0.1
-    });
-    const backing = new THREE.Mesh(boardBackGeom, boardBackMat);
-    backing.position.set(0, 0, -0.3);
-    boardGroup.add(backing);
-
-    // Grid Cells
-    const tileGeom = new THREE.BoxGeometry(0.95, 0.95, 0.05);
-    const tileMatDark = new THREE.MeshStandardMaterial({ color: 0x120626, roughness: 0.9 });
-    const tileMatLight = new THREE.MeshStandardMaterial({ color: 0x1a0b36, roughness: 0.9 });
-
-    for (let r = 0; r < GRID_SIZE; r++) {
-        for (let c = 0; c < GRID_SIZE; c++) {
-            const isDark = (r + c) % 2 === 0;
-            const tileCell = new THREE.Mesh(tileGeom, isDark ? tileMatDark : tileMatLight);
-            tileCell.position.set(getBoardX(c), getBoardY(r), -0.15);
-            boardGroup.add(tileCell);
-        }
-    }
-}
-
-/* =========================================================
-   SWIPING & 3D INTERACTION RAYCASTING
-========================================================= */
-let isSwiping = false;
-let startX = 0, startY = 0;
-
-function setupGestures() {
-    const el = canvasContainer;
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-
-    const handleStart = (clientX, clientY) => {
-        // Unlock sound on any click or touch
-        initAudio();
-        
-        if (!isPlaying || isPaused || isAnimating) return;
-
-        // Calculate container relative coordinates
-        const rect = el.getBoundingClientRect();
-        const x = ((clientX - rect.left) / el.clientWidth) * 2 - 1;
-        const y = -((clientY - rect.top) / el.clientHeight) * 2 + 1;
-
-        mouse.set(x, y);
-        raycaster.setFromCamera(mouse, camera);
-
-        // Find intersecting fruit meshes
-        const intersects = raycaster.intersectObjects(boardGroup.children, true);
-        if (intersects.length > 0) {
-            // Find which FruitTile owns this intersected object
-            let hitObj = intersects[0].object;
-            while (hitObj.parent && hitObj.parent !== boardGroup) {
-                hitObj = hitObj.parent;
-            }
-
-            // Find match on our board 2D array
-            let clickedTile = null;
-            for (let r = 0; r < GRID_SIZE; r++) {
-                for (let c = 0; c < GRID_SIZE; c++) {
-                    const tile = board[r][c];
-                    if (tile && tile.mesh === hitObj) {
-                        clickedTile = tile;
-                        break;
-                    }
-                }
-            }
-
-            if (clickedTile) {
-                sounds.click();
-
-                // Tap-to-Swap: If we already have a selected tile and click an adjacent one
-                if (activeSelectedTile && activeSelectedTile !== clickedTile) {
-                    const rDiff = Math.abs(activeSelectedTile.row - clickedTile.row);
-                    const cDiff = Math.abs(activeSelectedTile.col - clickedTile.col);
-                    if ((rDiff === 1 && cDiff === 0) || (rDiff === 0 && cDiff === 1)) {
-                        // Adjacent! Swap them
-                        const r1 = activeSelectedTile.row;
-                        const c1 = activeSelectedTile.col;
-                        const r2 = clickedTile.row;
-                        const c2 = clickedTile.col;
-
-                        // Restore original scale
-                        if (activeSelectedTile.mesh) {
-                            activeSelectedTile.mesh.scale.set(1, 1, 1);
-                        }
-                        activeSelectedTile = null;
-
-                        trySwap(r1, c1, r2, c2);
-                        isSwiping = false;
-                        return;
-                    }
-                }
-
-                // If not adjacent or no previous selection, select this one
-                if (activeSelectedTile && activeSelectedTile.mesh) {
-                    activeSelectedTile.mesh.scale.set(1, 1, 1);
-                }
-
-                activeSelectedTile = clickedTile;
-                // Highlight selection by pulsing/scaling up
-                activeSelectedTile.mesh.scale.set(1.25, 1.25, 1.25);
-
-                startX = clientX;
-                startY = clientY;
-                isSwiping = true;
-            }
-        } else {
-            // Clicked empty board background, clear selection
-            if (activeSelectedTile && activeSelectedTile.mesh) {
-                activeSelectedTile.mesh.scale.set(1, 1, 1);
-            }
-            activeSelectedTile = null;
-        }
-    };
-
-    const handleMove = (clientX, clientY) => {
-        if (!isSwiping || !activeSelectedTile || isAnimating) return;
-
-        const diffX = clientX - startX;
-        const diffY = clientY - startY;
-        const threshold = 25; // responsive swipe limit
-
-        if (Math.abs(diffX) > threshold || Math.abs(diffY) > threshold) {
-            isSwiping = false;
-
-            let targetRow = activeSelectedTile.row;
-            let targetCol = activeSelectedTile.col;
-
-            if (Math.abs(diffX) > Math.abs(diffY)) {
-                // Horizontal Swipe
-                targetCol += (diffX > 0) ? 1 : -1;
-            } else {
-                // Vertical Swipe
-                targetRow += (diffY > 0) ? 1 : -1; // Correct vertical swipe mapping (drag down goes to higher index)
-            }
-
-            // Restore scale of selected tile
-            if (activeSelectedTile.mesh) {
-                activeSelectedTile.mesh.scale.set(1, 1, 1);
-            }
-
-            if (targetRow >= 0 && targetRow < GRID_SIZE && targetCol >= 0 && targetCol < GRID_SIZE) {
-                const r1 = activeSelectedTile.row;
-                const c1 = activeSelectedTile.col;
-                activeSelectedTile = null;
-                trySwap(r1, c1, targetRow, targetCol);
-            } else {
-                activeSelectedTile = null;
-            }
-        }
-    };
-
-    const handleEnd = () => {
-        isSwiping = false;
-        // Do NOT reset activeSelectedTile here to allow tap-to-swap click matching!
-    };
-
-    // Pointer events for modern touch & mouse support
-    el.addEventListener("pointerdown", e => {
-        handleStart(e.clientX, e.clientY);
-    });
-    el.addEventListener("pointermove", e => {
-        handleMove(e.clientX, e.clientY);
-    });
-    el.addEventListener("pointerup", handleEnd);
-    el.addEventListener("pointercancel", handleEnd);
-
-    // Prevent viewport scrolling on touchscreens
-    el.addEventListener("touchstart", e => {
-        if (e.touches.length > 0) {
-            handleStart(e.touches[0].clientX, e.touches[0].clientY);
-        }
-    }, { passive: true });
-
-    el.addEventListener("touchmove", e => {
-        if (isSwiping && e.touches.length > 0) {
-            handleMove(e.touches[0].clientX, e.touches[0].clientY);
-        }
-    }, { passive: true });
-
-    el.addEventListener("touchend", handleEnd);
-}
-
-// SWAP ALGORITHM
-function trySwap(r1, c1, r2, c2) {
-    isAnimating = true;
-    sounds.swap();
-
-    const t1 = board[r1][c1];
-    const t2 = board[r2][c2];
-
-    // Swap indexes
-    t1.row = r2; t1.col = c2;
-    t2.row = r1; t2.col = c1;
-
-    board[r1][c1] = t2;
-    board[r2][c2] = t1;
-
-    // Track coordinates of swap for spawning special reward fruits
-    lastSwapR1 = r1; lastSwapC1 = c1;
-    lastSwapR2 = r2; lastSwapC2 = c2;
-
-    // Animate meshes swap
-    t1.updateGridPosition(0.28);
-    t2.updateGridPosition(0.28, () => {
-        // Detect matches
-        const matches = checkMatches();
-        if (matches.length > 0) {
-            moves--;
-            updateHUD();
-            processMatches();
-        } else {
-            // Revert swap if no matches
-            sounds.swap();
-            t1.row = r1; t1.col = c1;
-            t2.row = r2; t2.col = c2;
-            board[r1][c1] = t1;
-            board[r2][c2] = t2;
-            t1.updateGridPosition(0.25);
-            t2.updateGridPosition(0.25, () => {
-                isAnimating = false;
-            });
-        }
-    });
-}
-
-/* =========================================================
-   MATCH-3 MATRIX PARSER (MATCH DETECTION)
-========================================================= */
-function findMatches() {
-    let horizontalMatches = [];
-    let verticalMatches = [];
-
-    // Find horizontal matches
-    for (let r = 0; r < GRID_SIZE; r++) {
-        let c = 0;
-        while (c < GRID_SIZE) {
-            if (!board[r][c]) {
-                c++;
-                continue;
-            }
-            let match = [board[r][c]];
-            let nextC = c + 1;
-            while (nextC < GRID_SIZE && board[r][nextC] && board[r][nextC].typeIndex === board[r][c].typeIndex) {
-                match.push(board[r][nextC]);
-                nextC++;
-            }
-            if (match.length >= 3) {
-                horizontalMatches.push(match);
-                c = nextC;
-            } else {
-                c++;
-            }
+    function createEmptyGrid() {
+        grid = [];
+        fallingOffsets = [];
+        for (let r = 0; r < GRID_SIZE; r++) {
+            grid.push(new Array(GRID_SIZE).fill(-1));
+            fallingOffsets.push(new Array(GRID_SIZE).fill(0));
         }
     }
 
-    // Find vertical matches
-    for (let c = 0; c < GRID_SIZE; c++) {
-        let r = 0;
-        while (r < GRID_SIZE) {
-            if (!board[r][c]) {
-                r++;
-                continue;
-            }
-            let match = [board[r][c]];
-            let nextR = r + 1;
-            while (nextR < GRID_SIZE && board[nextR][c] && board[nextR][c].typeIndex === board[r][c].typeIndex) {
-                match.push(board[nextR][c]);
-                nextR++;
-            }
-            if (match.length >= 3) {
-                verticalMatches.push(match);
-                r = nextR;
-            } else {
-                r++;
-            }
-        }
-    }
-
-    return { horizontalMatches, verticalMatches };
-}
-
-function checkMatches() {
-    const { horizontalMatches, verticalMatches } = findMatches();
-    let matchSet = new Set();
-    horizontalMatches.forEach(m => m.forEach(t => matchSet.add(t)));
-    verticalMatches.forEach(m => m.forEach(t => matchSet.add(t)));
-    return Array.from(matchSet);
-}
-
-/* =========================================================
-   SPECIAL VFX RENDERERS
-========================================================= */
-function spawnLaserEffect(index, direction) {
-    const laserGeom = direction === "row" 
-        ? new THREE.BoxGeometry(10, 0.15, 0.15) 
-        : new THREE.BoxGeometry(0.15, 10, 0.15);
-    const laserMat = new THREE.MeshBasicMaterial({
-        color: 0xffffff,
-        transparent: true,
-        opacity: 0.95
-    });
-    const laser = new THREE.Mesh(laserGeom, laserMat);
-    if (direction === "row") {
-        laser.position.set(0, getBoardY(index), 0.3);
-    } else {
-        laser.position.set(getBoardX(index), 0, 0.3);
-    }
-    scene.add(laser);
-    
-    // Fade out laser
-    addTween(laser.material, "opacity", 0, 0.35, () => {
-        scene.remove(laser);
-        laserGeom.dispose();
-        laserMat.dispose();
-    });
-}
-
-function spawnExplosionEffect(row, col) {
-    const x = getBoardX(col);
-    const y = getBoardY(row);
-    // Radial expansion ring
-    const ringGeom = new THREE.RingGeometry(0.1, 1.5, 32);
-    const ringMat = new THREE.MeshBasicMaterial({
-        color: 0xffaa44,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.8
-    });
-    const ring = new THREE.Mesh(ringGeom, ringMat);
-    ring.position.set(x, y, 0.25);
-    scene.add(ring);
-    
-    addTween(ring.scale, "x", 1.8, 0.3);
-    addTween(ring.scale, "y", 1.8, 0.3);
-    addTween(ring.material, "opacity", 0, 0.3, () => {
-        scene.remove(ring);
-        ringGeom.dispose();
-        ringMat.dispose();
-    });
-    
-    // Extra sparkle explosion particles
-    spawnParticles(x, y, 0xffaa44, 25);
-}
-
-function spawnColorBombEffect(row, col, color) {
-    const x = getBoardX(col);
-    const y = getBoardY(row);
-    spawnParticles(x, y, color, 30);
-    // Mega shockwave ring
-    const ringGeom = new THREE.RingGeometry(0.1, 2.0, 32);
-    const ringMat = new THREE.MeshBasicMaterial({
-        color: color,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.8
-    });
-    const ring = new THREE.Mesh(ringGeom, ringMat);
-    ring.position.set(x, y, 0.25);
-    scene.add(ring);
-    
-    addTween(ring.scale, "x", 2.2, 0.4);
-    addTween(ring.scale, "y", 2.2, 0.4);
-    addTween(ring.material, "opacity", 0, 0.4, () => {
-        scene.remove(ring);
-        ringGeom.dispose();
-        ringMat.dispose();
-    });
-}
-
-function showMatchRewardNotification(type, bonusPoints) {
-    // Create elements
-    const notification = document.createElement("div");
-    notification.style.position = "absolute";
-    notification.style.top = "30%";
-    notification.style.left = "50%";
-    notification.style.transform = "translate(-50%, -50%) scale(0.5)";
-    notification.style.background = "linear-gradient(135deg, #ffde43 0%, #ff68b4 100%)";
-    notification.style.color = "#000";
-    notification.style.fontWeight = "900";
-    notification.style.fontSize = "22px";
-    notification.style.padding = "14px 28px";
-    notification.style.borderRadius = "30px";
-    notification.style.boxShadow = "0 10px 30px rgba(255, 104, 180, 0.6)";
-    notification.style.zIndex = "1000";
-    notification.style.pointerEvents = "none";
-    notification.style.opacity = "0";
-    notification.style.transition = "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
-    notification.style.textAlign = "center";
-    notification.style.border = "3px solid #fff";
-    notification.style.textShadow = "0 1px 2px rgba(255,255,255,0.6)";
-    
-    // Check if Arabic direction
-    const isRtl = document.documentElement.dir === "rtl" || document.body.dir === "rtl" || (document.getElementById("label-instruction") && document.getElementById("label-instruction").textContent.includes("اسحب"));
-    
-    let title = "";
-    let desc = "";
-    if (type === "color-bomb") {
-        title = isRtl ? "💥 قنبلة الألوان الكونية! 💥" : "💥 COSMIC COLOR BOMB! 💥";
-        desc = isRtl ? `مكافأة +${bonusPoints} نقطة وقنبلة ألوان!` : `+${bonusPoints} Bonus & Color Bomb!`;
-    } else if (type === "wrapped") {
-        title = isRtl ? "🔮 فاكهة الفقاعة المتفجرة! 🔮" : "🔮 WRAPPED EXPLOSION! 🔮";
-        desc = isRtl ? `مكافأة +${bonusPoints} نقطة!` : `+${bonusPoints} Bonus Points!`;
-    } else if (type === "striped") {
-        title = isRtl ? "⚡ شعاع الليزر المخطط! ⚡" : "⚡ STRIPED LASER CANDY! ⚡";
-        desc = isRtl ? `مكافأة +${bonusPoints} نقطة!` : `+${bonusPoints} Bonus Points!`;
-    }
-    
-    notification.innerHTML = `<div style="font-size:24px; margin-bottom:4px;">${title}</div><div style="font-size:16px; font-weight: 700;">${desc}</div>`;
-    
-    const container = document.getElementById("game-container") || document.body;
-    container.appendChild(notification);
-    
-    // Animate in
-    setTimeout(() => {
-        notification.style.opacity = "1";
-        notification.style.transform = "translate(-50%, -50%) scale(1)";
-    }, 50);
-    
-    // Float and fade out
-    setTimeout(() => {
-        notification.style.top = "20%";
-        notification.style.opacity = "0";
-        notification.style.transform = "translate(-50%, -50%) scale(0.8)";
-    }, 1400);
-    
-    // Remove
-    setTimeout(() => {
-        notification.remove();
-    }, 1900);
-}
-
-function awardMatchSpecialReward(specialType) {
-    let bonus = 0;
-    if (specialType === "color-bomb") {
-        bonus = 2000;
-        triggerCameraShake(0.4);
-    } else if (specialType === "wrapped") {
-        bonus = 1000;
-        triggerCameraShake(0.25);
-    } else if (specialType === "striped") {
-        bonus = 500;
-        triggerCameraShake(0.15);
-    }
-    
-    score += bonus;
-    showMatchRewardNotification(specialType, bonus);
-}
-
-/* =========================================================
-   MATCH PROCESSING & CASCADE ENGINE WITH SPECIAL BOMBS
-========================================================= */
-function processMatches() {
-    const { horizontalMatches, verticalMatches } = findMatches();
-    if (horizontalMatches.length === 0 && verticalMatches.length === 0) {
-        isAnimating = false;
-        checkGameOver();
-        return;
-    }
-
-    isAnimating = true;
-    sounds.match();
-
-    // Set of all tiles to destroy
-    let tilesToDestroy = new Set();
-    
-    // We want to identify if there are any special creations
-    let specialsToSpawn = []; // Array of { r, c, typeIndex, specialType }
-
-    // Helper to check if a tile is the swap source
-    function isSwapSource(tile) {
-        return (tile.row === lastSwapR1 && tile.col === lastSwapC1) || 
-               (tile.row === lastSwapR2 && tile.col === lastSwapC2);
-    }
-
-    // 1. Check for T/L shapes (intersection of horizontal and vertical matches)
-    let processedH = new Set();
-    let processedV = new Set();
-
-    for (let hIdx = 0; hIdx < horizontalMatches.length; hIdx++) {
-        const hMatch = horizontalMatches[hIdx];
-        for (let vIdx = 0; vIdx < verticalMatches.length; vIdx++) {
-            const vMatch = verticalMatches[vIdx];
-            
-            // Find intersection
-            const intersection = hMatch.find(hTile => vMatch.some(vTile => vTile.row === hTile.row && vTile.col === hTile.col));
-            if (intersection) {
-                // T or L Match! Spawns a WRAPPED candy at intersection or swap source
-                let spawnTile = hMatch.find(isSwapSource) || vMatch.find(isSwapSource) || intersection;
-                specialsToSpawn.push({
-                    row: spawnTile.row,
-                    col: spawnTile.col,
-                    typeIndex: spawnTile.typeIndex,
-                    specialType: "wrapped"
-                });
-                awardMatchSpecialReward("wrapped");
-                
-                hMatch.forEach(t => tilesToDestroy.add(t));
-                vMatch.forEach(t => tilesToDestroy.add(t));
-                
-                processedH.add(hIdx);
-                processedV.add(vIdx);
-            }
-        }
-    }
-
-    // 2. Check remaining horizontal matches
-    for (let i = 0; i < horizontalMatches.length; i++) {
-        if (processedH.has(i)) continue;
-        const match = horizontalMatches[i];
-        
-        match.forEach(t => tilesToDestroy.add(t));
-
-        if (match.length >= 5) {
-            // Spawn a COLOR BOMB
-            let spawnTile = match.find(isSwapSource) || match[Math.floor(match.length / 2)];
-            specialsToSpawn.push({
-                row: spawnTile.row,
-                col: spawnTile.col,
-                typeIndex: spawnTile.typeIndex,
-                specialType: "color-bomb"
-            });
-            awardMatchSpecialReward("color-bomb");
-        } else if (match.length === 4) {
-            // Match-4 horizontal spawns a Column Striper (Striped Col)
-            let spawnTile = match.find(isSwapSource) || match[Math.floor(match.length / 2)];
-            specialsToSpawn.push({
-                row: spawnTile.row,
-                col: spawnTile.col,
-                typeIndex: spawnTile.typeIndex,
-                specialType: "striped-col"
-            });
-            awardMatchSpecialReward("striped");
-        }
-    }
-
-    // 3. Check remaining vertical matches
-    for (let i = 0; i < verticalMatches.length; i++) {
-        if (processedV.has(i)) continue;
-        const match = verticalMatches[i];
-        
-        match.forEach(t => tilesToDestroy.add(t));
-
-        if (match.length >= 5) {
-            // Spawn a COLOR BOMB
-            let spawnTile = match.find(isSwapSource) || match[Math.floor(match.length / 2)];
-            specialsToSpawn.push({
-                row: spawnTile.row,
-                col: spawnTile.col,
-                typeIndex: spawnTile.typeIndex,
-                specialType: "color-bomb"
-            });
-            awardMatchSpecialReward("color-bomb");
-        } else if (match.length === 4) {
-            // Match-4 vertical spawns a Row Striper (Striped Row)
-            let spawnTile = match.find(isSwapSource) || match[Math.floor(match.length / 2)];
-            specialsToSpawn.push({
-                row: spawnTile.row,
-                col: spawnTile.col,
-                typeIndex: spawnTile.typeIndex,
-                specialType: "striped-row"
-            });
-            awardMatchSpecialReward("striped");
-        }
-    }
-
-    // Reset swap variables
-    lastSwapR1 = -1; lastSwapC1 = -1;
-    lastSwapR2 = -1; lastSwapC2 = -1;
-
-    // Chain Reaction Explosion Queue!
-    let listToProcess = Array.from(tilesToDestroy);
-    let fullyExploded = new Set();
-
-    while (listToProcess.length > 0) {
-        let nextBatch = [];
-        for (let tile of listToProcess) {
-            if (fullyExploded.has(tile)) continue;
-            fullyExploded.add(tile);
-
-            if (tile.isStripedRow) {
-                // Clear the row
-                sounds.special();
-                spawnLaserEffect(tile.row, "row");
-                for (let c = 0; c < GRID_SIZE; c++) {
-                    const target = board[tile.row][c];
-                    if (target && !tilesToDestroy.has(target)) {
-                        tilesToDestroy.add(target);
-                        nextBatch.push(target);
-                    }
-                }
-            }
-            if (tile.isStripedCol) {
-                // Clear the column
-                sounds.special();
-                spawnLaserEffect(tile.col, "col");
-                for (let r = 0; r < GRID_SIZE; r++) {
-                    const target = board[r][tile.col];
-                    if (target && !tilesToDestroy.has(target)) {
-                        tilesToDestroy.add(target);
-                        nextBatch.push(target);
-                    }
-                }
-            }
-            if (tile.isWrapped) {
-                // Explode in 3x3 surrounding radius
-                sounds.special();
-                spawnExplosionEffect(tile.row, tile.col);
-                for (let r = Math.max(0, tile.row - 1); r <= Math.min(GRID_SIZE - 1, tile.row + 1); r++) {
-                    for (let c = Math.max(0, tile.col - 1); c <= Math.min(GRID_SIZE - 1, tile.col + 1); c++) {
-                        const target = board[r][c];
-                        if (target && !tilesToDestroy.has(target)) {
-                            tilesToDestroy.add(target);
-                            nextBatch.push(target);
-                        }
-                    }
-                }
-            }
-            if (tile.isColorBomb) {
-                // Clear all candies of the color that triggered it
-                sounds.special();
-                const targetColorIndex = tile.typeIndex;
-                spawnColorBombEffect(tile.row, tile.col, FRUIT_TYPES[targetColorIndex].color);
-                for (let r = 0; r < GRID_SIZE; r++) {
-                    for (let c = 0; c < GRID_SIZE; c++) {
-                        const target = board[r][c];
-                        if (target && target.typeIndex === targetColorIndex && !tilesToDestroy.has(target)) {
-                            tilesToDestroy.add(target);
-                            nextBatch.push(target);
-                        }
-                    }
-                }
-            }
-        }
-        listToProcess = nextBatch;
-    }
-
-    // Execute final destruction of everything in tilesToDestroy Set
-    const finalDestructionList = Array.from(tilesToDestroy);
-    finalDestructionList.forEach(tile => {
-        const x = getBoardX(tile.col);
-        const y = getBoardY(tile.row);
-        const color = FRUIT_TYPES[tile.typeIndex].color;
-        
-        spawnParticles(x, y, color, (tile.isColorBomb || tile.isWrapped) ? 28 : 14);
-
-        if (tile.mesh) {
-            addTween(tile.mesh.scale, "x", 0.0, 0.22);
-            addTween(tile.mesh.scale, "y", 0.0, 0.22);
-            addTween(tile.mesh.scale, "z", 0.0, 0.22, () => {
-                boardGroup.remove(tile.mesh);
-            });
-        }
-        board[tile.row][tile.col] = null;
-    });
-
-    // Score points and scale with bigger combinations
-    score += finalDestructionList.length * 60;
-    if (finalDestructionList.length > 3) {
-        score += (finalDestructionList.length - 3) * 40; // combo bonuses
-    }
-    updateHUD();
-
-    // Spawn special candies at designated vacant spots
-    setTimeout(() => {
-        specialsToSpawn.forEach(spec => {
-            const tile = new FruitTile(spec.row, spec.col, spec.typeIndex);
-            tile.makeSpecial(spec.specialType);
-            board[spec.row][spec.col] = tile;
-            
-            tile.mesh.scale.set(0, 0, 0);
-            addTween(tile.mesh.scale, "x", 1.0, 0.3);
-            addTween(tile.mesh.scale, "y", 1.0, 0.3);
-            addTween(tile.mesh.scale, "z", 1.0, 0.3);
-            tile.updateGridPosition(0.1);
-        });
-
-        dropFruits();
-    }, 250);
-}
-
-/* =========================================================
-   GRAVITY CASCADE (FALLING IN 3D)
-========================================================= */
-function dropFruits() {
-    let shifted = false;
-
-    for (let c = 0; c < GRID_SIZE; c++) {
-        let emptySpaces = 0;
-
-        // Loop column upwards
-        for (let r = GRID_SIZE - 1; r >= 0; r--) {
-            if (board[r][c] === null) {
-                emptySpaces++;
-            } else if (emptySpaces > 0) {
-                // Fall existing tile down
-                const tile = board[r][c];
-                board[r + emptySpaces][c] = tile;
-                board[r][c] = null;
-                tile.row = r + emptySpaces;
-                
-                // Falling physics animation
-                tile.updateGridPosition(0.35);
-                shifted = true;
-            }
-        }
-
-        // Fill empty top spaces with fresh fruits
-        for (let r = 0; r < emptySpaces; r++) {
-            const newType = Math.floor(Math.random() * FRUIT_TYPES.length);
-            const tile = new FruitTile(r - emptySpaces - 1, c, newType); // start way above
-            
-            board[r][c] = tile;
-            tile.row = r;
-            tile.updateGridPosition(0.42);
-            shifted = true;
-        }
-    }
-
-    sounds.fall();
-
-    // Recheck matches cascade recursive loop
-    setTimeout(() => {
-        const chainMatches = checkMatches();
-        if (chainMatches.length > 0) {
-            processMatches();
-        } else {
-            isAnimating = false;
-            checkGameOver();
-        }
-    }, 450);
-}
-
-/* =========================================================
-   GAME ENGINE SCENE LOOP (ANIMATION THREAD)
-========================================================= */
-let clock = new THREE.Clock();
-let shakeAmount = 0;
-
-function triggerCameraShake(amount = 0.25) {
-    shakeAmount = amount;
-}
-
-function animate() {
-    requestAnimationFrame(animate);
-
-    const dt = clock.getDelta();
-
-    // Update tweens
-    updateTweens(dt);
-
-    // Update physics particles
-    updateParticles(dt);
-
-    // Gently float and rotate idle fruit meshes to breathe life into the 3D board
-    if (isPlaying && !isPaused && boardGroup) {
-        const time = clock.getElapsedTime();
+    // Populate grid without creating any initial matches
+    function fillInitialGrid() {
+        createEmptyGrid();
         for (let r = 0; r < GRID_SIZE; r++) {
             for (let c = 0; c < GRID_SIZE; c++) {
-                const tile = board[r][c];
-                if (tile && tile.mesh) {
-                    // Small idle organic sine wave rotation and levitation
-                    tile.mesh.rotation.y = Math.sin(time + r * 0.4 + c * 0.2) * 0.12;
-                    tile.mesh.position.z = Math.sin(time * 1.5 + r * 0.5 + c * 0.3) * 0.04;
+                let possibleTypes = [0, 1, 2, 3, 4, 5];
+                while (possibleTypes.length > 0) {
+                    const idx = Math.floor(Math.random() * possibleTypes.length);
+                    const type = possibleTypes[idx];
+                    
+                    // Check if setting this type creates a match-3
+                    if (r >= 2 && grid[r-1][c] === type && grid[r-2][c] === type) {
+                        possibleTypes.splice(idx, 1);
+                        continue;
+                    }
+                    if (c >= 2 && grid[r][c-1] === type && grid[r][c-2] === type) {
+                        possibleTypes.splice(idx, 1);
+                        continue;
+                    }
+
+                    grid[r][c] = type;
+                    break;
                 }
             }
         }
     }
 
-    // Slowly spin starry background
-    if (backgroundStars) {
-        backgroundStars.rotation.z += 0.015 * dt;
-    }
+    // ----------------------------------------------------
+    // MATCH DETECTION ALGORITHMS
+    // ----------------------------------------------------
+    function getMatches() {
+        let matches = []; // array of {r, c} objects
+        let isMatched = Array.from({ length: GRID_SIZE }, () => new Array(GRID_SIZE).fill(false));
 
-    if (renderer && scene && camera) {
-        if (shakeAmount > 0.01) {
-            camera.position.x = (Math.random() - 0.5) * shakeAmount;
-            camera.position.y = (Math.random() - 0.5) * shakeAmount;
-            shakeAmount *= 0.88; // decay
-        } else {
-            camera.position.set(0, 0, 10);
+        // 1. Horizontal check
+        for (let r = 0; r < GRID_SIZE; r++) {
+            let matchLength = 1;
+            let matchType = -1;
+            for (let c = 0; c < GRID_SIZE; c++) {
+                if (grid[r][c] !== -1 && grid[r][c] === matchType) {
+                    matchLength++;
+                } else {
+                    if (matchLength >= 3) {
+                        for (let k = c - matchLength; k < c; k++) {
+                            isMatched[r][k] = true;
+                        }
+                    }
+                    matchType = grid[r][c];
+                    matchLength = 1;
+                }
+            }
+            if (matchLength >= 3) {
+                for (let k = GRID_SIZE - matchLength; k < GRID_SIZE; k++) {
+                    isMatched[r][k] = true;
+                }
+            }
         }
-        renderer.render(scene, camera);
-    }
-}
 
-/* =========================================================
-   HUD ENGINE (UPDATE SYSTEM)
-========================================================= */
-function updateHUD() {
-    document.getElementById("score").textContent = score.toLocaleString();
-    document.getElementById("moves").textContent = moves;
-    document.getElementById("stage").textContent = currentStage;
-    document.getElementById("target").textContent = targetScore.toLocaleString();
-
-    // Update Progress bar percentage
-    const percent = Math.min(100, (score / targetScore) * 100);
-    document.getElementById("progress-bar").style.width = `${percent}%`;
-
-    // Dynamically render 5 stage dots centered on currentStage (minimum starting at 1)
-    const stageBar = document.getElementById("stage-bar");
-    if (stageBar) {
-        let startIdx = Math.max(1, currentStage - 2);
-        let html = "";
-        for (let i = startIdx; i < startIdx + 5; i++) {
-            const isActive = (i === currentStage) ? "active" : "";
-            const label = isRtl ? `مرحلة ${i}` : `Stage ${i}`;
-            html += `<div class="stage-dot ${isActive}" data-stage="${i}" id="btn-st-${i}" onclick="selectStage(${i})">${label}</div>`;
+        // 2. Vertical check
+        for (let c = 0; c < GRID_SIZE; c++) {
+            let matchLength = 1;
+            let matchType = -1;
+            for (let r = 0; r < GRID_SIZE; r++) {
+                if (grid[r][c] !== -1 && grid[r][c] === matchType) {
+                    matchLength++;
+                } else {
+                    if (matchLength >= 3) {
+                        for (let k = r - matchLength; k < r; k++) {
+                            isMatched[k][c] = true;
+                        }
+                    }
+                    matchType = grid[r][c];
+                    matchLength = 1;
+                }
+            }
+            if (matchLength >= 3) {
+                for (let k = GRID_SIZE - matchLength; k < GRID_SIZE; k++) {
+                    isMatched[k][c] = true;
+                }
+            }
         }
-        stageBar.innerHTML = html;
+
+        // Consolidate list
+        for (let r = 0; r < GRID_SIZE; r++) {
+            for (let c = 0; c < GRID_SIZE; c++) {
+                if (isMatched[r][c]) {
+                    matches.push({ r, c });
+                }
+            }
+        }
+        return matches;
     }
-}
 
-function togglePause() {
-    if (!isPlaying) return;
-    isPaused = !isPaused;
-    if (isPaused) {
-        document.getElementById("pause-overlay").classList.remove("hidden");
-        document.getElementById("pause").textContent = "▶️";
-    } else {
-        document.getElementById("pause-overlay").classList.add("hidden");
-        document.getElementById("pause").textContent = "⏸️";
-    }
-}
-
-document.getElementById("resume-btn").addEventListener("click", () => {
-    togglePause();
-});
-
-/* =========================================================
-   GAME OVER EVALUATION & STATE MACHINE
-========================================================= */
-function checkGameOver() {
-    // Win Condition
-    if (score >= targetScore) {
-        endGame(true);
-    }
-    // Lose Condition
-    else if (moves <= 0) {
-        endGame(false);
-    }
-}
-
-function endGame(isWin) {
-    isPlaying = false;
-    isAnimating = false;
-
-    if (isWin) {
-        sounds.win();
-        document.getElementById("overlay").classList.remove("hidden");
-        document.getElementById("main-logo").textContent = t.win;
-        document.getElementById("modal-icon").textContent = "🏆";
-
-        const nextStage = currentStage + 1;
-        const nextConfig = getStageConfig(nextStage);
-        const stageName = isRtl ? nextConfig.labelAr : nextConfig.labelEn;
-        document.getElementById("message").innerHTML = 
-            t.finalScore + "<b>" + score.toLocaleString() + "</b> / " + targetScore.toLocaleString() + "<br><br>" +
-            (isRtl 
-              ? `✨ ممتاز! لقد هزمت المرحلة ${currentStage}! المستويات تزداد صعوبة، هل أنت مستعد للمرحلة ${nextStage} (${stageName})؟`
-              : `✨ Perfect! You beat Stage ${currentStage}! Ready for Stage ${nextStage} (${stageName})?`);
-        document.getElementById("start-btn").textContent = isRtl ? `المرحلة التالية ${nextStage} ➡️` : `Next Stage ${nextStage} ➡️`;
+    // ----------------------------------------------------
+    // GRAVITY & REFILL PHYSICS (Animate drop offsets)
+    // ----------------------------------------------------
+    async function processMatchesAndRefill() {
+        isProcessing = true;
+        let matches = getMatches();
         
-        // Advance state
-        currentStage = nextStage;
-    } else {
-        sounds.lose();
-        document.getElementById("overlay").classList.remove("hidden");
-        document.getElementById("main-logo").textContent = t.lose;
-        document.getElementById("modal-icon").textContent = "💔";
+        if (matches.length === 0) {
+            currentCombo = 0; // Reset active combo cascade count
+            isProcessing = false;
+            // Check if user reached level objective
+            if (score >= targetScore) {
+                playLevelUpSound();
+                activeGame = false;
+                document.getElementById("win-screen").style.display = "flex";
+                document.getElementById("win-score-val").textContent = score.toLocaleString();
+            } else if (movesLeft <= 0) {
+                playFailSound();
+                activeGame = false;
+                document.getElementById("over-screen").style.display = "flex";
+                document.getElementById("over-score-val").textContent = score.toLocaleString();
+            }
+            return;
+        }
 
-        const currentConfig = getStageConfig(currentStage);
-        const stageName = isRtl ? currentConfig.labelAr : currentConfig.labelEn;
-        document.getElementById("message").innerHTML = 
-            t.finalScore + "<b>" + score.toLocaleString() + "</b> / " + targetScore.toLocaleString() + "<br><br>" +
-            (isRtl
-              ? `المرحلة ${currentStage} (${stageName}): لقد نفذت حركاتك. حاول مجدداً للوصول للمجموع المطلق!`
-              : `Stage ${currentStage} (${stageName}): Out of moves. Retry this stage to meet the sweet goal!`);
-        document.getElementById("start-btn").textContent = isRtl ? `إعادة محاولة المرحلة ${currentStage} 🔄` : `Retry Stage ${currentStage} 🔄`;
+        // Process Match Combo!
+        currentCombo++;
+        playMatchSound();
+        
+        // Multiplier bonus formula: score + (count * 40 * multiplier)
+        let basePts = matches.length * 40;
+        let ptsGained = basePts * currentCombo;
+        score += ptsGained;
+        
+        // Calculate average match position to spawn Floating Text overlay
+        let sumX = 0, sumY = 0;
+        matches.forEach(cell => {
+            const centerX = cell.c * CELL_SIZE + CELL_SIZE / 2;
+            const centerY = cell.r * CELL_SIZE + CELL_SIZE / 2;
+            sumX += centerX;
+            sumY += centerY;
+            spawnExplosionParticles(centerX, centerY, CANDY_TYPES[grid[cell.r][cell.c]].color);
+            grid[cell.r][cell.c] = -1; // remove
+        });
+
+        const avgX = sumX / matches.length;
+        const avgY = sumY / matches.length;
+
+        // Spawn a snappy neon floating combo indicator
+        let textMsg = `+${ptsGained}`;
+        let textCol = "#ffffff";
+        if (currentCombo > 1) {
+            textMsg = `콤보 Combo x${currentCombo}! +${ptsGained}`;
+            textCol = "#facc15"; // Yellow neon
+        }
+        spawnFloatingText(avgX, avgY, textMsg, textCol);
+
+        // Update stats HUD instantly
+        updateStatsHUD();
+
+        // Snappy frame hold to let the player feel the explosion
+        await delay(60);
+
+        // Apply Gravity Fall logic column-by-column
+        for (let c = 0; c < GRID_SIZE; c++) {
+            let emptyCells = 0;
+            // Scan from bottom to top
+            for (let r = GRID_SIZE - 1; r >= 0; r--) {
+                if (grid[r][c] === -1) {
+                    emptyCells++;
+                } else if (emptyCells > 0) {
+                    // Pull item down to fill gap
+                    grid[r + emptyCells][c] = grid[r][c];
+                    // Set a high offset value to smoothly animate falling
+                    fallingOffsets[r + emptyCells][c] = -emptyCells * CELL_SIZE;
+                    grid[r][c] = -1;
+                }
+            }
+
+            // Refill topmost empty cells
+            for (let k = 0; k < emptyCells; k++) {
+                const newType = Math.floor(Math.random() * CANDY_TYPES.length);
+                grid[k][c] = newType;
+                // Animate entering from way above the canvas
+                fallingOffsets[k][c] = -(k + 1 + emptyCells) * CELL_SIZE;
+            }
+        }
+
+        // Animate the pieces falling down smoothly using frame-interpolation (Highly accelerated!)
+        await animateFallingPieces();
+
+        // Check recursively for cascading combo matches!
+        await processMatchesAndRefill();
     }
-}
 
-/* =========================================================
-   START / LOAD ENGINE HANDLER
-========================================================= */
-document.getElementById("start-btn").addEventListener("click", () => {
-    initAudio();
-    sounds.gameStart();
-
-    // Load configs dynamically
-    const config = getStageConfig(currentStage);
-    targetScore = config.target;
-    moves = config.moves;
-    score = 0;
-
-    isPlaying = true;
-    isPaused = false;
-    isAnimating = false;
-
-    document.getElementById("pause-overlay").classList.add("hidden");
-    document.getElementById("pause").textContent = "⏸️";
-    document.getElementById("overlay").classList.add("hidden");
-
-    onWindowResize();
-    createBoard();
-    updateHUD();
-});
-
-// Setup dynamic level selection callback
-window.selectStage = function(stageNum) {
-    if (isAnimating) return;
-    initAudio();
-    sounds.click();
-    currentStage = stageNum;
-    
-    const config = getStageConfig(stageNum);
-    targetScore = config.target;
-    moves = config.moves;
-    score = 0;
-
-    isPlaying = true;
-    isPaused = false;
-    isAnimating = false;
-
-    document.getElementById("pause-overlay").classList.add("hidden");
-    document.getElementById("pause").textContent = "⏸️";
-    document.getElementById("overlay").classList.add("hidden");
-
-    createBoard();
-    updateHUD();
-};
-
-// Keyboards Controls
-window.addEventListener("keydown", event => {
-    if (event.key === "p" || event.key === "P") {
-        event.preventDefault();
-        togglePause();
+    function delay(ms) {
+        return new Promise(res => setTimeout(res, ms));
     }
-});
 
-/* =========================================================
-   INIT SYSTEM BOOTSTRAPER
-========================================================= */
-init3DWorld();
-setupGestures();
-animate();
+    // Smooth scroll down transition (Highly accelerated from 4.5 to 18.0 px/frame)
+    function animateFallingPieces() {
+        return new Promise(resolve => {
+            function update() {
+                let stillAnimating = false;
+                for (let r = 0; r < GRID_SIZE; r++) {
+                    for (let c = 0; c < GRID_SIZE; c++) {
+                        if (fallingOffsets[r][c] < 0) {
+                            fallingOffsets[r][c] += 18.0; // 4x acceleration
+                            if (fallingOffsets[r][c] >= 0) {
+                                fallingOffsets[r][c] = 0;
+                            } else {
+                                stillAnimating = true;
+                            }
+                        }
+                    }
+                }
+                drawGrid();
+                if (stillAnimating) {
+                    requestAnimationFrame(update);
+                } else {
+                    resolve();
+                }
+            }
+            update();
+        });
+    }
+
+    // ----------------------------------------------------
+    // SWAPPING WITH REVERT ANIMATION
+    // ----------------------------------------------------
+    async function trySwap(cell1, cell2) {
+        if (isProcessing) return;
+        isProcessing = true;
+
+        movesLeft--;
+        currentCombo = 0; // Reset active combo chains on fresh swipe move!
+        updateStatsHUD();
+
+        // 1. Swap in memory
+        const temp = grid[cell1.r][cell1.c];
+        grid[cell1.r][cell1.c] = grid[cell2.r][cell2.c];
+        grid[cell2.r][cell2.c] = temp;
+
+        playSlideSound();
+
+        // Animate swap movement slide
+        await animateSwap(cell1, cell2, false);
+
+        // 2. Validate matches
+        let matches = getMatches();
+        if (matches.length > 0) {
+            // Success! Process cascade clearing
+            await processMatchesAndRefill();
+        } else {
+            // Failure! Revert back to original locations
+            playFailSound();
+            const tempRevert = grid[cell1.r][cell1.c];
+            grid[cell1.r][cell1.c] = grid[cell2.r][cell2.c];
+            grid[cell2.r][cell2.c] = tempRevert;
+
+            await animateSwap(cell1, cell2, true);
+            isProcessing = false;
+        }
+    }
+
+    function animateSwap(cell1, cell2, isReverting) {
+        return new Promise(resolve => {
+            let frame = 0;
+            const totalFrames = 5; // Reduced from 12 to 5 frames for instant snappy swap transition!
+
+            function update() {
+                frame++;
+                const ratio = frame / totalFrames;
+                
+                // Store temporary interpolation offsets
+                swapAnimation = {
+                    r1: cell1.r, c1: cell1.c,
+                    r2: cell2.r, c2: cell2.c,
+                    ratio: isReverting ? (1 - ratio) : ratio
+                };
+
+                drawGrid();
+
+                if (frame < totalFrames) {
+                    requestAnimationFrame(update);
+                } else {
+                    swapAnimation = null;
+                    resolve();
+                }
+            }
+            update();
+        });
+    }
+
+
+    // ----------------------------------------------------
+    // LAUNCH THE MATCH 3 RUN
+    // ----------------------------------------------------
+    function initAndStartGame() {
+        initAudio();
+        
+        // Hide overlays
+        document.getElementById("start-screen").style.display = "none";
+        document.getElementById("win-screen").style.display = "none";
+        document.getElementById("over-screen").style.display = "none";
+
+        score = 0;
+        movesLeft = 20; // 20 moves limit strictly
+        targetScore = 1000 + (currentLevel - 1) * 500;
+        selectedCell = null;
+        isProcessing = false;
+        activeGame = true;
+
+        fillInitialGrid();
+        updateStatsHUD();
+        drawGrid();
+    }
+
+    function nextLevel() {
+        currentLevel++;
+        initAndStartGame();
+    }
+
+    function updateStatsHUD() {
+        document.getElementById("hud-score").textContent = score.toLocaleString();
+        document.getElementById("hud-target").textContent = targetScore.toLocaleString();
+        document.getElementById("hud-moves").textContent = movesLeft.toString();
+
+        // Progress Fill ratio
+        const pct = Math.min(100, (score / targetScore) * 100);
+        document.getElementById("progress-bar-fill").style.width = `${pct}%`;
+    }
+
+    // ----------------------------------------------------
+    // PROCEDURAL CANDY SHAPE DESIGN (No outside files)
+    // ----------------------------------------------------
+    function drawCandyItem(ctx, type, cx, cy, radius) {
+        ctx.shadowColor = CANDY_TYPES[type].glow;
+        ctx.shadowBlur = 10;
+        
+        ctx.fillStyle = CANDY_TYPES[type].color;
+        
+        if (type === 0) {
+            // Red Heart curve (💗)
+            ctx.beginPath();
+            const topY = cy - radius * 0.3;
+            ctx.moveTo(cx, topY + radius * 0.4);
+            ctx.bezierCurveTo(cx - radius * 0.9, topY - radius * 0.9, cx - radius * 1.3, topY + radius * 0.4, cx, cy + radius * 0.9);
+            ctx.bezierCurveTo(cx + radius * 1.3, topY + radius * 0.4, cx + radius * 0.9, topY - radius * 0.9, cx, topY + radius * 0.4);
+            ctx.closePath();
+            ctx.fill();
+
+            // Inner gloss flare
+            ctx.fillStyle = "rgba(255,255,255,0.35)";
+            ctx.beginPath();
+            ctx.arc(cx - radius * 0.35, cy - radius * 0.2, 3, 0, Math.PI * 2);
+            ctx.fill();
+        } 
+        else if (type === 1) {
+            // Golden Star (⭐)
+            ctx.beginPath();
+            const spikes = 5;
+            const outerR = radius * 0.95;
+            const innerR = radius * 0.4;
+            let rot = Math.PI / 2 * 3;
+            let x = cx;
+            let y = cy;
+            let step = Math.PI / spikes;
+
+            ctx.moveTo(cx, cy - outerR);
+            for (let i = 0; i < spikes; i++) {
+                x = cx + Math.cos(rot) * outerR;
+                y = cy + Math.sin(rot) * outerR;
+                ctx.lineTo(x, y);
+                rot += step;
+
+                x = cx + Math.cos(rot) * innerR;
+                y = cy + Math.sin(rot) * innerR;
+                ctx.lineTo(x, y);
+                rot += step;
+            }
+            ctx.lineTo(cx, cy - outerR);
+            ctx.closePath();
+            ctx.fill();
+
+            // Highlight
+            ctx.fillStyle = "rgba(255,255,255,0.45)";
+            ctx.beginPath();
+            ctx.ellipse(cx, cy - radius * 0.4, 4, 2, 0, 0, Math.PI * 2);
+            ctx.fill();
+        } 
+        else if (type === 2) {
+            // Blue Cyan Diamond Gem (💎)
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - radius);
+            ctx.lineTo(cx + radius, cy);
+            ctx.lineTo(cx, cy + radius);
+            ctx.lineTo(cx - radius, cy);
+            ctx.closePath();
+            ctx.fill();
+
+            // Gem facets
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(cx - radius, cy);
+            ctx.lineTo(cx + radius, cy);
+            ctx.moveTo(cx, cy - radius);
+            ctx.lineTo(cx, cy + radius);
+            ctx.stroke();
+
+            // Corner sparkle flare
+            ctx.fillStyle = "white";
+            ctx.fillRect(cx - 3, cy - 3, 6, 6);
+        } 
+        else if (type === 3) {
+            // Crescent Purple Moon (🔮)
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius * 0.9, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Shadow eclipse contour for moon look
+            ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+            ctx.beginPath();
+            ctx.arc(cx - radius * 0.35, cy, radius * 0.9, 0, Math.PI * 2);
+            ctx.fill();
+        } 
+        else if (type === 4) {
+            // Clover / Green Triangle
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - radius);
+            ctx.lineTo(cx + radius * 0.85, cy + radius * 0.8);
+            ctx.lineTo(cx - radius * 0.85, cy + radius * 0.8);
+            ctx.closePath();
+            ctx.fill();
+
+            // Round curves
+            ctx.beginPath();
+            ctx.arc(cx, cy + 4, 6, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffffff";
+            ctx.fill();
+        } 
+        else if (type === 5) {
+            // Orange Ring / Donut (🍩)
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius * 0.9, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Hole
+            ctx.fillStyle = "#090514"; // background color match
+            ctx.beginPath();
+            ctx.arc(cx, cy, radius * 0.35, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Sprinkles (dots)
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(cx - 6, cy - 6, 2, 2);
+            ctx.fillRect(cx + 6, cy + 6, 2, 2);
+        }
+
+        ctx.shadowBlur = 0; // reset
+    }
+
+    // ----------------------------------------------------
+    // CANVAS RENDERING
+    // ----------------------------------------------------
+    function drawGrid() {
+        ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+        // A. Draw Chessboard grid lines
+        for (let r = 0; r < GRID_SIZE; r++) {
+            for (let c = 0; c < GRID_SIZE; c++) {
+                ctx.fillStyle = ((r + c) % 2 === 0) ? "rgba(255,255,255,0.015)" : "rgba(255,255,255,0.003)";
+                ctx.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                
+                // Fine grids outline
+                ctx.strokeStyle = "rgba(255,255,255,0.03)";
+                ctx.lineWidth = 1;
+                ctx.strokeRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            }
+        }
+
+        // B. Draw Selected outline highlight
+        if (selectedCell && !isProcessing) {
+            ctx.strokeStyle = "rgba(236, 72, 153, 0.85)";
+            ctx.lineWidth = 3.5;
+            ctx.shadowColor = "rgba(236, 72, 153, 0.6)";
+            ctx.shadowBlur = 10;
+            ctx.strokeRect(selectedCell.c * CELL_SIZE + 2, selectedCell.r * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+            ctx.shadowBlur = 0; // reset
+        }
+
+        // C. Draw candies inside cells
+        for (let r = 0; r < GRID_SIZE; r++) {
+            for (let c = 0; c < GRID_SIZE; c++) {
+                const type = grid[r][c];
+                if (type === -1) continue;
+
+                // Check if this item is currently animating/swapping
+                let renderX = c * CELL_SIZE + CELL_SIZE / 2;
+                let renderY = r * CELL_SIZE + CELL_SIZE / 2;
+
+                // Apply falling gravity offsets
+                if (fallingOffsets[r][c] < 0) {
+                    renderY += fallingOffsets[r][c];
+                }
+
+                // Apply swapping slide offsets
+                if (swapAnimation) {
+                    const isCell1 = (r === swapAnimation.r1 && c === swapAnimation.c1);
+                    const isCell2 = (r === swapAnimation.r2 && c === swapAnimation.c2);
+
+                    if (isCell1 || isCell2) {
+                        const targetX1 = swapAnimation.c1 * CELL_SIZE + CELL_SIZE / 2;
+                        const targetY1 = swapAnimation.r1 * CELL_SIZE + CELL_SIZE / 2;
+                        const targetX2 = swapAnimation.c2 * CELL_SIZE + CELL_SIZE / 2;
+                        const targetY2 = swapAnimation.r2 * CELL_SIZE + CELL_SIZE / 2;
+
+                        if (isCell1) {
+                            renderX = targetX1 + (targetX2 - targetX1) * swapAnimation.ratio;
+                            renderY = targetY1 + (targetY2 - targetY1) * swapAnimation.ratio;
+                        } else {
+                            renderX = targetX2 + (targetX1 - targetX2) * swapAnimation.ratio;
+                            renderY = targetY2 + (targetY1 - targetY2) * swapAnimation.ratio;
+                        }
+                    }
+                }
+
+                drawCandyItem(ctx, type, renderX, renderY, CELL_SIZE * 0.4);
+            }
+        }
+
+        // D. Update and Draw active match particles
+        updateAndDrawParticles();
+
+        // E. Update and Draw active floating combo scores
+        updateAndDrawFloatingTexts();
+    }
+
+    // ----------------------------------------------------
+    // EXPLOSION PARTICLES
+    // ----------------------------------------------------
+    function spawnExplosionParticles(x, y, color) {
+        for (let i = 0; i < 8; i++) {
+            particles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 6,
+                vy: (Math.random() - 0.5) * 6,
+                radius: 2 + Math.random() * 4,
+                color: color,
+                life: 1.0,
+                decay: 0.045
+            });
+        }
+    }
+
+    function updateAndDrawParticles() {
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life -= p.decay;
+
+            if (p.life <= 0) {
+                particles.splice(i, 1);
+                continue;
+            }
+
+            ctx.save();
+            ctx.globalAlpha = p.life;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
+    // ----------------------------------------------------
+    // FLOATING TEXTS SYSTEM (Combo popup effects)
+    // ----------------------------------------------------
+    function spawnFloatingText(x, y, text, color) {
+        floatingTexts.push({
+            x: x,
+            y: y,
+            text: text,
+            color: color,
+            alpha: 1.0,
+            vy: -1.2, // speed of rising
+            life: 1.0,
+            decay: 0.02
+        });
+    }
+
+    function updateAndDrawFloatingTexts() {
+        for (let i = floatingTexts.length - 1; i >= 0; i--) {
+            const ft = floatingTexts[i];
+            ft.y += ft.vy;
+            ft.alpha -= ft.decay;
+
+            if (ft.alpha <= 0) {
+                floatingTexts.splice(i, 1);
+                continue;
+            }
+
+            ctx.save();
+            ctx.globalAlpha = ft.alpha;
+            ctx.fillStyle = ft.color;
+            ctx.shadowColor = "rgba(0,0,0,1)";
+            ctx.shadowBlur = 4;
+            ctx.font = "bold 13px system-ui";
+            ctx.textAlign = "center";
+            // Outline border
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 3;
+            ctx.strokeText(ft.text, ft.x, ft.y);
+            // Fill
+            ctx.fillText(ft.text, ft.x, ft.y);
+            ctx.restore();
+        }
+    }
+
+    // ----------------------------------------------------
+    // MOUSE & TOUCH SWAP HANDLERS
+    // ----------------------------------------------------
+    function getCellFromCoords(x, y) {
+        const rect = canvas.getBoundingClientRect();
+        // Calculate cell relative to grid
+        const gridX = (x - rect.left) * (CANVAS_WIDTH / rect.width);
+        const gridY = (y - rect.top) * (CANVAS_HEIGHT / rect.height);
+
+        const c = Math.floor(gridX / CELL_SIZE);
+        const r = Math.floor(gridY / CELL_SIZE);
+
+        if (r >= 0 && r < GRID_SIZE && c >= 0 && c < GRID_SIZE) {
+            return { r, c };
+        }
+        return null;
+    }
+
+    function handleInteractionStart(clientX, clientY) {
+        if (isProcessing || !activeGame) return;
+        initAudio();
+
+        const cell = getCellFromCoords(clientX, clientY);
+        if (cell) {
+            selectedCell = cell;
+            dragStartCoords = { x: clientX, y: clientY };
+        }
+    }
+
+    function handleInteractionMove(clientX, clientY) {
+        if (!selectedCell || !dragStartCoords || isProcessing || !activeGame) return;
+
+        const dx = clientX - dragStartCoords.x;
+        const dy = clientY - dragStartCoords.y;
+        const minSwipeDist = 20; // pixels to trigger swipe
+
+        if (Math.abs(dx) > minSwipeDist || Math.abs(dy) > minSwipeDist) {
+            // Determine swipe direction
+            let targetR = selectedCell.r;
+            let targetC = selectedCell.c;
+
+            if (Math.abs(dx) > Math.abs(dy)) {
+                // Swipe Left / Right
+                targetC += (dx > 0) ? 1 : -1;
+            } else {
+                // Swipe Up / Down
+                targetR += (dy > 0) ? 1 : -1;
+            }
+
+            // Verify bounds and try swapping adjacent cells
+            if (targetR >= 0 && targetR < GRID_SIZE && targetC >= 0 && targetC < GRID_SIZE) {
+                const cell1 = selectedCell;
+                const cell2 = { r: targetR, c: targetC };
+                selectedCell = null;
+                dragStartCoords = null;
+                trySwap(cell1, cell2);
+            }
+        }
+    }
+
+    function handleInteractionEnd() {
+        // Clear drag anchor, keep selection for click-to-swap fallbacks
+        dragStartCoords = null;
+    }
+
+    // Bind touch events for mobile
+    canvas.addEventListener("touchstart", (e) => {
+        const touch = e.touches[0];
+        handleInteractionStart(touch.clientX, touch.clientY);
+    });
+
+    canvas.addEventListener("touchmove", (e) => {
+        const touch = e.touches[0];
+        handleInteractionMove(touch.clientX, touch.clientY);
+    });
+
+    canvas.addEventListener("touchend", handleInteractionEnd);
+
+    // Bind mouse events for PC desktop
+    canvas.addEventListener("mousedown", (e) => {
+        handleInteractionStart(e.clientX, e.clientY);
+    });
+
+    canvas.addEventListener("mousemove", (e) => {
+        handleInteractionMove(e.clientX, e.clientY);
+    });
+
+    canvas.addEventListener("mouseup", handleInteractionEnd);
+
+
+    // Continuous rendering tick for particle fades
+    function mainRenderLoop() {
+        if (activeGame) {
+            drawGrid();
+        }
+        requestAnimationFrame(mainRenderLoop);
+    }
+
+    // Apply starting translation state
+    updateUIStrings();
+    requestAnimationFrame(mainRenderLoop);
 
 </script>
 
