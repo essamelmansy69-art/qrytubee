@@ -404,7 +404,7 @@
             lblHigh: "الرقم القياسي:",
             lblLives: "المستوى / الأرواح:",
             startTitle: "غارة الطائرات الأتاري الكلاسيكية",
-            startDesc: "اسحب إصبعك على الشاشة لتوجيه الطائرة وتفادي العقبات بحرية تامة، أطلق النيران والصواريخ لتدمير الأعداء وحصون النهر، واجمع براميل الوقود لتبقى في الجو!",
+            startDesc: "تفادى الحواجز والمطبات الحجرية، أطلق النيران والصواريخ لتدمير الأعداء وحصون النهر، واجمع براميل الوقود لتبقى طائرتك في الجو!",
             startBtn: "ابدأ المعركة ➔",
             overTitle: "انتهت اللعبة!",
             overDesc: "لقد تحطمت طائرتك بالكامل أو نفد وقودك في غارة النهر.",
@@ -426,7 +426,7 @@
             lblHigh: "High Score:",
             lblLives: "Level / Lives:",
             startTitle: "Atari Retro Plane Raid",
-            startDesc: "Drag your finger anywhere on the screen to smoothly steer your aircraft and dodge obstacles. Fire missiles to blow up barriers, and collect fuel!",
+            startDesc: "Dodge rocky obstacles and laser turrets. Fire missiles to blow up defense barriers, and catch fuel canisters to sustain flight!",
             startBtn: "Start Battle ➔",
             overTitle: "Game Over!",
             overDesc: "Your aircraft has crashed or completely run out of energy fuel in the river canyon.",
@@ -816,65 +816,6 @@
     setupTouchButton("btn-touch-fire", "fire");
 
     // ----------------------------------------------------
-    // REAL-TIME CANVAS TOUCH & DRAG STEERING
-    // ----------------------------------------------------
-    let isDragging = false;
-
-    function getCanvasCoords(e) {
-        const rect = canvas.getBoundingClientRect();
-        // Support both single touch and mouse click events
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        
-        // Scale to match internally used 360x400 coordinate system
-        const x = (clientX - rect.left) * (WIDTH / rect.width);
-        const y = (clientY - rect.top) * (HEIGHT / rect.height);
-        return { x, y };
-    }
-
-    function handleDragStart(e) {
-        if (!gameRunning || gameOver) return;
-        initAudio();
-        isDragging = true;
-        const coords = getCanvasCoords(e);
-        player.targetX = coords.x;
-        player.targetY = coords.y;
-    }
-
-    function handleDragMove(e) {
-        if (!isDragging || !gameRunning || gameOver) return;
-        const coords = getCanvasCoords(e);
-        player.targetX = coords.x;
-        player.targetY = coords.y;
-        
-        // Prevent default browser scrolling and bouncing gestures on mobile
-        if (e.cancelable) {
-            e.preventDefault();
-        }
-    }
-
-    function handleDragEnd() {
-        isDragging = false;
-    }
-
-    // Direct touch event registrations
-    canvas.addEventListener("touchstart", (e) => {
-        handleDragStart(e);
-    }, { passive: false });
-
-    canvas.addEventListener("touchmove", (e) => {
-        handleDragMove(e);
-    }, { passive: false });
-
-    canvas.addEventListener("touchend", handleDragEnd);
-
-    // Mouse steering drag registrations for desktop ease-of-use
-    canvas.addEventListener("mousedown", handleDragStart);
-    canvas.addEventListener("mousemove", handleDragMove);
-    canvas.addEventListener("mouseup", handleDragEnd);
-    canvas.addEventListener("mouseleave", handleDragEnd);
-
-    // ----------------------------------------------------
     // LAUNCH OR RESET GAMEPLAY
     // ----------------------------------------------------
     function startGame() {
@@ -1038,40 +979,20 @@
             scrollSpeed = Math.max(1.2, scrollSpeed - 1.2);
         }
 
-         // 3. Player movements
-         const pSpeed = planeConfig.speed;
-         if (isDragging) {
-             // Smoothly interpolate towards the dragged touch/mouse position
-             const dx = player.targetX - (player.x + planeConfig.width / 2);
-             const dy = player.targetY - (player.y + planeConfig.height / 2);
-             
-             // Speed limit step ratio so it remains balanced and doesn't warp through items
-             const dist = Math.sqrt(dx * dx + dy * dy);
-             const maxStep = pSpeed * 2.2; // faster tracking speed for finger-drag responsiveness
-             if (dist > maxStep) {
-                 player.x += (dx / dist) * maxStep;
-                 player.y += (dy / dist) * maxStep;
-             } else {
-                 player.x += dx;
-                 player.y += dy;
-             }
-             
-             // Clamp player inside top boundary to keep the action moving
-             player.y = Math.max(HEIGHT / 2, Math.min(HEIGHT - 45, player.y));
-         } else {
-             if (keys["arrowleft"] || keys["a"] || touchState.left) {
-                 player.x -= pSpeed;
-             }
-             if (keys["arrowright"] || keys["d"] || touchState.right) {
-                 player.x += pSpeed;
-             }
-             if (keys["arrowup"] || keys["w"] || touchState.up) {
-                 player.y = Math.max(HEIGHT / 2, player.y - pSpeed * 0.6);
-             }
-             if (keys["arrowdown"] || keys["s"] || touchState.down) {
-                 player.y = Math.min(HEIGHT - 45, player.y + pSpeed * 0.6);
-             }
-         }
+        // 3. Player movements
+        const pSpeed = planeConfig.speed;
+        if (keys["arrowleft"] || keys["a"] || touchState.left) {
+            player.x -= pSpeed;
+        }
+        if (keys["arrowright"] || keys["d"] || touchState.right) {
+            player.x += pSpeed;
+        }
+        if (keys["arrowup"] || keys["w"] || touchState.up) {
+            player.y = Math.max(HEIGHT / 2, player.y - pSpeed * 0.6);
+        }
+        if (keys["arrowdown"] || keys["s"] || touchState.down) {
+            player.y = Math.min(HEIGHT - 45, player.y + pSpeed * 0.6);
+        }
 
         // Clamp inside River limits dynamically
         // Match player with river banks on current horizontal row

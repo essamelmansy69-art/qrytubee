@@ -1,9 +1,7 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap');
 
 @layer base {
   body {
-    font-family: 'Cairo', sans-serif;
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
