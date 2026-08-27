@@ -1,9 +1,21 @@
 export interface Game {
   id: string;
-  title: string;
+  titleAr: string;
+  titleEn: string;
+  descriptionAr: string;
+  descriptionEn: string;
+  thumbnail: string;
+  iframeUrl: string;
   category: string;
-  thumbnailUrl: string;
-  embedUrl: string;
-  description: string;
-  controls: string;
+  controlsAr: string;
+  controlsEn: string;
+  rating: number;
+  views: number;
+  playsCount: number;
+}
+
+export interface Category {
+  id: string;
+  nameAr: string;
+  nameEn: string;
 }
