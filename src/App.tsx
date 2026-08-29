@@ -30,6 +30,7 @@ import breakoutThumbnail from './assets/images/breakout_thumbnail_1787511090254.
 import candyCrushThumbnail from './assets/images/candy_crush_thumbnail_1787541332465.jpg';
 import carRacingThumbnail from './assets/images/car_racing_thumbnail_1787601761728.jpg';
 import planeShooterThumbnail from './assets/images/plane_shooter_thumb_1787712159818.jpg';
+import ludoThumbnail from './assets/images/ludo_thumbnail_1787977186825.jpg';
 
 // Bilingual translations structure for premium localized design
 const TRANSLATIONS = {
@@ -219,6 +220,21 @@ const GAME_DATABASE_LOCALIZED = [
     controls: {
       ar: 'لوحة المفاتيح: استخدم أسهم الاتجاهات (◀ ▶ ▲ ▼) أو مفاتيح A / S / D / W للتوجيه والتحكم بالسرعة، ومفتاح المسافة (Spacebar) أو مفتاح F لإطلاق النار والصواريخ. على شاشات الجوال: استخدم لوحة الاتجاهات (D-pad) وأزرار الإطلاق التفاعلية الظاهرة أسفل اللعبة.',
       en: 'Keyboard: Use Arrow keys or A/S/D/W keys to steer and accelerate/decelerate, and Spacebar or F key to fire missiles. Touch/Mobile: Use the on-screen glowing direction D-pad and red FIRE action button.'
+    }
+  },
+  {
+    id: 'game-ludo',
+    category: 'Puzzle' as const,
+    thumbnailUrl: ludoThumbnail,
+    embedUrl: '/games/ludo.html',
+    title: { ar: 'لعبه لودو اون لاين الكلاسيكية الاحترافية', en: 'Retro Ludo Board Pro' },
+    description: {
+      ar: 'استمتع بلعب لعبه لودو اون لاين الكلاسيكية الشهيرة والمحبوبة مجاناً وبدون تحميل على الجوال والكمبيوتر! تحكّم بقطعك الأربعة، ارمِ النرد واحصّل على الرقم 6 للانطلاق، وتفادَ قطع الخصوم أو قم بأسرها لتعود لبيتها، وتنافس في وضع اللعب الفردي ضد كمبيوتر ذكي أو مع أصدقائك بوضع اللعب المحلي الممتع والمثالي بدون أخطاء.',
+      en: 'Play the popular classic Ludo board game online for free with no downloads! Control your four tokens, roll the dice, unlock with a 6, capture opponent tokens to send them back home, and compete in single-player vs smart computer AI or multi-player with friends locally.'
+    },
+    controls: {
+      ar: 'الماوس/الكيبورد: انقر على النرد أو اضغط على مفتاح المسافة (Spacebar) للرمي، ثم انقر فوق القطعة النشطة والمضيئة لتحريكها. على الجوال: انقر فوق النرد للرمي، ثم انقر فوق قطعك المضيئة للتحرك بسلاسة وبدون تعقيد.',
+      en: 'Mouse/Keyboard: Click the dice or press Spacebar to roll, then click any glowing active token to move it. Mobile/Touch: Tap the dice to roll, then tap your glowing tokens to move them smoothly.'
     }
   }
 ];
