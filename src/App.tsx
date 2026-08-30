@@ -31,6 +31,7 @@ import candyCrushThumbnail from './assets/images/candy_crush_thumbnail_178754133
 import carRacingThumbnail from './assets/images/car_racing_thumbnail_1787601761728.jpg';
 import planeShooterThumbnail from './assets/images/plane_shooter_thumb_1787712159818.jpg';
 import ludoThumbnail from './assets/images/ludo_thumbnail_1787977186825.jpg';
+import bubbleShooter3DThumbnail from './assets/images/bubble_shooter_3d_thumbnail_1788115719156.jpg';
 
 // Bilingual translations structure for premium localized design
 const TRANSLATIONS = {
@@ -236,6 +237,21 @@ const GAME_DATABASE_LOCALIZED = [
       ar: 'الماوس/الكيبورد: انقر على النرد أو اضغط على مفتاح المسافة (Spacebar) للرمي، ثم انقر فوق القطعة النشطة والمضيئة لتحريكها. على الجوال: انقر فوق النرد للرمي، ثم انقر فوق قطعك المضيئة للتحرك بسلاسة وبدون تعقيد.',
       en: 'Mouse/Keyboard: Click the dice or press Spacebar to roll, then click any glowing active token to move it. Mobile/Touch: Tap the dice to roll, then tap your glowing tokens to move them smoothly.'
     }
+  },
+  {
+    id: 'game-bubble-shooter-3d',
+    category: 'Puzzle' as const,
+    thumbnailUrl: bubbleShooter3DThumbnail,
+    embedUrl: '/games/bubble-shooter-3d.html',
+    title: { ar: 'بابل شوتر آنلاین - لعبة بابل شوتر 3D', en: 'Bubble Shooter 3D Online' },
+    description: {
+      ar: 'استمتع بلعب بابل شوتر آنلاین مجاناً وبدون تحميل على موقع أتاري للألعاب! صوّب قاذفة الفقاعات الملونة بذكاء، وطابق 3 كرات أو أكثر من نفس اللون لتفجيرها وإخلاء ساحة اللعب تماماً. استمتع بمستويات لا حصر لها، ورسومات ثلاثية الأبعاد جذابة، ونظام نقاط تفاعلي ممتع.',
+      en: 'Play Bubble Shooter 3D online for free with no downloads on Atari Games! Aim your bubble launcher strategically and match 3 or more bubbles of the same color to pop them and clear the board. Enjoy endless engaging levels, beautiful 3D bubble designs, and fun high score trackers.'
+    },
+    controls: {
+      ar: 'الماوس/الكيبورد: صوّب بالماوس وانقر بزر الماوس الأيسر للإطلاق وتفجير الفقاعات المتطابقة. على الجوال: المس الشاشة ووجّه مسار الإطلاق ثم افلت إصبعك لإطلاق الفقاعة.',
+      en: 'Mouse/Keyboard: Aim with the mouse and left-click to fire and pop matching bubbles. Mobile/Touch: Tap, hold to aim the path, and release to shoot the bubble.'
+    }
   }
 ];
 
@@ -338,6 +354,19 @@ export default function App() {
       }
     }
   }, [selectedGame]);
+
+  // Listen for goBack messages from game iframes to close play modal automatically
+  useEffect(() => {
+    const handleGameMessage = (event: MessageEvent) => {
+      if (event.data === 'goBack') {
+        setSelectedGame(null);
+      }
+    };
+    window.addEventListener('message', handleGameMessage);
+    return () => {
+      window.removeEventListener('message', handleGameMessage);
+    };
+  }, []);
 
   // Dynamic SEO Metadata updater for Google indexing and social shares
   useEffect(() => {
