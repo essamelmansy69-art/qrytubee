@@ -34,6 +34,7 @@ import ludoThumbnail from './assets/images/ludo_thumbnail_1787977186825.jpg';
 import bubbleShooter3DThumbnail from './assets/images/bubble_shooter_3d_thumbnail_1788115719156.jpg';
 import tripuzzleThumbnail from './assets/images/tripuzzle_thumbnail_1788133227750.jpg';
 import numberSearchThumbnail from './assets/images/number_search_thumbnail_1788145573502.jpg';
+import zumaThumbnail from './assets/images/zuma_thumbnail_1788190967005.jpg';
 
 // Bilingual translations structure for premium localized design
 const TRANSLATIONS = {
@@ -293,6 +294,21 @@ const GAME_DATABASE_LOCALIZED = [
     controls: {
       ar: 'الماوس/الكيبورد: انقر واسحب مؤشر الماوس فوق خط الأرقام المتجاورة أفقياً أو عمودياً أو قطرياً لتحديدها. على الجوال: المس واسحب إصبعك لتحديد وحل الأرقام.',
       en: 'Mouse/Keyboard: Click and drag your cursor over adjacent grid numbers to select them horizontally, vertically, or diagonally. Mobile/Touch: Tap and slide your finger to connect target numbers.'
+    }
+  },
+  {
+    id: 'game-zuma-legend',
+    category: 'Puzzle' as const,
+    thumbnailUrl: zumaThumbnail,
+    embedUrl: '/games/zuma.html',
+    title: { ar: 'لعبة زومة كلاسيك مجاناً | zuma game free download', en: 'Zuma Game Free Download & Play Online | Zuma Legend' },
+    description: {
+      ar: 'إذا كنت تبحث عن روابط zuma game free download لتجربة لعبة زومة الكلاسيكية، نوفر لك هنا إمكانية لعب لعبة زومة ليجند الأسطورية أون لاين مجاناً وبدون الحاجة لتحميل أي ملفات! طابق 3 كرات أو أكثر وفجّر السلسلة في 100 مستوى رائع ومثير.',
+      en: 'Looking for a zuma game free download? Experience the legendary Zuma game online free with no installation required! Match 3 or more colored marbles, blast the chain, and conquer all 100 challenging levels directly on your device.'
+    },
+    controls: {
+      ar: 'الماوس/الكيبورد: صوّب وحرّك بالماوس لتوجيه الإطلاق، وانقر بزر الماوس الأيسر لإطلاق الكرة. انقر فوق الضفدع لتغيير لون الكرة المطلقة. على الجوال: المس الشاشة ووجّه مسار الضفدع لتحديد زاوية الإطلاق ثم اضغط للإطلاق وتغيير الألوان.',
+      en: 'Mouse/Keyboard: Aim with the cursor to steer, and left-click to fire. Tap the shooter frog to swap the current ball color with the next one. Mobile/Touch: Tap on screen in the desired direction to aim and shoot marbles.'
     }
   }
 ];
@@ -933,6 +949,7 @@ export default function App() {
                   title={selectedGame.title[locale]}
                   className="w-full h-full border-0 bg-black flex-1"
                   allow="autoplay; gamepad; fullscreen; keyboard"
+                  sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-pointer-lock"
                   referrerPolicy="no-referrer"
                   onLoad={() => setIsIframeLoading(false)}
                 />
