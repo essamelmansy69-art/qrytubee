@@ -33,6 +33,7 @@ import planeShooterThumbnail from './assets/images/plane_shooter_thumb_178771215
 import ludoThumbnail from './assets/images/ludo_thumbnail_1787977186825.jpg';
 import bubbleShooter3DThumbnail from './assets/images/bubble_shooter_3d_thumbnail_1788115719156.jpg';
 import tripuzzleThumbnail from './assets/images/tripuzzle_thumbnail_1788133227750.jpg';
+import numberSearchThumbnail from './assets/images/number_search_thumbnail_1788145573502.jpg';
 
 // Bilingual translations structure for premium localized design
 const TRANSLATIONS = {
@@ -268,6 +269,21 @@ const GAME_DATABASE_LOCALIZED = [
       ar: 'الماوس/الكيبورد: اسحب المثلثات الملونة من اللوحة السفلية وضعها داخل الشكل المناسب. على الجوال: المس المثلث واسحبه لتطابق الأشكال الهندسية بدقة وسلاسة.',
       en: 'Mouse/Keyboard: Drag the colored triangles from the tray and fit them inside the geometric frame. Mobile/Touch: Tap and slide the triangular blocks with your finger to complete the puzzles.'
     }
+  },
+  {
+    id: 'game-number-search',
+    category: 'Puzzle' as const,
+    thumbnailUrl: numberSearchThumbnail,
+    embedUrl: '/games/number-search.html',
+    title: { ar: 'البحث عن الأرقام - Number Search Game Printable', en: 'Number Search Game Printable' },
+    description: {
+      ar: 'العب واستمتع بأفضل لعبة البحث عن الأرقام (number search game printable) مجاناً وبدون تحميل على موقع أتاري للألعاب! تحدى سرعة بديهتك ودقة ملاحظتك أون لاين.',
+      en: 'Enjoy the ultimate classic number search game printable style directly on your browser! Scan the grid, find target numbers as fast as possible, and connect them.'
+    },
+    controls: {
+      ar: 'الماوس/الكيبورد: انقر واسحب مؤشر الماوس فوق خط الأرقام المتجاورة أفقياً أو عمودياً أو قطرياً لتحديدها. على الجوال: المس واسحب إصبعك لتحديد وحل الأرقام.',
+      en: 'Mouse/Keyboard: Click and drag your cursor over adjacent grid numbers to select them horizontally, vertically, or diagonally. Mobile/Touch: Tap and slide your finger to connect target numbers.'
+    }
   }
 ];
 
@@ -352,6 +368,16 @@ export default function App() {
       }
     }
   }, []);
+
+  // Set an automatic safety fallback timer to dismiss the loading screen
+  useEffect(() => {
+    if (selectedGame && isIframeLoading) {
+      const timer = setTimeout(() => {
+        setIsIframeLoading(false);
+      }, 2500); // 2.5 seconds maximum loading screen visibility
+      return () => clearTimeout(timer);
+    }
+  }, [selectedGame, isIframeLoading]);
 
   // Synchronize selected game with the URL query parameters
   useEffect(() => {
