@@ -728,91 +728,6 @@ export default function App() {
           })}
         </div>
 
-        {/* Hero Featured Game - Simple, extremely premium and clean */}
-        {!searchQuery && activeCategory === 'All' && (
-          <div className={`rounded-3xl border overflow-hidden transition-all duration-300 ${
-            isDarkMode 
-              ? 'bg-[#0f172a] border-slate-800/80 shadow-md' 
-              : 'bg-white border-slate-200/80 shadow-sm'
-          }`}>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 sm:p-8">
-              
-              {/* Left Side: Dynamic game card cover */}
-              <div className="lg:col-span-5 aspect-video sm:aspect-square lg:aspect-square rounded-2xl overflow-hidden relative group cursor-pointer" onClick={() => { setSelectedGame(heroGame); setIsIframeLoading(true); }}>
-                <img 
-                  src={heroGame.thumbnailUrl} 
-                  alt={heroGame.title[locale]} 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  <div className="w-14 h-14 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shadow-lg shadow-amber-500/30">
-                    <Play className="w-6 h-6 fill-current translate-x-0.5" />
-                  </div>
-                </div>
-                <span className="absolute top-3 right-3 bg-amber-500 text-slate-950 text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-lg">
-                  {t.featured}
-                </span>
-              </div>
-
-              {/* Right Side: Game metadata details */}
-              <div className="lg:col-span-7 flex flex-col justify-between space-y-5">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/10">
-                      {heroGame.category}
-                    </span>
-                    <span className="text-[10px] font-semibold text-slate-400">
-                      ★ {t.rated}
-                    </span>
-                  </div>
-                  
-                  <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-                    {heroGame.title[locale]}
-                  </h2>
-                  
-                  <p className={`text-xs sm:text-sm leading-relaxed ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-                    {heroGame.description[locale]}
-                  </p>
-                </div>
-
-                <div className={`p-4 rounded-xl border text-xs leading-relaxed ${
-                  isDarkMode 
-                    ? 'bg-[#131b2e]/60 border-slate-800/80 text-slate-300' 
-                    : 'bg-slate-50 border-slate-200/80 text-slate-600'
-                }`}>
-                  <strong className="text-amber-500 font-bold block mb-1.5">{t.controls}:</strong>
-                  {heroGame.controls[locale]}
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3">
-                  <button 
-                    onClick={() => { setSelectedGame(heroGame); setIsIframeLoading(true); }}
-                    className="flex items-center gap-2 px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-sm transition-all shadow-md shadow-amber-500/10 active:scale-95 cursor-pointer"
-                  >
-                    <Play className="w-4 h-4 fill-current" />
-                    <span>{t.playNow}</span>
-                  </button>
-
-                  <button 
-                    onClick={(e) => handleToggleFavorite(e, heroGame.id)}
-                    className={`p-3 rounded-xl border transition-all cursor-pointer ${
-                      favorites.includes(heroGame.id)
-                        ? 'bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500/20'
-                        : isDarkMode
-                          ? 'bg-[#131b2e] border-slate-800 hover:bg-slate-800 text-slate-400'
-                          : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-600'
-                    }`}
-                    title={favorites.includes(heroGame.id) ? 'Remove' : 'Add to favorites'}
-                  >
-                    <Heart className={`w-4 h-4 ${favorites.includes(heroGame.id) ? 'fill-current' : ''}`} />
-                  </button>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        )}
-
         {/* Dynamic Games Grid */}
         <div className="space-y-5">
           <div className="flex items-center justify-between">
@@ -845,6 +760,7 @@ export default function App() {
                         src={game.thumbnailUrl} 
                         alt={game.title[locale]} 
                         loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
 
