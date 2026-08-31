@@ -71,7 +71,12 @@ const TRANSLATIONS = {
     language: "لغة العرض",
     aboutPlatform: "عن منصة أتاري",
     backToTop: "العودة للأعلى",
-    currentLang: "اللغة الحالية: العربية"
+    currentLang: "اللغة الحالية: العربية",
+    privacyPolicy: "سياسة الخصوصية",
+    termsOfService: "شروط الاستخدام",
+    copyrightPolicy: "سياسة حقوق النشر (DMCA)",
+    legalPages: "الصفحات القانونية",
+    close: "إغلاق"
   },
   en: {
     title: "Atari",
@@ -107,7 +112,12 @@ const TRANSLATIONS = {
     language: "Display Language",
     aboutPlatform: "About Atari Hub",
     backToTop: "Back to Top",
-    currentLang: "Current: English"
+    currentLang: "Current: English",
+    privacyPolicy: "Privacy Policy",
+    termsOfService: "Terms of Service",
+    copyrightPolicy: "Copyright & DMCA Policy",
+    legalPages: "Legal Information",
+    close: "Close"
   }
 };
 
@@ -320,6 +330,9 @@ export default function App() {
   const [isIframeLoading, setIsIframeLoading] = useState<boolean>(true);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [copiedNotification, setCopiedNotification] = useState<boolean>(false);
+
+  // Active Legal Page Modal Tab: 'privacy' | 'terms' | 'dmca' | null
+  const [activeLegalTab, setActiveLegalTab] = useState<'privacy' | 'terms' | 'dmca' | null>(null);
 
   const iframeContainerRef = useRef<HTMLDivElement>(null);
   const t = TRANSLATIONS[locale];
@@ -731,10 +744,10 @@ export default function App() {
         {/* Dynamic Games Grid */}
         <div className="space-y-5">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-extrabold tracking-tight">
+            <h2 className="text-lg font-extrabold tracking-tight">
               {activeCategory === 'All' && !searchQuery ? t.moreGames : activeCategory === 'Favorites' ? t.favorites : t[CATEGORY_MAP[activeCategory]]}
               {searchQuery && ` (${searchQuery})`}
-            </h3>
+            </h2>
             <span className="text-[10px] sm:text-xs font-semibold px-2.5 py-1 bg-slate-500/5 rounded-lg opacity-80 border border-slate-500/10">
               {filteredGames.length}
             </span>
@@ -742,7 +755,7 @@ export default function App() {
 
           {filteredGames.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
-              {filteredGames.map((game) => {
+              {filteredGames.map((game, index) => {
                 const isFav = favorites.includes(game.id);
                 return (
                   <div 
@@ -759,7 +772,8 @@ export default function App() {
                       <img 
                         src={game.thumbnailUrl} 
                         alt={game.title[locale]} 
-                        loading="lazy"
+                        loading={index < 4 ? "eager" : "lazy"}
+                        fetchPriority={index < 4 ? "high" : "auto"}
                         decoding="async"
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
@@ -792,10 +806,12 @@ export default function App() {
 
                     {/* Metadata below image */}
                     <div className="p-3">
-                      <h4 className="font-extrabold text-xs tracking-tight truncate">
+                      <h3 className="font-extrabold text-xs tracking-tight truncate">
                         {game.title[locale]}
-                      </h4>
-                      <p className="text-[10px] text-slate-500 mt-0.5 font-medium truncate">
+                      </h3>
+                      <p className={`text-[10px] mt-0.5 font-semibold truncate ${
+                        isDarkMode ? 'text-slate-400' : 'text-slate-600'
+                      }`}>
                         {game.category} Classic
                       </p>
                     </div>
@@ -811,7 +827,7 @@ export default function App() {
               <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mx-auto mb-4">
                 <Gamepad2 className="w-6 h-6 text-amber-500" />
               </div>
-              <h4 className="font-bold text-sm">{t.noGames}</h4>
+              <h3 className="font-bold text-sm">{t.noGames}</h3>
               <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto leading-relaxed">
                 {activeCategory === 'Favorites' ? t.favoritesEmpty : t.noGames}
               </p>
@@ -950,7 +966,7 @@ export default function App() {
                 
                 <div className="flex items-center gap-1.5 mb-3">
                   <Sparkles className="w-4 h-4 text-amber-500" />
-                  <h4 className="text-xs font-bold tracking-wide uppercase">{t.moreGames}</h4>
+                  <h3 className="text-xs font-bold tracking-wide uppercase">{t.moreGames}</h3>
                 </div>
 
                 <div className="space-y-2">
@@ -976,8 +992,10 @@ export default function App() {
                           className="w-10 h-10 rounded-lg object-cover shrink-0"
                         />
                         <div className="flex-1 min-w-0">
-                          <h5 className="font-bold text-xs truncate">{recGame.title[locale]}</h5>
-                          <span className="text-[9px] font-semibold text-slate-500">{recGame.category}</span>
+                          <h4 className="font-bold text-xs truncate">{recGame.title[locale]}</h4>
+                          <span className={`text-[9px] font-bold ${
+                            isDarkMode ? 'text-slate-400' : 'text-slate-600'
+                          }`}>{recGame.category}</span>
                         </div>
                         <Play className="w-3 h-3 text-amber-500 opacity-85" />
                       </div>
@@ -1002,7 +1020,7 @@ export default function App() {
             <div className="hidden sm:block px-5 py-4 bg-[#0f172a] border-t border-slate-800/60 shrink-0">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div className="max-w-2xl">
-                  <h4 className="font-bold text-xs text-slate-400">{t.about} {selectedGame.title[locale]}</h4>
+                  <h3 className="font-bold text-xs text-slate-400">{t.about} {selectedGame.title[locale]}</h3>
                   <p className="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">
                     {selectedGame.description[locale]}
                   </p>
@@ -1023,6 +1041,174 @@ export default function App() {
         </div>
       )}
 
+      {/* Legal Information Modal Dialog */}
+      {activeLegalTab && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div 
+            onClick={() => setActiveLegalTab(null)}
+            className="absolute inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity"
+          ></div>
+
+          {/* Modal Container */}
+          <div className={`relative w-full max-w-2xl rounded-2xl border shadow-2xl overflow-hidden transition-all duration-300 flex flex-col max-h-[85vh] ${
+            isDarkMode 
+              ? 'bg-[#0b1220] border-slate-800 text-slate-100' 
+              : 'bg-white border-slate-200 text-slate-800'
+          }`}>
+            
+            {/* Header */}
+            <div className={`p-5 border-b flex items-center justify-between shrink-0 ${
+              isDarkMode ? 'border-slate-800/80' : 'border-slate-100'
+            }`}>
+              <div className="flex items-center gap-2">
+                <Globe className="w-5 h-5 text-amber-500" />
+                <h2 className="text-sm sm:text-base font-extrabold tracking-tight">
+                  {t.legalPages}
+                </h2>
+              </div>
+              <button 
+                onClick={() => setActiveLegalTab(null)}
+                className={`p-2 rounded-xl border transition-all cursor-pointer ${
+                  isDarkMode 
+                    ? 'bg-slate-900 border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-slate-200' 
+                    : 'bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-500 hover:text-slate-800'
+                }`}
+                aria-label={t.close}
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Tab Selectors */}
+            <div className={`p-2 border-b flex items-center gap-1 shrink-0 ${
+              isDarkMode ? 'border-slate-800/80 bg-[#090d16]' : 'border-slate-100 bg-slate-50'
+            }`}>
+              {(['privacy', 'terms', 'dmca'] as const).map((tab) => {
+                const isActive = activeLegalTab === tab;
+                const tabTitle = tab === 'privacy' 
+                  ? t.privacyPolicy 
+                  : tab === 'terms' 
+                    ? t.termsOfService 
+                    : t.copyrightPolicy;
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveLegalTab(tab)}
+                    className={`flex-1 py-2 px-3 rounded-xl text-[10px] sm:text-xs font-bold transition-all duration-300 cursor-pointer text-center truncate ${
+                      isActive
+                        ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/15'
+                        : isDarkMode 
+                          ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-900' 
+                          : 'text-slate-600 hover:text-slate-800 hover:bg-slate-200/50'
+                    }`}
+                  >
+                    {tabTitle}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Legal Content */}
+            <div className="p-6 overflow-y-auto space-y-4 text-xs sm:text-sm leading-relaxed max-h-[50vh] scrollbar-thin">
+              {activeLegalTab === 'privacy' && (
+                <div className="space-y-4">
+                  <h3 className="text-amber-500 font-extrabold text-sm sm:text-base">
+                    {locale === 'ar' ? 'سياسة الخصوصية وحماية بيانات المستخدم' : 'Privacy Policy & User Data Protection'}
+                  </h3>
+                  <p className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>
+                    {locale === 'ar' 
+                      ? "نحن في منصة أتاري نهتم بخصوصيتك للغاية. لا نقوم بجمع أو حفظ أي بيانات شخصية خاصة بك عند استخدام الألعاب الكلاسيكية على موقعنا."
+                      : "At Atari Hub, we care deeply about your privacy. We do not collect or store any of your personal data when playing retro games on our platform."}
+                  </p>
+                  <p className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>
+                    {locale === 'ar' 
+                      ? "يتم حفظ تفضيلاتك مثل الألعاب المفضلة وقائمتها، بالإضافة إلى خيار الوضع الداكن أو الفاتح محلياً بشكل آمن في متصفحك (عبر تقنية Local Storage) لضمان عودتك إليها بسهولة دون الحاجة لتسجيل حساب، ولا يتم مشاركتها أبداً مع أي خوادم خارجية أو أطراف ثالثة."
+                      : "Your preferences, such as saved favorites and color themes, are stored locally inside your browser (using secure Local Storage) so you can resume your session seamlessly without signing up. This information never leaves your device."}
+                  </p>
+                  <p className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>
+                    {locale === 'ar' 
+                      ? "يتم استخدام تحليلات جوجل (Google Analytics) فقط كأداة إحصائية مجهولة الهوية وآمنة لقياس سرعة تحميل الصفحات وتحديد الألعاب الأكثر شعبية لتمكيننا من تزويدكم بتجربة لعب مستقرة ومحسنة دوماً."
+                      : "Anonymized, privacy-compliant Google Analytics may be utilized simply to monitor loading times and understand game popularity, helping us allocate server bandwidth effectively for your best entertainment."}
+                  </p>
+                </div>
+              )}
+
+              {activeLegalTab === 'terms' && (
+                <div className="space-y-4">
+                  <h3 className="text-amber-500 font-extrabold text-sm sm:text-base">
+                    {locale === 'ar' ? 'شروط الخدمة والاستخدام العادل' : 'Terms of Service & Fair Use'}
+                  </h3>
+                  <p className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>
+                    {locale === 'ar' 
+                      ? "مرحباً بك في منصة أتاري للألعاب الكلاسيكية. إن تصفحك للموقع أو لعب أي من الألعاب المتوفرة عليه يمثل موافقة صريحة على شروطنا البسيطة التالية:"
+                      : "Welcome to Atari Hub. By accessing our retro games platform, you agree to comply with our simple and fair terms of service below:"}
+                  </p>
+                  <p className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>
+                    {locale === 'ar' 
+                      ? "١. جميع الألعاب المتوفرة هنا مجانية بنسبة ١٠٠٪ ومتاحة لجميع الزوار بغرض الترفيه الشخصي غير التجاري والمباشر عبر متصفح الويب الخاص بك."
+                      : "1. All vintage and arcade games hosted on our website are 100% free of charge and intended strictly for personal, non-commercial entertainment directly inside your web browser."}
+                  </p>
+                  <p className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>
+                    {locale === 'ar' 
+                      ? "٢. يُمنع منعاً باتاً استخدام برمجيات الكشط التلقائي، أو الروبوتات الضارة، أو توجيه هجمات حرمان من الخدمة (DDoS) التي تستهلك موارد الخادم وتسبب بطء الموقع للاعبين الآخرين."
+                      : "2. Scraping content, abusing bandwidth, or executing automated requests that strain our infrastructure is strictly prohibited, ensuring that retro game loading times remain instant for everyone."}
+                  </p>
+                  <p className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>
+                    {locale === 'ar' 
+                      ? "٣. تحتفظ المنصة بالحق في تحديث قاعدة الألعاب، أو إزالة أي لعبة لأسباب تنظيمية، أو تعديل طريقة التحكم لتعزيز جودة اللعب وسرعة استجابة الأكواد."
+                      : "3. We reserve the full rights to update our retro collection, deprecate specific emulated versions for optimization, and modify controls to optimize playability without prior individual alerts."}
+                  </p>
+                </div>
+              )}
+
+              {activeLegalTab === 'dmca' && (
+                <div className="space-y-4">
+                  <h3 className="text-amber-500 font-extrabold text-sm sm:text-base">
+                    {locale === 'ar' ? 'حقوق النشر والملكية الفكرية (DMCA)' : 'Copyright & DMCA Take-Down Policy'}
+                  </h3>
+                  <p className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>
+                    {locale === 'ar' 
+                      ? "منصة أتاري تحترم بشدة حقوق الملكية الفكرية وحقوق النشر للغير وتعمل وفق تشريعات النشر الرقمي الدولية."
+                      : "Atari Hub highly respects intellectual property rights, creator contributions, and international digital copyright legislations."}
+                  </p>
+                  <p className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>
+                    {locale === 'ar' 
+                      ? "جميع الألعاب المتوفرة أون لاين على المنصة مبنية على كود مفتوح المصدر (HTML5 / JavaScript)، أو تقع ضمن نطاق الملكية العامة للألعاب التاريخية التي انتهت فترة حمايتها الحصرية، أو يتم تشغيلها عبر محاكيات مرخصة ومتاحة للجميع مجاناً."
+                      : "All classic games available on our platform are built with open-source technologies, belong to the historical public domain of legacy video games, or run through secure, licensed client-side web emulators."}
+                  </p>
+                  <p className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>
+                    {locale === 'ar' 
+                      ? "إذا كنت تمتلك حقوق الملكية الفكرية أو النشر لأي لعبة من الألعاب المعروضة هنا، وتعارض نشرها المجاني للجمهور، يرجى تزويدنا بإثبات ملكيتك للمحتوى عبر إرسال بريد إلكتروني إلى فريق الإدارة وسنقوم بحذف اللعبة من المنصة نهائياً في غضون ٢٤ ساعة عمل فور استلام طلبك ومراجعته."
+                      : "If you are the legal copyright owner of any featured arcade classic and object to its free emulated presentation here, please contact us with proof of ownership. We will verify your request and remove the specific game within 24 business hours."}
+                  </p>
+                  <div className={`p-4 rounded-xl border text-xs leading-relaxed font-bold ${
+                    isDarkMode ? 'bg-[#131b2e]/65 border-slate-800 text-amber-400' : 'bg-amber-50 border-amber-200 text-amber-800'
+                  }`}>
+                    {locale === 'ar' 
+                      ? "للتواصل مع الدعم القانوني وإرسال البلاغات: support@atari.hub" 
+                      : "For legal inquiries and DMCA complaints: support@atari.hub"}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer Close */}
+            <div className={`p-5 border-t flex justify-end shrink-0 ${
+              isDarkMode ? 'border-slate-800/80 bg-[#090d16]' : 'border-slate-100 bg-slate-50'
+            }`}>
+              <button
+                onClick={() => setActiveLegalTab(null)}
+                className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs transition-all shadow-md shadow-amber-500/10 active:scale-95 cursor-pointer"
+              >
+                {t.close}
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
       {/* Footer Block */}
       <footer className={`border-t py-12 md:py-16 text-xs transition-colors duration-300 ${
         isDarkMode 
@@ -1032,7 +1218,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-12">
           
           {/* Main Footer Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10 text-start">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10 text-start">
             
             {/* Column 1: Brand Info */}
             <div className="space-y-4">
@@ -1043,10 +1229,10 @@ export default function App() {
                   </div>
                 </div>
                 <div>
-                  <h4 className="text-sm font-extrabold tracking-wider bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
+                  <div className="text-sm font-extrabold tracking-wider bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
                     {t.title}
-                  </h4>
-                  <p className="text-[10px] font-semibold opacity-60">
+                  </div>
+                  <p className="text-[10px] font-semibold opacity-80">
                     {t.subtitle}
                   </p>
                 </div>
@@ -1070,10 +1256,10 @@ export default function App() {
 
             {/* Column 2: Quick Links (أقسام الألعاب / Game Categories) */}
             <div className="space-y-4">
-              <h4 className="text-xs font-extrabold uppercase tracking-wider text-amber-500 flex items-center gap-2">
+              <h3 className="text-xs font-extrabold uppercase tracking-wider text-amber-500 flex items-center gap-2">
                 <Sparkles className="w-3.5 h-3.5" />
                 <span>{t.categories}</span>
-              </h4>
+              </h3>
               <ul className="space-y-2.5 text-[11px] font-semibold">
                 {(['All', 'Action', 'Puzzle', 'Racing', 'Arcade', 'Favorites'] as const).map((cat) => {
                   const transKey = CATEGORY_MAP[cat];
@@ -1109,10 +1295,10 @@ export default function App() {
 
             {/* Column 3: Quick Launch Games (اكتشف الألعاب / Discover Games) */}
             <div className="space-y-4">
-              <h4 className="text-xs font-extrabold uppercase tracking-wider text-amber-500 flex items-center gap-2">
+              <h3 className="text-xs font-extrabold uppercase tracking-wider text-amber-500 flex items-center gap-2">
                 <Play className="w-3.5 h-3.5 fill-current" />
                 <span>{locale === 'ar' ? 'اكتشف الألعاب' : 'Quick Play'}</span>
-              </h4>
+              </h3>
               <ul className="space-y-2 text-[11px] font-semibold">
                 {GAME_DATABASE_LOCALIZED.slice(0, 5).map((game) => (
                   <li key={game.id}>
@@ -1137,84 +1323,40 @@ export default function App() {
               </ul>
             </div>
 
-            {/* Column 4: Premium Language & Preferences Section */}
-            <div className="space-y-4">
-              <h4 className="text-xs font-extrabold uppercase tracking-wider text-amber-500 flex items-center gap-2">
-                <Globe className="w-3.5 h-3.5" />
-                <span>{t.language}</span>
-              </h4>
-              
-              <p className={`text-[10px] leading-relaxed ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-                {t.currentLang}
-              </p>
-
-              {/* Prominent, easy-to-use Bilingual Toggle Selector */}
-              <div className={`p-1 rounded-xl flex items-center gap-1 border transition-all ${
-                isDarkMode ? 'bg-[#0b101a] border-slate-800/80' : 'bg-slate-100 border-slate-200'
-              }`}>
-                <button
-                  onClick={() => setLocale('ar')}
-                  className={`flex-1 py-2 px-2.5 rounded-lg text-[10px] sm:text-xs font-bold transition-all duration-300 cursor-pointer flex items-center justify-center gap-1.5 ${
-                    locale === 'ar'
-                      ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/15'
-                      : isDarkMode 
-                        ? 'text-slate-400 hover:text-slate-200' 
-                        : 'text-slate-600 hover:text-slate-800'
-                  }`}
-                >
-                  <span>العربية</span>
-                  {locale === 'ar' && <span className="w-1.5 h-1.5 rounded-full bg-slate-950"></span>}
-                </button>
-                <button
-                  onClick={() => setLocale('en')}
-                  className={`flex-1 py-2 px-2.5 rounded-lg text-[10px] sm:text-xs font-bold transition-all duration-300 cursor-pointer flex items-center justify-center gap-1.5 ${
-                    locale === 'en'
-                      ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/15'
-                      : isDarkMode 
-                        ? 'text-slate-400 hover:text-slate-200' 
-                        : 'text-slate-600 hover:text-slate-800'
-                  }`}
-                >
-                  <span>English</span>
-                  {locale === 'en' && <span className="w-1.5 h-1.5 rounded-full bg-slate-950"></span>}
-                </button>
-              </div>
-
-              {/* Secondary Control: Theme Toggle & Random Game */}
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => setIsDarkMode(!isDarkMode)}
-                  className={`flex-1 py-2.5 px-3 rounded-xl border text-[11px] font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                    isDarkMode 
-                      ? 'bg-[#0f172a] border-slate-800/80 hover:bg-slate-800 text-amber-400' 
-                      : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700'
-                  }`}
-                  aria-label={t.themeToggle}
-                >
-                  {isDarkMode ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
-                  <span>{t.themeToggle}</span>
-                </button>
-
-                <button 
-                  onClick={playRandomGame}
-                  className="flex-1 py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-[11px] transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-sm active:scale-95"
-                >
-                  <Shuffle className="w-3.5 h-3.5" />
-                  <span>{t.randomGame}</span>
-                </button>
-              </div>
-
-            </div>
-
           </div>
 
           {/* Bottom copyright and Back to Top block */}
-          <div className={`pt-6 border-t flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] ${
+          <div className={`pt-6 border-t flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] ${
             isDarkMode ? 'border-slate-800/40 text-slate-500' : 'border-slate-200 text-slate-400'
           }`}>
-            <p className="font-medium text-center sm:text-start">
-              {t.rights}
-            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-start">
+              <p className="font-medium">
+                {t.rights}
+              </p>
+              <div className="flex flex-wrap justify-center items-center gap-3 font-semibold">
+                <span className="opacity-40 hidden sm:inline">•</span>
+                <button 
+                  onClick={() => setActiveLegalTab('privacy')}
+                  className="hover:text-amber-500 transition-colors cursor-pointer"
+                >
+                  {t.privacyPolicy}
+                </button>
+                <span className="opacity-40">•</span>
+                <button 
+                  onClick={() => setActiveLegalTab('terms')}
+                  className="hover:text-amber-500 transition-colors cursor-pointer"
+                >
+                  {t.termsOfService}
+                </button>
+                <span className="opacity-40">•</span>
+                <button 
+                  onClick={() => setActiveLegalTab('dmca')}
+                  className="hover:text-amber-500 transition-colors cursor-pointer"
+                >
+                  {t.copyrightPolicy}
+                </button>
+              </div>
+            </div>
             
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
