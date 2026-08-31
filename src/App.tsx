@@ -32,6 +32,7 @@ import carRacingThumbnail from './assets/images/car_racing_thumbnail_17876017617
 import planeShooterThumbnail from './assets/images/plane_shooter_thumb_1787712159818.jpg';
 import ludoThumbnail from './assets/images/ludo_thumbnail_1787977186825.jpg';
 import bubbleShooter3DThumbnail from './assets/images/bubble_shooter_3d_thumbnail_1788115719156.jpg';
+import tripuzzleThumbnail from './assets/images/tripuzzle_thumbnail_1788133227750.jpg';
 
 // Bilingual translations structure for premium localized design
 const TRANSLATIONS = {
@@ -251,6 +252,21 @@ const GAME_DATABASE_LOCALIZED = [
     controls: {
       ar: 'الماوس/الكيبورد: صوّب بالماوس وانقر بزر الماوس الأيسر للإطلاق وتفجير الفقاعات المتطابقة. على الجوال: المس الشاشة ووجّه مسار الإطلاق ثم افلت إصبعك لإطلاق الفقاعة.',
       en: 'Mouse/Keyboard: Aim with the mouse and left-click to fire and pop matching bubbles. Mobile/Touch: Tap, hold to aim the path, and release to shoot the bubble.'
+    }
+  },
+  {
+    id: 'game-tri-puzzle',
+    category: 'Puzzle' as const,
+    thumbnailUrl: tripuzzleThumbnail,
+    embedUrl: '/games/tri-puzzle.html',
+    title: { ar: 'لعبة تراي بازل - TriPuzzle أون لاين', en: 'TriPuzzle Block Craft' },
+    description: {
+      ar: 'العب لعبة الألغاز والذكاء الهندسية الشهيرة تراي بازل (TriPuzzle) مجاناً وبدون تحميل على موقع أتاري للألعاب! تحدى عقلك واسحب المثلثات الملونة لتشكيل الأشكال الهندسية المتطابقة بشكل مثالي وتجاوز المستويات الشيقة والمسلية.',
+      en: 'Play the popular geometric brain-training TriPuzzle game online for free on Atari Games! Challenge your cognitive skills, drag colored triangular blocks, and fit them perfectly into structural grid shapes to clear levels.'
+    },
+    controls: {
+      ar: 'الماوس/الكيبورد: اسحب المثلثات الملونة من اللوحة السفلية وضعها داخل الشكل المناسب. على الجوال: المس المثلث واسحبه لتطابق الأشكال الهندسية بدقة وسلاسة.',
+      en: 'Mouse/Keyboard: Drag the colored triangles from the tray and fit them inside the geometric frame. Mobile/Touch: Tap and slide the triangular blocks with your finger to complete the puzzles.'
     }
   }
 ];
