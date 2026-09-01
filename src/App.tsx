@@ -35,6 +35,7 @@ import bubbleShooter3DThumbnail from './assets/images/bubble_shooter_3d_thumbnai
 import tripuzzleThumbnail from './assets/images/tripuzzle_thumbnail_1788133227750.jpg';
 import numberSearchThumbnail from './assets/images/number_search_thumbnail_1788145573502.jpg';
 import zumaThumbnail from './assets/images/zuma_thumbnail_1788190967005.jpg';
+import sudokuThumbnail from './assets/images/sudoku_thumbnail_1788237960483.jpg';
 
 // Bilingual translations structure for premium localized design
 const TRANSLATIONS = {
@@ -309,6 +310,21 @@ const GAME_DATABASE_LOCALIZED = [
     controls: {
       ar: 'الماوس/الكيبورد: صوّب وحرّك بالماوس لتوجيه الإطلاق، وانقر بزر الماوس الأيسر لإطلاق الكرة. انقر فوق الضفدع لتغيير لون الكرة المطلقة. على الجوال: المس الشاشة ووجّه مسار الضفدع لتحديد زاوية الإطلاق ثم اضغط للإطلاق وتغيير الألوان.',
       en: 'Mouse/Keyboard: Aim with the cursor to steer, and left-click to fire. Tap the shooter frog to swap the current ball color with the next one. Mobile/Touch: Tap on screen in the desired direction to aim and shoot marbles.'
+    }
+  },
+  {
+    id: 'game-daily-mini-sudoku',
+    category: 'Puzzle' as const,
+    thumbnailUrl: sudokuThumbnail,
+    embedUrl: '/games/daily-mini-sudoku.html',
+    title: { ar: 'لعبة سودوكو المصغرة اليومية | mini sudoku online', en: 'Daily Mini Sudoku Online | mini sudoku online' },
+    description: {
+      ar: 'استمتع بتجربة لعبة mini sudoku online اليومية المميزة والسهلة مجاناً! حل ألغاز سودوكو المصغرة الممتعة لتنشيط ذكائك وذاكرتك يومياً بدون تحميل مباشرة من متصفحك.',
+      en: 'Play the ultimate mini sudoku online game for free! Solve daily quick 6x6 grid puzzles directly in your browser. Perfect for a quick, brain-stimulating challenge anytime, anywhere.'
+    },
+    controls: {
+      ar: 'الماوس/الكيبورد: انقر فوق المربع الفارغ لاختياره ثم اضغط على الرقم المناسب من لوحة المفاتيح أو من الأرقام المعروضة بالشاشة. على الجوال: اضغط على المربع ثم حدد الرقم المطلوب لملء الشبكة.',
+      en: 'Mouse/Keyboard: Click on any empty cell to select it, then press the desired number from your keyboard or screen keypad. Mobile/Touch: Tap on a cell and choose the correct number to fill.'
     }
   }
 ];
