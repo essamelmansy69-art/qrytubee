@@ -16,6 +16,49 @@ async function startServer() {
     res.json({ status: "ok" });
   });
 
+  // Get GameMonetize Games Feed (Proxy)
+  app.get("/api/games", async (req, res) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.setHeader("Cache-Control", "public, max-age=3600"); // Cache for 1 hour
+
+    try {
+      const feedUrl = "https://gamemonetize.com/feed.php?format=0&num=50&page=1";
+      const response = await fetch(feedUrl, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "Accept": "application/json"
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch GameMonetize feed: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      if (!Array.isArray(data)) {
+        throw new Error("Invalid response format from GameMonetize feed (expected an array)");
+      }
+
+      // Map GameMonetize items to our standard Game interface
+      const mappedGames = data.map((item: any) => ({
+        id: String(item.id || `gm-${Math.random().toString(36).substring(2, 11)}`),
+        title: String(item.title || "Untitled Game").trim(),
+        category: String(item.category || "Arcade").trim(),
+        thumbnailUrl: String(item.thumb || "").trim(),
+        embedUrl: String(item.url || "").trim(),
+        description: String(item.description || "").trim(),
+        controls: String(item.instructions || "Mouse and Keyboard controls").trim()
+      }));
+
+      res.json(mappedGames);
+    } catch (error: any) {
+      console.error("Error fetching games from GameMonetize:", error);
+      res.status(500).json({ error: "Failed to fetch games from provider", details: error.message });
+    }
+  });
+
   // Proxy endpoint to safely fetch handymen CSV from Google Sheets without CORS issues
   app.get("/api/handymen-csv", async (req, res) => {
     res.setHeader("Access-Control-Allow-Origin", "*");

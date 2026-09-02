@@ -355,10 +355,107 @@ export default function App() {
 
   // Search & Category Filtering
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [activeCategory, setActiveCategory] = useState<CategoryKey>('All');
+  const [activeCategory, setActiveCategory] = useState<string>('All');
+
+  // Dynamic Game State loaded from local database + GameMonetize Feed
+  const [games, setGames] = useState<any[]>(() => GAME_DATABASE_LOCALIZED);
+  const [isLoadingGames, setIsLoadingGames] = useState<boolean>(false);
+
+  // Fetch dynamic games from proxy
+  useEffect(() => {
+    let active = true;
+    async function loadGames() {
+      setIsLoadingGames(true);
+      try {
+        const res = await fetch('/api/games');
+        if (!res.ok) throw new Error('Failed to fetch from proxy');
+        const data = await res.json();
+        
+        if (active && Array.isArray(data)) {
+          const normalized = data.map((item: any) => ({
+            id: item.id,
+            category: item.category || 'Arcade',
+            thumbnailUrl: item.thumbnailUrl,
+            embedUrl: item.embedUrl,
+            title: {
+              ar: item.title,
+              en: item.title
+            },
+            description: {
+              ar: item.description,
+              en: item.description
+            },
+            controls: {
+              ar: item.controls || "Mouse and Keyboard controls",
+              en: item.controls || "Mouse and Keyboard controls"
+            }
+          }));
+
+          setGames(prev => {
+            const existingIds = prev.map(g => g.id);
+            const fresh = normalized.filter((g: any) => !existingIds.includes(g.id));
+            return [...prev, ...fresh];
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching dynamic games feed:', err);
+      } finally {
+        if (active) setIsLoadingGames(false);
+      }
+    }
+    loadGames();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Compute dynamic categories present in the active games database
+  const availableCategories = React.useMemo(() => {
+    const cats = new Set<string>();
+    games.forEach(g => {
+      if (g.category) {
+        cats.add(g.category);
+      }
+    });
+    const standardCats = ['Action', 'Puzzle', 'Racing', 'Arcade'];
+    const otherCats = Array.from(cats).filter(c => !standardCats.includes(c)).sort();
+    return ['All', ...standardCats, ...otherCats, 'Favorites'];
+  }, [games]);
+
+  // Translate category titles
+  const getCategoryName = (cat: string) => {
+    if (locale === 'en') {
+      if (cat === 'All') return 'All';
+      if (cat === 'Favorites') return 'My Favorites';
+      return cat;
+    } else {
+      const arabicMap: Record<string, string> = {
+        'All': 'الكل',
+        'Action': 'حركة وإثارة',
+        'Puzzle': 'ذكاء وألغاز',
+        'Racing': 'سباقات وسرعة',
+        'Arcade': 'أركيد كلاسيك',
+        'Favorites': 'ألعاب المفضلة',
+        '3D': 'ثلاثي الأبعاد',
+        'Adventure': 'مغامرات',
+        'Shooting': 'إطلاق نار',
+        'Sports': 'رياضة',
+        'Girls': 'بنات',
+        'Boys': 'أولاد',
+        'Multiplayer': 'ألعاب جماعية',
+        'Simulation': 'محاكاة',
+        'Platformer': 'ألعاب منصات',
+        'Driving': 'قيادة وسيارات',
+        'Strategy': 'إستراتيجية',
+        'Fighting': 'قتال ومواجهة',
+        'Hypercasual': 'ألعاب خفيفة'
+      };
+      return arabicMap[cat] || cat;
+    }
+  };
 
   // Interactive Game Overlay Playroom Modal
-  const [selectedGame, setSelectedGame] = useState<typeof GAME_DATABASE_LOCALIZED[0] | null>(null);
+  const [selectedGame, setSelectedGame] = useState<any>(null);
   const [isIframeLoading, setIsIframeLoading] = useState<boolean>(true);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [copiedNotification, setCopiedNotification] = useState<boolean>(false);
@@ -401,18 +498,18 @@ export default function App() {
     localStorage.setItem('atari_favorites', JSON.stringify(favorites));
   }, [favorites]);
 
-  // Load game from URL search parameters on startup
+  // Load game from URL search parameters on startup or once games load
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const gameId = params.get('game');
-    if (gameId) {
-      const game = GAME_DATABASE_LOCALIZED.find(g => g.id === gameId);
+    if (gameId && !selectedGame) {
+      const game = games.find(g => g.id === gameId);
       if (game) {
         setSelectedGame(game);
         setIsIframeLoading(true);
       }
     }
-  }, []);
+  }, [games, selectedGame]);
 
   // Set an automatic safety fallback timer to dismiss the loading screen
   useEffect(() => {
@@ -551,7 +648,7 @@ export default function App() {
   }, []);
 
   // Filter game assets
-  const filteredGames = GAME_DATABASE_LOCALIZED.filter((game) => {
+  const filteredGames = games.filter((game) => {
     const titleMatch = (game.title[locale] || '').toLowerCase().includes(searchQuery.toLowerCase());
     const descMatch = (game.description[locale] || '').toLowerCase().includes(searchQuery.toLowerCase());
     const queryMatch = titleMatch || descMatch;
@@ -567,9 +664,9 @@ export default function App() {
 
   // Pick random game
   const playRandomGame = () => {
-    const candidates = GAME_DATABASE_LOCALIZED;
-    const randomIndex = Math.floor(Math.random() * candidates.length);
-    setSelectedGame(candidates[randomIndex]);
+    if (games.length === 0) return;
+    const randomIndex = Math.floor(Math.random() * games.length);
+    setSelectedGame(games[randomIndex]);
     setIsIframeLoading(true);
   };
 
@@ -736,9 +833,8 @@ export default function App() {
         
         {/* Categories Bar - Beautiful, minimal segmented tabs */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
-          {(['All', 'Action', 'Puzzle', 'Racing', 'Arcade', 'Favorites'] as const).map((cat) => {
+          {availableCategories.map((cat) => {
             const isActive = activeCategory === cat;
-            const transKey = CATEGORY_MAP[cat];
             
             return (
               <button
@@ -761,7 +857,8 @@ export default function App() {
                   {cat === 'Puzzle' && <Cpu className="w-3.5 h-3.5" />}
                   {cat === 'Racing' && <TrendingUp className="w-3.5 h-3.5" />}
                   {cat === 'Arcade' && <Play className="w-3.5 h-3.5" />}
-                  <span>{t[transKey]}</span>
+                  {!['Favorites', 'All', 'Action', 'Puzzle', 'Racing', 'Arcade'].includes(cat) && <Sparkles className="w-3.5 h-3.5" />}
+                  <span>{getCategoryName(cat)}</span>
                   {cat === 'Favorites' && favorites.length > 0 && (
                     <span className="text-[10px] bg-amber-500/15 text-amber-500 px-1.5 py-0.5 rounded-full font-bold ml-1">
                       {favorites.length}
@@ -777,7 +874,7 @@ export default function App() {
         <div className="space-y-5">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-extrabold tracking-tight">
-              {activeCategory === 'All' && !searchQuery ? t.moreGames : activeCategory === 'Favorites' ? t.favorites : t[CATEGORY_MAP[activeCategory]]}
+              {activeCategory === 'All' && !searchQuery ? t.moreGames : activeCategory === 'Favorites' ? t.favorites : getCategoryName(activeCategory)}
               {searchQuery && ` (${searchQuery})`}
             </h2>
             <span className="text-[10px] sm:text-xs font-semibold px-2.5 py-1 bg-slate-500/5 rounded-lg opacity-80 border border-slate-500/10">
@@ -832,7 +929,7 @@ export default function App() {
 
                       {/* Category Pill Tag */}
                       <span className="absolute bottom-2.5 left-2.5 bg-black/60 text-[9px] font-extrabold text-slate-300 px-2 py-0.5 rounded-md">
-                        {game.category}
+                        {getCategoryName(game.category)}
                       </span>
                     </div>
 
@@ -844,7 +941,7 @@ export default function App() {
                       <p className={`text-[10px] mt-0.5 font-semibold truncate ${
                         isDarkMode ? 'text-slate-400' : 'text-slate-600'
                       }`}>
-                        {game.category} Classic
+                        {getCategoryName(game.category)} Classic
                       </p>
                     </div>
                   </div>
@@ -1003,7 +1100,7 @@ export default function App() {
                 </div>
 
                 <div className="space-y-2">
-                  {GAME_DATABASE_LOCALIZED
+                  {games
                     .filter((g) => g.id !== selectedGame.id)
                     .slice(0, 4)
                     .map((recGame) => (
@@ -1028,7 +1125,7 @@ export default function App() {
                           <h4 className="font-bold text-xs truncate">{recGame.title[locale]}</h4>
                           <span className={`text-[9px] font-bold ${
                             isDarkMode ? 'text-slate-400' : 'text-slate-600'
-                          }`}>{recGame.category}</span>
+                          }`}>{getCategoryName(recGame.category)}</span>
                         </div>
                         <Play className="w-3 h-3 text-amber-500 opacity-85" />
                       </div>
@@ -1282,7 +1379,7 @@ export default function App() {
                 <div className={`text-[10px] font-semibold px-2.5 py-1 rounded-lg ${
                   isDarkMode ? 'bg-[#0f172a] border border-slate-800/80 text-slate-400' : 'bg-white border border-slate-200 text-slate-600'
                 }`}>
-                  {GAME_DATABASE_LOCALIZED.length} {locale === 'ar' ? 'ألعاب كلاسيكية' : 'Retro Games'}
+                  {games.length} {locale === 'ar' ? 'ألعاب كلاسيكية' : 'Retro Games'}
                 </div>
               </div>
             </div>
@@ -1295,7 +1392,6 @@ export default function App() {
               </h3>
               <ul className="space-y-2.5 text-[11px] font-semibold">
                 {(['All', 'Action', 'Puzzle', 'Racing', 'Arcade', 'Favorites'] as const).map((cat) => {
-                  const transKey = CATEGORY_MAP[cat];
                   const isActive = activeCategory === cat;
                   return (
                     <li key={cat}>
@@ -1313,7 +1409,7 @@ export default function App() {
                         }`}
                       >
                         <span className={`w-1.5 h-1.5 rounded-full transition-all ${isActive ? 'bg-amber-500 scale-125' : 'bg-slate-400/30'}`}></span>
-                        <span>{t[transKey]}</span>
+                        <span>{getCategoryName(cat)}</span>
                         {cat === 'Favorites' && favorites.length > 0 && (
                           <span className="text-[9px] bg-amber-500/10 text-amber-500 px-1.5 py-0.2 rounded-full font-bold">
                             {favorites.length}
@@ -1333,7 +1429,7 @@ export default function App() {
                 <span>{locale === 'ar' ? 'اكتشف الألعاب' : 'Quick Play'}</span>
               </h3>
               <ul className="space-y-2 text-[11px] font-semibold">
-                {GAME_DATABASE_LOCALIZED.slice(0, 5).map((game) => (
+                {games.slice(0, 5).map((game) => (
                   <li key={game.id}>
                     <button
                       onClick={() => {
