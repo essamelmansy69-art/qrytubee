@@ -1338,8 +1338,6 @@ export default function App() {
                     title={selectedGame.title[locale]}
                     className="w-full h-full border-0 bg-black flex-1"
                     allow="autoplay; gamepad; fullscreen; keyboard"
-                    sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-pointer-lock"
-                    referrerPolicy="no-referrer"
                     onLoad={() => setIsIframeLoading(false)}
                   />
 
@@ -1423,8 +1421,6 @@ export default function App() {
                     title={selectedGame.title[locale]}
                     className="w-full h-full border-0 bg-black flex-1"
                     allow="autoplay; gamepad; fullscreen; keyboard"
-                    sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-pointer-lock"
-                    referrerPolicy="no-referrer"
                     onLoad={() => setIsIframeLoading(false)}
                   />
 
