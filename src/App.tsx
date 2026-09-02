@@ -22,7 +22,8 @@ import {
   TrendingUp,
   Share2,
   Globe,
-  ArrowUp
+  ArrowUp,
+  ExternalLink
 } from 'lucide-react';
 import cheeseThumbnail from './assets/images/cheese_eater_thumbnail_1787373161126.jpg';
 import tetrisThumbnail from './assets/images/tetris_thumbnail_1787444248779.jpg';
@@ -1325,6 +1326,26 @@ export default function App() {
 
                 {/* Center Game View Frame */}
                 <div className="flex-1 flex flex-col bg-black relative min-h-[45vh] lg:h-full">
+                  {/* Quick helper toolbar if game gets stuck */}
+                  <div className="bg-slate-900 border-b border-slate-800 px-3 py-1.5 flex items-center justify-between text-[11px] text-slate-300 gap-2 shrink-0">
+                    <span className="flex items-center gap-1.5">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                      </span>
+                      <span>{locale === 'ar' ? 'هل اللعبة معلقة؟ أوقف مانع الإعلانات أو شغّلها هنا:' : 'Game stuck? Stop ad-blocker or play directly:'}</span>
+                    </span>
+                    <a 
+                      href={selectedGame.embedUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-1 rounded bg-amber-500 text-slate-950 font-extrabold hover:bg-amber-600 transition-all flex items-center gap-1 active:scale-95 text-[10px] shadow-md shadow-amber-500/10 whitespace-nowrap"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      <span>{locale === 'ar' ? 'تشغيل خارجي سريع 🚀' : 'Quick External Play 🚀'}</span>
+                    </a>
+                  </div>
+
                   {isIframeLoading && (
                     <div className="absolute inset-0 bg-[#090d16] flex flex-col items-center justify-center z-10 p-4 text-center">
                       <div className="w-12 h-12 rounded-full border-2 border-slate-800 border-t-amber-500 animate-spin mb-4"></div>
@@ -1337,7 +1358,7 @@ export default function App() {
                     src={selectedGame.embedUrl} 
                     title={selectedGame.title[locale]}
                     className="w-full h-full border-0 bg-black flex-1"
-                    allow="autoplay; gamepad; fullscreen; keyboard"
+                    allow="autoplay; gamepad; fullscreen; keyboard; accelerometer; gyroscope; picture-in-picture; web-share"
                     onLoad={() => setIsIframeLoading(false)}
                   />
 
@@ -1406,6 +1427,26 @@ export default function App() {
                 
                 {/* Left IFrame game canvas */}
                 <div ref={iframeContainerRef} className="flex-1 bg-black relative flex flex-col h-[50vh] md:h-full">
+                  {/* Quick helper toolbar if game gets stuck */}
+                  <div className="bg-slate-900 border-b border-slate-800 px-3 py-1.5 flex items-center justify-between text-[11px] text-slate-300 gap-2 shrink-0">
+                    <span className="flex items-center gap-1.5">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                      </span>
+                      <span>{locale === 'ar' ? 'هل اللعبة معلقة؟ أوقف مانع الإعلانات أو شغّلها هنا:' : 'Game stuck? Stop ad-blocker or play directly:'}</span>
+                    </span>
+                    <a 
+                      href={selectedGame.embedUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-1 rounded bg-amber-500 text-slate-950 font-extrabold hover:bg-amber-600 transition-all flex items-center gap-1 active:scale-95 text-[10px] shadow-md shadow-amber-500/10 whitespace-nowrap"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      <span>{locale === 'ar' ? 'تشغيل خارجي سريع 🚀' : 'Quick External Play 🚀'}</span>
+                    </a>
+                  </div>
+
                   {isIframeLoading && (
                     <div className="absolute inset-0 bg-[#090d16] flex flex-col items-center justify-center z-10 p-4 text-center">
                       <div className="w-12 h-12 rounded-full border-2 border-slate-800 border-t-amber-500 animate-spin mb-4"></div>
@@ -1420,7 +1461,7 @@ export default function App() {
                     src={selectedGame.embedUrl} 
                     title={selectedGame.title[locale]}
                     className="w-full h-full border-0 bg-black flex-1"
-                    allow="autoplay; gamepad; fullscreen; keyboard"
+                    allow="autoplay; gamepad; fullscreen; keyboard; accelerometer; gyroscope; picture-in-picture; web-share"
                     onLoad={() => setIsIframeLoading(false)}
                   />
 

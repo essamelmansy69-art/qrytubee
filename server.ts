@@ -166,10 +166,10 @@ async function startServer() {
     ];
 
     const urls = [
-      `https://gamemonetize.com/feed.php?format=1&num=${num}&page=${page}`,
-      `https://gamemonetize.co/feed.php?format=1&num=${num}&page=${page}`,
-      `http://gamemonetize.com/feed.php?format=1&num=${num}&page=${page}`,
-      `http://gamemonetize.co/feed.php?format=1&num=${num}&page=${page}`
+      `https://gamemonetize.com/feed.php?format=0&num=${num}&page=${page}`,
+      `https://gamemonetize.co/feed.php?format=0&num=${num}&page=${page}`,
+      `http://gamemonetize.com/feed.php?format=0&num=${num}&page=${page}`,
+      `http://gamemonetize.co/feed.php?format=0&num=${num}&page=${page}`
     ];
 
     let lastError = null;
