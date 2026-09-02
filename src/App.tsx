@@ -22,8 +22,7 @@ import {
   TrendingUp,
   Share2,
   Globe,
-  ArrowUp,
-  ExternalLink
+  ArrowUp
 } from 'lucide-react';
 import cheeseThumbnail from './assets/images/cheese_eater_thumbnail_1787373161126.jpg';
 import tetrisThumbnail from './assets/images/tetris_thumbnail_1787444248779.jpg';
@@ -79,8 +78,7 @@ const TRANSLATIONS = {
     termsOfService: "شروط الاستخدام",
     copyrightPolicy: "سياسة حقوق النشر (DMCA)",
     legalPages: "الصفحات القانونية",
-    close: "إغلاق",
-    onlineArcade: "ألعاب أون لاين"
+    close: "إغلاق"
   },
   en: {
     title: "Atari",
@@ -121,13 +119,12 @@ const TRANSLATIONS = {
     termsOfService: "Terms of Service",
     copyrightPolicy: "Copyright & DMCA Policy",
     legalPages: "Legal Information",
-    close: "Close",
-    onlineArcade: "Online Arcade"
+    close: "Close"
   }
 };
 
 // Map raw categories to translation keys
-type CategoryKey = 'All' | 'Action' | 'Puzzle' | 'Racing' | 'Arcade' | 'Favorites' | 'OnlineArcade';
+type CategoryKey = 'All' | 'Action' | 'Puzzle' | 'Racing' | 'Arcade' | 'Favorites';
 
 const CATEGORY_MAP: Record<CategoryKey, keyof typeof TRANSLATIONS.en> = {
   All: 'all',
@@ -135,8 +132,7 @@ const CATEGORY_MAP: Record<CategoryKey, keyof typeof TRANSLATIONS.en> = {
   Puzzle: 'puzzle',
   Racing: 'racing',
   Arcade: 'arcade',
-  Favorites: 'favorites',
-  OnlineArcade: 'onlineArcade'
+  Favorites: 'favorites'
 };
 
 // Clean minimalist category accents
@@ -333,117 +329,6 @@ const GAME_DATABASE_LOCALIZED = [
   }
 ];
 
-const CLIENT_FALLBACK_GAMES = [
-  {
-    id: "84899",
-    title: "RACE: Rocket Arena Car Extreme",
-    description: "Explosive 3D survival racing game set in a post-apocalyptic world. Upgrade powerful combat cars, fire weapons, use shields and nitro, and battle through dangerous arenas filled with traps and destruction.",
-    instructions: "Arrow Up / W - Nitro, Arrow Down / S - Brake, Arrow Left / A - Move left, Arrow Right / D - Move right, Space - Rockets, Q - Superpower, E - Shield, Mouse - Navigation",
-    thumb: "https://img.gamemonetize.com/76oe5vr125yw3oc362159k0wyny5gthh/512x384.jpg",
-    url: "https://html5.gamemonetize.co/76oe5vr125yw3oc362159k0wyny5gthh/",
-    category: "Racing"
-  },
-  {
-    id: "85536",
-    title: "Jigsaw: Pusha Pusha",
-    description: "Time to push! Use the arrow keys to walk and push the crates. Your goal is to place each crate onto an altar.",
-    instructions: "W, A, S, D or Arrow Keys.",
-    thumb: "https://img.gamemonetize.com/1b081qlbwkb2ijnbt2y6cue43smw70ao/512x384.jpg",
-    url: "https://html5.gamemonetize.co/1b081qlbwkb2ijnbt2y6cue43smw70ao/",
-    category: "Puzzle"
-  },
-  {
-    id: "7szooxdfm3kpxidj3qdf58x822jbe3a8",
-    title: "Moto X3M Pool Party",
-    description: "Moto X3M is back and in this sequel you'll definitely get wet! Try to beat more beautiful summer-themed levels.",
-    instructions: "W, A, S, D or Arrow Keys to balance and accelerate.",
-    thumb: "https://img.gamemonetize.com/7szooxdfm3kpxidj3qdf58x822jbe3a8/512x384.jpg",
-    url: "https://html5.gamemonetize.co/7szooxdfm3kpxidj3qdf58x822jbe3a8/",
-    category: "Racing"
-  },
-  {
-    id: "dskby4snoiv0on0oig8gqf9h08itidp0",
-    title: "Zuma Legend",
-    description: "Zuma Legend is an exciting marble shooter puzzle game! Match colors and blast all the marbles before they reach the hole.",
-    instructions: "Mouse / Touch to target and shoot marbles.",
-    thumb: "https://img.gamemonetize.com/dskby4snoiv0on0oig8gqf9h08itidp0/512x384.jpg",
-    url: "https://html5.gamemonetize.co/dskby4snoiv0on0oig8gqf9h08itidp0/",
-    category: "Puzzle"
-  },
-  {
-    id: "7uio1skk2b9v5m468m9yhycoofv7f9sk",
-    title: "Sudoku Classic Master",
-    description: "Play classic Sudoku online with elegant modern UI, multiple difficulty settings, and helpful tools.",
-    instructions: "Select cells and input numbers 1-9 to complete the grid.",
-    thumb: "https://img.gamemonetize.com/7uio1skk2b9v5m468m9yhycoofv7f9sk/512x384.jpg",
-    url: "https://html5.gamemonetize.co/7uio1skk2b9v5m468m9yhycoofv7f9sk/",
-    category: "Puzzle"
-  },
-  {
-    id: "f49bofwz4p6bbyk5it72v8w6n3h39y80",
-    title: "Bubble Shooter Pro",
-    description: "Shoot and burst bubbles in this addictive bubble shooter classic! Enjoy hours of matching puzzle gameplay.",
-    instructions: "Mouse / Touch to aim and shoot bubbles.",
-    thumb: "https://img.gamemonetize.com/f49bofwz4p6bbyk5it72v8w6n3h39y80/512x384.jpg",
-    url: "https://html5.gamemonetize.co/f49bofwz4p6bbyk5it72v8w6n3h39y80/",
-    category: "Arcade"
-  },
-  {
-    id: "e2g1o6sh1bykwpy623ocbbyk5it72v8w",
-    title: "Subway Surfers Monaco",
-    description: "Help Jake, Tricky & Fresh escape from the grumpy Inspector and his dog in the glamorous city of Monaco!",
-    instructions: "Left/Right arrow keys to steer, Up arrow to jump, Down arrow to slide, Space to use Hoverboard.",
-    thumb: "https://img.gamemonetize.com/e2g1o6sh1bykwpy623ocbbyk5it72v8w/512x384.jpg",
-    url: "https://html5.gamemonetize.co/e2g1o6sh1bykwpy623ocbbyk5it72v8w/",
-    category: "Action"
-  },
-  {
-    id: "w8m468m9yhycoofv7f9sk7uio1skk2b9v",
-    title: "Temple Run Tomb",
-    description: "Run, slide, jump, and escape the scary temple monsters in this infinite runner game!",
-    instructions: "Arrow keys or W,A,S,D to steer, jump, and slide.",
-    thumb: "https://img.gamemonetize.com/w8m468m9yhycoofv7f9sk7uio1skk2b9v/512x384.jpg",
-    url: "https://html5.gamemonetize.co/w8m468m9yhycoofv7f9sk7uio1skk2b9v/",
-    category: "Action"
-  },
-  {
-    id: "83sh1bykwpy623ocbbyk5it72v8w6n3h",
-    title: "Ludo Classic Multiplayer",
-    description: "Roll the dice and race your tokens from start to finish! Play classic Ludo board game online with friends or AI.",
-    instructions: "Click/Tap to roll dice and move tokens.",
-    thumb: "https://img.gamemonetize.com/83sh1bykwpy623ocbbyk5it72v8w6n3h/512x384.jpg",
-    url: "https://html5.gamemonetize.co/83sh1bykwpy623ocbbyk5it72v8w6n3h/",
-    category: "Arcade"
-  },
-  {
-    id: "rfvf4nek738ypuke2jtjsxp4it2dzwgc",
-    title: "Paint Drive IO",
-    description: "A fast-paced io arcade racer where you drive a car around an open arena, leaving a colored trail that claims territory.",
-    instructions: "Arrow keys or WASD to drive.",
-    thumb: "https://img.gamemonetize.com/rfvf4nek738ypuke2jtjsxp4it2dzwgc/512x384.jpg",
-    url: "https://html5.gamemonetize.co/rfvf4nek738ypuke2jtjsxp4it2dzwgc/",
-    category: "Racing"
-  },
-  {
-    id: "f9sk7uio1skk2b9v5m468m9yhycoofv7",
-    title: "Cut the Rope: Time Travel",
-    description: "Join Om Nom as he travels back in time to feed his ancestors with delicious candy in this physics-based puzzle adventure.",
-    instructions: "Swipe or Drag mouse to cut the ropes.",
-    thumb: "https://img.gamemonetize.com/f9sk7uio1skk2b9v5m468m9yhycoofv7/512x384.jpg",
-    url: "https://html5.gamemonetize.co/f9sk7uio1skk2b9v5m468m9yhycoofv7/",
-    category: "Puzzle"
-  },
-  {
-    id: "2b9v5m468m9yhycoofv7f9sk7uio1skk",
-    title: "Solitaire Classic Klondike",
-    description: "Play the timeless classic card game with smooth card movements and auto-complete features.",
-    instructions: "Drag and drop cards to build stacks of descending value and alternating colors.",
-    thumb: "https://img.gamemonetize.com/2b9v5m468m9yhycoofv7f9sk7uio1skk/512x384.jpg",
-    url: "https://html5.gamemonetize.co/2b9v5m468m9yhycoofv7f9sk7uio1skk/",
-    category: "Arcade"
-  }
-];
-
 export default function App() {
   // Locale State: Arabic by default, synced with URL query param for different language links
   const [locale, setLocale] = useState<'ar' | 'en'>(() => {
@@ -470,7 +355,7 @@ export default function App() {
 
   // Search & Category Filtering
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [activeCategory, setActiveCategory] = useState<CategoryKey>('OnlineArcade');
+  const [activeCategory, setActiveCategory] = useState<CategoryKey>('All');
 
   // Interactive Game Overlay Playroom Modal
   const [selectedGame, setSelectedGame] = useState<typeof GAME_DATABASE_LOCALIZED[0] | null>(null);
@@ -480,63 +365,6 @@ export default function App() {
 
   // Active Legal Page Modal Tab: 'privacy' | 'terms' | 'dmca' | null
   const [activeLegalTab, setActiveLegalTab] = useState<'privacy' | 'terms' | 'dmca' | null>(null);
-
-  // GameMonetize dynamic integration states
-  const [gamemonetizeGames, setGamemonetizeGames] = useState<any[]>([]);
-  const [isGamemonetizeLoading, setIsGamemonetizeLoading] = useState<boolean>(false);
-  const [gamemonetizePage, setGamemonetizePage] = useState<number>(1);
-  const [gamemonetizeError, setGamemonetizeError] = useState<string | null>(null);
-
-  // Dual Game Provider Strategy: 'gamepix' (100% working on mobile, zero whitelisting) vs 'gamemonetize'
-  const [activeProvider, setActiveProvider] = useState<'gamepix' | 'gamemonetize'>(() => {
-    const saved = localStorage.getItem('atari_provider');
-    return (saved === 'gamemonetize') ? 'gamemonetize' : 'gamepix';
-  });
-
-  useEffect(() => {
-    localStorage.setItem('atari_provider', activeProvider);
-  }, [activeProvider]);
-
-  useEffect(() => {
-    if (activeCategory === 'OnlineArcade') {
-      const fetchGames = async () => {
-        setIsGamemonetizeLoading(true);
-        setGamemonetizeError(null);
-        try {
-          if (activeProvider === 'gamepix') {
-            const res = await fetch(`/api/gamepix-feed?num=48&offset=${(gamemonetizePage - 1) * 48}`);
-            if (!res.ok) throw new Error('Failed to fetch GamePix feed');
-            const data = await res.json();
-            if (data && Array.isArray(data.games) && data.games.length > 0) {
-              setGamemonetizeGames(data.games);
-            } else {
-              throw new Error('Empty GamePix games list, using fallback');
-            }
-          } else {
-            const res = await fetch(`/api/gamemonetize-feed?num=36&page=${gamemonetizePage}`);
-            const contentType = res.headers.get('content-type') || '';
-            if (!res.ok || contentType.includes('text/html')) {
-              throw new Error('Fallback triggered due to HTML/unauthorized response');
-            }
-            const data = await res.json();
-            if (data && Array.isArray(data.games) && data.games.length > 0) {
-              setGamemonetizeGames(data.games);
-            } else {
-              throw new Error('Empty games list, using fallback');
-            }
-          }
-        } catch (err: any) {
-          console.warn("Using high-quality client-side fallback games database:", err.message);
-          setGamemonetizeGames(CLIENT_FALLBACK_GAMES);
-          setGamemonetizeError(null);
-        } finally {
-          setIsGamemonetizeLoading(false);
-        }
-      };
-
-      fetchGames();
-    }
-  }, [activeCategory, gamemonetizePage, activeProvider, locale]);
 
   const iframeContainerRef = useRef<HTMLDivElement>(null);
   const t = TRANSLATIONS[locale];
@@ -908,7 +736,7 @@ export default function App() {
         
         {/* Categories Bar - Beautiful, minimal segmented tabs */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
-          {(['OnlineArcade', 'All', 'Action', 'Puzzle', 'Racing', 'Arcade', 'Favorites'] as const).map((cat) => {
+          {(['All', 'Action', 'Puzzle', 'Racing', 'Arcade', 'Favorites'] as const).map((cat) => {
             const isActive = activeCategory === cat;
             const transKey = CATEGORY_MAP[cat];
             
@@ -933,7 +761,6 @@ export default function App() {
                   {cat === 'Puzzle' && <Cpu className="w-3.5 h-3.5" />}
                   {cat === 'Racing' && <TrendingUp className="w-3.5 h-3.5" />}
                   {cat === 'Arcade' && <Play className="w-3.5 h-3.5" />}
-                  {cat === 'OnlineArcade' && <Globe className="w-3.5 h-3.5" />}
                   <span>{t[transKey]}</span>
                   {cat === 'Favorites' && favorites.length > 0 && (
                     <span className="text-[10px] bg-amber-500/15 text-amber-500 px-1.5 py-0.5 rounded-full font-bold ml-1">
@@ -954,355 +781,98 @@ export default function App() {
               {searchQuery && ` (${searchQuery})`}
             </h2>
             <span className="text-[10px] sm:text-xs font-semibold px-2.5 py-1 bg-slate-500/5 rounded-lg opacity-80 border border-slate-500/10">
-              {activeCategory === 'OnlineArcade'
-                ? gamemonetizeGames.filter(g => g.title.toLowerCase().includes(searchQuery.toLowerCase())).length
-                : filteredGames.length}
+              {filteredGames.length}
             </span>
           </div>
 
-          {activeCategory === 'OnlineArcade' ? (
-            <div className="space-y-8">
-              {/* Dual Server Selector with Pulsing Indicator */}
-              <div className={`p-4 rounded-2xl border flex flex-col lg:flex-row lg:items-center justify-between gap-4 ${
-                isDarkMode ? 'bg-[#0f172a] border-slate-800/80' : 'bg-white border-slate-200'
-              }`}>
-                <div className="space-y-1">
-                  <h3 className="text-xs font-black tracking-wider uppercase text-amber-500 flex items-center gap-2">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                    </span>
-                    {locale === 'ar' ? 'اختر سيرفر تشغيل الألعاب' : 'Select Game Hosting Server'}
-                  </h3>
-                  <p className="text-[11px] text-slate-400 leading-relaxed">
-                    {locale === 'ar' 
-                      ? 'إذا كانت بعض الألعاب لا تعمل على جهازك أو جوالك، قم بالتبديل إلى السيرفر الأول الذي يعمل 100% بدون أي حظر أو توقف.'
-                      : 'If some games do not load or play on your mobile, simply switch to Server 1 which has 100% guaranteed uptime.'}
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2 shrink-0">
-                  <button
-                    onClick={() => {
-                      setActiveProvider('gamepix');
-                      setGamemonetizePage(1);
-                    }}
-                    className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 ${
-                      activeProvider === 'gamepix'
-                        ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/15'
-                        : isDarkMode
-                          ? 'bg-slate-800/50 text-slate-400 hover:text-slate-300 hover:bg-slate-800'
-                          : 'bg-slate-100 text-slate-500 hover:text-slate-700 hover:bg-slate-200'
+          {filteredGames.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
+              {filteredGames.map((game, index) => {
+                const isFav = favorites.includes(game.id);
+                return (
+                  <div 
+                    key={game.id}
+                    onClick={() => { setSelectedGame(game); setIsIframeLoading(true); }}
+                    className={`group rounded-2xl overflow-hidden border transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg cursor-pointer ${
+                      isDarkMode 
+                        ? 'bg-[#0f172a] border-slate-800/80 hover:border-slate-700' 
+                        : 'bg-white border-slate-200/80 hover:border-slate-300'
                     }`}
                   >
-                    <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
-                    <span>{locale === 'ar' ? 'السيرفر الأول (GamePix) ⚡ [يعمل 100%]' : 'Server 1 (GamePix) ⚡ [100% Working]'}</span>
-                  </button>
+                    {/* Thumbnail */}
+                    <div className="aspect-square relative overflow-hidden bg-slate-900">
+                      <img 
+                        src={game.thumbnailUrl} 
+                        alt={game.title[locale]} 
+                        loading={index < 4 ? "eager" : "lazy"}
+                        fetchPriority={index < 4 ? "high" : "auto"}
+                        decoding="async"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
 
-                  <button
-                    onClick={() => {
-                      setActiveProvider('gamemonetize');
-                      setGamemonetizePage(1);
-                    }}
-                    className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 ${
-                      activeProvider === 'gamemonetize'
-                        ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/15'
-                        : isDarkMode
-                          ? 'bg-slate-800/50 text-slate-400 hover:text-slate-300 hover:bg-slate-800'
-                          : 'bg-slate-100 text-slate-500 hover:text-slate-700 hover:bg-slate-200'
-                    }`}
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
-                    <span>{locale === 'ar' ? 'السيرفر الثاني (GameMonetize)' : 'Server 2 (GameMonetize)'}</span>
-                  </button>
-                </div>
-              </div>
-
-              {isGamemonetizeLoading ? (
-                /* Skeleton Loader Grid */
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
-                  {Array.from({ length: 12 }).map((_, i) => (
-                    <div 
-                      key={i}
-                      className={`rounded-2xl overflow-hidden border animate-pulse ${
-                        isDarkMode ? 'bg-[#0f172a] border-slate-800/80' : 'bg-white border-slate-200'
-                      }`}
-                    >
-                      <div className="aspect-square bg-slate-800/50" />
-                      <div className="p-3 space-y-2">
-                        <div className="h-3 bg-slate-800/50 rounded-full w-2/3" />
-                        <div className="h-2 bg-slate-800/50 rounded-full w-1/2" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : gamemonetizeError ? (
-                /* Beautiful Error View */
-                <div className={`rounded-2xl p-10 text-center max-w-md mx-auto border ${
-                  isDarkMode ? 'bg-[#0f172a] border-slate-800/80' : 'bg-white border-slate-200'
-                }`}>
-                  <div className="w-12 h-12 rounded-xl bg-red-500/15 flex items-center justify-center mx-auto mb-4">
-                    <X className="w-6 h-6 text-red-500" />
-                  </div>
-                  <h3 className="font-bold text-sm">{gamemonetizeError}</h3>
-                  <div className="mt-5 flex justify-center">
-                    <button 
-                      onClick={() => { setGamemonetizePage(1); }}
-                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-amber-500 text-slate-950 text-xs font-bold hover:bg-amber-600 transition-all cursor-pointer"
-                    >
-                      <RotateCcw className="w-3 h-3" />
-                      <span>{locale === 'ar' ? 'إعادة المحاولة' : 'Retry'}</span>
-                    </button>
-                  </div>
-                </div>
-              ) : gamemonetizeGames.filter(g => g.title.toLowerCase().includes(searchQuery.toLowerCase())).length > 0 ? (
-                /* GameMonetize Games Grid */
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
-                  {gamemonetizeGames
-                    .filter(g => g.title.toLowerCase().includes(searchQuery.toLowerCase()))
-                    .map((game, index) => {
-                      const gmId = `gm-${game.id}`;
-                      const isFav = favorites.includes(gmId);
-                      
-                      const playOnlineGame = () => {
-                        const mapped = {
-                          id: gmId,
-                          category: game.category || 'Arcade',
-                          thumbnailUrl: game.thumb,
-                          embedUrl: game.url,
-                          title: { ar: game.title, en: game.title },
-                          description: { 
-                            ar: game.description || game.title, 
-                            en: game.description || game.title 
-                          },
-                          controls: { 
-                            ar: game.instructions || 'استخدم الماوس أو لوحة المفاتيح أو شاشة اللمس للتحكم واللعب!', 
-                            en: game.instructions || 'Use Mouse, Keyboard, or Touch Screen to control and play!' 
-                          }
-                        };
-                        setSelectedGame(mapped);
-                        setIsIframeLoading(true);
-                      };
-
-                      return (
-                        <div 
-                          key={game.id}
-                          onClick={playOnlineGame}
-                          className={`group rounded-2xl overflow-hidden border transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg cursor-pointer ${
-                            isDarkMode 
-                              ? 'bg-[#0f172a] border-slate-800/80 hover:border-slate-700' 
-                              : 'bg-white border-slate-200/80 hover:border-slate-300'
-                          }`}
-                        >
-                          {/* Thumbnail */}
-                          <div className="aspect-square relative overflow-hidden bg-slate-900">
-                            <img 
-                              src={`https://images.weserv.nl/?url=${encodeURIComponent(game.thumb.trim())}`} 
-                              alt={game.title} 
-                              loading="lazy"
-                              referrerPolicy="no-referrer"
-                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                              onError={(e) => {
-                                e.currentTarget.src = game.thumb;
-                              }}
-                            />
-
-                            {/* Cover hover play state */}
-                            <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                              <div className="w-10 h-10 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
-                                <Play className="w-4 h-4 fill-current translate-x-0.5" />
-                              </div>
-                            </div>
-
-                            {/* Favorite button overlay */}
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleToggleFavorite(e, gmId);
-                              }}
-                              className={`absolute top-2.5 right-2.5 p-1.5 rounded-lg backdrop-blur-md transition-all active:scale-90 z-10 ${
-                                isFav 
-                                  ? 'bg-red-500 text-white shadow-sm' 
-                                  : 'bg-black/30 hover:bg-black/50 text-white hover:scale-105'
-                              }`}
-                              title={isFav ? 'Favorite' : 'Add favorite'}
-                            >
-                              <Heart className={`w-3 h-3 ${isFav ? 'fill-current' : ''}`} />
-                            </button>
-
-                            {/* Category Pill Tag */}
-                            <span className="absolute bottom-2.5 left-2.5 bg-black/60 text-[9px] font-extrabold text-slate-300 px-2 py-0.5 rounded-md">
-                              {game.category}
-                            </span>
-                          </div>
-
-                          {/* Metadata below image */}
-                          <div className="p-3">
-                            <h3 className="font-extrabold text-xs tracking-tight truncate">
-                              {game.title}
-                            </h3>
-                            <p className={`text-[10px] mt-0.5 font-semibold truncate ${
-                              isDarkMode ? 'text-slate-400' : 'text-slate-600'
-                            }`}>
-                              {game.category} Free Game
-                            </p>
-                          </div>
+                      {/* Cover hover play state */}
+                      <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
+                          <Play className="w-4 h-4 fill-current translate-x-0.5" />
                         </div>
-                      );
-                    })}
-                </div>
-              ) : (
-                /* Empty Filter View for GameMonetize search */
-                <div className={`rounded-2xl p-10 text-center max-w-md mx-auto border ${
-                  isDarkMode ? 'bg-[#0f172a] border-slate-800/80' : 'bg-white border-slate-200'
-                }`}>
-                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mx-auto mb-4">
-                    <Gamepad2 className="w-6 h-6 text-amber-500" />
-                  </div>
-                  <h3 className="font-bold text-sm">{t.noGames}</h3>
-                  <div className="mt-5 flex justify-center">
-                    <button 
-                      onClick={() => setSearchQuery('')}
-                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-amber-500 text-slate-950 text-xs font-bold hover:bg-amber-600 transition-all cursor-pointer"
-                    >
-                      <RotateCcw className="w-3 h-3" />
-                      <span>{t.resetFilters}</span>
-                    </button>
-                  </div>
-                </div>
-              )}
+                      </div>
 
-              {/* Pagination Controls */}
-              {!isGamemonetizeLoading && !gamemonetizeError && gamemonetizeGames.length > 0 && (
-                <div className="flex items-center justify-center gap-4 pt-4">
-                  <button
-                    disabled={gamemonetizePage === 1}
-                    onClick={() => setGamemonetizePage(prev => Math.max(1, prev - 1))}
-                    className={`p-2.5 rounded-xl border font-bold transition-all flex items-center gap-1 text-xs cursor-pointer ${
-                      gamemonetizePage === 1
-                        ? 'opacity-40 cursor-not-allowed'
-                        : isDarkMode
-                          ? 'bg-slate-800 border-slate-700 hover:bg-slate-700 text-white'
-                          : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700'
-                    }`}
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    <span>{locale === 'ar' ? 'السابق' : 'Prev'}</span>
-                  </button>
+                      {/* Favorite button overlay */}
+                      <button
+                        onClick={(e) => handleToggleFavorite(e, game.id)}
+                        className={`absolute top-2.5 right-2.5 p-1.5 rounded-lg backdrop-blur-md transition-all active:scale-90 ${
+                          isFav 
+                            ? 'bg-red-500 text-white shadow-sm' 
+                            : 'bg-black/30 hover:bg-black/50 text-white hover:scale-105'
+                        }`}
+                        title={isFav ? 'Favorite' : 'Add favorite'}
+                      >
+                        <Heart className={`w-3 h-3 ${isFav ? 'fill-current' : ''}`} />
+                      </button>
 
-                  <div className={`px-4 py-2 rounded-xl border text-xs font-extrabold ${
-                    isDarkMode ? 'bg-[#0f172a] border-slate-800 text-amber-400' : 'bg-slate-100 border-slate-200 text-[#0f172a]'
-                  }`}>
-                    {locale === 'ar' ? `الصفحة ${gamemonetizePage}` : `Page ${gamemonetizePage}`}
+                      {/* Category Pill Tag */}
+                      <span className="absolute bottom-2.5 left-2.5 bg-black/60 text-[9px] font-extrabold text-slate-300 px-2 py-0.5 rounded-md">
+                        {game.category}
+                      </span>
+                    </div>
+
+                    {/* Metadata below image */}
+                    <div className="p-3">
+                      <h3 className="font-extrabold text-xs tracking-tight truncate">
+                        {game.title[locale]}
+                      </h3>
+                      <p className={`text-[10px] mt-0.5 font-semibold truncate ${
+                        isDarkMode ? 'text-slate-400' : 'text-slate-600'
+                      }`}>
+                        {game.category} Classic
+                      </p>
+                    </div>
                   </div>
-
-                  <button
-                    onClick={() => setGamemonetizePage(prev => prev + 1)}
-                    className={`p-2.5 rounded-xl border font-bold transition-all flex items-center gap-1 text-xs cursor-pointer ${
-                      isDarkMode
-                        ? 'bg-slate-800 border-slate-700 hover:bg-slate-700 text-white'
-                        : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700'
-                    }`}
-                  >
-                    <span>{locale === 'ar' ? 'التالي' : 'Next'}</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
+                );
+              })}
             </div>
           ) : (
-            filteredGames.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
-                {filteredGames.map((game, index) => {
-                  const isFav = favorites.includes(game.id);
-                  return (
-                    <div 
-                      key={game.id}
-                      onClick={() => { setSelectedGame(game); setIsIframeLoading(true); }}
-                      className={`group rounded-2xl overflow-hidden border transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg cursor-pointer ${
-                        isDarkMode 
-                          ? 'bg-[#0f172a] border-slate-800/80 hover:border-slate-700' 
-                          : 'bg-white border-slate-200/80 hover:border-slate-300'
-                      }`}
-                    >
-                      {/* Thumbnail */}
-                      <div className="aspect-square relative overflow-hidden bg-slate-900">
-                        <img 
-                          src={game.thumbnailUrl} 
-                          alt={game.title[locale]} 
-                          loading={index < 4 ? "eager" : "lazy"}
-                          fetchPriority={index < 4 ? "high" : "auto"}
-                          decoding="async"
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-
-                        {/* Cover hover play state */}
-                        <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                          <div className="w-10 h-10 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
-                            <Play className="w-4 h-4 fill-current translate-x-0.5" />
-                          </div>
-                        </div>
-
-                        {/* Favorite button overlay */}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleToggleFavorite(e, game.id);
-                          }}
-                          className={`absolute top-2.5 right-2.5 p-1.5 rounded-lg backdrop-blur-md transition-all active:scale-90 z-10 ${
-                            isFav 
-                              ? 'bg-red-500 text-white shadow-sm' 
-                              : 'bg-black/30 hover:bg-black/50 text-white hover:scale-105'
-                          }`}
-                          title={isFav ? 'Favorite' : 'Add favorite'}
-                        >
-                          <Heart className={`w-3 h-3 ${isFav ? 'fill-current' : ''}`} />
-                        </button>
-
-                        {/* Category Pill Tag */}
-                        <span className="absolute bottom-2.5 left-2.5 bg-black/60 text-[9px] font-extrabold text-slate-300 px-2 py-0.5 rounded-md">
-                          {game.category}
-                        </span>
-                      </div>
-
-                      {/* Metadata below image */}
-                      <div className="p-3">
-                        <h3 className="font-extrabold text-xs tracking-tight truncate">
-                          {game.title[locale]}
-                        </h3>
-                        <p className={`text-[10px] mt-0.5 font-semibold truncate ${
-                          isDarkMode ? 'text-slate-400' : 'text-slate-600'
-                        }`}>
-                          {game.category} Classic
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
+            /* Empty Filter View */
+            <div className={`rounded-2xl p-10 text-center max-w-md mx-auto border ${
+              isDarkMode ? 'bg-[#0f172a] border-slate-800/80' : 'bg-white border-slate-200'
+            }`}>
+              <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mx-auto mb-4">
+                <Gamepad2 className="w-6 h-6 text-amber-500" />
               </div>
-            ) : (
-              /* Empty Filter View */
-              <div className={`rounded-2xl p-10 text-center max-w-md mx-auto border ${
-                isDarkMode ? 'bg-[#0f172a] border-slate-800/80' : 'bg-white border-slate-200'
-              }`}>
-                <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center mx-auto mb-4">
-                  <Gamepad2 className="w-6 h-6 text-amber-500" />
-                </div>
-                <h3 className="font-bold text-sm">{t.noGames}</h3>
-                <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto leading-relaxed">
-                  {activeCategory === 'Favorites' ? t.favoritesEmpty : t.noGames}
-                </p>
-                <div className="mt-5 flex justify-center">
-                  <button 
-                    onClick={() => { setActiveCategory('All'); setSearchQuery(''); }}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-amber-500 text-slate-950 text-xs font-bold hover:bg-amber-600 transition-all cursor-pointer"
-                  >
-                    <RotateCcw className="w-3 h-3" />
-                    <span>{t.resetFilters}</span>
-                  </button>
-                </div>
+              <h3 className="font-bold text-sm">{t.noGames}</h3>
+              <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto leading-relaxed">
+                {activeCategory === 'Favorites' ? t.favoritesEmpty : t.noGames}
+              </p>
+              <div className="mt-5 flex justify-center">
+                <button 
+                  onClick={() => { setActiveCategory('All'); setSearchQuery(''); }}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-amber-500 text-slate-950 text-xs font-bold hover:bg-amber-600 transition-all cursor-pointer"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>{t.resetFilters}</span>
+                </button>
               </div>
-            )
+            </div>
           )}
         </div>
 
@@ -1376,251 +946,108 @@ export default function App() {
             </div>
 
             {/* Split viewport */}
-            {selectedGame.id.startsWith('gm-') ? (
-              /* Custom Centered Game View Layout with surrounding Ads */
-              <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
-                
-                {/* Left Side Ad Column on Desktop */}
-                <div className="hidden lg:flex w-44 bg-[#090d16] border-r border-slate-800/60 p-3 flex-col items-center justify-between shrink-0">
-                  <div className="text-[10px] tracking-wider uppercase opacity-40 font-bold mb-2">إعلان - Advertisement</div>
-                  
-                  {/* Dynamic styled ad container matching the arcade vibe */}
-                  <div className="flex-1 w-full bg-slate-900/40 rounded-xl border border-slate-800/50 p-3 flex flex-col items-center justify-center text-center space-y-4">
-                    <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
-                      <Gamepad2 className="w-5 h-5 text-amber-500 animate-bounce" />
-                    </div>
-                    <div>
-                      <h4 className="text-[11px] font-extrabold text-amber-400">العب ألعاباً جديدة!</h4>
-                      <p className="text-[9px] text-slate-400 mt-1 leading-relaxed">اضغط هنا لاستكشاف المزيد من الألعاب الحماسية والمثيرة مجاناً</p>
-                    </div>
-                    <button onClick={() => setGamemonetizePage(p => p + 1)} className="px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold text-[9px] w-full cursor-pointer hover:bg-amber-600 transition-colors">
-                      {locale === 'ar' ? 'تصفح الآن' : 'Browse Now'}
+            <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+              
+              {/* Left IFrame game canvas */}
+              <div ref={iframeContainerRef} className="flex-1 bg-black relative flex flex-col h-[50vh] md:h-full">
+                {isIframeLoading && (
+                  <div className="absolute inset-0 bg-[#090d16] flex flex-col items-center justify-center z-10 p-4 text-center">
+                    <div className="w-12 h-12 rounded-full border-2 border-slate-800 border-t-amber-500 animate-spin mb-4"></div>
+                    <h4 className="text-sm font-bold text-white">تحميل اللعبة الكلاسيكية...</h4>
+                    <p className="text-[11px] text-slate-400 mt-1 max-w-xs">
+                      {selectedGame.title[locale]}
+                    </p>
+                  </div>
+                )}
+
+                <iframe 
+                  src={selectedGame.embedUrl} 
+                  title={selectedGame.title[locale]}
+                  className="w-full h-full border-0 bg-black flex-1"
+                  allow="autoplay; gamepad; fullscreen; keyboard"
+                  sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-pointer-lock"
+                  referrerPolicy="no-referrer"
+                  onLoad={() => setIsIframeLoading(false)}
+                />
+
+                {/* Floating controls inside Fullscreen */}
+                {isFullscreen && (
+                  <div className={`absolute top-4 ${locale === 'ar' ? 'left-4' : 'right-4'} z-20 flex items-center gap-2 opacity-40 hover:opacity-100 transition-opacity`}>
+                    <button 
+                      onClick={toggleFullscreenMode}
+                      className="p-2 bg-black/80 backdrop-blur-md rounded-lg text-white"
+                    >
+                      <Minimize2 className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={() => {
+                        document.exitFullscreen().catch(()=>{});
+                        setSelectedGame(null);
+                      }}
+                      className="p-2 bg-red-600 rounded-lg text-white"
+                    >
+                      <X className="w-4 h-4" />
                     </button>
                   </div>
-
-                  <div className="text-[9px] opacity-30 font-bold mt-2">GameMonetize Ads</div>
-                </div>
-
-                {/* Center Game View Frame */}
-                <div className="flex-1 flex flex-col bg-black relative min-h-[45vh] lg:h-full">
-                  {/* Quick helper toolbar if game gets stuck */}
-                  <div className="bg-slate-900 border-b border-slate-800 px-3 py-1.5 flex items-center justify-between text-[11px] text-slate-300 gap-2 shrink-0">
-                    <span className="flex items-center gap-1.5">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                      </span>
-                      <span>{locale === 'ar' ? 'هل اللعبة معلقة؟ أوقف مانع الإعلانات أو شغّلها هنا:' : 'Game stuck? Stop ad-blocker or play directly:'}</span>
-                    </span>
-                    <a 
-                      href={selectedGame.embedUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="px-2.5 py-1 rounded bg-amber-500 text-slate-950 font-extrabold hover:bg-amber-600 transition-all flex items-center gap-1 active:scale-95 text-[10px] shadow-md shadow-amber-500/10 whitespace-nowrap"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                      <span>{locale === 'ar' ? 'تشغيل خارجي سريع 🚀' : 'Quick External Play 🚀'}</span>
-                    </a>
-                  </div>
-
-                  {isIframeLoading && (
-                    <div className="absolute inset-0 bg-[#090d16] flex flex-col items-center justify-center z-10 p-4 text-center">
-                      <div className="w-12 h-12 rounded-full border-2 border-slate-800 border-t-amber-500 animate-spin mb-4"></div>
-                      <h4 className="text-sm font-bold text-white">{locale === 'ar' ? 'تحميل اللعبة...' : 'Loading Game...'}</h4>
-                      <p className="text-[11px] text-slate-400 mt-1 max-w-xs">{selectedGame.title[locale]}</p>
-                    </div>
-                  )}
-
-                  <iframe 
-                    src={selectedGame.embedUrl} 
-                    title={selectedGame.title[locale]}
-                    className="w-full h-full border-0 bg-black flex-1"
-                    allow="autoplay; gamepad; fullscreen; keyboard; accelerometer; gyroscope; picture-in-picture; web-share"
-                    onLoad={() => setIsIframeLoading(false)}
-                  />
-
-                  {/* Mobile Horizontal Bottom Ad Banner */}
-                  <div className="lg:hidden w-full bg-[#0f172a] border-t border-slate-800/60 py-2 px-3 flex items-center justify-between shrink-0">
-                    <span className="text-[8px] tracking-wider uppercase opacity-40 font-bold">إعلان - AD</span>
-                    <div className="flex-1 text-center px-4">
-                      <p className="text-[10px] text-amber-400 font-bold animate-pulse">شريكنا الإعلاني: العب أفضل الألعاب المجانية دون تحميل!</p>
-                    </div>
-                    <span className="text-[8px] opacity-30 font-bold">GM</span>
-                  </div>
-
-                  {/* Floating controls inside Fullscreen */}
-                  {isFullscreen && (
-                    <div className={`absolute top-4 ${locale === 'ar' ? 'left-4' : 'right-4'} z-20 flex items-center gap-2 opacity-40 hover:opacity-100 transition-opacity`}>
-                      <button 
-                        onClick={toggleFullscreenMode}
-                        className="p-2 bg-black/80 backdrop-blur-md rounded-lg text-white"
-                      >
-                        <Minimize2 className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => {
-                          document.exitFullscreen().catch(()=>{});
-                          setSelectedGame(null);
-                        }}
-                        className="p-2 bg-red-600 rounded-lg text-white"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Right Side Ad & Info Column */}
-                <div className="w-full lg:w-72 border-t lg:border-t-0 border-slate-800/60 bg-[#0f172a] flex flex-col overflow-y-auto shrink-0 p-4 h-[35vh] lg:h-full">
-                  
-                  {/* Dynamic Right Sidebar Top Ad Unit */}
-                  <div className="bg-slate-900/50 rounded-xl border border-slate-800/40 p-3.5 mb-4 flex flex-col space-y-3.5 shrink-0">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[8px] tracking-wider uppercase opacity-40 font-bold">إعلان تجاري - Sponsor</span>
-                      <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded-md font-bold">نشط - Active</span>
-                    </div>
-                    <div className="space-y-1.5 text-center">
-                      <h4 className="text-xs font-bold text-white">العاب ماهر وموقع بوكي مجاناً</h4>
-                      <p className="text-[10px] text-slate-400 leading-normal">هل تحب ألعاب الموبايل السريعة؟ جرب منصتنا السحابية لألعاب ممتعة مئة بالمئة!</p>
-                    </div>
-                    <div className="h-[1px] bg-slate-800/60" />
-                    <p className="text-[9px] text-slate-500 text-center">قد يعجبك أيضاً ألعاب السيارات وسباق النيون</p>
-                  </div>
-
-                  {/* Instructions and Controls */}
-                  <div className="p-3.5 rounded-xl bg-slate-900/30 border border-slate-800/40 text-[11px] leading-relaxed space-y-2 mt-auto shrink-0">
-                    <div className="flex items-center gap-1 text-amber-500 font-bold">
-                      <Info className="w-3.5 h-3.5" />
-                      <span>{t.howToPlay}:</span>
-                    </div>
-                    <p className="text-slate-300">{selectedGame.controls[locale]}</p>
-                  </div>
-
-                </div>
-
+                )}
               </div>
-            ) : (
-              <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+
+              {/* Right Side Sidebar (Clean recommendations & controllers guide) */}
+              <div className={`w-full md:w-72 border-t md:border-t-0 ${
+                locale === 'ar' ? 'md:border-r' : 'md:border-l'
+              } ${isDarkMode ? 'bg-[#0f172a] border-slate-800/60' : 'bg-[#f8fafc] border-slate-200'} flex flex-col overflow-y-auto shrink-0 p-4 h-[35vh] md:h-full`}>
                 
-                {/* Left IFrame game canvas */}
-                <div ref={iframeContainerRef} className="flex-1 bg-black relative flex flex-col h-[50vh] md:h-full">
-                  {/* Quick helper toolbar if game gets stuck */}
-                  <div className="bg-slate-900 border-b border-slate-800 px-3 py-1.5 flex items-center justify-between text-[11px] text-slate-300 gap-2 shrink-0">
-                    <span className="flex items-center gap-1.5">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                      </span>
-                      <span>{locale === 'ar' ? 'هل اللعبة معلقة؟ أوقف مانع الإعلانات أو شغّلها هنا:' : 'Game stuck? Stop ad-blocker or play directly:'}</span>
-                    </span>
-                    <a 
-                      href={selectedGame.embedUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="px-2.5 py-1 rounded bg-amber-500 text-slate-950 font-extrabold hover:bg-amber-600 transition-all flex items-center gap-1 active:scale-95 text-[10px] shadow-md shadow-amber-500/10 whitespace-nowrap"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                      <span>{locale === 'ar' ? 'تشغيل خارجي سريع 🚀' : 'Quick External Play 🚀'}</span>
-                    </a>
-                  </div>
+                <div className="flex items-center gap-1.5 mb-3">
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  <h3 className="text-xs font-bold tracking-wide uppercase">{t.moreGames}</h3>
+                </div>
 
-                  {isIframeLoading && (
-                    <div className="absolute inset-0 bg-[#090d16] flex flex-col items-center justify-center z-10 p-4 text-center">
-                      <div className="w-12 h-12 rounded-full border-2 border-slate-800 border-t-amber-500 animate-spin mb-4"></div>
-                      <h4 className="text-sm font-bold text-white">تحميل اللعبة الكلاسيكية...</h4>
-                      <p className="text-[11px] text-slate-400 mt-1 max-w-xs">
-                        {selectedGame.title[locale]}
-                      </p>
-                    </div>
-                  )}
-
-                  <iframe 
-                    src={selectedGame.embedUrl} 
-                    title={selectedGame.title[locale]}
-                    className="w-full h-full border-0 bg-black flex-1"
-                    allow="autoplay; gamepad; fullscreen; keyboard; accelerometer; gyroscope; picture-in-picture; web-share"
-                    onLoad={() => setIsIframeLoading(false)}
-                  />
-
-                  {/* Floating controls inside Fullscreen */}
-                  {isFullscreen && (
-                    <div className={`absolute top-4 ${locale === 'ar' ? 'left-4' : 'right-4'} z-20 flex items-center gap-2 opacity-40 hover:opacity-100 transition-opacity`}>
-                      <button 
-                        onClick={toggleFullscreenMode}
-                        className="p-2 bg-black/80 backdrop-blur-md rounded-lg text-white"
-                      >
-                        <Minimize2 className="w-4 h-4" />
-                      </button>
-                      <button 
+                <div className="space-y-2">
+                  {GAME_DATABASE_LOCALIZED
+                    .filter((g) => g.id !== selectedGame.id)
+                    .slice(0, 4)
+                    .map((recGame) => (
+                      <div 
+                        key={recGame.id}
                         onClick={() => {
-                          document.exitFullscreen().catch(()=>{});
-                          setSelectedGame(null);
+                          setSelectedGame(recGame);
+                          setIsIframeLoading(true);
                         }}
-                        className="p-2 bg-red-600 rounded-lg text-white"
+                        className={`flex items-center gap-3 p-2 rounded-xl border transition-all cursor-pointer hover:scale-[1.01] ${
+                          isDarkMode 
+                            ? 'bg-[#131b2e] border-slate-800/40 hover:border-amber-500/20 hover:bg-[#18223c]' 
+                            : 'bg-white border-slate-200/60 hover:bg-slate-50'
+                        }`}
                       >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Right Side Sidebar (Clean recommendations & controllers guide) */}
-                <div className={`w-full md:w-72 border-t md:border-t-0 ${
-                  locale === 'ar' ? 'md:border-r' : 'md:border-l'
-                } ${isDarkMode ? 'bg-[#0f172a] border-slate-800/60' : 'bg-[#f8fafc] border-slate-200'} flex flex-col overflow-y-auto shrink-0 p-4 h-[35vh] md:h-full`}>
-                  
-                  <div className="flex items-center gap-1.5 mb-3">
-                    <Sparkles className="w-4 h-4 text-amber-500" />
-                    <h3 className="text-xs font-bold tracking-wide uppercase">{t.moreGames}</h3>
-                  </div>
-
-                  <div className="space-y-2">
-                    {GAME_DATABASE_LOCALIZED
-                      .filter((g) => g.id !== selectedGame.id)
-                      .slice(0, 4)
-                      .map((recGame) => (
-                        <div 
-                          key={recGame.id}
-                          onClick={() => {
-                            setSelectedGame(recGame);
-                            setIsIframeLoading(true);
-                          }}
-                          className={`flex items-center gap-3 p-2 rounded-xl border transition-all cursor-pointer hover:scale-[1.01] ${
-                            isDarkMode 
-                              ? 'bg-[#131b2e] border-slate-800/40 hover:border-amber-500/20 hover:bg-[#18223c]' 
-                              : 'bg-white border-slate-200/60 hover:bg-slate-50'
-                          }`}
-                        >
-                          <img 
-                            src={recGame.thumbnailUrl} 
-                            alt={recGame.title[locale]} 
-                            className="w-10 h-10 rounded-lg object-cover shrink-0"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-bold text-xs truncate">{recGame.title[locale]}</h4>
-                            <span className={`text-[9px] font-bold ${
-                              isDarkMode ? 'text-slate-400' : 'text-slate-600'
-                            }`}>{recGame.category}</span>
-                          </div>
-                          <Play className="w-3 h-3 text-amber-500 opacity-85" />
+                        <img 
+                          src={recGame.thumbnailUrl} 
+                          alt={recGame.title[locale]} 
+                          className="w-10 h-10 rounded-lg object-cover shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-xs truncate">{recGame.title[locale]}</h4>
+                          <span className={`text-[9px] font-bold ${
+                            isDarkMode ? 'text-slate-400' : 'text-slate-600'
+                          }`}>{recGame.category}</span>
                         </div>
-                      ))}
-                  </div>
-
-                  {/* Instructions Drawer */}
-                  <div className={`mt-4 p-3.5 rounded-xl border text-[11px] leading-relaxed space-y-2 mt-auto shrink-0 ${
-                    isDarkMode ? 'bg-[#131b2e] border-slate-800/40 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-600'
-                  }`}>
-                    <div className="flex items-center gap-1 text-amber-500 font-bold">
-                      <Info className="w-3.5 h-3.5" />
-                      <span>{t.howToPlay}:</span>
-                    </div>
-                    <p>{selectedGame.controls[locale]}</p>
-                  </div>
+                        <Play className="w-3 h-3 text-amber-500 opacity-85" />
+                      </div>
+                    ))}
                 </div>
 
+                {/* Instructions Drawer */}
+                <div className={`mt-4 p-3.5 rounded-xl border text-[11px] leading-relaxed space-y-2 mt-auto shrink-0 ${
+                  isDarkMode ? 'bg-[#131b2e] border-slate-800/40 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-600'
+                }`}>
+                  <div className="flex items-center gap-1 text-amber-500 font-bold">
+                    <Info className="w-3.5 h-3.5" />
+                    <span>{t.howToPlay}:</span>
+                  </div>
+                  <p>{selectedGame.controls[locale]}</p>
+                </div>
               </div>
-            )}
+
+            </div>
 
             {/* Bottom Panel bar */}
             <div className="hidden sm:block px-5 py-4 bg-[#0f172a] border-t border-slate-800/60 shrink-0">
