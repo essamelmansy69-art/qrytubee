@@ -6,6 +6,82 @@ import compression from "compression";
 
 const PORT = 3000;
 
+// A collection of popular, high-quality, fully-working games to fallback to if feed servers are completely down
+const FALLBACK_ONLINE_GAMES = [
+  {
+    id: "84899",
+    title: "RACE: Rocket Arena Car Extreme",
+    description: "Explosive 3D survival racing game set in a post-apocalyptic world. Upgrade powerful combat cars, fire weapons, use shields and nitro.",
+    instructions: "Arrow Up / W - Nitro, Arrow Down / S - Brake, Arrow Left / A - Move left, Arrow Right / D - Move right, Space - Rockets, Q - Superpower, E - Shield.",
+    thumb: "https://img.gamemonetize.com/76oe5vr125yw3oc362159k0wyny5gthh/512x384.jpg",
+    url: "https://html5.gamemonetize.co/76oe5vr125yw3oc362159k0wyny5gthh/",
+    category: "Racing"
+  },
+  {
+    id: "85536",
+    title: "Jigsaw: Pusha Pusha",
+    description: "Time to push! Use the arrow keys to walk and push the crates. Your goal is to place each crate onto an altar.",
+    instructions: "W, A, S, D or Arrow Keys.",
+    thumb: "https://img.gamemonetize.com/1b081qlbwkb2ijnbt2y6cue43smw70ao/512x384.jpg",
+    url: "https://html5.gamemonetize.co/1b081qlbwkb2ijnbt2y6cue43smw70ao/",
+    category: "Puzzle"
+  },
+  {
+    id: "7szooxdfm3kpxidj3qdf58x822jbe3a8",
+    title: "Moto X3M Pool Party",
+    description: "Moto X3M is back and in this sequel you'll definitely get wet! Try to beat more beautiful summer-themed levels.",
+    instructions: "W, A, S, D or Arrow Keys to balance and accelerate.",
+    thumb: "https://img.gamemonetize.com/7szooxdfm3kpxidj3qdf58x822jbe3a8/512x384.jpg",
+    url: "https://html5.gamemonetize.co/7szooxdfm3kpxidj3qdf58x822jbe3a8/",
+    category: "Racing"
+  },
+  {
+    id: "dskby4snoiv0on0oig8gqf9h08itidp0",
+    title: "Zuma Legend",
+    description: " Zuma Legend is an exciting marble shooter puzzle game! Match colors and blast all the marbles before they reach the hole.",
+    instructions: "Mouse / Touch to target and shoot marbles.",
+    thumb: "https://img.gamemonetize.com/dskby4snoiv0on0oig8gqf9h08itidp0/512x384.jpg",
+    url: "https://html5.gamemonetize.co/dskby4snoiv0on0oig8gqf9h08itidp0/",
+    category: "Puzzle"
+  },
+  {
+    id: "7uio1skk2b9v5m468m9yhycoofv7f9sk",
+    title: "Sudoku Classic Master",
+    description: "Play classic Sudoku online with elegant modern UI, multiple difficulty settings, and helpful tools.",
+    instructions: "Select cells and input numbers 1-9 to complete the grid.",
+    thumb: "https://img.gamemonetize.com/7uio1skk2b9v5m468m9yhycoofv7f9sk/512x384.jpg",
+    url: "https://html5.gamemonetize.co/7uio1skk2b9v5m468m9yhycoofv7f9sk/",
+    category: "Puzzle"
+  },
+  {
+    id: "f49bofwz4p6bbyk5it72v8w6n3h39y80",
+    title: "Bubble Shooter Pro",
+    description: "Shoot and burst bubbles in this addictive bubble shooter classic! Enjoy hours of matching puzzle gameplay.",
+    instructions: "Mouse / Touch to aim and shoot bubbles.",
+    thumb: "https://img.gamemonetize.com/f49bofwz4p6bbyk5it72v8w6n3h39y80/512x384.jpg",
+    url: "https://html5.gamemonetize.co/f49bofwz4p6bbyk5it72v8w6n3h39y80/",
+    category: "Arcade"
+  },
+  {
+    id: "88931",
+    title: "Subway Surfers Monaco",
+    description: "Help Jake, Tricky & Fresh escape from the grumpy Inspector and his dog in the glamorous city of Monaco!",
+    instructions: "Left/Right arrow keys to steer, Up arrow to jump, Down arrow to slide, Space to use Hoverboard.",
+    thumb: "https://img.gamemonetize.com/e2g1o6sh1bykwpy623ocbbyk5it72v8w/512x384.jpg",
+    url: "https://html5.gamemonetize.co/e2g1o6sh1bykwpy623ocbbyk5it72v8w/",
+    category: "Action"
+  },
+  {
+    id: "89112",
+    title: "Temple Run Tomb",
+    description: "Run, slide, jump, and escape the scary temple monsters in this infinite runner game!",
+    instructions: "Arrow keys or W,A,S,D to steer, jump, and slide.",
+    thumb: "https://img.gamemonetize.com/w8m468m9yhycoofv7f9sk7uio1skk2b9v/512x384.jpg",
+    url: "https://html5.gamemonetize.co/w8m468m9yhycoofv7f9sk7uio1skk2b9v/",
+    category: "Action"
+  }
+];
+
 async function startServer() {
   const app = express();
   app.use(compression());
@@ -88,82 +164,6 @@ async function startServer() {
     if (feedCache[cacheKey] && (now - feedCache[cacheKey].timestamp < CACHE_TTL)) {
       return res.json(feedCache[cacheKey].data);
     }
-
-    // A collection of popular, high-quality, fully-working games to fallback to if feed servers are completely down
-    const FALLBACK_ONLINE_GAMES = [
-      {
-        id: "84899",
-        title: "RACE: Rocket Arena Car Extreme",
-        description: "Explosive 3D survival racing game set in a post-apocalyptic world. Upgrade powerful combat cars, fire weapons, use shields and nitro.",
-        instructions: "Arrow Up / W - Nitro, Arrow Down / S - Brake, Arrow Left / A - Move left, Arrow Right / D - Move right, Space - Rockets, Q - Superpower, E - Shield.",
-        thumb: "https://img.gamemonetize.com/76oe5vr125yw3oc362159k0wyny5gthh/512x384.jpg",
-        url: "https://html5.gamemonetize.co/76oe5vr125yw3oc362159k0wyny5gthh/",
-        category: "Racing"
-      },
-      {
-        id: "85536",
-        title: "Jigsaw: Pusha Pusha",
-        description: "Time to push! Use the arrow keys to walk and push the crates. Your goal is to place each crate onto an altar.",
-        instructions: "W, A, S, D or Arrow Keys.",
-        thumb: "https://img.gamemonetize.com/1b081qlbwkb2ijnbt2y6cue43smw70ao/512x384.jpg",
-        url: "https://html5.gamemonetize.co/1b081qlbwkb2ijnbt2y6cue43smw70ao/",
-        category: "Puzzle"
-      },
-      {
-        id: "7szooxdfm3kpxidj3qdf58x822jbe3a8",
-        title: "Moto X3M Pool Party",
-        description: "Moto X3M is back and in this sequel you'll definitely get wet! Try to beat more beautiful summer-themed levels.",
-        instructions: "W, A, S, D or Arrow Keys to balance and accelerate.",
-        thumb: "https://img.gamemonetize.com/7szooxdfm3kpxidj3qdf58x822jbe3a8/512x384.jpg",
-        url: "https://html5.gamemonetize.co/7szooxdfm3kpxidj3qdf58x822jbe3a8/",
-        category: "Racing"
-      },
-      {
-        id: "dskby4snoiv0on0oig8gqf9h08itidp0",
-        title: "Zuma Legend",
-        description: " Zuma Legend is an exciting marble shooter puzzle game! Match colors and blast all the marbles before they reach the hole.",
-        instructions: "Mouse / Touch to target and shoot marbles.",
-        thumb: "https://img.gamemonetize.com/dskby4snoiv0on0oig8gqf9h08itidp0/512x384.jpg",
-        url: "https://html5.gamemonetize.co/dskby4snoiv0on0oig8gqf9h08itidp0/",
-        category: "Puzzle"
-      },
-      {
-        id: "7uio1skk2b9v5m468m9yhycoofv7f9sk",
-        title: "Sudoku Classic Master",
-        description: "Play classic Sudoku online with elegant modern UI, multiple difficulty settings, and helpful tools.",
-        instructions: "Select cells and input numbers 1-9 to complete the grid.",
-        thumb: "https://img.gamemonetize.com/7uio1skk2b9v5m468m9yhycoofv7f9sk/512x384.jpg",
-        url: "https://html5.gamemonetize.co/7uio1skk2b9v5m468m9yhycoofv7f9sk/",
-        category: "Puzzle"
-      },
-      {
-        id: "f49bofwz4p6bbyk5it72v8w6n3h39y80",
-        title: "Bubble Shooter Pro",
-        description: "Shoot and burst bubbles in this addictive bubble shooter classic! Enjoy hours of matching puzzle gameplay.",
-        instructions: "Mouse / Touch to aim and shoot bubbles.",
-        thumb: "https://img.gamemonetize.com/f49bofwz4p6bbyk5it72v8w6n3h39y80/512x384.jpg",
-        url: "https://html5.gamemonetize.co/f49bofwz4p6bbyk5it72v8w6n3h39y80/",
-        category: "Arcade"
-      },
-      {
-        id: "88931",
-        title: "Subway Surfers Monaco",
-        description: "Help Jake, Tricky & Fresh escape from the grumpy Inspector and his dog in the glamorous city of Monaco!",
-        instructions: "Left/Right arrow keys to steer, Up arrow to jump, Down arrow to slide, Space to use Hoverboard.",
-        thumb: "https://img.gamemonetize.com/e2g1o6sh1bykwpy623ocbbyk5it72v8w/512x384.jpg",
-        url: "https://html5.gamemonetize.co/e2g1o6sh1bykwpy623ocbbyk5it72v8w/",
-        category: "Action"
-      },
-      {
-        id: "89112",
-        title: "Temple Run Tomb",
-        description: "Run, slide, jump, and escape the scary temple monsters in this infinite runner game!",
-        instructions: "Arrow keys or W,A,S,D to steer, jump, and slide.",
-        thumb: "https://img.gamemonetize.com/w8m468m9yhycoofv7f9sk7uio1skk2b9v/512x384.jpg",
-        url: "https://html5.gamemonetize.co/w8m468m9yhycoofv7f9sk7uio1skk2b9v/",
-        category: "Action"
-      }
-    ];
 
     const urls = [
       `https://gamemonetize.com/feed.php?format=0&num=${num}&page=${page}`,
@@ -274,6 +274,59 @@ async function startServer() {
     // Also cache the fallback so we don't spam requests when offline
     feedCache[cacheKey] = { data: { games: FALLBACK_ONLINE_GAMES }, timestamp: now };
     return res.json({ games: FALLBACK_ONLINE_GAMES });
+  });
+
+  // GamePix cache
+  const gamepixCache: { [key: string]: { data: any; timestamp: number } } = {};
+
+  // GamePix proxy endpoint - ultra reliable HTML5 games feed with 100% iframe compatibility
+  app.get("/api/gamepix-feed", async (req, res) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.setHeader("Cache-Control", "public, max-age=300");
+
+    const num = parseInt(req.query.num as string) || 40;
+    const offset = parseInt(req.query.offset as string) || 0;
+    const cacheKey = `${num}-${offset}`;
+    const now = Date.now();
+
+    if (gamepixCache[cacheKey] && (now - gamepixCache[cacheKey].timestamp < CACHE_TTL)) {
+      return res.json(gamepixCache[cacheKey].data);
+    }
+
+    try {
+      const response = await fetch(`https://games.gamepix.com/games?sid=1&limit=${num}&offset=${offset}&order=q`, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "Accept": "application/json"
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`GamePix feed returned status ${response.status}`);
+      }
+
+      const rawData = await response.json();
+      if (rawData && rawData.status === "success" && Array.isArray(rawData.data)) {
+        const games = rawData.data.map((item: any) => ({
+          id: String(item.id),
+          title: item.title || '',
+          description: item.description || '',
+          instructions: item.description || 'Use Touch or Mouse to play!',
+          thumb: item.thumbnailUrl || item.thumbnailUrl100 || '',
+          url: item.url || '',
+          category: item.category || 'Arcade'
+        }));
+
+        gamepixCache[cacheKey] = { data: { games }, timestamp: now };
+        return res.json({ games });
+      } else {
+        throw new Error("Invalid GamePix API response format");
+      }
+    } catch (err: any) {
+      console.warn("GamePix feed failed:", err.message);
+      return res.json({ games: FALLBACK_ONLINE_GAMES });
+    }
   });
 
   // Image proxy to bypass GameMonetize hotlink protection and speed up image loading using server-side fetching and browser caching
