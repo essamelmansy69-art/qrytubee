@@ -70,6 +70,10 @@ async function startServer() {
     res.status(502).json({ error: "Could not retrieve CSV from Google Sheets" });
   });
 
+  // Server-side cache for GameMonetize feed to make homepage load instantly
+  const feedCache: { [key: string]: { data: any; timestamp: number } } = {};
+  const CACHE_TTL = 10 * 60 * 1000; // 10 minutes cache
+
   // GameMonetize feed proxy & parser (with multi-domain retry and high-quality static fallback)
   app.get("/api/gamemonetize-feed", async (req, res) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
@@ -78,6 +82,12 @@ async function startServer() {
 
     const num = parseInt(req.query.num as string) || 40;
     const page = parseInt(req.query.page as string) || 1;
+
+    const cacheKey = `${num}-${page}`;
+    const now = Date.now();
+    if (feedCache[cacheKey] && (now - feedCache[cacheKey].timestamp < CACHE_TTL)) {
+      return res.json(feedCache[cacheKey].data);
+    }
 
     // A collection of popular, high-quality, fully-working games to fallback to if feed servers are completely down
     const FALLBACK_ONLINE_GAMES = [
@@ -221,6 +231,7 @@ async function startServer() {
             }
           }
           if (games.length > 0) {
+            feedCache[cacheKey] = { data: { games }, timestamp: now };
             return res.json({ games });
           }
         } else {
@@ -248,6 +259,7 @@ async function startServer() {
           });
 
           if (games.length > 0) {
+            feedCache[cacheKey] = { data: { games }, timestamp: now };
             return res.json({ games });
           }
         }
@@ -259,7 +271,42 @@ async function startServer() {
 
     // Elegant graceful degradation: fallback to cached popular games list so homepage NEVER crashes
     console.warn("All external GameMonetize feed fetches failed. Serving offline fallback games database to guarantee 100% uptime.");
+    // Also cache the fallback so we don't spam requests when offline
+    feedCache[cacheKey] = { data: { games: FALLBACK_ONLINE_GAMES }, timestamp: now };
     return res.json({ games: FALLBACK_ONLINE_GAMES });
+  });
+
+  // Image proxy to bypass GameMonetize hotlink protection and speed up image loading using server-side fetching and browser caching
+  app.get("/api/image-proxy", async (req, res) => {
+    const imageUrl = req.query.url as string;
+    if (!imageUrl) {
+      return res.status(400).send("No image URL provided");
+    }
+
+    try {
+      const response = await fetch(imageUrl, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "Referer": "https://gamemonetize.com/"
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch image: ${response.status}`);
+      }
+
+      const contentType = response.headers.get("content-type") || "image/jpeg";
+      res.setHeader("Content-Type", contentType);
+      // Cache in browser and CDN for 1 day
+      res.setHeader("Cache-Control", "public, max-age=86400, s-maxage=86400");
+
+      const arrayBuffer = await response.arrayBuffer();
+      res.send(Buffer.from(arrayBuffer));
+    } catch (error: any) {
+      console.error("Image proxy failed:", error.message);
+      // Failover: redirect to the original URL or a fallback placeholder
+      res.redirect(imageUrl);
+    }
   });
 
   // Dynamic robots.txt for Google SEO Indexing

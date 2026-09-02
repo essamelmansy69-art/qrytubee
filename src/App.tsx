@@ -1019,7 +1019,7 @@ export default function App() {
                           {/* Thumbnail */}
                           <div className="aspect-square relative overflow-hidden bg-slate-900">
                             <img 
-                              src={game.thumb} 
+                              src={`/api/image-proxy?url=${encodeURIComponent(game.thumb)}`} 
                               alt={game.title} 
                               loading="lazy"
                               referrerPolicy="no-referrer"
