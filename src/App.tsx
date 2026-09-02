@@ -361,44 +361,79 @@ export default function App() {
   const [games, setGames] = useState<any[]>(() => GAME_DATABASE_LOCALIZED);
   const [isLoadingGames, setIsLoadingGames] = useState<boolean>(false);
 
-  // Fetch dynamic games from proxy
+  // Fetch dynamic games from proxy, with direct client-side fallback if proxy is cached/unavailable
   useEffect(() => {
     let active = true;
     async function loadGames() {
       setIsLoadingGames(true);
-      try {
-        const res = await fetch('/api/games');
-        if (!res.ok) throw new Error('Failed to fetch from proxy');
-        const data = await res.json();
-        
-        if (active && Array.isArray(data)) {
-          const normalized = data.map((item: any) => ({
-            id: item.id,
-            category: item.category || 'Arcade',
-            thumbnailUrl: item.thumbnailUrl,
-            embedUrl: item.embedUrl,
-            title: {
-              ar: item.title,
-              en: item.title
-            },
-            description: {
-              ar: item.description,
-              en: item.description
-            },
-            controls: {
-              ar: item.controls || "Mouse and Keyboard controls",
-              en: item.controls || "Mouse and Keyboard controls"
-            }
-          }));
+      
+      // Define a general normalizer for any GameMonetize raw or proxied item
+      const normalizeItem = (item: any) => {
+        const gameId = String(item.id || `gm-${Math.random().toString(36).substring(2, 11)}`);
+        const gameTitle = String(item.title || "Untitled Game").trim();
+        const gameCategory = String(item.category || "Arcade").trim();
+        const gameThumb = String(item.thumb || item.thumbnailUrl || "").trim();
+        const gameUrl = String(item.url || item.embedUrl || "").trim();
+        const gameDesc = String(item.description || "").trim();
+        const gameControls = String(item.instructions || item.controls || "Mouse and Keyboard controls").trim();
 
-          setGames(prev => {
-            const existingIds = prev.map(g => g.id);
-            const fresh = normalized.filter((g: any) => !existingIds.includes(g.id));
-            return [...prev, ...fresh];
-          });
+        return {
+          id: gameId,
+          category: gameCategory,
+          thumbnailUrl: gameThumb,
+          embedUrl: gameUrl,
+          title: {
+            ar: gameTitle,
+            en: gameTitle
+          },
+          description: {
+            ar: gameDesc,
+            en: gameDesc
+          },
+          controls: {
+            ar: gameControls,
+            en: gameControls
+          }
+        };
+      };
+
+      try {
+        // Try fetching through our secure backend proxy first
+        try {
+          const res = await fetch('/api/games');
+          if (res.ok) {
+            const data = await res.json();
+            if (active && Array.isArray(data)) {
+              const normalized = data.map(normalizeItem);
+              setGames(prev => {
+                const existingIds = prev.map(g => g.id);
+                const fresh = normalized.filter((g: any) => !existingIds.includes(g.id));
+                return [...prev, ...fresh];
+              });
+              return; // Successfully loaded from proxy
+            }
+          }
+          throw new Error('Proxy responded with non-ok status or empty body');
+        } catch (proxyError) {
+          console.warn('Backend proxy unavailable, falling back to direct client-side fetch:', proxyError);
+          
+          // Fallback: Fetch directly from GameMonetize (which has Access-Control-Allow-Origin: *)
+          const res = await fetch('https://gamemonetize.com/feed.php?format=0&num=50&page=1');
+          if (!res.ok) {
+            throw new Error(`Direct fetch failed: ${res.statusText}`);
+          }
+          const data = await res.json();
+          if (active && Array.isArray(data)) {
+            const normalized = data.map(normalizeItem);
+            setGames(prev => {
+              const existingIds = prev.map(g => g.id);
+              const fresh = normalized.filter((g: any) => !existingIds.includes(g.id));
+              return [...prev, ...fresh];
+            });
+          }
         }
       } catch (err) {
-        console.error('Error fetching dynamic games feed:', err);
+        console.error('Error fetching dynamic games feed through both paths:', err);
       } finally {
         if (active) setIsLoadingGames(false);
       }
