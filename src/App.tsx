@@ -1019,11 +1019,14 @@ export default function App() {
                           {/* Thumbnail */}
                           <div className="aspect-square relative overflow-hidden bg-slate-900">
                             <img 
-                              src={`/api/image-proxy?url=${encodeURIComponent(game.thumb)}`} 
+                              src={`https://images.weserv.nl/?url=${encodeURIComponent(game.thumb.trim())}`} 
                               alt={game.title} 
                               loading="lazy"
                               referrerPolicy="no-referrer"
                               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              onError={(e) => {
+                                e.currentTarget.src = game.thumb;
+                              }}
                             />
 
                             {/* Cover hover play state */}
