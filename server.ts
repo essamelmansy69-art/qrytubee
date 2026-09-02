@@ -70,6 +70,108 @@ async function startServer() {
     res.status(502).json({ error: "Could not retrieve CSV from Google Sheets" });
   });
 
+  // GameMonetize feed proxy & parser
+  app.get("/api/gamemonetize-feed", async (req, res) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.setHeader("Cache-Control", "public, max-age=300"); // Cache for 5 minutes
+
+    const num = parseInt(req.query.num as string) || 40;
+    const page = parseInt(req.query.page as string) || 1;
+
+    // Use format=1 as specified by the user
+    const url = `https://gamemonetize.com/feed.php?format=1&num=${num}&page=${page}`;
+
+    try {
+      const response = await fetch(url, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "Accept": "application/json,text/xml,application/xml,*/*"
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`GameMonetize returned status ${response.status}`);
+      }
+
+      const text = await response.text();
+      const cleanText = text.trim();
+
+      const hashCodeHelper = (str: string) => {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+          const char = str.charCodeAt(i);
+          hash = (hash << 5) - hash + char;
+          hash = hash & hash;
+        }
+        return Math.abs(hash).toString(36);
+      };
+
+      // Check if response is XML
+      if (cleanText.startsWith("<?xml") || cleanText.startsWith("<")) {
+        const games: any[] = [];
+        const itemRegex = /<(item|game)>([\s\S]*?)<\/\1>/g;
+        let match;
+        while ((match = itemRegex.exec(cleanText)) !== null) {
+          const itemContent = match[2];
+          const getTagValue = (tagName: string) => {
+            const tagRegex = new RegExp(`<${tagName}>\\s*(?:<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>|([\\s\\S]*?))\\s*</${tagName}>`, 'i');
+            const tagMatch = tagRegex.exec(itemContent);
+            if (tagMatch) {
+              return (tagMatch[1] || tagMatch[2] || '').trim();
+            }
+            return '';
+          };
+
+          const title = getTagValue('title');
+          games.push({
+            id: getTagValue('id') || getTagValue('game_id') || `gm-${hashCodeHelper(title)}`,
+            title: title,
+            description: getTagValue('description') || getTagValue('desc'),
+            instructions: getTagValue('instructions'),
+            thumb: getTagValue('thumb') || getTagValue('thumbnail') || getTagValue('image'),
+            url: getTagValue('url') || getTagValue('iframe') || getTagValue('code'),
+            category: getTagValue('category') || getTagValue('genre') || 'Arcade'
+          });
+        }
+        return res.json({ games });
+      } else {
+        // It is JSON format
+        try {
+          const data = JSON.parse(cleanText);
+          let gamesArray: any[] = [];
+          if (Array.isArray(data)) {
+            gamesArray = data;
+          } else if (data && typeof data === "object") {
+            gamesArray = data.games || data.items || [];
+          }
+
+          const games = gamesArray.map((item: any, idx: number) => {
+            const title = item.title || item.name || '';
+            const id = item.id || item.game_id || item.slug || `gm-${hashCodeHelper(title || String(idx))}`;
+            return {
+              id: String(id),
+              title: title,
+              description: item.description || item.desc || '',
+              instructions: item.instructions || item.instruction || '',
+              thumb: item.thumb || item.thumbnail || item.image || item.thumb_url || '',
+              url: item.url || item.iframe || item.code || '',
+              category: item.category || item.genre || 'Arcade'
+            };
+          });
+
+          return res.json({ games });
+        } catch (jsonErr: any) {
+          console.error("JSON parsing of GameMonetize feed failed:", jsonErr);
+          throw new Error("Failed to parse feed as JSON or XML");
+        }
+      }
+    } catch (error: any) {
+      console.error("Failed to fetch/parse GameMonetize feed:", error);
+      res.status(502).json({ error: "Failed to retrieve or parse GameMonetize feed", details: error.message });
+    }
+  });
+
   // Dynamic robots.txt for Google SEO Indexing
   app.get("/robots.txt", (req, res) => {
     const host = req.get("host") || "ai.studio/build";
