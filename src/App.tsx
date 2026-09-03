@@ -665,6 +665,18 @@ export default function App() {
         descStr = locale === 'ar'
           ? 'العب لعبة كاندي كراش (Candy Match 3) الكلاسيكية الممتعة مجاناً أون لاين وبدون تحميل! طابق قطع الحلوى، اصنع القنابل الملونة والحلوى المخططة المميزة لتحقيق أعلى النقاط.'
           : 'Play the classic Candy Crush Match 3 game online for free with no download! Match tasty sweet candies, create delicious color bomb and striped power-ups to smash the board.';
+      } else if (
+        selectedGame.id === 'game-going-up-rooftop' || 
+        selectedGame.id === 'going-up-rooftop' ||
+        (selectedGame.title && selectedGame.title.en && selectedGame.title.en.toLowerCase().includes('going up rooftop')) ||
+        (selectedGame.title && selectedGame.title.ar && selectedGame.title.ar.toLowerCase().includes('going up rooftop'))
+      ) {
+        titleStr = locale === 'ar'
+          ? 'لعبة Going Up Rooftop اون لاين - العب أركيد كلاسيك مجاناً'
+          : 'Going Up Rooftop Game Online - Play Free Classic Arcade | Atari';
+        descStr = locale === 'ar'
+          ? 'العب لعبة Going Up Rooftop اون لاين الكلاسيكية مجاناً وبدون تحميل! تسلق أسطح المنازل والمباني العالية، تجنب العقبات الخطيرة، وحقق أعلى النقاط في هذه اللعبة الحماسية الشيقة (going up rooftop game online).'
+          : 'Play the exciting going up rooftop game online for free with no download! Climb rooftop heights, dodge challenging obstacles, and reach the top in this thrilling classic retro arcade game.';
       } else {
         titleStr = locale === 'ar'
           ? `${selectedGame.title.ar} - العب الآن | أتاري`
