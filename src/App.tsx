@@ -587,6 +587,40 @@ export default function App() {
     };
   }, []);
 
+  // Back button (popstate) and Keyboard Escape support to close active game modal gracefully on mobile/desktop
+  useEffect(() => {
+    if (!selectedGame) return;
+
+    const stateKey = 'game_playroom_active';
+    // Push temporary state so that physical or browser back gestures trigger popstate instead of leaving the site
+    window.history.pushState({ modalActive: stateKey }, '');
+
+    const handlePopState = (e: PopStateEvent) => {
+      setSelectedGame(null);
+      setIsFullscreen(false);
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedGame(null);
+        setIsFullscreen(false);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('keydown', handleKeyDown);
+
+      // Clean up browser history stack if user clicked the Close "X" button manually
+      if (window.history.state && window.history.state.modalActive === stateKey) {
+        window.history.back();
+      }
+    };
+  }, [selectedGame]);
+
   // Dynamic SEO Metadata updater for Google indexing and social shares
   useEffect(() => {
     const metaDescription = document.querySelector('meta[name="description"]');
@@ -1067,12 +1101,14 @@ export default function App() {
                   <Heart className={`w-3.5 h-3.5 ${favorites.includes(selectedGame.id) ? 'fill-current' : ''}`} />
                 </button>
 
-                {/* Close modal option */}
+                {/* Close modal option - High contrast easily tappable bilingual button */}
                 <button 
                   onClick={() => setSelectedGame(null)}
-                  className="p-2 bg-red-950/40 border border-red-900/30 rounded-lg text-red-400 hover:bg-red-950/60 transition-all cursor-pointer"
+                  className="flex items-center gap-1 px-3 py-2 bg-red-500/15 hover:bg-red-500/25 active:scale-95 border border-red-500/45 rounded-lg text-red-400 hover:text-red-300 transition-all cursor-pointer font-bold text-xs shadow-lg shadow-red-500/5 min-h-[38px]"
+                  title={locale === 'ar' ? 'خروج من اللعبة' : 'Exit Game'}
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-4 h-4 text-red-400 shrink-0" />
+                  <span>{locale === 'ar' ? 'خروج' : 'Exit'}</span>
                 </button>
               </div>
             </div>
