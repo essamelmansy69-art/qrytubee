@@ -403,18 +403,22 @@ export default function App() {
         try {
           const res = await fetch('/api/games');
           if (res.ok) {
-            const data = await res.json();
-            if (active && Array.isArray(data)) {
-              const normalized = data.map(normalizeItem);
-              setGames(prev => {
-                const existingIds = prev.map(g => g.id);
-                const fresh = normalized.filter((g: any) => !existingIds.includes(g.id));
-                return [...prev, ...fresh];
-              });
-              return; // Successfully loaded from proxy
+            const contentType = res.headers.get('content-type');
+            const text = await res.text();
+            if (text.trim().startsWith('[')) {
+              const data = JSON.parse(text);
+              if (active && Array.isArray(data)) {
+                const normalized = data.map(normalizeItem);
+                setGames(prev => {
+                  const existingIds = prev.map(g => g.id);
+                  const fresh = normalized.filter((g: any) => !existingIds.includes(g.id));
+                  return [...prev, ...fresh];
+                });
+                return; // Successfully loaded from proxy
+              }
             }
           }
-          throw new Error('Proxy responded with non-ok status or empty body');
+          throw new Error('Proxy responded with non-JSON or invalid format');
         } catch (proxyError) {
           console.warn('Backend proxy unavailable, falling back to direct client-side fetch:', proxyError);
           
@@ -423,7 +427,11 @@ export default function App() {
           if (!res.ok) {
             throw new Error(`Direct fetch failed: ${res.statusText}`);
           }
-          const data = await res.json();
+          const text = await res.text();
+          if (!text.trim().startsWith('[')) {
+            throw new Error('Received non-JSON content from direct GameMonetize feed (probably HTML / CORS block / Adblocker)');
+          }
+          const data = JSON.parse(text);
           if (active && Array.isArray(data)) {
             const normalized = data.map(normalizeItem);
             setGames(prev => {
@@ -434,7 +442,7 @@ export default function App() {
           }
         }
       } catch (err) {
-        console.error('Error fetching dynamic games feed through both paths:', err);
+        console.warn('Error fetching dynamic games feed through both paths (using local fallback database):', err);
       } finally {
         if (active) setIsLoadingGames(false);
       }

@@ -35,7 +35,12 @@ async function startServer() {
         throw new Error(`Failed to fetch GameMonetize feed: ${response.statusText}`);
       }
 
-      const data = await response.json();
+      const text = await response.text();
+      if (!text.trim().startsWith("[")) {
+        throw new Error("Received non-JSON content from GameMonetize feed (probably HTML / Cloudflare block page)");
+      }
+
+      const data = JSON.parse(text);
       
       if (!Array.isArray(data)) {
         throw new Error("Invalid response format from GameMonetize feed (expected an array)");
