@@ -356,6 +356,7 @@ export default function App() {
   // Search & Category Filtering
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeCategory, setActiveCategory] = useState<string>('All');
+  const [isUrlLoaded, setIsUrlLoaded] = useState<boolean>(false);
 
   // Dynamic Game State loaded from local database + GameMonetize Feed
   const [games, setGames] = useState<any[]>(() => GAME_DATABASE_LOCALIZED);
@@ -533,18 +534,20 @@ export default function App() {
     localStorage.setItem('atari_favorites', JSON.stringify(favorites));
   }, [favorites]);
 
-  // Load game from URL search parameters on startup or once games load
+  // Load game from URL search parameters only on startup once games load
   useEffect(() => {
+    if (isUrlLoaded || games.length === 0) return;
     const params = new URLSearchParams(window.location.search);
     const gameId = params.get('game');
-    if (gameId && !selectedGame) {
+    if (gameId) {
       const game = games.find(g => g.id === gameId);
       if (game) {
         setSelectedGame(game);
         setIsIframeLoading(true);
       }
     }
-  }, [games, selectedGame]);
+    setIsUrlLoaded(true);
+  }, [games, isUrlLoaded]);
 
   // Set an automatic safety fallback timer to dismiss the loading screen
   useEffect(() => {
