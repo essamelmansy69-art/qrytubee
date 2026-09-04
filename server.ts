@@ -16,11 +16,16 @@ async function startServer() {
     res.json({ status: "ok" });
   });
 
-  // Get GameMonetize Games Feed (Proxy)
-  app.get("/api/games", async (req, res) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-    res.setHeader("Cache-Control", "public, max-age=3600"); // Cache for 1 hour
+  // Global cache for GameMonetize games to be shared by both /api/games and /sitemap.xml
+  let cachedGameMonetizeGames: any[] = [];
+  let cacheTime = 0;
+  const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
+
+  async function getGameMonetizeGames() {
+    const now = Date.now();
+    if (cachedGameMonetizeGames.length > 0 && (now - cacheTime < CACHE_DURATION)) {
+      return cachedGameMonetizeGames;
+    }
 
     try {
       const feedUrl = "https://gamemonetize.com/feed.php?format=0&num=50&page=1";
@@ -31,35 +36,41 @@ async function startServer() {
         }
       });
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch GameMonetize feed: ${response.statusText}`);
+      if (response.ok) {
+        const text = await response.text();
+        if (text.trim().startsWith("[")) {
+          const data = JSON.parse(text);
+          if (Array.isArray(data)) {
+            cachedGameMonetizeGames = data.map((item: any) => ({
+              id: String(item.id || "").trim(),
+              title: String(item.title || "Untitled Game").trim(),
+              category: String(item.category || "Arcade").trim(),
+              thumbnailUrl: String(item.thumb || "").trim(),
+              embedUrl: String(item.url || "").trim(),
+              description: String(item.description || "").trim(),
+              controls: String(item.instructions || "Mouse and Keyboard controls").trim()
+            })).filter((g: any) => g.id);
+            cacheTime = now;
+          }
+        }
       }
+    } catch (error) {
+      console.error("Error fetching/parsing GameMonetize feed:", error);
+    }
+    return cachedGameMonetizeGames;
+  }
 
-      const text = await response.text();
-      if (!text.trim().startsWith("[")) {
-        throw new Error("Received non-JSON content from GameMonetize feed (probably HTML / Cloudflare block page)");
-      }
+  // Get GameMonetize Games Feed (Proxy)
+  app.get("/api/games", async (req, res) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.setHeader("Cache-Control", "public, max-age=3600"); // Cache for 1 hour
 
-      const data = JSON.parse(text);
-      
-      if (!Array.isArray(data)) {
-        throw new Error("Invalid response format from GameMonetize feed (expected an array)");
-      }
-
-      // Map GameMonetize items to our standard Game interface
-      const mappedGames = data.map((item: any) => ({
-        id: String(item.id || `gm-${Math.random().toString(36).substring(2, 11)}`),
-        title: String(item.title || "Untitled Game").trim(),
-        category: String(item.category || "Arcade").trim(),
-        thumbnailUrl: String(item.thumb || "").trim(),
-        embedUrl: String(item.url || "").trim(),
-        description: String(item.description || "").trim(),
-        controls: String(item.instructions || "Mouse and Keyboard controls").trim()
-      }));
-
-      res.json(mappedGames);
+    try {
+      const gamesList = await getGameMonetizeGames();
+      res.json(gamesList);
     } catch (error: any) {
-      console.error("Error fetching games from GameMonetize:", error);
+      console.error("Error in /api/games endpoint:", error);
       res.status(500).json({ error: "Failed to fetch games from provider", details: error.message });
     }
   });
@@ -135,7 +146,7 @@ Sitemap: ${baseUrl}/sitemap.xml
   });
 
   // Dynamic XML Sitemap for Google SEO Indexing
-  app.get("/sitemap.xml", (req, res) => {
+  app.get("/sitemap.xml", async (req, res) => {
     const host = req.get("host") || "ai.studio/build";
     const protocol = req.secure || req.headers["x-forwarded-proto"] === "https" ? "https" : "http";
     const baseUrl = `${protocol}://${host}`;
@@ -144,7 +155,7 @@ Sitemap: ${baseUrl}/sitemap.xml
     let gameIds: string[] = ["game-cheese-eater", "game-tetris", "game-breakout", "game-candy-crush"];
     const gameDates: Record<string, string> = {};
     const languages = ["ar", "en"];
-    let latestDate = "2026-08-23";
+    let latestDate = "2026-09-03";
 
     try {
       const gamesDir = path.join(process.cwd(), "public", "games");
@@ -165,13 +176,26 @@ Sitemap: ${baseUrl}/sitemap.xml
                 latestDate = mtimeStr;
               }
             } catch (e) {
-              gameDates[id] = "2026-08-23";
+              gameDates[id] = "2026-09-03";
             }
           }
         });
       }
     } catch (err) {
       console.error("Error dynamically scanning games for sitemap:", err);
+    }
+
+    // Dynamic addition of imported GameMonetize games!
+    try {
+      const gmGames = await getGameMonetizeGames();
+      gmGames.forEach((g: any) => {
+        if (!gameIds.includes(g.id)) {
+          gameIds.push(g.id);
+          gameDates[g.id] = "2026-09-03"; // latest modified date for GameMonetize imports
+        }
+      });
+    } catch (e) {
+      console.error("Error adding GameMonetize games to sitemap:", e);
     }
 
     let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -197,7 +221,7 @@ Sitemap: ${baseUrl}/sitemap.xml
 
     // Add game links with language query parameters for separate SEO indexing
     gameIds.forEach((gameId) => {
-      const fileLastmod = gameDates[gameId] || "2026-08-23";
+      const fileLastmod = gameDates[gameId] || "2026-09-03";
       languages.forEach((lang) => {
         const gameUrlAr = `${baseUrl}/?game=${gameId}&amp;lang=ar`;
         const gameUrlEn = `${baseUrl}/?game=${gameId}&amp;lang=en`;
