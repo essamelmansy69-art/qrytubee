@@ -22,31 +22,45 @@ const LANGUAGES = ["ar", "en"];
 const BASE_URL = "https://qrytube.com";
 const LATEST_DATE = "2026-09-03";
 
-async function generate() {
-  console.log("Generating static sitemap.xml...");
-  let gameIds = [...LOCAL_GAMES];
-  
+async function fetchSitemapFeed(url) {
   try {
-    const response = await fetch("https://gamemonetize.com/feed.php?format=0&num=50&page=1");
+    const response = await fetch(url);
     if (response.ok) {
       const text = await response.text();
       if (text.trim().startsWith("[")) {
         const data = JSON.parse(text);
         if (Array.isArray(data)) {
-          data.forEach((item) => {
-            const id = String(item.id || "").trim();
-            if (id && !gameIds.includes(id)) {
-              gameIds.push(id);
-            }
-          });
-          console.log(`Fetched ${data.length} games from GameMonetize feed.`);
+          return data;
         }
-      } else {
-        console.warn("GameMonetize returned non-JSON content. Using local fallback database.");
       }
-    } else {
-      console.warn("Failed to fetch GameMonetize feed. Using local fallback database.");
     }
+  } catch (e) {
+    console.warn(`Error fetching feed ${url}:`, e);
+  }
+  return [];
+}
+
+async function generate() {
+  console.log("Generating static sitemap.xml...");
+  let gameIds = [...LOCAL_GAMES];
+  
+  try {
+    const feed1Url = "https://gamemonetize.com/feed.php?format=0&num=50&page=1";
+    const feed2Url = "https://gamemonetize.com/feed.php?format=0&num=20&page=1";
+    
+    const [data1, data2] = await Promise.all([
+      fetchSitemapFeed(feed1Url),
+      fetchSitemapFeed(feed2Url)
+    ]);
+
+    const combined = [...data1, ...data2];
+    combined.forEach((item) => {
+      const id = String(item.id || "").trim();
+      if (id && !gameIds.includes(id)) {
+        gameIds.push(id);
+      }
+    });
+    console.log(`Successfully merged feeds. Total unique game IDs for sitemap: ${gameIds.length}`);
   } catch (error) {
     console.warn("Error fetching GameMonetize games for sitemap, continuing with local games only:", error);
   }

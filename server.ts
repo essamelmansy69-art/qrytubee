@@ -21,6 +21,29 @@ async function startServer() {
   let cacheTime = 0;
   const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
 
+  async function fetchFeed(url: string) {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "Accept": "application/json"
+        }
+      });
+      if (response.ok) {
+        const text = await response.text();
+        if (text.trim().startsWith("[")) {
+          const data = JSON.parse(text);
+          if (Array.isArray(data)) {
+            return data;
+          }
+        }
+      }
+    } catch (e) {
+      console.error(`Error fetching feed from ${url}:`, e);
+    }
+    return [];
+  }
+
   async function getGameMonetizeGames() {
     const now = Date.now();
     if (cachedGameMonetizeGames.length > 0 && (now - cacheTime < CACHE_DURATION)) {
@@ -28,34 +51,40 @@ async function startServer() {
     }
 
     try {
-      const feedUrl = "https://gamemonetize.com/feed.php?format=0&num=50&page=1";
-      const response = await fetch(feedUrl, {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-          "Accept": "application/json"
-        }
-      });
+      const feed1Url = "https://gamemonetize.com/feed.php?format=0&num=50&page=1";
+      const feed2Url = "https://gamemonetize.com/feed.php?format=0&num=20&page=1";
+      
+      const [data1, data2] = await Promise.all([
+        fetchFeed(feed1Url),
+        fetchFeed(feed2Url)
+      ]);
 
-      if (response.ok) {
-        const text = await response.text();
-        if (text.trim().startsWith("[")) {
-          const data = JSON.parse(text);
-          if (Array.isArray(data)) {
-            cachedGameMonetizeGames = data.map((item: any) => ({
-              id: String(item.id || "").trim(),
-              title: String(item.title || "Untitled Game").trim(),
-              category: String(item.category || "Arcade").trim(),
-              thumbnailUrl: String(item.thumb || "").trim(),
-              embedUrl: String(item.url || "").trim(),
-              description: String(item.description || "").trim(),
-              controls: String(item.instructions || "Mouse and Keyboard controls").trim()
-            })).filter((g: any) => g.id);
-            cacheTime = now;
-          }
+      const combined = [...data1, ...data2];
+      const seen = new Set();
+      const uniqueGames: any[] = [];
+
+      for (const item of combined) {
+        const id = String(item.id || "").trim();
+        if (id && !seen.has(id)) {
+          seen.add(id);
+          uniqueGames.push({
+            id,
+            title: String(item.title || "Untitled Game").trim(),
+            category: String(item.category || "Arcade").trim(),
+            thumbnailUrl: String(item.thumb || "").trim(),
+            embedUrl: String(item.url || "").trim(),
+            description: String(item.description || "").trim(),
+            controls: String(item.instructions || "Mouse and Keyboard controls").trim()
+          });
         }
       }
+
+      if (uniqueGames.length > 0) {
+        cachedGameMonetizeGames = uniqueGames;
+        cacheTime = now;
+      }
     } catch (error) {
-      console.error("Error fetching/parsing GameMonetize feed:", error);
+      console.error("Error fetching/parsing GameMonetize feeds:", error);
     }
     return cachedGameMonetizeGames;
   }
