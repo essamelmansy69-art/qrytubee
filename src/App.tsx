@@ -36,6 +36,7 @@ import tripuzzleThumbnail from './assets/images/tripuzzle_thumbnail_178813322775
 import numberSearchThumbnail from './assets/images/number_search_thumbnail_1788145573502.jpg';
 import zumaThumbnail from './assets/images/zuma_thumbnail_1788190967005.jpg';
 import sudokuThumbnail from './assets/images/sudoku_thumbnail_1788237960483.jpg';
+import taxiRushThumbnail from './assets/images/taxi_rush_thumbnail_1788539643138.jpg';
 
 // Bilingual translations structure for premium localized design
 const TRANSLATIONS = {
@@ -323,8 +324,23 @@ const GAME_DATABASE_LOCALIZED = [
       en: 'Play the ultimate mini sudoku online game for free! Solve daily quick 6x6 grid puzzles directly in your browser. Perfect for a quick, brain-stimulating challenge anytime, anywhere.'
     },
     controls: {
-      ar: 'الماوس/الكيبورد: انقر فوق المربع الفارغ لاختياره ثم اضغط على الرقم المناسب من لوحة المفاتيح أو من الأرقام المعروضة بالشاشة. على الجوال: اضغط على المربع ثم حدد الرقم المطلوب لملء الشبكة.',
+      ar: 'لوحة المفاتيح والماوس: انقر فوق المربع الفارغ لاختياره ثم اضغط على الرقم المناسب من لوحة المفاتيح أو من الأرقام المعروضة بالشاشة. على الجوال: اضغط على المربع ثم حدد الرقم المطلوب لملء الشبكة.',
       en: 'Mouse/Keyboard: Click on any empty cell to select it, then press the desired number from your keyboard or screen keypad. Mobile/Touch: Tap on a cell and choose the correct number to fill.'
+    }
+  },
+  {
+    id: 'game-taxi-rush',
+    category: 'Racing' as const,
+    thumbnailUrl: taxiRushThumbnail,
+    embedUrl: '/games/taxi-rush.html',
+    title: { ar: 'لعبة تاكسي راش أون لاين مجاناً | crazy taxi city rush game', en: 'Taxi Rush Game Free Online | Play Crazy Taxi City Rush Game' },
+    description: {
+      ar: 'العب لعبة تاكسي راش (Taxi Rush) الممتعة والمثيرة مجاناً أون لاين! تحكّم بسيارة الأجرة السريعة في وسط المدينة المزدحم وتفادَ الحوادث في لعبة crazy taxi city rush game الأسطورية بدون تحميل.',
+      en: 'Play the exciting Taxi Rush game free online with no downloads! Drive your fast cab through heavy traffic and pick up passengers in this legendary crazy taxi city rush game.'
+    },
+    controls: {
+      ar: 'لوحة المفاتيح: استخدم أسهم الاتجاهات لليمين واليسار (◀ ▶) أو مفاتيح A / D للتوجيه والتحكم بالسيارة. على الجوال: استخدم الأزرار التفاعلية المريحة الظاهرة أسفل اللعبة للتوجيه يميناً ويساراً.',
+      en: 'Keyboard: Use Left/Right Arrow keys or A/D keys to steer your yellow cab. Mobile/Touch: Tap the left or right glowing button arrows on the screen to turn smoothly.'
     }
   }
 ];
@@ -685,6 +701,18 @@ export default function App() {
         descStr = locale === 'ar'
           ? 'العب لعبة Going Up Rooftop اون لاين الكلاسيكية مجاناً وبدون تحميل! تسلق أسطح المنازل والمباني العالية، تجنب العقبات الخطيرة، وحقق أعلى النقاط في هذه اللعبة الحماسية الشيقة (going up rooftop game online).'
           : 'Play the exciting going up rooftop game online for free with no download! Climb rooftop heights, dodge challenging obstacles, and reach the top in this thrilling classic retro arcade game.';
+      } else if (
+        selectedGame.id === 'game-taxi-rush' ||
+        selectedGame.id === 'taxi-rush' ||
+        (selectedGame.title && selectedGame.title.en && selectedGame.title.en.toLowerCase().includes('taxi')) ||
+        (selectedGame.title && selectedGame.title.ar && selectedGame.title.ar.toLowerCase().includes('تاكسي'))
+      ) {
+        titleStr = locale === 'ar'
+          ? 'لعبة تاكسي راش أون لاين مجاناً | crazy taxi city rush game'
+          : 'Taxi Rush Game Free Online | Play Crazy Taxi City Rush Game';
+        descStr = locale === 'ar'
+          ? 'العب لعبة تاكسي راش (Taxi Rush) الممتعة والمثيرة مجاناً أون لاين! تحكّم بسيارة الأجرة السريعة في وسط المدينة المزدحم وتفادَ الحوادث في لعبة crazy taxi city rush game الأسطورية بدون تحميل.'
+          : 'Play the exciting Taxi Rush game free online with no downloads! Drive your fast cab through heavy traffic and pick up passengers in this legendary crazy taxi city rush game.';
       } else {
         titleStr = locale === 'ar'
           ? `${selectedGame.title.ar} - العب الآن | أتاري`

@@ -14,7 +14,8 @@ const LOCAL_GAMES = [
   "game-number-search",
   "game-zuma-legend",
   "game-daily-mini-sudoku",
-  "game-going-up-rooftop"
+  "game-going-up-rooftop",
+  "game-taxi-rush"
 ];
 
 const LANGUAGES = ["ar", "en"];

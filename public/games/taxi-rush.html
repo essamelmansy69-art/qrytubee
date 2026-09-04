@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لعبة تاكسي راش أون لاين مجاناً | crazy taxi city rush game</title>
+  <meta name="description" content="العب لعبة تاكسي راش (Taxi Rush) الممتعة والمثيرة مجاناً أون لاين! تحكّم بسيارة الأجرة السريعة في وسط المدينة المزدحم وتفادَ الحوادث في لعبة crazy taxi city rush game الأسطورية بدون تحميل.">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #0B0F19;
+      color: #fff;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    #game-container {
+      position: relative;
+      width: 100%;
+      max-width: 450px;
+      height: 100vh;
+      max-height: 600px;
+      background: #111827;
+      border: 3px solid #FBBF24;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: #1F2937;
+    }
+    .hud {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      right: 15px;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+      font-family: monospace;
+      font-size: 18px;
+      font-weight: bold;
+      text-shadow: 2px 2px 0px #000;
+      z-index: 10;
+    }
+    .score-box {
+      color: #FBBF24;
+    }
+    .time-box {
+      color: #EF4444;
+    }
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(17, 24, 39, 0.85);
+      z-index: 20;
+      text-align: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .screen h1 {
+      color: #FBBF24;
+      font-size: 28px;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    .screen p {
+      font-size: 15px;
+      color: #D1D5DB;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .btn {
+      background: #FBBF24;
+      color: #000;
+      border: none;
+      padding: 12px 30px;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 9999px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(251, 191, 36, 0.3);
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      background: #F59E0B;
+      transform: scale(1.05);
+    }
+    .touch-controls {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      padding: 0 20px;
+      box-sizing: border-box;
+      z-index: 15;
+    }
+    .touch-btn {
+      width: 70px;
+      height: 70px;
+      background: rgba(251, 191, 36, 0.3);
+      border: 2px solid #FBBF24;
+      border-radius: 50%;
+      color: #FBBF24;
+      font-size: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      backdrop-filter: blur(4px);
+    }
+    .touch-btn:active {
+      background: rgba(251, 191, 36, 0.6);
+      transform: scale(0.9);
+    }
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="game-container">
+    <!-- HUD -->
+    <div class="hud">
+      <div class="score-box" id="score-val">النقاط: 0</div>
+      <div class="time-box" id="time-val">الوقت: 40</div>
+    </div>
+
+    <!-- Start Screen -->
+    <div class="screen" id="start-screen">
+      <h1>لعبة تاكسي راش</h1>
+      <p>مرحباً بك في crazy taxi city rush game! قد سيارتك الصفراء بجنون، تفادَ الحوادث، واجمع العملات والركاب في شوارع المدينة لزيادة الوقت والوصول للرقم القياسي.</p>
+      <button class="btn" id="start-btn">ابدأ اللعب الآن</button>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div class="screen hidden" id="game-over-screen">
+      <h1>انتهى الوقت!</h1>
+      <p id="final-score-text">النقاط التي أحرزتها: 0</p>
+      <p style="color: #10B981; font-weight: bold;" id="high-score-text">أعلى نقاط: 0</p>
+      <button class="btn" id="restart-btn">العب مرة أخرى</button>
+    </div>
+
+    <!-- Game Canvas -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Mobile Touch Controls -->
+    <div class="touch-controls" id="controls-ui">
+      <div class="touch-btn" id="btn-left">◀</div>
+      <div class="touch-btn" id="btn-right">▶</div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // Audio Setup using Web Audio API
+    let audioCtx = null;
+    function playSound(type) {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      if (type === 'pickup') {
+        // Collect coin beep
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+      } else if (type === 'crash') {
+        // Explode / Hit noise
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.3);
+      }
+    }
+
+    // Set Canvas Dimensions
+    function resizeCanvas() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    // Game Variables
+    let score = 0;
+    let timeRemaining = 40;
+    let gameOver = false;
+    let gameActive = false;
+    let gameInterval = null;
+
+    // Player Taxi
+    const player = {
+      x: 0,
+      y: 0,
+      width: 44,
+      height: 80,
+      speed: 6,
+      targetX: 0
+    };
+
+    // Obstacles, Coins & Passengers
+    let obstacles = [];
+    let items = [];
+    let scrollSpeed = 5;
+    let obstacleTimer = 0;
+    let itemTimer = 0;
+
+    // Road Properties
+    const lanes = 3;
+    function getLaneX(laneIndex) {
+      const laneWidth = canvas.width / lanes;
+      return laneIndex * laneWidth + laneWidth / 2;
+    }
+
+    // Input States
+    const keys = { Left: false, Right: false };
+
+    // Reset Game State
+    function resetGame() {
+      score = 0;
+      timeRemaining = 40;
+      gameOver = false;
+      obstacles = [];
+      items = [];
+      scrollSpeed = 5;
+      
+      player.x = getLaneX(1) - player.width / 2;
+      player.y = canvas.height - player.height - 110;
+      player.targetX = player.x;
+
+      document.getElementById("score-val").innerText = "النقاط: " + score;
+      document.getElementById("time-val").innerText = "الوقت: " + timeRemaining;
+    }
+
+    // Draw Dashed Highway lines
+    let roadOffset = 0;
+    function drawRoad() {
+      roadOffset += scrollSpeed;
+      if (roadOffset >= 40) roadOffset = 0;
+
+      ctx.fillStyle = "#374151"; // Asphalt grey
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Lanes dividers
+      ctx.strokeStyle = "#FBBF24";
+      ctx.lineWidth = 4;
+      ctx.setLineDash([20, 20]);
+      
+      for (let i = 1; i < lanes; i++) {
+        const x = (canvas.width / lanes) * i;
+        ctx.beginPath();
+        ctx.moveTo(x, -40 + roadOffset);
+        ctx.lineTo(x, canvas.height + 40);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+    }
+
+    // Draw Player Yellow Taxi Cab
+    function drawPlayer() {
+      // Draw shadow
+      ctx.fillStyle = "rgba(0,0,0,0.25)";
+      ctx.fillRect(player.x + 4, player.y + 4, player.width, player.height);
+
+      // Main Cab body
+      ctx.fillStyle = "#FBBF24"; // Bright taxi yellow
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+
+      // Windshield
+      ctx.fillStyle = "#1E293B";
+      ctx.fillRect(player.x + 4, player.y + 12, player.width - 8, 15);
+
+      // Rear glass
+      ctx.fillRect(player.x + 4, player.y + 55, player.width - 8, 10);
+
+      // Black tires
+      ctx.fillStyle = "#000";
+      ctx.fillRect(player.x - 3, player.y + 10, 3, 15);
+      ctx.fillRect(player.x + player.width, player.y + 10, 3, 15);
+      ctx.fillRect(player.x - 3, player.y + 55, 3, 15);
+      ctx.fillRect(player.x + player.width, player.y + 55, 3, 15);
+
+      // "TAXI" sign on top
+      ctx.fillStyle = "#000";
+      ctx.fillRect(player.x + 10, player.y + 34, player.width - 20, 8);
+      ctx.fillStyle = "#FFF";
+      ctx.font = "bold 7px sans-serif";
+      ctx.fillText("TAXI", player.x + 13, player.y + 41);
+
+      // Red tail lights
+      ctx.fillStyle = "#EF4444";
+      ctx.fillRect(player.x + 4, player.y + player.height - 4, 6, 4);
+      ctx.fillRect(player.x + player.width - 10, player.y + player.height - 4, 6, 4);
+    }
+
+    // Obstacle Construction
+    function spawnObstacle() {
+      const lane = Math.floor(Math.random() * lanes);
+      const width = 42;
+      const height = 75;
+      const colors = ["#EF4444", "#3B82F6", "#10B981", "#8B5CF6", "#EC4899"];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+
+      obstacles.push({
+        x: getLaneX(lane) - width / 2,
+        y: -100,
+        width,
+        height,
+        color,
+        speed: scrollSpeed - 1 - Math.random() * 2
+      });
+    }
+
+    // Spawn Passenger / Gold Coins
+    function spawnItem() {
+      const lane = Math.floor(Math.random() * lanes);
+      const isPassenger = Math.random() > 0.6; // 40% passenger, 60% coin
+      const size = 20;
+
+      items.push({
+        x: getLaneX(lane) - size / 2,
+        y: -100,
+        size,
+        isPassenger,
+        collected: false
+      });
+    }
+
+    // Game Loops
+    function update() {
+      if (gameOver) return;
+
+      // Handle Smooth Player Movement
+      if (keys.Left) {
+        player.x -= player.speed;
+        if (player.x < 10) player.x = 10;
+      }
+      if (keys.Right) {
+        player.x += player.speed;
+        if (player.x > canvas.width - player.width - 10) player.x = canvas.width - player.width - 10;
+      }
+
+      // Generate items & obstacles
+      obstacleTimer++;
+      if (obstacleTimer > 60) {
+        spawnObstacle();
+        obstacleTimer = 0;
+      }
+
+      itemTimer++;
+      if (itemTimer > 45) {
+        spawnItem();
+        itemTimer = 0;
+      }
+
+      // Move and check obstacles
+      for (let i = obstacles.length - 1; i >= 0; i--) {
+        const obs = obstacles[i];
+        obs.y += obs.speed;
+
+        // Collision Check
+        if (
+          player.x < obs.x + obs.width &&
+          player.x + player.width > obs.x &&
+          player.y < obs.y + obs.height &&
+          player.y + player.height > obs.y
+        ) {
+          playSound('crash');
+          obstacles.splice(i, 1);
+          score = Math.max(0, score - 15);
+          timeRemaining = Math.max(0, timeRemaining - 5);
+          document.getElementById("score-val").innerText = "النقاط: " + score;
+          document.getElementById("time-val").innerText = "الوقت: " + timeRemaining;
+          continue;
+        }
+
+        // Remove off-screen obstacles
+        if (obs.y > canvas.height) {
+          obstacles.splice(i, 1);
+        }
+      }
+
+      // Move and check items
+      for (let i = items.length - 1; i >= 0; i--) {
+        const item = items[i];
+        item.y += scrollSpeed;
+
+        // Collision Check
+        if (
+          player.x < item.x + item.size &&
+          player.x + player.width > item.x &&
+          player.y < item.y + item.size &&
+          player.y + player.height > item.y
+        ) {
+          playSound('pickup');
+          if (item.isPassenger) {
+            score += 30;
+            timeRemaining += 5; // Earn extra seconds
+          } else {
+            score += 10;
+            timeRemaining += 2;
+          }
+          document.getElementById("score-val").innerText = "النقاط: " + score;
+          document.getElementById("time-val").innerText = "الوقت: " + timeRemaining;
+          items.splice(i, 1);
+          continue;
+        }
+
+        // Remove off-screen items
+        if (item.y > canvas.height) {
+          items.splice(i, 1);
+        }
+      }
+
+      // Increase speed slightly with high scores
+      scrollSpeed = 5 + Math.floor(score / 200);
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawRoad();
+
+      // Draw items
+      items.forEach(item => {
+        if (item.isPassenger) {
+          // Green passenger circle
+          ctx.fillStyle = "#10B981";
+          ctx.beginPath();
+          ctx.arc(item.x + item.size/2, item.y + item.size/2, item.size/2 + 3, 0, Math.PI * 2);
+          ctx.fill();
+          
+          ctx.fillStyle = "#FFF";
+          ctx.font = "bold 10px sans-serif";
+          ctx.fillText("👤", item.x + 3, item.y + item.size/2 + 3);
+        } else {
+          // Golden Coin
+          ctx.fillStyle = "#FBBF24";
+          ctx.beginPath();
+          ctx.arc(item.x + item.size/2, item.y + item.size/2, item.size/2, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = "#D97706";
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+
+          ctx.fillStyle = "#D97706";
+          ctx.font = "bold 10px sans-serif";
+          ctx.fillText("$", item.x + 6, item.y + item.size/2 + 4);
+        }
+      });
+
+      // Draw Obstacles (other traffic cars)
+      obstacles.forEach(obs => {
+        ctx.fillStyle = "rgba(0,0,0,0.15)";
+        ctx.fillRect(obs.x + 4, obs.y + 4, obs.width, obs.height);
+
+        ctx.fillStyle = obs.color;
+        ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+
+        // Windshields
+        ctx.fillStyle = "#1E293B";
+        ctx.fillRect(obs.x + 4, obs.y + obs.height - 25, obs.width - 8, 12);
+        ctx.fillRect(obs.x + 4, obs.y + 12, obs.width - 8, 10);
+      });
+
+      drawPlayer();
+    }
+
+    function gameLoop() {
+      update();
+      draw();
+      if (!gameOver) {
+        requestAnimationFrame(gameLoop);
+      }
+    }
+
+    // Start Timer
+    function startTimer() {
+      gameInterval = setInterval(() => {
+        if (timeRemaining > 0) {
+          timeRemaining--;
+          document.getElementById("time-val").innerText = "الوقت: " + timeRemaining;
+        } else {
+          endGame();
+        }
+      }, 1000);
+    }
+
+    function endGame() {
+      gameOver = true;
+      clearInterval(gameInterval);
+      document.getElementById("game-over-screen").classList.remove("hidden");
+      document.getElementById("final-score-text").innerText = "النقاط التي أحرزتها: " + score;
+
+      // Local storage high score management
+      const savedHigh = localStorage.getItem("taxi_rush_high") || 0;
+      if (score > savedHigh) {
+        localStorage.setItem("taxi_rush_high", score);
+        document.getElementById("high-score-text").innerText = "رقم قياسي جديد! أعلى نقاط: " + score;
+      } else {
+        document.getElementById("high-score-text").innerText = "أعلى نقاط: " + savedHigh;
+      }
+    }
+
+    // Event Listeners
+    document.getElementById("start-btn").addEventListener("click", () => {
+      document.getElementById("start-screen").classList.add("hidden");
+      resetGame();
+      startTimer();
+      gameLoop();
+      // Resume audio context
+      playSound('pickup');
+    });
+
+    document.getElementById("restart-btn").addEventListener("click", () => {
+      document.getElementById("game-over-screen").classList.add("hidden");
+      resetGame();
+      startTimer();
+      gameLoop();
+      playSound('pickup');
+    });
+
+    // Keyboard Inputs
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") keys.Left = true;
+      if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") keys.Right = true;
+    });
+
+    window.addEventListener("keyup", (e) => {
+      if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") keys.Left = false;
+      if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") keys.Right = false;
+    });
+
+    // Mobile buttons bindings
+    const btnLeft = document.getElementById("btn-left");
+    const btnRight = document.getElementById("btn-right");
+
+    btnLeft.addEventListener("touchstart", (e) => { e.preventDefault(); keys.Left = true; });
+    btnLeft.addEventListener("touchend", (e) => { e.preventDefault(); keys.Left = false; });
+    btnLeft.addEventListener("mousedown", () => keys.Left = true);
+    btnLeft.addEventListener("mouseup", () => keys.Left = false);
+
+    btnRight.addEventListener("touchstart", (e) => { e.preventDefault(); keys.Right = true; });
+    btnRight.addEventListener("touchend", (e) => { e.preventDefault(); keys.Right = false; });
+    btnRight.addEventListener("mousedown", () => keys.Right = true);
+    btnRight.addEventListener("mouseup", () => keys.Right = false);
+
+    // Communicate back button to parent App.tsx if they click return
+    window.parent.postMessage('goBackReady', '*');
+  </script>
+</body>
+</html>
