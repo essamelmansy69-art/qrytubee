@@ -713,6 +713,19 @@ export default function App() {
         descStr = locale === 'ar'
           ? 'العب لعبة تاكسي راش (Taxi Rush) الممتعة والمثيرة مجاناً أون لاين! تحكّم بسيارة الأجرة السريعة في وسط المدينة المزدحم وتفادَ الحوادث في لعبة crazy taxi city rush game الأسطورية بدون تحميل.'
           : 'Play the exciting Taxi Rush game free online with no downloads! Drive your fast cab through heavy traffic and pick up passengers in this legendary crazy taxi city rush game.';
+      } else if (
+        selectedGame.id === 'game-merge-mansion' ||
+        selectedGame.id === 'merge-mansion' ||
+        (selectedGame.title && selectedGame.title.en && selectedGame.title.en.toLowerCase().includes('merge')) ||
+        (selectedGame.title && selectedGame.title.ar && selectedGame.title.ar.toLowerCase().includes('ميرج')) ||
+        (selectedGame.title && selectedGame.title.en && selectedGame.title.en.toLowerCase().includes('mansion'))
+      ) {
+        titleStr = locale === 'ar'
+          ? 'لعبة ميرج مانشن اون لاين مجاناً | merge mansion game theory'
+          : 'Merge Mansion Game Online Free | Play Merge Mansion Game Theory';
+        descStr = locale === 'ar'
+          ? 'العب لعبة ميرج مانشن (Merge Mansion) المثيرة أون لاين مجاناً بدون تحميل! اكتشف أسرار وجاذبية ألغاز القصر مع نظرية merge mansion game theory الأسطورية لحل الغموض.'
+          : 'Play the addictive Merge Mansion game online for free with no downloads! Unlock the deep secrets and mansion puzzles using the famous merge mansion game theory to solve the family mystery.';
       } else {
         titleStr = locale === 'ar'
           ? `${selectedGame.title.ar} - العب الآن | أتاري`
