@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ARTICLES, Article } from '../data/articles';
 import { BookOpen, User, Clock, Calendar, ArrowLeft, ArrowRight, Gamepad2, Play } from 'lucide-react';
 
@@ -11,6 +11,43 @@ interface ArticlesSectionProps {
 
 export default function ArticlesSection({ locale, isDarkMode, games, onPlayGame }: ArticlesSectionProps) {
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+
+  // Sync state with URL "?article=id" parameter
+  useEffect(() => {
+    const handleUrlSync = () => {
+      const params = new URLSearchParams(window.location.search);
+      const articleId = params.get('article');
+      if (articleId) {
+        const found = ARTICLES.find(a => a.id === articleId);
+        if (found) {
+          setSelectedArticle(found);
+        } else {
+          setSelectedArticle(null);
+        }
+      } else {
+        setSelectedArticle(null);
+      }
+    };
+
+    // Run once on mount and also listen to popstate for browser navigation (back/forward)
+    handleUrlSync();
+    window.addEventListener('popstate', handleUrlSync);
+    return () => window.removeEventListener('popstate', handleUrlSync);
+  }, []);
+
+  // Set selected article helper that updates URL pushState
+  const handleSelectArticle = (article: Article | null) => {
+    setSelectedArticle(article);
+    const params = new URLSearchParams(window.location.search);
+    if (article) {
+      params.set('article', article.id);
+    } else {
+      params.delete('article');
+    }
+    // Preserving other parameters like 'lang' or 'game'
+    const newUrl = `${window.location.pathname}?${params.toString()}${window.location.hash}`;
+    window.history.pushState({ articleId: article?.id || null }, '', newUrl);
+  };
 
   // Helper to parse content with titles, bullets and bold tags
   const renderRichContent = (text: string) => {
@@ -106,7 +143,7 @@ export default function ArticlesSection({ locale, isDarkMode, games, onPlayGame 
         {/* Back Button */}
         <button
           onClick={() => {
-            setSelectedArticle(null);
+            handleSelectArticle(null);
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           className={`group mb-8 flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all ${
@@ -243,7 +280,7 @@ export default function ArticlesSection({ locale, isDarkMode, games, onPlayGame 
             <article
               key={article.id}
               onClick={() => {
-                setSelectedArticle(article);
+                handleSelectArticle(article);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               className="group flex flex-col h-full overflow-hidden rounded-2xl border border-slate-850 bg-slate-950/60 cursor-pointer transition-all duration-300 hover:border-emerald-500/30 hover:shadow-xl hover:shadow-emerald-950/10 hover:translate-y-[-4px]"

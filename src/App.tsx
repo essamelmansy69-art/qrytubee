@@ -360,7 +360,10 @@ export default function App() {
   });
 
   // Active View State: 'games' (Arcade) or 'articles' (Articles/Guides)
-  const [activeView, setActiveView] = useState<'games' | 'articles'>('games');
+  const [activeView, setActiveView] = useState<'games' | 'articles'>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.has('article') ? 'articles' : 'games';
+  });
 
   // Theme State: Dark mode (default & recommended for classic premium look) or light mode
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
