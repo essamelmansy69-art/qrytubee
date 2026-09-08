@@ -22,8 +22,10 @@ import {
   TrendingUp,
   Share2,
   Globe,
-  ArrowUp
+  ArrowUp,
+  BookOpen
 } from 'lucide-react';
+import ArticlesSection from './components/ArticlesSection';
 import cheeseThumbnail from './assets/images/cheese_eater_thumbnail_1787373161126.jpg';
 import tetrisThumbnail from './assets/images/tetris_thumbnail_1787444248779.jpg';
 import breakoutThumbnail from './assets/images/breakout_thumbnail_1787511090254.jpg';
@@ -356,6 +358,9 @@ export default function App() {
     const saved = localStorage.getItem('atari_locale');
     return saved === 'en' ? 'en' : 'ar';
   });
+
+  // Active View State: 'games' (Arcade) or 'articles' (Articles/Guides)
+  const [activeView, setActiveView] = useState<'games' | 'articles'>('games');
 
   // Theme State: Dark mode (default & recommended for classic premium look) or light mode
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
@@ -846,7 +851,7 @@ export default function App() {
           {/* Logo Brand Title */}
           <div className="flex items-center justify-between">
             <div 
-              onClick={() => { setActiveCategory('All'); setSearchQuery(''); }}
+              onClick={() => { setActiveView('games'); setActiveCategory('All'); setSearchQuery(''); }}
               className="flex items-center gap-3 cursor-pointer select-none group"
             >
               <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 p-[1.5px] shadow-md shadow-amber-500/10">
@@ -890,6 +895,8 @@ export default function App() {
               </button>
             </div>
           </div>
+
+
 
           {/* Search bar inside navigation (highly clean, minimal borders) */}
           <div className="flex-1 max-w-md relative">
@@ -963,8 +970,19 @@ export default function App() {
 
       {/* Main Container */}
       <main className="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 flex-1 space-y-8">
-        
-        {/* Categories Bar - Beautiful, minimal segmented tabs */}
+        {activeView === 'articles' ? (
+          <ArticlesSection
+            locale={locale}
+            isDarkMode={isDarkMode}
+            games={games}
+            onPlayGame={(game) => {
+              setSelectedGame(game);
+              setIsIframeLoading(true);
+            }}
+          />
+        ) : (
+          <>
+            {/* Categories Bar - Beautiful, minimal segmented tabs */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 no-scrollbar">
           {availableCategories.map((cat) => {
             const isActive = activeCategory === cat;
@@ -1105,7 +1123,8 @@ export default function App() {
             </div>
           )}
         </div>
-
+        </>
+        )}
       </main>
 
       {/* Modern Professional Game modal */}
@@ -1516,6 +1535,27 @@ export default function App() {
                 }`}>
                   {games.length} {locale === 'ar' ? 'ألعاب كلاسيكية' : 'Retro Games'}
                 </div>
+              </div>
+              <div className="pt-2">
+                <button
+                  onClick={() => {
+                    setActiveView(activeView === 'games' ? 'articles' : 'games');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-bold border transition-all cursor-pointer bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 border-amber-500 shadow-md shadow-amber-500/10 hover:shadow-amber-500/20 active:scale-[0.98]"
+                >
+                  {activeView === 'articles' ? (
+                    <>
+                      <Gamepad2 className="w-4 h-4" />
+                      <span>{locale === 'ar' ? 'العودة لساحة الألعاب' : 'Go Back to Games'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <BookOpen className="w-4 h-4" />
+                      <span>{locale === 'ar' ? '📖 تصفح المقالات ودليل الألعاب' : '📖 Browse Strategy Guides'}</span>
+                    </>
+                  )}
+                </button>
               </div>
             </div>
 
