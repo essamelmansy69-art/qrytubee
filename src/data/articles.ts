@@ -307,6 +307,6 @@ Play the best hand-crafted selection of retro arcade, logic, and shooting games 
     category: { ar: 'ألعاب مجانية', en: 'Free Games' },
     date: '2026-09-10',
     author: { ar: 'خبير ألعاب السيو المحترف', en: 'SEO Gaming Expert' },
-    imageUrl: '/src/assets/images/free_games_hero_1789076983265.jpg'
+    imageUrl: '/free_games_hero_1789076983265.jpg'
   }
 ];
