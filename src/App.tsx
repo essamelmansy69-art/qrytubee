@@ -1037,66 +1037,69 @@ export default function App() {
           </div>
 
           {filteredGames.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2 sm:gap-3.5">
               {filteredGames.map((game, index) => {
                 const isFav = favorites.includes(game.id);
+                
+                // Set neat category colors for top-left tag
+                let badgeBg = "bg-slate-950/60";
+                if (game.category === 'Action') badgeBg = "bg-red-900/60";
+                else if (game.category === 'Puzzle') badgeBg = "bg-indigo-900/60";
+                else if (game.category === 'Racing') badgeBg = "bg-emerald-900/60";
+                else if (game.category === 'Girls' || game.id.includes('girls') || game.id.includes('makeover') || game.id.includes('makeup')) badgeBg = "bg-purple-900/75";
+
                 return (
                   <div 
                     key={game.id}
                     onClick={() => { setSelectedGame(game); setIsIframeLoading(true); }}
-                    className={`group rounded-2xl overflow-hidden border transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg cursor-pointer ${
+                    className={`group relative aspect-square rounded-[20px] sm:rounded-[24px] overflow-hidden border transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl cursor-pointer select-none ${
                       isDarkMode 
-                        ? 'bg-[#0f172a] border-slate-800/80 hover:border-slate-700' 
-                        : 'bg-white border-slate-200/80 hover:border-slate-300'
+                        ? 'bg-[#0f172a] border-slate-800/60 hover:border-slate-700/80' 
+                        : 'bg-white border-slate-200/60 hover:border-slate-300'
                     }`}
                   >
-                    {/* Thumbnail */}
-                    <div className="aspect-square relative overflow-hidden bg-slate-900">
+                    {/* Image / Thumbnail */}
+                    <div className="w-full h-full relative overflow-hidden bg-slate-950/20 flex flex-col">
                       <img 
                         src={game.thumbnailUrl} 
                         alt={game.title[locale]} 
-                        loading={index < 4 ? "eager" : "lazy"}
-                        fetchPriority={index < 4 ? "high" : "auto"}
+                        loading={index < 6 ? "eager" : "lazy"}
+                        fetchPriority={index < 6 ? "high" : "auto"}
                         decoding="async"
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
 
-                      {/* Cover hover play state */}
-                      <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                        <div className="w-10 h-10 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
-                          <Play className="w-4 h-4 fill-current translate-x-0.5" />
+                      {/* Cover hover play overlay */}
+                      <div className="absolute inset-0 bg-slate-950/45 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform duration-300">
+                          <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current translate-x-0.5 text-slate-950" />
                         </div>
                       </div>
 
                       {/* Favorite button overlay */}
                       <button
                         onClick={(e) => handleToggleFavorite(e, game.id)}
-                        className={`absolute top-2.5 right-2.5 p-1.5 rounded-lg backdrop-blur-md transition-all active:scale-90 ${
+                        className={`absolute top-2 right-2 p-1 rounded-lg backdrop-blur-xs transition-all active:scale-90 z-20 ${
                           isFav 
                             ? 'bg-red-500 text-white shadow-sm' 
-                            : 'bg-black/30 hover:bg-black/50 text-white hover:scale-105'
+                            : 'bg-black/30 hover:bg-black/55 text-white'
                         }`}
                         title={isFav ? 'Favorite' : 'Add favorite'}
                       >
-                        <Heart className={`w-3 h-3 ${isFav ? 'fill-current' : ''}`} />
+                        <Heart className={`w-2.5 h-2.5 sm:w-3 sm:h-3 ${isFav ? 'fill-current' : ''}`} />
                       </button>
 
-                      {/* Category Pill Tag */}
-                      <span className="absolute bottom-2.5 left-2.5 bg-black/60 text-[9px] font-extrabold text-slate-300 px-2 py-0.5 rounded-md">
+                      {/* Category Pill Tag (exactly at top-left as shown in screenshot) */}
+                      <span className={`absolute top-2 left-2 ${badgeBg} backdrop-blur-xs text-[7px] sm:text-[9px] font-extrabold text-white px-2 py-0.5 rounded-md tracking-wider uppercase z-10`}>
                         {getCategoryName(game.category)}
                       </span>
-                    </div>
 
-                    {/* Metadata below image */}
-                    <div className="p-3">
-                      <h3 className="font-extrabold text-xs tracking-tight truncate">
-                        {game.title[locale]}
-                      </h3>
-                      <p className={`text-[10px] mt-0.5 font-semibold truncate ${
-                        isDarkMode ? 'text-slate-400' : 'text-slate-600'
-                      }`}>
-                        {getCategoryName(game.category)} Classic
-                      </p>
+                      {/* Centered White Title at the bottom overlayed on rich dark gradient */}
+                      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent pt-8 pb-2 sm:pb-3 px-1.5 sm:px-2 flex flex-col justify-end z-10">
+                        <h3 className="font-extrabold text-white text-[9px] sm:text-xs text-center truncate drop-shadow-md leading-tight">
+                          {game.title[locale]}
+                        </h3>
+                      </div>
                     </div>
                   </div>
                 );
