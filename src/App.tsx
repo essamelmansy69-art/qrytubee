@@ -997,7 +997,7 @@ export default function App() {
               <X className="w-3.5 h-3.5" />
             </button>
 
-            {/* Banner Inner Content - Compact layout */}
+             {/* Banner Inner Content - Compact layout */}
             <div className="py-3.5 px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-3.5 relative z-10">
               
               {/* Left Side: Concise Text */}
@@ -1007,7 +1007,7 @@ export default function App() {
                 <div className="flex items-center justify-center md:justify-start gap-1.5">
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[8px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-500 border border-emerald-500/20">
                     <Sparkles className="w-2 h-2" />
-                    <span>Freecash Partner</span>
+                    <span>RewardJoy Partner</span>
                   </span>
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[8px] font-extrabold uppercase tracking-wider bg-slate-500/10 text-slate-400">
                     <Coins className="w-2.5 h-2.5 text-emerald-500" />
@@ -1020,8 +1020,8 @@ export default function App() {
                   isDarkMode ? 'text-white' : 'text-slate-900'
                 } text-xs sm:text-sm leading-normal`}>
                   {locale === 'ar' 
-                    ? 'العب ألعابك المفضلة واكسب مكافآت مالية حقيقية وجوائز هائلة عبر موقع Freecash الموثوق! 🎁💰' 
-                    : 'Play your favorite casual games and earn real cash rewards through the trusted Freecash platform! 🎁💰'}
+                    ? 'العب ألعابك المفضلة واكسب مكافآت مالية حقيقية وجوائز هائلة عبر موقع RewardJoy الموثوق! 🎁💰' 
+                    : 'Play your favorite casual games and earn real cash rewards through the trusted RewardJoy platform! 🎁💰'}
                 </h2>
 
                 <p className={`text-[10px] sm:text-xs font-semibold ${
@@ -1037,7 +1037,7 @@ export default function App() {
               {/* Right Side: Compact CTA Button */}
               <div className="shrink-0 w-full md:w-auto">
                 <a 
-                  href="https://freecash.com/r/fbf5ee5bf8"
+                  href="https://www.rewardjoy.com/?r=essamelmansy"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full md:w-auto inline-flex items-center justify-center gap-1.5 px-4.5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 hover:text-white font-extrabold text-[11px] tracking-wide transition-all duration-300 transform hover:-translate-y-0.5 active:scale-95 text-center cursor-pointer shadow-sm shadow-emerald-500/10"
