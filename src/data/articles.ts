@@ -676,7 +676,7 @@ Launch your favorite free games on our responsive browser platform today, test y
     category: { ar: 'ربح ومكافآت', en: 'Earn & Play' },
     date: '2026-09-17',
     author: { ar: 'مستشار الربح الرقمي', en: 'Digital Rewards Expert' },
-    imageUrl: '/src/assets/images/earn_play_rewards_hero_1789691282557.jpg'
+    imageUrl: '/earn_play_rewards_hero_1789691282557.jpg'
   }
 ];
 
